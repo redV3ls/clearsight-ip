@@ -26,27 +26,15 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             scroll-behavior: smooth;
-            color: #1f2937;
-        }
-        
-        .dark-mode {
-            background-color: #0f172a !important;
-            color: #e2e8f0 !important;
-        }
-        
-        .dark-mode * {
-            color: #e2e8f0 !important;
-        }
-        
-        .dark-mode .bg-light {
-            background-color: #1e293b;
-        }
-        
-        .dark-mode .text-dark {
+            background-color: #0f172a;
             color: #e2e8f0;
         }
         
-        .dark-mode .card {
+        .bg-light {
+            background-color: #1e293b;
+        }
+        
+        .card {
             background-color: #1e293b;
             border: 1px solid #334155;
         }
@@ -84,20 +72,10 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         .stats-number {
             font-size: 2.5rem;
             font-weight: 700;
-        }
-        
-        .dark-mode .stats-number {
             color: #14b8a6;
         }
         
         .gradient-text {
-            background: linear-gradient(90deg, #1a365d, #14b8a6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .dark-mode .gradient-text {
             background: linear-gradient(90deg, #60a5fa, #14b8a6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -178,44 +156,31 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             100% { transform: translateY(0px); }
         }
         
-        .card {
-            background-color: white;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
-        }
-        
-        .bg-light {
-            background-color: #f8fafc;
-        }
     </style>
 </head>
-<body class="bg-background text-text dark:text-gray-200">
+<body>
     <!-- Header -->
-    <header class="sticky top-0 z-50 bg-white dark:bg-slate-900 shadow-md py-4 px-6">
+    <header class="sticky top-0 z-50 bg-slate-900 shadow-md py-4 px-6">
         <div class="container mx-auto flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-bold text-primary dark:text-accent">Clearsight IP</h1>
-                <p class="text-sm text-gray-600 dark:text-gray-300">Bridge Your Skills Gap with AI-Powered Insights</p>
+                <h1 class="text-2xl font-bold text-accent">Clearsight IP</h1>
+                <p class="text-sm text-gray-300">Bridge Your Skills Gap with AI-Powered Insights</p>
             </div>
             
             <nav class="hidden md:flex space-x-8">
-                <a href="#features" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">Features</a>
-                <a href="#how-it-works" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">How It Works</a>
-                <a href="#api" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">API Endpoints</a>
-                <a href="#pricing" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">Pricing</a>
-                <a href="#documentation" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">Documentation</a>
-                <a href="#contact" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">Contact</a>
+                <a href="#features" class="nav-link text-gray-300 hover:text-accent">Features</a>
+                <a href="#how-it-works" class="nav-link text-gray-300 hover:text-accent">How It Works</a>
+                <a href="#api" class="nav-link text-gray-300 hover:text-accent">API Endpoints</a>
+                <a href="#pricing" class="nav-link text-gray-300 hover:text-accent">Pricing</a>
+                <a href="#documentation" class="nav-link text-gray-300 hover:text-accent">Documentation</a>
+                <a href="#contact" class="nav-link text-gray-300 hover:text-accent">Contact</a>
             </nav>
             
             <div class="flex items-center space-x-4">
-                <button id="theme-toggle" class="focus:outline-none">
-                    <i class="fas fa-moon text-gray-700 dark:text-yellow-300 text-xl"></i>
-                </button>
                 <button class="bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
                     Get API Access
                 </button>
-                <button class="md:hidden text-gray-700 dark:text-gray-300">
+                <button class="md:hidden text-gray-300">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
             </div>
@@ -229,22 +194,22 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
                         Build Your <span class="gradient-text">Skills Management Platform</span>
                     </h1>
-                    <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
-                        A comprehensive RESTful API for managing user profiles, skills, and job requirements - built on Cloudflare Workers for global scale
+                    <p class="text-xl text-gray-300 mb-8">
+                        Transform your workforce development with intelligent skills matching and gap analysis that drives real career growth and business results
                     </p>
                     
                     <div class="flex flex-wrap gap-4 mb-8">
                         <div class="flex items-center">
-                            <i class="fas fa-globe text-accent mr-2"></i>
-                            <span class="font-medium">Global edge deployment</span>
+                            <i class="fas fa-rocket text-accent mr-2"></i>
+                            <span class="font-medium">Fast implementation</span>
                         </div>
                         <div class="flex items-center">
-                            <i class="fas fa-database text-accent mr-2"></i>
-                            <span class="font-medium">D1 Database ready</span>
+                            <i class="fas fa-chart-line text-accent mr-2"></i>
+                            <span class="font-medium">Proven ROI increase</span>
                         </div>
                         <div class="flex items-center">
-                            <i class="fas fa-shield-alt text-accent mr-2"></i>
-                            <span class="font-medium">JWT Authentication</span>
+                            <i class="fas fa-users text-accent mr-2"></i>
+                            <span class="font-medium">Team-focused solution</span>
                         </div>
                     </div>
                 
@@ -252,7 +217,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <button class="bg-primary hover:bg-blue-800 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
                         Start Free Trial
                     </button>
-                    <button class="bg-transparent hover:bg-gray-100 dark:hover:bg-slate-800 border-2 border-primary text-primary dark:text-accent font-semibold py-3 px-8 rounded-lg transition duration-300">
+                    <button class="bg-transparent hover:bg-slate-800 border-2 border-accent text-accent font-semibold py-3 px-8 rounded-lg transition duration-300">
                         View Live Demo
                     </button>
                 </div>
@@ -262,10 +227,10 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 <div class="relative">
                     <div class="w-80 h-80 md:w-96 md:h-96 bg-gradient-to-br from-primary to-accent rounded-full opacity-10 absolute -top-10 -left-10 animate-float"></div>
                     <div class="w-64 h-64 md:w-80 md:h-80 bg-gradient-to-tr from-accent to-primary rounded-full opacity-10 absolute -bottom-10 -right-10 animate-float animation-delay-2000"></div>
-                    <div class="relative bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700">
+                    <div class="relative bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-lg">Skill Gap Analysis Report</h3>
-                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">Match: 72%</span>
+                            <span class="bg-green-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded">Match: 72%</span>
                         </div>
                         
                         <div class="space-y-4">
@@ -299,7 +264,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                                 </div>
                             </div>
                             
-                            <div class="pt-4 border-t border-gray-200 dark:border-slate-700">
+                            <div class="pt-4 border-t border-slate-700">
                                 <h4 class="font-semibold mb-2">Recommended Learning Paths:</h4>
                                 <ul class="list-disc pl-5 space-y-1 text-sm">
                                     <li>Advanced React Patterns Course</li>
@@ -315,142 +280,142 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     </section>
 
     <!-- Core Features -->
-    <section id="features" class="py-16 bg-light dark:bg-slate-800">
+    <section id="features" class="py-16 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Currently Available Features</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                    Production-ready API endpoints for managing user profiles, skills, and job requirements
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">What You Get</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Complete skills management solution that integrates seamlessly with your existing workflow
                 </p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Feature 1 - User Management -->
+                <!-- Feature 1 - Team Management -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300">
-                    <div class="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4">
-                        <i class="fas fa-user-cog text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-14 h-14 rounded-full bg-blue-900/50 flex items-center justify-center mb-4">
+                        <i class="fas fa-users text-accent text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">User Authentication & Profiles</h3>
+                    <h3 class="text-xl font-bold mb-2">Team Skills Overview</h3>
                     <ul class="space-y-2 mb-4">
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>JWT-based user registration and login</span>
+                            <span>Centralized team skill profiles</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Complete user profile management</span>
+                            <span>Easy onboarding for new members</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Password change and security features</span>
+                            <span>Secure access controls</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Role-based access control</span>
+                            <span>Role-based permissions</span>
                         </li>
                     </ul>
                 </div>
                 
                 <!-- Feature 2 - Skills Management -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300">
-                    <div class="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4">
-                        <i class="fas fa-cogs text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-14 h-14 rounded-full bg-blue-900/50 flex items-center justify-center mb-4">
+                        <i class="fas fa-trophy text-accent text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Skills & Experience Tracking</h3>
+                    <h3 class="text-xl font-bold mb-2">Skills Development Tracking</h3>
                     <ul class="space-y-2 mb-4">
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Add, update, and remove user skills</span>
+                            <span>Visual skill progression mapping</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Track skill levels (beginner to expert)</span>
+                            <span>Expertise level assessments</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Years of experience per skill</span>
+                            <span>Experience timeline tracking</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Confidence scoring and certifications</span>
+                            <span>Certification and achievement records</span>
                         </li>
                     </ul>
                 </div>
                 
-                <!-- Feature 3 - Job Management -->
+                <!-- Feature 3 - Opportunity Matching -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300">
-                    <div class="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4">
-                        <i class="fas fa-briefcase text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-14 h-14 rounded-full bg-blue-900/50 flex items-center justify-center mb-4">
+                        <i class="fas fa-bullseye text-accent text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Job Requirements Management</h3>
+                    <h3 class="text-xl font-bold mb-2">Smart Opportunity Matching</h3>
                     <ul class="space-y-2 mb-4">
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Create and manage job postings</span>
+                            <span>Perfect role-to-skill matching</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Define skill requirements with importance levels</span>
+                            <span>Priority-based requirement analysis</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Search and filter job opportunities</span>
+                            <span>Discover hidden career paths</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Track minimum skill levels and experience</span>
+                            <span>Experience gap identification</span>
                         </li>
                     </ul>
                 </div>
                 
-                <!-- Feature 4 - API Infrastructure -->
+                <!-- Feature 4 - Analytics & Insights -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300">
-                    <div class="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4">
-                        <i class="fas fa-cloud text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-14 h-14 rounded-full bg-blue-900/50 flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-bar text-accent text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Enterprise-Grade Infrastructure</h3>
+                    <h3 class="text-xl font-bold mb-2">Actionable Insights</h3>
                     <ul class="space-y-2 mb-4">
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Cloudflare Workers global deployment</span>
+                            <span>Real-time skill gap analysis</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>D1 SQLite database with migrations</span>
+                            <span>Team performance dashboards</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>KV caching for performance</span>
+                            <span>Progress tracking reports</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Built-in rate limiting and security</span>
+                            <span>ROI measurement tools</span>
                         </li>
                     </ul>
                 </div>
                 
-                <!-- Feature 5 - Health & Monitoring -->
+                <!-- Feature 5 - Growth Planning -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300">
-                    <div class="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4">
-                        <i class="fas fa-heartbeat text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-14 h-14 rounded-full bg-blue-900/50 flex items-center justify-center mb-4">
+                        <i class="fas fa-seedling text-accent text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Health Monitoring & Observability</h3>
+                    <h3 class="text-xl font-bold mb-2">Career Growth Planning</h3>
                     <ul class="space-y-2 mb-4">
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Comprehensive health check endpoints</span>
+                            <span>Personalized development roadmaps</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Database and cache connectivity monitoring</span>
+                            <span>Learning resource recommendations</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Performance tracking middleware</span>
+                            <span>Milestone tracking and celebrations</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-accent mt-1 mr-2"></i>
-                            <span>Environment validation and status</span>
+                            <span>Success metrics monitoring</span>
                         </li>
                     </ul>
                 </div>
@@ -489,41 +454,33 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                    Simple process to transform your career development journey
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Three simple steps to transform your team's career development
                 </p>
             </div>
             
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-10 md:mb-0 text-center md:text-left md:w-2/5">
                     <div class="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-white text-2xl font-bold mb-4 mx-auto md:mx-0">1</div>
-                    <h3 class="text-2xl font-bold mb-3">Upload & Parse</h3>
-                    <p class="text-gray-600 dark:text-gray-300">
-                        Submit resumes or job descriptions via our secure API. Our system parses and extracts all relevant skills and experiences.
+                    <h3 class="text-2xl font-bold mb-3">Get Started</h3>
+                    <p class="text-gray-300">
+                        Sign up your team in minutes. Our intuitive onboarding gets everyone set up with their skill profiles quickly and easily.
                     </p>
-                </div>
-                
-                <div class="hidden md:block">
-                    <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-bold">2</div>
                 </div>
                 
                 <div class="mb-10 md:mb-0 text-center md:text-left md:w-2/5">
                     <div class="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-white text-2xl font-bold mb-4 mx-auto md:mx-0">2</div>
-                    <h3 class="text-2xl font-bold mb-3">AI Analysis</h3>
-                    <p class="text-gray-600 dark:text-gray-300">
-                        Our advanced AI engine analyzes skills, compares them to job requirements, and identifies gaps with contextual understanding.
+                    <h3 class="text-2xl font-bold mb-3">Track & Discover</h3>
+                    <p class="text-gray-300">
+                        Build comprehensive skill profiles and explore career opportunities. Discover hidden talents and identify growth opportunities across your organization.
                     </p>
-                </div>
-                
-                <div class="hidden md:block">
-                    <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-bold">3</div>
                 </div>
                 
                 <div class="text-center md:text-left md:w-2/5">
                     <div class="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-white text-2xl font-bold mb-4 mx-auto md:mx-0">3</div>
-                    <h3 class="text-2xl font-bold mb-3">Get Insights</h3>
-                    <p class="text-gray-600 dark:text-gray-300">
-                        Receive detailed reports with skill gap analysis, severity ratings, and personalized learning recommendations.
+                    <h3 class="text-2xl font-bold mb-3">Grow & Succeed</h3>
+                    <p class="text-gray-300">
+                        Get personalized development plans and watch your team flourish. Track progress, celebrate achievements, and measure real business impact.
                     </p>
                 </div>
             </div>
@@ -531,12 +488,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     </section>
 
     <!-- API Endpoints -->
-    <section id="api" class="py-16 bg-light dark:bg-slate-800">
+    <section id="api" class="py-16 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Live API Endpoints</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                    Currently available production endpoints for user and job management
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Developer Integration</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Seamlessly integrate with your existing systems using our comprehensive API
                 </p>
             </div>
             
@@ -586,62 +543,62 @@ GET  /health/detailed</code></pre>
     <section class="py-16">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Technology Stack</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                    Enterprise-grade infrastructure for reliable performance
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Why Choose Clearsight IP</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Built for scale, security, and success with enterprise-grade reliability
                 </p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="card p-6 rounded-xl text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                        <i class="fab fa-cloudflare text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-900/50 rounded-full flex items-center justify-center">
+                        <i class="fab fa-cloudflare text-accent text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Cloudflare Workers</h3>
-                    <p class="text-gray-600 dark:text-gray-300">Global edge deployment for ultra-low latency</p>
+                    <h3 class="text-xl font-bold mb-2">Lightning Fast</h3>
+                    <p class="text-gray-300">Instant results worldwide with blazing-fast performance</p>
                 </div>
                 
                 <div class="card p-6 rounded-xl text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                        <i class="fas fa-brain text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-900/50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-brain text-accent text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">AI/ML Engine</h3>
-                    <p class="text-gray-600 dark:text-gray-300">Advanced skill extraction and matching algorithms</p>
+                    <h3 class="text-xl font-bold mb-2">Smart Matching</h3>
+                    <p class="text-gray-300">AI-powered insights that understand your unique needs</p>
                 </div>
                 
                 <div class="card p-6 rounded-xl text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                        <i class="fas fa-bolt text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-900/50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-bolt text-accent text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Real-time Processing</h3>
-                    <p class="text-gray-600 dark:text-gray-300">&lt;100ms latency for instant results</p>
+                    <h3 class="text-xl font-bold mb-2">Always On</h3>
+                    <p class="text-gray-300">Real-time updates keep your team informed and engaged</p>
                 </div>
                 
                 <div class="card p-6 rounded-xl text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                        <i class="fas fa-shield-alt text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-900/50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-accent text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">99.9% Uptime SLA</h3>
-                    <p class="text-gray-600 dark:text-gray-300">Reliable service backed by enterprise SLA</p>
+                    <h3 class="text-xl font-bold mb-2">Enterprise Ready</h3>
+                    <p class="text-gray-300">99.9% uptime guarantee with enterprise-grade security</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Integration -->
-    <section class="py-16 bg-light dark:bg-slate-800">
+    <section class="py-16 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Seamless Integration</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
                     Connect with your existing tools and platforms
                 </p>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
                 <div class="flex flex-col items-center justify-center p-6 card rounded-xl">
-                    <div class="w-16 h-16 mb-4 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center">
-                        <span class="font-bold text-primary">ATS</span>
+                    <div class="w-16 h-16 mb-4 bg-slate-700 rounded-lg flex items-center justify-center">
+                        <span class="font-bold text-accent">ATS</span>
                     </div>
                     <p class="text-center">Applicant Tracking Systems</p>
                 </div>
@@ -682,15 +639,15 @@ GET  /health/detailed</code></pre>
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                    Choose the plan that fits your needs
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Start free, scale as you grow - pricing that works for teams of any size
                 </p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                 <!-- Developer Plan -->
                 <div class="pricing-card card p-8 rounded-xl text-center">
-                    <h3 class="text-2xl font-bold mb-2">Developer</h3>
+                    <h3 class="text-2xl font-bold mb-2">Starter</h3>
                     <div class="mb-6">
                         <span class="text-4xl font-bold">$0</span>
                         <span class="text-gray-600 dark:text-gray-300">/month</span>
@@ -698,11 +655,11 @@ GET  /health/detailed</code></pre>
                     <ul class="space-y-3 mb-8">
                         <li class="flex items-center justify-center">
                             <i class="fas fa-check-circle text-accent mr-2"></i>
-                            <span>1,000 API calls/month</span>
+                            <span>Up to 5 team members</span>
                         </li>
                         <li class="flex items-center justify-center">
                             <i class="fas fa-check-circle text-accent mr-2"></i>
-                            <span>Basic skill analysis</span>
+                            <span>Core skills tracking</span>
                         </li>
                         <li class="flex items-center justify-center">
                             <i class="fas fa-check-circle text-accent mr-2"></i>
@@ -717,7 +674,7 @@ GET  /health/detailed</code></pre>
                             <span>Trend analysis</span>
                         </li>
                     </ul>
-                    <button class="w-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-primary dark:text-accent font-semibold py-3 px-4 rounded-lg transition duration-300">
+                    <button class="w-full bg-slate-700 hover:bg-slate-600 text-accent font-semibold py-3 px-4 rounded-lg transition duration-300">
                         Get Started
                     </button>
                 </div>
@@ -730,20 +687,20 @@ GET  /health/detailed</code></pre>
                     <h3 class="text-2xl font-bold mb-2">Professional</h3>
                     <div class="mb-6">
                         <span class="text-4xl font-bold">$99</span>
-                        <span class="text-gray-600 dark:text-gray-300">/month</span>
+                        <span class="text-gray-300">/month</span>
                     </div>
                     <ul class="space-y-3 mb-8">
                         <li class="flex items-center justify-center">
                             <i class="fas fa-check-circle text-accent mr-2"></i>
-                            <span>50,000 API calls/month</span>
+                            <span>Up to 50 team members</span>
                         </li>
                         <li class="flex items-center justify-center">
                             <i class="fas fa-check-circle text-accent mr-2"></i>
-                            <span>Full skill analysis features</span>
+                            <span>Advanced analytics and insights</span>
                         </li>
                         <li class="flex items-center justify-center">
                             <i class="fas fa-check-circle text-accent mr-2"></i>
-                            <span>Team analytics (up to 25 members)</span>
+                            <span>Custom development roadmaps</span>
                         </li>
                         <li class="flex items-center justify-center">
                             <i class="fas fa-check-circle text-accent mr-2"></i>
@@ -768,7 +725,7 @@ GET  /health/detailed</code></pre>
                     <ul class="space-y-3 mb-8">
                         <li class="flex items-center justify-center">
                             <i class="fas fa-check-circle text-accent mr-2"></i>
-                            <span>Unlimited API calls</span>
+                            <span>Unlimited team members</span>
                         </li>
                         <li class="flex items-center justify-center">
                             <i class="fas fa-check-circle text-accent mr-2"></i>
@@ -787,7 +744,7 @@ GET  /health/detailed</code></pre>
                             <span>SLA guarantee</span>
                         </li>
                     </ul>
-                    <button class="w-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-primary dark:text-accent font-semibold py-3 px-4 rounded-lg transition duration-300">
+                    <button class="w-full bg-slate-700 hover:bg-slate-600 text-accent font-semibold py-3 px-4 rounded-lg transition duration-300">
                         Contact Sales
                     </button>
                 </div>
@@ -796,54 +753,54 @@ GET  /health/detailed</code></pre>
     </section>
 
     <!-- Security & Compliance -->
-    <section class="py-16 bg-light dark:bg-slate-800">
+    <section class="py-16 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Security & Compliance</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                    Enterprise-grade security to protect your data
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Trust & Security</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Your data is safe with enterprise-grade security and compliance
                 </p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 max-w-5xl mx-auto">
                 <div class="flex flex-col items-center text-center">
-                    <div class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4">
-                        <i class="fas fa-key text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-16 h-16 rounded-full bg-blue-900/50 flex items-center justify-center mb-4">
+                        <i class="fas fa-key text-accent text-2xl"></i>
                     </div>
-                    <h3 class="font-bold mb-2">JWT/API Key Auth</h3>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm">Secure authentication methods</p>
+                    <h3 class="font-bold mb-2">Secure Access</h3>
+                    <p class="text-gray-300 text-sm">Multi-layered authentication keeps your data safe</p>
                 </div>
                 
                 <div class="flex flex-col items-center text-center">
-                    <div class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4">
-                        <i class="fas fa-lock text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-16 h-16 rounded-full bg-blue-900/50 flex items-center justify-center mb-4">
+                        <i class="fas fa-lock text-accent text-2xl"></i>
                     </div>
-                    <h3 class="font-bold mb-2">End-to-End Encryption</h3>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm">Data protection at rest and in transit</p>
+                    <h3 class="font-bold mb-2">Data Protection</h3>
+                    <p class="text-gray-300 text-sm">Bank-level encryption protects all your information</p>
                 </div>
                 
                 <div class="flex flex-col items-center text-center">
-                    <div class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4">
-                        <i class="fas fa-gavel text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-16 h-16 rounded-full bg-blue-900/50 flex items-center justify-center mb-4">
+                        <i class="fas fa-gavel text-accent text-2xl"></i>
                     </div>
-                    <h3 class="font-bold mb-2">GDPR/CCPA Compliant</h3>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm">Privacy regulations adherence</p>
+                    <h3 class="font-bold mb-2">Privacy First</h3>
+                    <p class="text-gray-300 text-sm">Full GDPR and CCPA compliance built-in</p>
                 </div>
                 
                 <div class="flex flex-col items-center text-center">
-                    <div class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4">
-                        <i class="fas fa-trash-alt text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-16 h-16 rounded-full bg-blue-900/50 flex items-center justify-center mb-4">
+                        <i class="fas fa-user-shield text-accent text-2xl"></i>
                     </div>
-                    <h3 class="font-bold mb-2">No Permanent Storage</h3>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm">Personal data is not retained</p>
+                    <h3 class="font-bold mb-2">Your Control</h3>
+                    <p class="text-gray-300 text-sm">Complete data ownership and deletion rights</p>
                 </div>
                 
                 <div class="flex flex-col items-center text-center">
-                    <div class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-4">
-                        <i class="fas fa-certificate text-primary dark:text-accent text-2xl"></i>
+                    <div class="w-16 h-16 rounded-full bg-blue-900/50 flex items-center justify-center mb-4">
+                        <i class="fas fa-certificate text-accent text-2xl"></i>
                     </div>
-                    <h3 class="font-bold mb-2">ISO 27001 Certified</h3>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm">Information security management</p>
+                    <h3 class="font-bold mb-2">Certified Secure</h3>
+                    <p class="text-gray-300 text-sm">ISO 27001 certified security management</p>
                 </div>
             </div>
         </div>
@@ -853,19 +810,19 @@ GET  /health/detailed</code></pre>
     <section class="py-16">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Live Demo</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                    Experience skill gap analysis in action
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Try It Now</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    See how Clearsight IP identifies skill gaps and creates development plans
                 </p>
             </div>
             
             <div class="max-w-4xl mx-auto">
                 <div class="card demo-box rounded-xl p-6">
                     <div class="mb-6">
-                        <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2" for="resume-input">
-                            Paste Sample Resume Text
+                        <label class="block text-gray-300 font-medium mb-2" for="resume-input">
+                            Try our skill analysis with sample text
                         </label>
-                        <textarea id="resume-input" class="w-full h-40 p-4 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" placeholder="Paste your resume text here...">Software Engineer with 5 years of experience in web development. Proficient in JavaScript, React, Node.js, and MongoDB. Experienced with AWS cloud services and Docker containerization. Bachelor's degree in Computer Science from MIT. Seeking opportunities to work on challenging projects that leverage cutting-edge technologies.</textarea>
+                        <textarea id="resume-input" class="w-full h-40 p-4 border border-slate-600 rounded-lg bg-slate-700 text-gray-100" placeholder="Paste your resume text here...">
                     </div>
                     
                     <div class="flex justify-center mb-6">
@@ -1014,37 +971,6 @@ GET  /health/detailed</code></pre>
     </footer>
 
     <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-        const themeIcon = themeToggle.querySelector('i');
-        
-        // Check for saved theme preference or respect OS setting
-        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-        const currentTheme = localStorage.getItem('theme');
-        
-        if (currentTheme === 'dark' || (!currentTheme && prefersDarkScheme.matches)) {
-            body.classList.add('dark-mode');
-            themeIcon.classList.remove('fa-moon');
-            themeIcon.classList.add('fa-sun');
-        } else {
-            themeIcon.classList.remove('fa-sun');
-            themeIcon.classList.add('fa-moon');
-        }
-        
-        themeToggle.addEventListener('click', function() {
-            body.classList.toggle('dark-mode');
-            
-            if (body.classList.contains('dark-mode')) {
-                themeIcon.classList.remove('fa-moon');
-                themeIcon.classList.add('fa-sun');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                themeIcon.classList.remove('fa-sun');
-                themeIcon.classList.add('fa-moon');
-                localStorage.setItem('theme', 'light');
-            }
-        });
         
         // Demo functionality
         const analyzeBtn = document.getElementById('analyze-btn');
