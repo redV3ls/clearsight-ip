@@ -52,7 +52,7 @@
         }
         
         .hero-pattern {
-            background-image: radial-gradient(rgba(20, 184, 166, 0.08) 1px, transparent 1px);
+            background-image: radial-gradient(rgba(20, 184, 166, 0.08) 2px, transparent 1px);
             background-size: 20px 20px;
         }
         
