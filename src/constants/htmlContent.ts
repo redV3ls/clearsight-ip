@@ -187,90 +187,177 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         </div>
     </header>
 
-    <!-- Hero Section -->
+    <!-- Hero Section - Problem Statement -->
     <section class="py-16 md:py-24 hero-pattern">
         <div class="container mx-auto px-6 flex flex-col md:flex-row items-center">
             <div class="md:w-1/2 mb-12 md:mb-0">
-                    <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
-                        Build Your <span class="gradient-text">Skills Management Platform</span>
-                    </h1>
-                    <p class="text-xl text-gray-300 mb-8">
-                        Transform your workforce development with intelligent skills matching and gap analysis that drives real career growth and business results
-                    </p>
-                    
-                    <div class="flex flex-wrap gap-4 mb-8">
-                        <div class="flex items-center">
-                            <i class="fas fa-rocket text-accent mr-2"></i>
-                            <span class="font-medium">Fast implementation</span>
+                <div class="mb-6">
+                    <span class="bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded-full">The Problem</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
+                    <span class="text-red-600">73% of companies</span> struggle to identify skill gaps, costing them <span class="gradient-text">$1.2M annually</span> in missed opportunities
+                </h1>
+                <p class="text-xl text-gray-300 mb-8">
+                    Traditional hiring and development processes are blind to hidden talents and critical skill gaps. Teams waste months on mismatched hires while existing employees plateau without clear growth paths.
+                </p>
+                
+                <div class="bg-red-900/20 border-l-4 border-red-500 p-4 mb-8">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-red-500"></i>
                         </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-chart-line text-accent mr-2"></i>
-                            <span class="font-medium">Proven ROI increase</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-users text-accent mr-2"></i>
-                            <span class="font-medium">Team-focused solution</span>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-300">
+                                <strong>The Hidden Costs:</strong> 6 months average time-to-productivity for new hires • 40% of internal promotions fail due to skill misalignment • $15K average cost per bad hire
+                            </p>
                         </div>
                     </div>
+                </div>
                 
                 <div class="flex flex-wrap gap-4">
                     <button class="bg-primary hover:bg-blue-800 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
-                        Start Free Trial
+                        See The Solution
                     </button>
-                    <button class="bg-transparent hover:bg-slate-800 border-2 border-accent text-accent font-semibold py-3 px-8 rounded-lg transition duration-300">
-                        View Live Demo
+                    <button class="bg-transparent hover:bg-slate-800 border-2 border-primary text-accent font-semibold py-3 px-8 rounded-lg transition duration-300">
+                        Calculate Your Costs
                     </button>
                 </div>
             </div>
             
             <div class="md:w-1/2 flex justify-center">
                 <div class="relative">
-                    <div class="w-80 h-80 md:w-96 md:h-96 bg-gradient-to-br from-primary to-accent rounded-full opacity-10 absolute -top-10 -left-10 animate-float"></div>
-                    <div class="w-64 h-64 md:w-80 md:h-80 bg-gradient-to-tr from-accent to-primary rounded-full opacity-10 absolute -bottom-10 -right-10 animate-float animation-delay-2000"></div>
+                    <div class="w-80 h-80 md:w-96 md:h-96 bg-gradient-to-br from-red-500 to-orange-500 rounded-full opacity-10 absolute -top-10 -left-10 animate-float"></div>
+                    <div class="w-64 h-64 md:w-80 md:h-80 bg-gradient-to-tr from-orange-500 to-red-500 rounded-full opacity-10 absolute -bottom-10 -right-10 animate-float animation-delay-2000"></div>
                     <div class="relative bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-lg">Skill Gap Analysis Report</h3>
-                            <span class="bg-green-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded">Match: 72%</span>
+                            <h3 class="font-bold text-lg text-red-400">The Reality Check</h3>
+                            <span class="bg-red-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded">Hidden Costs</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 bg-red-900/20 rounded">
+                                <span class="text-sm font-medium">Time to Fill Positions</span>
+                                <span class="text-sm font-bold text-red-400">89 days</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center p-3 bg-orange-900/20 rounded">
+                                <span class="text-sm font-medium">Bad Hire Cost</span>
+                                <span class="text-sm font-bold text-orange-400">$240K</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center p-3 bg-yellow-900/20 rounded">
+                                <span class="text-sm font-medium">Skill Gap Impact</span>
+                                <span class="text-sm font-bold text-yellow-400">-23% productivity</span>
+                            </div>
+                            
+                            <div class="pt-4 border-t border-slate-700">
+                                <h4 class="font-semibold mb-2 text-red-400">What You're Missing:</h4>
+                                <ul class="space-y-1 text-sm">
+                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Internal talent going unnoticed</li>
+                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Expensive external hiring</li>
+                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Team skill imbalances</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="py-16 bg-gradient-to-r from-green-900/20 to-blue-900/20">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <span class="bg-green-600 text-white text-sm font-semibold px-3 py-1 rounded-full">The Solution</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-4 mb-6">
+                    AI-Powered Skills Intelligence That <span class="text-green-400">Actually Works</span>
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Transform your workforce development with intelligent skills analysis that identifies hidden talents, predicts future needs, and creates personalized growth paths.
+                </p>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0">
+                    <div class="relative bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg text-green-400">Smart Analysis Results</h3>
+                            <span class="bg-green-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded">92% Match</span>
                         </div>
                         
                         <div class="space-y-4">
                             <div>
                                 <div class="flex justify-between mb-1">
                                     <span class="text-sm font-medium">JavaScript</span>
-                                    <span class="text-sm font-medium">85%</span>
+                                    <span class="text-sm font-medium text-green-400">Expert Level</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                    <div class="bg-green-600 h-2.5 rounded-full" style="width: 85%"></div>
+                                    <div class="bg-green-600 h-2.5 rounded-full" style="width: 92%"></div>
                                 </div>
                             </div>
                             
                             <div>
                                 <div class="flex justify-between mb-1">
-                                    <span class="text-sm font-medium">React</span>
-                                    <span class="text-sm font-medium">65%</span>
+                                    <span class="text-sm font-medium">Team Leadership</span>
+                                    <span class="text-sm font-medium text-blue-400">Hidden Strength</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                    <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 65%"></div>
+                                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: 78%"></div>
                                 </div>
                             </div>
                             
                             <div>
                                 <div class="flex justify-between mb-1">
-                                    <span class="text-sm font-medium">Node.js</span>
-                                    <span class="text-sm font-medium">45%</span>
+                                    <span class="text-sm font-medium">Cloud Architecture</span>
+                                    <span class="text-sm font-medium text-purple-400">Growth Opportunity</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                    <div class="bg-red-500 h-2.5 rounded-full" style="width: 45%"></div>
+                                    <div class="bg-purple-600 h-2.5 rounded-full" style="width: 45%"></div>
                                 </div>
                             </div>
                             
                             <div class="pt-4 border-t border-slate-700">
-                                <h4 class="font-semibold mb-2">Recommended Learning Paths:</h4>
-                                <ul class="list-disc pl-5 space-y-1 text-sm">
-                                    <li>Advanced React Patterns Course</li>
-                                    <li>Node.js Backend Development</li>
-                                    <li>Full-Stack JavaScript Certification</li>
+                                <h4 class="font-semibold mb-2 text-green-400">Recommended Actions:</h4>
+                                <ul class="space-y-1 text-sm">
+                                    <li class="flex items-center"><i class="fas fa-arrow-up text-green-500 mr-2"></i>Promote to Senior Developer</li>
+                                    <li class="flex items-center"><i class="fas fa-users text-blue-500 mr-2"></i>Consider for Team Lead role</li>
+                                    <li class="flex items-center"><i class="fas fa-graduation-cap text-purple-500 mr-2"></i>AWS Certification path (3 months)</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="md:w-1/2 md:pl-12">
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 rounded-full bg-green-900/50 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-search text-green-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold mb-2">Discover Hidden Talents</h3>
+                                <p class="text-gray-300">Uncover skills and potential that traditional methods miss. Our AI analyzes context, not just keywords.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 rounded-full bg-blue-900/50 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-chart-line text-blue-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold mb-2">Predict Future Needs</h3>
+                                <p class="text-gray-300">Stay ahead with industry trend analysis and emerging skills detection. Plan your workforce evolution.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 rounded-full bg-purple-900/50 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-route text-purple-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold mb-2">Create Growth Paths</h3>
+                                <p class="text-gray-300">Generate personalized development roadmaps with time estimates, costs, and success metrics.</p>
                             </div>
                         </div>
                     </div>
