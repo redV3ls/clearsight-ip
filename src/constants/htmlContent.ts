@@ -11,10 +11,10 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1a365d',
+                        primary: '#14b8a6',
                         accent: '#14b8a6',
-                        background: '#f8fafc',
-                        text: '#1f2937'
+                        background: '#0f172a',
+                        text: '#e2e8f0'
                     }
                 }
             }
@@ -33,7 +33,7 @@
             color: #e2e8f0;
         }
         
-        .dark-mode .bg-light {
+        .dark-mode .bg-slate-800 {
             background-color: #1e293b;
         }
         
@@ -166,32 +166,32 @@
         }
     </style>
 </head>
-<body class="bg-background text-text dark:text-gray-200">
+<body class=\"bg-slate-900 text-gray-200\">
     <!-- Header -->
-    <header class="sticky top-0 z-50 bg-white dark:bg-slate-900 shadow-md py-4 px-6">
+    <header class="sticky top-0 z-50 bg-slate-800 bg-slate-900 shadow-md py-4 px-6">
         <div class="container mx-auto flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-bold text-primary dark:text-accent">Clearsight IP</h1>
-                <p class="text-sm text-gray-600 dark:text-gray-300">Bridge Your Skills Gap with AI-Powered Insights</p>
+                <h1 class="text-2xl font-bold text-accent text-accent">Clearsight IP</h1>
+                <p class="text-sm text-gray-400 text-gray-300">Bridge Your Skills Gap with AI-Powered Insights</p>
             </div>
             
             <nav class="hidden md:flex space-x-8">
-                <a href="#features" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">Features</a>
-                <a href="#how-it-works" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">How It Works</a>
-                <a href="#api" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">API Endpoints</a>
-                <a href="#pricing" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">Pricing</a>
-                <a href="#documentation" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">Documentation</a>
-                <a href="#contact" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-accent">Contact</a>
+                <a href="#features" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Features</a>
+                <a href="#how-it-works" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">How It Works</a>
+                <a href="#api" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">API Endpoints</a>
+                <a href="#pricing" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Pricing</a>
+                <a href="#documentation" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Documentation</a>
+                <a href="#contact" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Contact</a>
             </nav>
             
             <div class="flex items-center space-x-4">
                 <button id="theme-toggle" class="focus:outline-none">
-                    <i class="fas fa-moon text-gray-700 dark:text-yellow-300 text-xl"></i>
+                    <i class="fas fa-moon text-gray-300 text-yellow-300 text-xl"></i>
                 </button>
                 <a href="#api" class="bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
                     Get API Access
                 </a>
-                <button class="md:hidden text-gray-700 dark:text-gray-300">
+                <button class="md:hidden text-gray-300 text-gray-300">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
             </div>
@@ -206,27 +206,27 @@
                     <span class="bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded-full">The Problem</span>
                 </div>
                 <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
-                    <span class="text-red-600">73% of companies</span> struggle to identify skill gaps, costing them <span class="gradient-text">\\$1.2M annually</span> in missed opportunities
+                    <span class="text-red-600">73% of companies</span> struggle to identify skill gaps, costing them <span class="gradient-text">$1.2M annually</span> in missed opportunities
                 </h1>
-                <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
+                <p class="text-xl text-gray-400 text-gray-300 mb-8">
                     Traditional hiring and development processes are blind to hidden talents and critical skill gaps. Teams waste months on mismatched hires while existing employees plateau without clear growth paths.
                 </p>
                 
-                <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-8">
+                <div class="bg-red-50 bg-red-900/20 border-l-4 border-red-500 p-4 mb-8">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <i class="fas fa-exclamation-triangle text-red-500"></i>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm text-red-700 dark:text-red-300">
-                                <strong>The Hidden Costs:</strong> 6 months average time-to-productivity for new hires вЂў 40% of internal promotions fail due to skill misalignment вЂў \\$15K average cost per bad hire
+                            <p class="text-sm text-red-700 text-red-300">
+                                <strong>The Hidden Costs:</strong> 6 months average time-to-productivity for new hires вЂў 40% of internal promotions fail due to skill misalignment вЂў $15K average cost per bad hire
                             </p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="flex flex-wrap gap-4">
-                    <button class="bg-primary hover:bg-blue-800 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
+                    <button class="bg-accent hover:bg-teal-600 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
                         See The Solution
                     </button>
                 </div>
@@ -236,29 +236,29 @@
                 <div class="relative">
                     <div class="w-80 h-80 md:w-96 md:h-96 bg-gradient-to-br from-red-500 to-orange-500 rounded-full opacity-10 absolute -top-10 -left-10 animate-float"></div>
                     <div class="w-64 h-64 md:w-80 md:h-80 bg-gradient-to-tr from-orange-500 to-red-500 rounded-full opacity-10 absolute -bottom-10 -right-10 animate-float animation-delay-2000"></div>
-                    <div class="relative bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700">
+                    <div class="relative bg-slate-800 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 border-slate-700">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-lg text-red-600">The Reality Check</h3>
                             <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">Hidden Costs</span>
                         </div>
                         
                         <div class="space-y-4">
-                            <div class="flex justify-between items-center p-3 bg-red-50 dark:bg-red-900/20 rounded">
+                            <div class="flex justify-between items-center p-3 bg-red-50 bg-red-900/20 rounded">
                                 <span class="text-sm font-medium">Time to Fill Positions</span>
                                 <span class="text-sm font-bold text-red-600">89 days</span>
                             </div>
                             
-                            <div class="flex justify-between items-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded">
+                            <div class="flex justify-between items-center p-3 bg-orange-50 bg-orange-900/20 rounded">
                                 <span class="text-sm font-medium">Bad Hire Cost</span>
-                                <span class="text-sm font-bold text-orange-600">\\$240K</span>
+                                <span class="text-sm font-bold text-orange-600">$240K</span>
                             </div>
                             
-                            <div class="flex justify-between items-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded">
+                            <div class="flex justify-between items-center p-3 bg-yellow-50 bg-yellow-900/20 rounded">
                                 <span class="text-sm font-medium">Skill Gap Impact</span>
                                 <span class="text-sm font-bold text-yellow-600">-23% productivity</span>
                             </div>
                             
-                            <div class="pt-4 border-t border-gray-200 dark:border-slate-700">
+                            <div class="pt-4 border-t border-slate-700 border-slate-700">
                                 <h4 class="font-semibold mb-2 text-red-600">What You're Missing:</h4>
                                 <ul class="space-y-1 text-sm">
                                     <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Internal talent going unnoticed</li>
@@ -274,21 +274,21 @@
     </section>
 
     <!-- Solution Section -->
-    <section class="py-16 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20">
+    <section class="py-16 bg-gradient-to-r from-green-50 to-blue-50 from-green-900/20 to-blue-900/20">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
                 <span class="bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">The Solution</span>
                 <h2 class="text-3xl md:text-4xl font-bold mt-4 mb-6">
                     AI-Powered Skills Intelligence That <span class="text-green-600">Actually Works</span>
                 </h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                <p class="text-xl text-gray-400 text-gray-300 max-w-3xl mx-auto">
                     Transform your workforce development with intelligent skills analysis that identifies hidden talents, predicts future needs, and creates personalized growth paths.
                 </p>
             </div>
 
             <div class="flex flex-col md:flex-row items-center">
                 <div class="md:w-1/2 mb-8 md:mb-0">
-                    <div class="relative bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700">
+                    <div class="relative bg-slate-800 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 border-slate-700">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-lg text-green-600">Smart Analysis Results</h3>
                             <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">92% Match</span>
@@ -300,7 +300,7 @@
                                     <span class="text-sm font-medium">JavaScript</span>
                                     <span class="text-sm font-medium text-green-600">Expert Level</span>
                                 </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="w-full bg-gray-700 rounded-full h-2.5">
                                     <div class="bg-green-600 h-2.5 rounded-full" style="width: 92%"></div>
                                 </div>
                             </div>
@@ -310,7 +310,7 @@
                                     <span class="text-sm font-medium">Team Leadership</span>
                                     <span class="text-sm font-medium text-blue-600">Hidden Strength</span>
                                 </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="w-full bg-gray-700 rounded-full h-2.5">
                                     <div class="bg-blue-600 h-2.5 rounded-full" style="width: 78%"></div>
                                 </div>
                             </div>
@@ -320,12 +320,12 @@
                                     <span class="text-sm font-medium">Cloud Architecture</span>
                                     <span class="text-sm font-medium text-purple-600">Growth Opportunity</span>
                                 </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="w-full bg-gray-700 rounded-full h-2.5">
                                     <div class="bg-purple-600 h-2.5 rounded-full" style="width: 45%"></div>
                                 </div>
                             </div>
                             
-                            <div class="pt-4 border-t border-gray-200 dark:border-slate-700">
+                            <div class="pt-4 border-t border-slate-700 border-slate-700">
                                 <h4 class="font-semibold mb-2 text-green-600">Recommended Actions:</h4>
                                 <ul class="space-y-1 text-sm">
                                     <li class="flex items-center"><i class="fas fa-arrow-up text-green-500 mr-2"></i>Promote to Senior Developer</li>
@@ -340,32 +340,32 @@
                 <div class="md:w-1/2 md:pl-12">
                     <div class="space-y-6">
                         <div class="flex items-start">
-                            <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center mr-4 flex-shrink-0">
+                            <div class="w-12 h-12 rounded-full bg-green-100 bg-green-900/50 flex items-center justify-center mr-4 flex-shrink-0">
                                 <i class="fas fa-search text-green-600 text-xl"></i>
                             </div>
                             <div>
                                 <h3 class="text-xl font-bold mb-2">Discover Hidden Talents</h3>
-                                <p class="text-gray-600 dark:text-gray-300">Uncover skills and potential that traditional methods miss. Our AI analyzes context, not just keywords.</p>
+                                <p class="text-gray-400 text-gray-300">Uncover skills and potential that traditional methods miss. Our AI analyzes context, not just keywords.</p>
                             </div>
                         </div>
 
                         <div class="flex items-start">
-                            <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-4 flex-shrink-0">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 bg-blue-900/50 flex items-center justify-center mr-4 flex-shrink-0">
                                 <i class="fas fa-chart-line text-blue-600 text-xl"></i>
                             </div>
                             <div>
                                 <h3 class="text-xl font-bold mb-2">Predict Future Needs</h3>
-                                <p class="text-gray-600 dark:text-gray-300">Stay ahead with industry trend analysis and emerging skills detection. Plan your workforce evolution.</p>
+                                <p class="text-gray-400 text-gray-300">Stay ahead with industry trend analysis and emerging skills detection. Plan your workforce evolution.</p>
                             </div>
                         </div>
 
                         <div class="flex items-start">
-                            <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center mr-4 flex-shrink-0">
+                            <div class="w-12 h-12 rounded-full bg-purple-100 bg-purple-900/50 flex items-center justify-center mr-4 flex-shrink-0">
                                 <i class="fas fa-route text-purple-600 text-xl"></i>
                             </div>
                             <div>
                                 <h3 class="text-xl font-bold mb-2">Create Growth Paths</h3>
-                                <p class="text-gray-600 dark:text-gray-300">Generate personalized development roadmaps with time estimates, costs, and success metrics.</p>
+                                <p class="text-gray-400 text-gray-300">Generate personalized development roadmaps with time estimates, costs, and success metrics.</p>
                             </div>
                         </div>
                     </div>
@@ -375,12 +375,12 @@
     </section>
 
     <!-- Proof Section -->
-    <section id="features" class="py-16 bg-light dark:bg-slate-800">
+    <section id="features" class="py-16 bg-slate-800 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">Proven Results</span>
                 <h2 class="text-3xl md:text-4xl font-bold mt-4 mb-6">Real Companies, Real Impact</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                <p class="text-xl text-gray-400 text-gray-300 max-w-3xl mx-auto">
                     See how leading organizations are transforming their workforce development with our AI-powered platform
                 </p>
             </div>
@@ -389,22 +389,22 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
                 <div class="text-center">
                     <div class="stats-number text-green-600">40%</div>
-                    <p class="text-gray-600 dark:text-gray-300 font-medium">Faster Hiring</p>
+                    <p class="text-gray-400 text-gray-300 font-medium">Faster Hiring</p>
                     <p class="text-sm text-gray-500">Average time-to-fill reduced</p>
                 </div>
                 <div class="text-center">
-                    <div class="stats-number text-blue-600">\\$1.2M</div>
-                    <p class="text-gray-600 dark:text-gray-300 font-medium">Cost Savings</p>
+                    <div class="stats-number text-blue-600">$1.2M</div>
+                    <p class="text-gray-400 text-gray-300 font-medium">Cost Savings</p>
                     <p class="text-sm text-gray-500">Annual hiring cost reduction</p>
                 </div>
                 <div class="text-center">
                     <div class="stats-number text-purple-600">85%</div>
-                    <p class="text-gray-600 dark:text-gray-300 font-medium">Internal Promotions</p>
+                    <p class="text-gray-400 text-gray-300 font-medium">Internal Promotions</p>
                     <p class="text-sm text-gray-500">Increase in successful promotions</p>
                 </div>
                 <div class="text-center">
                     <div class="stats-number text-orange-600">3x</div>
-                    <p class="text-gray-600 dark:text-gray-300 font-medium">ROI</p>
+                    <p class="text-gray-400 text-gray-300 font-medium">ROI</p>
                     <p class="text-sm text-gray-500">Return on investment</p>
                 </div>
             </div>
@@ -413,7 +413,7 @@
                 <!-- Case Study 1 -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300 border-l-4 border-green-500">
                     <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center mr-3">
+                        <div class="w-12 h-12 rounded-full bg-green-100 bg-green-900/50 flex items-center justify-center mr-3">
                             <i class="fas fa-building text-green-600 text-xl"></i>
                         </div>
                         <div>
@@ -423,9 +423,9 @@
                     </div>
                     <div class="mb-4">
                         <div class="text-2xl font-bold text-green-600 mb-1">67% faster hiring</div>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">Reduced time-to-fill from 89 to 29 days</p>
+                        <p class="text-sm text-gray-400 text-gray-300">Reduced time-to-fill from 89 to 29 days</p>
                     </div>
-                    <blockquote class="text-sm italic text-gray-600 dark:text-gray-300 mb-4">
+                    <blockquote class="text-sm italic text-gray-400 text-gray-300 mb-4">
                         "We discovered 15 internal candidates ready for promotion that we never knew existed. The AI found skills in contexts we completely missed."
                     </blockquote>
                     <div class="text-xs text-gray-500">
@@ -436,7 +436,7 @@
                 <!-- Case Study 2 -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300 border-l-4 border-blue-500">
                     <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-3">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 bg-blue-900/50 flex items-center justify-center mr-3">
                             <i class="fas fa-rocket text-blue-600 text-xl"></i>
                         </div>
                         <div>
@@ -445,10 +445,10 @@
                         </div>
                     </div>
                     <div class="mb-4">
-                        <div class="text-2xl font-bold text-blue-600 mb-1">\\$240K saved</div>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">Avoided 3 bad hires in first quarter</p>
+                        <div class="text-2xl font-bold text-blue-600 mb-1">$240K saved</div>
+                        <p class="text-sm text-gray-400 text-gray-300">Avoided 3 bad hires in first quarter</p>
                     </div>
-                    <blockquote class="text-sm italic text-gray-600 dark:text-gray-300 mb-4">
+                    <blockquote class="text-sm italic text-gray-400 text-gray-300 mb-4">
                         "The gap analysis showed us exactly what skills we needed vs. what candidates actually had. No more expensive hiring mistakes."
                     </blockquote>
                     <div class="text-xs text-gray-500">
@@ -459,7 +459,7 @@
                 <!-- Case Study 3 -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300 border-l-4 border-purple-500">
                     <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center mr-3">
+                        <div class="w-12 h-12 rounded-full bg-purple-100 bg-purple-900/50 flex items-center justify-center mr-3">
                             <i class="fas fa-university text-purple-600 text-xl"></i>
                         </div>
                         <div>
@@ -469,9 +469,9 @@
                     </div>
                     <div class="mb-4">
                         <div class="text-2xl font-bold text-purple-600 mb-1">3x ROI</div>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">\\$1.2M investment returned \\$3.6M value</p>
+                        <p class="text-sm text-gray-400 text-gray-300">$1.2M investment returned $3.6M value</p>
                     </div>
-                    <blockquote class="text-sm italic text-gray-600 dark:text-gray-300 mb-4">
+                    <blockquote class="text-sm italic text-gray-400 text-gray-300 mb-4">
                         "Our learning budget became strategic instead of scattered. People are getting promoted faster and staying longer."
                     </blockquote>
                     <div class="text-xs text-gray-500">
@@ -482,7 +482,7 @@
                 <!-- API Integration Success -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300 border-l-4 border-orange-500">
                     <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center mr-3">
+                        <div class="w-12 h-12 rounded-full bg-orange-100 bg-orange-900/50 flex items-center justify-center mr-3">
                             <i class="fas fa-code text-orange-600 text-xl"></i>
                         </div>
                         <div>
@@ -492,7 +492,7 @@
                     </div>
                     <div class="mb-4">
                         <div class="text-2xl font-bold text-orange-600 mb-1">&lt;100ms</div>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">Average API response time</p>
+                        <p class="text-sm text-gray-400 text-gray-300">Average API response time</p>
                     </div>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
@@ -521,7 +521,7 @@
                 <!-- Industry Recognition -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300 border-l-4 border-yellow-500">
                     <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/50 flex items-center justify-center mr-3">
+                        <div class="w-12 h-12 rounded-full bg-yellow-100 bg-yellow-900/50 flex items-center justify-center mr-3">
                             <i class="fas fa-award text-yellow-600 text-xl"></i>
                         </div>
                         <div>
@@ -552,7 +552,7 @@
                 <!-- Customer Satisfaction -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300 border-l-4 border-pink-500">
                     <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-pink-100 dark:bg-pink-900/50 flex items-center justify-center mr-3">
+                        <div class="w-12 h-12 rounded-full bg-pink-100 bg-pink-900/50 flex items-center justify-center mr-3">
                             <i class="fas fa-heart text-pink-600 text-xl"></i>
                         </div>
                         <div>
@@ -583,11 +583,11 @@
     </section>
 
     <!-- How It Works -->
-    <section id="how-it-works" class="py-16 bg-light dark:bg-slate-800">
+    <section id="how-it-works" class="py-16 bg-slate-800 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Discover Your Career Path in 3 Simple Steps</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                <p class="text-xl text-gray-400 text-gray-300 max-w-3xl mx-auto">
                     Uncover your skills, identify gaps, and plan your growth journey
                 </p>
             </div>
@@ -596,14 +596,14 @@
                 <div class="text-center">
                     <div class="w-20 h-20 rounded-full bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold mb-6 mx-auto">1</div>
                     <h3 class="text-2xl font-bold mb-4">Upload Your Resume</h3>
-                    <div class="bg-white dark:bg-slate-700 p-4 rounded-lg mb-4">
+                    <div class="bg-slate-800 bg-slate-700 p-4 rounded-lg mb-4">
                         <div class="flex items-center justify-center space-x-4 text-sm">
                             <span class="flex items-center"><i class="fas fa-file-pdf text-red-500 mr-1"></i>PDF</span>
                             <span class="flex items-center"><i class="fas fa-file-word text-blue-500 mr-1"></i>Word</span>
                             <span class="flex items-center"><i class="fas fa-file-alt text-green-500 mr-1"></i>Text</span>
                         </div>
                     </div>
-                    <p class="text-gray-600 dark:text-gray-300">
+                    <p class="text-gray-400 text-gray-300">
                         Simply upload your resume or paste your experience. Our AI extracts your skills and analyzes your career potential.
                     </p>
                 </div>
@@ -611,14 +611,14 @@
                 <div class="text-center">
                     <div class="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-2xl font-bold mb-6 mx-auto">2</div>
                     <h3 class="text-2xl font-bold mb-4">AI Analyzes Your Skills</h3>
-                    <div class="bg-white dark:bg-slate-700 p-4 rounded-lg mb-4">
+                    <div class="bg-slate-800 bg-slate-700 p-4 rounded-lg mb-4">
                         <div class="flex justify-center items-center">
                             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
                             <span class="ml-2 text-sm">Analyzing...</span>
                         </div>
                         <div class="text-xs text-gray-500 mt-2">Average processing time: &lt;30 seconds</div>
                     </div>
-                    <p class="text-gray-600 dark:text-gray-300">
+                    <p class="text-gray-400 text-gray-300">
                         Our AI identifies your current skills, discovers hidden strengths, and reveals opportunities for growth.
                     </p>
                 </div>
@@ -626,7 +626,7 @@
                 <div class="text-center">
                     <div class="w-20 h-20 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-2xl font-bold mb-6 mx-auto">3</div>
                     <h3 class="text-2xl font-bold mb-4">Get Your Career Roadmap</h3>
-                    <div class="bg-white dark:bg-slate-700 p-4 rounded-lg mb-4">
+                    <div class="bg-slate-800 bg-slate-700 p-4 rounded-lg mb-4">
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
                                 <span>Senior Developer Role</span>
@@ -642,20 +642,20 @@
                             </div>
                         </div>
                     </div>
-                    <p class="text-gray-600 dark:text-gray-300">
+                    <p class="text-gray-400 text-gray-300">
                         Receive personalized career paths with clear milestones, skill gaps to fill, and timeline estimates.
                     </p>
                 </div>
             </div>
 
             <div class="mt-16 text-center">
-                <div class="bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl p-8">
+                <div class="bg-gradient-to-r from-green-100 to-blue-100 from-green-900/20 to-blue-900/20 rounded-xl p-8">
                     <h3 class="text-2xl font-bold mb-4">Ready to see it in action?</h3>
-                    <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    <p class="text-gray-400 text-gray-300 mb-6">
                         Try our interactive demo with sample data or start your free trial with your own team.
                     </p>
                     <div class="flex flex-wrap justify-center gap-4">
-                        <button class="bg-primary hover:bg-blue-800 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
+                        <button class="bg-accent hover:bg-teal-600 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
                             Try Interactive Demo
                         </button>
                         <button class="bg-accent hover:bg-teal-600 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
@@ -671,7 +671,7 @@
     <section id="api" class="py-16 bg-gradient-to-r from-primary to-accent text-white">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
-                <span class="bg-white/20 text-white text-sm font-semibold px-3 py-1 rounded-full">Take Action</span>
+                <span class="bg-slate-800/20 text-white text-sm font-semibold px-3 py-1 rounded-full">Take Action</span>
                 <h2 class="text-3xl md:text-4xl font-bold mt-4 mb-6">
                     Ready to Transform Your Career?
                 </h2>
@@ -681,9 +681,9 @@
             </div>
 
             <div class="max-w-2xl mx-auto mb-12">
-                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-8">
+                <div class="bg-slate-800/10 backdrop-blur-sm rounded-xl p-8">
                     <div class="text-center mb-6">
-                        <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
+                        <div class="w-16 h-16 rounded-full bg-slate-800/20 flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-rocket text-white text-2xl"></i>
                         </div>
                         <h3 class="text-2xl font-bold mb-4">For Job Seekers & Professionals</h3>
@@ -722,10 +722,10 @@
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-4">
-                        <button class="flex-1 bg-white text-primary font-semibold py-3 px-6 rounded-lg hover:bg-gray-100 transition duration-300">
+                        <button class="flex-1 bg-slate-800 text-accent font-semibold py-3 px-6 rounded-lg hover:bg-slate-700 transition duration-300">
                             Try It Free Now
                         </button>
-                        <a href="#api" class="flex-1 bg-transparent border-2 border-white text-white font-semibold py-3 px-6 rounded-lg hover:bg-white hover:text-primary transition duration-300 text-center">
+                        <a href="#api" class="flex-1 bg-transparent border-2 border-white text-white font-semibold py-3 px-6 rounded-lg hover:bg-slate-800 hover:text-accent transition duration-300 text-center">
                             API Access for Developers
                         </a>
                     </div>
@@ -764,58 +764,58 @@
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Why Choose Clearsight IP</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                <p class="text-xl text-gray-400 text-gray-300 max-w-3xl mx-auto">
                     The smartest way to understand your skills and accelerate your career
                 </p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="card p-6 rounded-xl">
-                    <div class="w-16 h-16 mb-4 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
+                    <div class="w-16 h-16 mb-4 bg-green-100 bg-green-900/50 rounded-full flex items-center justify-center">
                         <i class="fas fa-microscope text-green-600 text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Deep Skills Analysis</h3>
-                    <p class="text-gray-600 dark:text-gray-300">Go beyond keywords. Our AI understands context, projects, and real-world application of your skills.</p>
+                    <p class="text-gray-400 text-gray-300">Go beyond keywords. Our AI understands context, projects, and real-world application of your skills.</p>
                 </div>
                 
                 <div class="card p-6 rounded-xl">
-                    <div class="w-16 h-16 mb-4 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
+                    <div class="w-16 h-16 mb-4 bg-blue-100 bg-blue-900/50 rounded-full flex items-center justify-center">
                         <i class="fas fa-gem text-blue-600 text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Hidden Talent Discovery</h3>
-                    <p class="text-gray-600 dark:text-gray-300">Uncover skills you didn't know you had. Find transferable abilities that open new career doors.</p>
+                    <p class="text-gray-400 text-gray-300">Uncover skills you didn't know you had. Find transferable abilities that open new career doors.</p>
                 </div>
                 
                 <div class="card p-6 rounded-xl">
-                    <div class="w-16 h-16 mb-4 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center">
+                    <div class="w-16 h-16 mb-4 bg-purple-100 bg-purple-900/50 rounded-full flex items-center justify-center">
                         <i class="fas fa-map-marked-alt text-purple-600 text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Personalized Roadmaps</h3>
-                    <p class="text-gray-600 dark:text-gray-300">Get custom career paths based on your goals, with clear steps and realistic timelines.</p>
+                    <p class="text-gray-400 text-gray-300">Get custom career paths based on your goals, with clear steps and realistic timelines.</p>
                 </div>
                 
                 <div class="card p-6 rounded-xl">
-                    <div class="w-16 h-16 mb-4 bg-orange-100 dark:bg-orange-900/50 rounded-full flex items-center justify-center">
+                    <div class="w-16 h-16 mb-4 bg-orange-100 bg-orange-900/50 rounded-full flex items-center justify-center">
                         <i class="fas fa-chart-line text-orange-600 text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Market Intelligence</h3>
-                    <p class="text-gray-600 dark:text-gray-300">Stay ahead with real-time insights on in-demand skills and emerging industry trends.</p>
+                    <p class="text-gray-400 text-gray-300">Stay ahead with real-time insights on in-demand skills and emerging industry trends.</p>
                 </div>
                 
                 <div class="card p-6 rounded-xl">
-                    <div class="w-16 h-16 mb-4 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center">
+                    <div class="w-16 h-16 mb-4 bg-teal-100 bg-teal-900/50 rounded-full flex items-center justify-center">
                         <i class="fas fa-bolt text-teal-600 text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Instant Results</h3>
-                    <p class="text-gray-600 dark:text-gray-300">No waiting days for feedback. Get comprehensive analysis in under 30 seconds.</p>
+                    <p class="text-gray-400 text-gray-300">No waiting days for feedback. Get comprehensive analysis in under 30 seconds.</p>
                 </div>
                 
                 <div class="card p-6 rounded-xl">
-                    <div class="w-16 h-16 mb-4 bg-pink-100 dark:bg-pink-900/50 rounded-full flex items-center justify-center">
+                    <div class="w-16 h-16 mb-4 bg-pink-100 bg-pink-900/50 rounded-full flex items-center justify-center">
                         <i class="fas fa-shield-alt text-pink-600 text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Privacy First</h3>
-                    <p class="text-gray-600 dark:text-gray-300">Your data is never stored permanently. Complete analysis with full privacy protection.</p>
+                    <p class="text-gray-400 text-gray-300">Your data is never stored permanently. Complete analysis with full privacy protection.</p>
                 </div>
             </div>
         </div>
@@ -827,7 +827,7 @@
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                <p class="text-xl text-gray-400 text-gray-300 max-w-3xl mx-auto">
                     Choose the plan that fits your needs
                 </p>
             </div>
@@ -837,8 +837,8 @@
                 <div class="pricing-card card p-8 rounded-xl text-center">
                     <h3 class="text-2xl font-bold mb-2">Developer</h3>
                     <div class="mb-6">
-                        <span class="text-4xl font-bold">\\$0</span>
-                        <span class="text-gray-600 dark:text-gray-300">/month</span>
+                        <span class="text-4xl font-bold">$0</span>
+                        <span class="text-gray-400 text-gray-300">/month</span>
                     </div>
                     <ul class="space-y-3 mb-8">
                         <li class="flex items-center justify-center">
@@ -862,7 +862,7 @@
                             <span>Trend analysis</span>
                         </li>
                     </ul>
-                    <button class="w-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-primary dark:text-accent font-semibold py-3 px-4 rounded-lg transition duration-300">
+                    <button class="w-full bg-slate-700 bg-slate-700 hover:bg-slate-600 hover:bg-slate-600 text-accent text-accent font-semibold py-3 px-4 rounded-lg transition duration-300">
                         Get Started
                     </button>
                 </div>
@@ -874,8 +874,8 @@
                     </div>
                     <h3 class="text-2xl font-bold mb-2">Professional</h3>
                     <div class="mb-6">
-                        <span class="text-4xl font-bold">\\$99</span>
-                        <span class="text-gray-600 dark:text-gray-300">/month</span>
+                        <span class="text-4xl font-bold">$99</span>
+                        <span class="text-gray-400 text-gray-300">/month</span>
                     </div>
                     <ul class="space-y-3 mb-8">
                         <li class="flex items-center justify-center">
@@ -932,7 +932,7 @@
                             <span>SLA guarantee</span>
                         </li>
                     </ul>
-                    <button class="w-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-primary dark:text-accent font-semibold py-3 px-4 rounded-lg transition duration-300">
+                    <button class="w-full bg-slate-700 bg-slate-700 hover:bg-slate-600 hover:bg-slate-600 text-accent text-accent font-semibold py-3 px-4 rounded-lg transition duration-300">
                         Contact Sales
                     </button>
                 </div>
@@ -941,38 +941,38 @@
     </section>
 
     <!-- Trust & Security -->
-    <section class="py-16 bg-light dark:bg-slate-800">
+    <section class="py-16 bg-slate-800 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Your Privacy Matters</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                <p class="text-xl text-gray-400 text-gray-300 max-w-3xl mx-auto">
                     We protect your data with enterprise-grade security
                 </p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
                 <div class="text-center">
-                    <div class="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center mx-auto mb-4">
+                    <div class="w-16 h-16 rounded-full bg-green-100 bg-green-900/50 flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-trash-alt text-green-600 text-2xl"></i>
                     </div>
                     <h3 class="font-bold mb-2">No Data Storage</h3>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm">Your resume and personal data are never permanently stored</p>
+                    <p class="text-gray-400 text-gray-300 text-sm">Your resume and personal data are never permanently stored</p>
                 </div>
                 
                 <div class="text-center">
-                    <div class="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mx-auto mb-4">
+                    <div class="w-16 h-16 rounded-full bg-blue-100 bg-blue-900/50 flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-lock text-blue-600 text-2xl"></i>
                     </div>
                     <h3 class="font-bold mb-2">Encrypted Processing</h3>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm">End-to-end encryption for all data transmission</p>
+                    <p class="text-gray-400 text-gray-300 text-sm">End-to-end encryption for all data transmission</p>
                 </div>
                 
                 <div class="text-center">
-                    <div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center mx-auto mb-4">
+                    <div class="w-16 h-16 rounded-full bg-purple-100 bg-purple-900/50 flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-gavel text-purple-600 text-2xl"></i>
                     </div>
                     <h3 class="font-bold mb-2">GDPR Compliant</h3>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm">Full compliance with global privacy regulations</p>
+                    <p class="text-gray-400 text-gray-300 text-sm">Full compliance with global privacy regulations</p>
                 </div>
             </div>
         </div>
@@ -983,7 +983,7 @@
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Live Demo</h2>
-                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                <p class="text-xl text-gray-400 text-gray-300 max-w-3xl mx-auto">
                     Experience skill gap analysis in action
                 </p>
             </div>
@@ -991,14 +991,14 @@
             <div class="max-w-4xl mx-auto">
                 <div class="card demo-box rounded-xl p-6">
                     <div class="mb-6">
-                        <label class="block text-gray-700 dark:text-gray-300 font-medium mb-2" for="resume-input">
+                        <label class="block text-gray-300 text-gray-300 font-medium mb-2" for="resume-input">
                             Paste Sample Resume Text
                         </label>
-                        <textarea id="resume-input" class="w-full h-40 p-4 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100" placeholder="Paste your resume text here...">Software Engineer with 5 years of experience in web development. Proficient in JavaScript, React, Node.js, and MongoDB. Experienced with AWS cloud services and Docker containerization. Bachelor's degree in Computer Science from MIT. Seeking opportunities to work on challenging projects that leverage cutting-edge technologies.</textarea>
+                        <textarea id="resume-input" class="w-full h-40 p-4 border border-slate-600 border-slate-600 rounded-lg bg-slate-800 bg-slate-700 text-gray-100 text-gray-100" placeholder="Paste your resume text here...">Software Engineer with 5 years of experience in web development. Proficient in JavaScript, React, Node.js, and MongoDB. Experienced with AWS cloud services and Docker containerization. Bachelor's degree in Computer Science from MIT. Seeking opportunities to work on challenging projects that leverage cutting-edge technologies.</textarea>
                     </div>
                     
                     <div class="flex justify-center mb-6">
-                        <button id="analyze-btn" class="bg-primary hover:bg-blue-800 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
+                        <button id="analyze-btn" class="bg-accent hover:bg-teal-600 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
                             Analyze Skills
                         </button>
                     </div>
@@ -1009,12 +1009,12 @@
                         <div class="mb-6">
                             <h4 class="font-semibold mb-2">Extracted Skills:</h4>
                             <div class="flex flex-wrap gap-2">
-                                <span class="bg-blue-100 dark:bg-blue-900/50 text-primary dark:text-accent px-3 py-1 rounded-full text-sm">JavaScript</span>
-                                <span class="bg-blue-100 dark:bg-blue-900/50 text-primary dark:text-accent px-3 py-1 rounded-full text-sm">React</span>
-                                <span class="bg-blue-100 dark:bg-blue-900/50 text-primary dark:text-accent px-3 py-1 rounded-full text-sm">Node.js</span>
-                                <span class="bg-blue-100 dark:bg-blue-900/50 text-primary dark:text-accent px-3 py-1 rounded-full text-sm">MongoDB</span>
-                                <span class="bg-blue-100 dark:bg-blue-900/50 text-primary dark:text-accent px-3 py-1 rounded-full text-sm">AWS</span>
-                                <span class="bg-blue-100 dark:bg-blue-900/50 text-primary dark:text-accent px-3 py-1 rounded-full text-sm">Docker</span>
+                                <span class="bg-blue-100 bg-blue-900/50 text-accent text-accent px-3 py-1 rounded-full text-sm">JavaScript</span>
+                                <span class="bg-blue-100 bg-blue-900/50 text-accent text-accent px-3 py-1 rounded-full text-sm">React</span>
+                                <span class="bg-blue-100 bg-blue-900/50 text-accent text-accent px-3 py-1 rounded-full text-sm">Node.js</span>
+                                <span class="bg-blue-100 bg-blue-900/50 text-accent text-accent px-3 py-1 rounded-full text-sm">MongoDB</span>
+                                <span class="bg-blue-100 bg-blue-900/50 text-accent text-accent px-3 py-1 rounded-full text-sm">AWS</span>
+                                <span class="bg-blue-100 bg-blue-900/50 text-accent text-accent px-3 py-1 rounded-full text-sm">Docker</span>
                             </div>
                         </div>
                         
@@ -1026,7 +1026,7 @@
                                         <span>JavaScript</span>
                                         <span>85% Match</span>
                                     </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
                                         <div class="bg-green-600 h-2.5 rounded-full" style="width: 85%"></div>
                                     </div>
                                 </div>
@@ -1036,7 +1036,7 @@
                                         <span>React</span>
                                         <span>75% Match</span>
                                     </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
                                         <div class="bg-green-500 h-2.5 rounded-full" style="width: 75%"></div>
                                     </div>
                                 </div>
@@ -1046,7 +1046,7 @@
                                         <span>Node.js</span>
                                         <span>60% Match</span>
                                     </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
                                         <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 60%"></div>
                                     </div>
                                 </div>
@@ -1056,7 +1056,7 @@
                                         <span>AWS</span>
                                         <span>45% Match</span>
                                     </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="w-full bg-gray-700 rounded-full h-2.5">
                                         <div class="bg-red-500 h-2.5 rounded-full" style="width: 45%"></div>
                                     </div>
                                 </div>
@@ -1078,7 +1078,7 @@
     </section>
 
     <!-- Footer -->
-    <footer id="contact" class="bg-primary text-white pt-16 pb-8">
+    <footer id="contact" class="bg-accent text-white pt-16 pb-8">
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
                 <div class="lg:col-span-2">
@@ -1143,38 +1143,6 @@
     </footer>
 
     <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-        const themeIcon = themeToggle.querySelector('i');
-        
-        // Check for saved theme preference or respect OS setting
-        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-        const currentTheme = localStorage.getItem('theme');
-        
-        if (currentTheme === 'dark' || (!currentTheme && prefersDarkScheme.matches)) {
-            body.classList.add('dark-mode');
-            themeIcon.classList.remove('fa-moon');
-            themeIcon.classList.add('fa-sun');
-        } else {
-            themeIcon.classList.remove('fa-sun');
-            themeIcon.classList.add('fa-moon');
-        }
-        
-        themeToggle.addEventListener('click', function() {
-            body.classList.toggle('dark-mode');
-            
-            if (body.classList.contains('dark-mode')) {
-                themeIcon.classList.remove('fa-moon');
-                themeIcon.classList.add('fa-sun');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                themeIcon.classList.remove('fa-sun');
-                themeIcon.classList.add('fa-moon');
-                localStorage.setItem('theme', 'light');
-            }
-        });
-        
         // Demo functionality
         const analyzeBtn = document.getElementById('analyze-btn');
         const demoResults = document.getElementById('demo-results');
@@ -1206,5 +1174,7 @@
     </script>
 </body>
 </html>
+
+
 
 `;
