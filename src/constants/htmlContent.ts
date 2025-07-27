@@ -184,7 +184,7 @@
             </nav>
             
             <div class="flex items-center space-x-4">
-                <a href="/api/docs" class="bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
+                <a href="/api/v1/docs" class="bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
                     View API Docs
                 </a>
                 <button class="md:hidden text-gray-300 text-gray-300">

@@ -180,7 +180,7 @@ const openAPIApp = createOpenAPIApp();
 app.route('/api', openAPIApp);
 
 // Redirect /docs to the actual documentation location
-app.get('/docs', (c) => c.redirect('/api/docs'));
+app.get('/docs', (c) => c.redirect('/api/v1/docs'));
 
 // API root endpoint (public - no auth required)
 app.get('/api/v1', (c) => {
