@@ -52,7 +52,7 @@
         }
         
         .hero-pattern {
-            background-image: radial-gradient(#14b8a6 1px, transparent 1px);
+            background-image: radial-gradient(rgba(20, 184, 166, 0.08) 1px, transparent 1px);
             background-size: 20px 20px;
         }
         
@@ -237,7 +237,7 @@
                     <div class="w-80 h-80 md:w-96 md:h-96 bg-gradient-to-br from-red-500 to-orange-500 rounded-full opacity-10 absolute -top-10 -left-10 animate-float"></div>
                     <div class="w-64 h-64 md:w-80 md:h-80 bg-gradient-to-tr from-orange-500 to-red-500 rounded-full opacity-10 absolute -bottom-10 -right-10 animate-float animation-delay-2000"></div>
                     <div class="relative bg-slate-800 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 border-slate-700">
-                        <div class="flex justify-between items-center mb-4">
+                        <div class="flex justify-between items-center mb-6">
                             <h3 class="font-bold text-lg text-red-600">The Reality Check</h3>
                             <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">Hidden Costs</span>
                         </div>
