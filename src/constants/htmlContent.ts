@@ -178,15 +178,15 @@
             <nav class="hidden md:flex space-x-8">
                 <a href="#features" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Features</a>
                 <a href="#how-it-works" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">How It Works</a>
-                <a href="#api" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">API Endpoints</a>
+                <a href="#demo" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Try Demo</a>
                 <a href="#pricing" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Pricing</a>
                 <a href="#documentation" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Documentation</a>
                 <a href="#contact" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Contact</a>
             </nav>
             
             <div class="flex items-center space-x-4">
-                <a href="#api" class="bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
-                    Get API Access
+                <a href="#documentation" class="bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
+                    View Documentation
                 </a>
                 <button class="md:hidden text-gray-300 text-gray-300">
                     <i class="fas fa-bars text-2xl"></i>
@@ -644,115 +644,6 @@
                     </p>
                 </div>
             </div>
-
-            <div class="mt-16 text-center">
-                <div class="bg-gradient-to-r from-green-100 to-blue-100 from-green-900/20 to-blue-900/20 rounded-xl p-8">
-                    <h3 class="text-2xl font-bold mb-4">Ready to see it in action?</h3>
-                    <p class="text-gray-400 text-gray-300 mb-6">
-                        Try our interactive demo with sample data or start your free trial with your own team.
-                    </p>
-                    <div class="flex flex-wrap justify-center gap-4">
-                        <button class="bg-accent hover:bg-teal-600 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
-                            Try Interactive Demo
-                        </button>
-                        <button class="bg-accent hover:bg-teal-600 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
-                            Start Free Trial
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Call to Action Section -->
-    <section id="api" class="py-20 md:py-24 bg-gradient-to-r from-primary to-accent text-white">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-12">
-                <span class="bg-slate-800/20 text-white text-sm font-semibold px-3 py-1 rounded-full">Take Action</span>
-                <h2 class="text-3xl md:text-4xl font-bold mt-4 mb-6">
-                    Ready to Transform Your Career?
-                </h2>
-                <p class="text-xl text-white/90 max-w-3xl mx-auto mb-8">
-                    Join thousands of professionals using our AI-powered skills intelligence to accelerate their career growth.
-                </p>
-            </div>
-
-            <div class="max-w-2xl mx-auto mb-12">
-                <div class="bg-slate-800/10 backdrop-blur-sm rounded-xl p-8">
-                    <div class="text-center mb-6">
-                        <div class="w-16 h-16 rounded-full bg-slate-800/20 flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-rocket text-white text-2xl"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold mb-4">For Job Seekers & Professionals</h3>
-                        <p class="text-white/90 mb-6">
-                            Take control of your career growth with AI-powered insights tailored to your unique skills and goals.
-                        </p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                        <div class="space-y-3">
-                            <div class="flex items-center">
-                                <i class="fas fa-check text-green-300 mr-2"></i>
-                                <span>Comprehensive Skills Analysis</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-check text-green-300 mr-2"></i>
-                                <span>Hidden Strengths Discovery</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-check text-green-300 mr-2"></i>
-                                <span>Career Path Recommendations</span>
-                            </div>
-                        </div>
-                        <div class="space-y-3">
-                            <div class="flex items-center">
-                                <i class="fas fa-check text-green-300 mr-2"></i>
-                                <span>Skill Gap Identification</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-check text-green-300 mr-2"></i>
-                                <span>Learning Path Guidance</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-check text-green-300 mr-2"></i>
-                                <span>Industry Trend Insights</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <button class="flex-1 bg-slate-800 text-accent font-semibold py-3 px-6 rounded-lg hover:bg-slate-700 transition duration-300">
-                            Try It Free Now
-                        </button>
-                        <a href="#api" class="flex-1 bg-transparent border-2 border-white text-white font-semibold py-3 px-6 rounded-lg hover:bg-slate-800 hover:text-accent transition duration-300 text-center">
-                            API Access for Developers
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center">
-                <div class="flex flex-wrap justify-center items-center gap-8 mb-8">
-                    <div class="flex items-center">
-                        <i class="fas fa-clock text-white/70 mr-2"></i>
-                        <span class="text-white/90">5-minute setup</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-shield-alt text-white/70 mr-2"></i>
-                        <span class="text-white/90">Enterprise security</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-headset text-white/70 mr-2"></i>
-                        <span class="text-white/90">24/7 support</span>
-                    </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-money-bill-wave text-white/70 mr-2"></i>
-                        <span class="text-white/90">No setup fees</span>
-                    </div>
-                </div>
-                
-                <p class="text-white/70 text-sm">
-                    Trusted by Fortune 500 companies • SOC 2 compliant • 99.9% uptime SLA
-                </p>
-            </div>
         </div>
     </section>
 
@@ -976,12 +867,12 @@
     </section>
 
     <!-- Live Demo -->
-    <section class="py-20 md:py-24 bg-slate-900">
+    <section id="demo" class="py-20 md:py-24 bg-slate-900">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Live Demo</h2>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Ready to see it in action?</h2>
                 <p class="text-xl text-gray-400 text-gray-300 max-w-3xl mx-auto">
-                    Experience skill gap analysis in action
+                    Experience skill gap analysis in action with our live demo
                 </p>
             </div>
             
