@@ -151,61 +151,165 @@ Error responses:
         }
       },
       schemas: {
-        Error: z.object({
-          success: z.literal(false),
-          error: z.object({
-            code: z.string(),
-            message: z.string(),
-            details: z.any().optional()
-          })
-        }),
-        SuccessResponse: z.object({
-          success: z.literal(true),
-          data: z.any(),
-          meta: z.object({
-            timestamp: z.string().datetime(),
-            version: z.string()
-          }).optional()
-        }),
-        PaginationMeta: z.object({
-          page: z.number().int().positive(),
-          limit: z.number().int().positive(),
-          total: z.number().int().nonnegative(),
-          totalPages: z.number().int().nonnegative()
-        }),
-        Skill: z.object({
-          id: z.string(),
-          name: z.string(),
-          category: z.string(),
-          level: z.number().min(1).max(5),
-          yearsOfExperience: z.number().optional(),
-          lastUsed: z.string().datetime().optional(),
-          verified: z.boolean().optional()
-        }),
-        User: z.object({
-          id: z.string(),
-          email: z.string().email(),
-          name: z.string().optional(),
-          role: z.enum(['user', 'admin']),
-          createdAt: z.string().datetime(),
-          updatedAt: z.string().datetime()
-        }),
-        GapAnalysisResult: z.object({
-          overallMatch: z.number().min(0).max(100),
-          gaps: z.array(z.object({
-            skill: z.string(),
-            required: z.number(),
-            current: z.number(),
-            gap: z.number(),
-            priority: z.enum(['high', 'medium', 'low'])
-          })),
-          recommendations: z.array(z.object({
-            skill: z.string(),
-            description: z.string(),
-            resources: z.array(z.string()).optional()
-          })),
-          strengths: z.array(z.string())
-        })
+        Error: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', enum: [false] },
+            error: {
+              type: 'object',
+              properties: {
+                code: { type: 'string' },
+                message: { type: 'string' },
+                details: { type: 'object' }
+              },
+              required: ['code', 'message']
+            }
+          },
+          required: ['success', 'error']
+        },
+        SuccessResponse: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', enum: [true] },
+            data: { type: 'object' },
+            meta: {
+              type: 'object',
+              properties: {
+                timestamp: { type: 'string', format: 'date-time' },
+                version: { type: 'string' }
+              }
+            }
+          },
+          required: ['success', 'data']
+        },
+        User: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            name: { type: 'string' },
+            role: { type: 'string', enum: ['user', 'admin'] },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          },
+          required: ['id', 'email', 'role', 'createdAt', 'updatedAt']
+        },
+        Skill: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            name: { type: 'string' },
+            category: { type: 'string' },
+            level: { type: 'string', enum: ['beginner', 'intermediate', 'advanced', 'expert'] },
+            yearsOfExperience: { type: 'number', minimum: 0 },
+            lastUsed: { type: 'string', format: 'date-time' },
+            verified: { type: 'boolean' }
+          },
+          required: ['id', 'name', 'category', 'level']
+        },
+        Job: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            title: { type: 'string' },
+            company: { type: 'string' },
+            location: { type: 'string' },
+            description: { type: 'string' },
+            requiredSkills: {
+              type: 'array',
+              items: { type: 'string' }
+            },
+            salaryRange: {
+              type: 'object',
+              properties: {
+                min: { type: 'number' },
+                max: { type: 'number' },
+                currency: { type: 'string' }
+              }
+            },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          },
+          required: ['id', 'title', 'description', 'requiredSkills']
+        },
+        GapAnalysisResult: {
+          type: 'object',
+          properties: {
+            analysisId: { type: 'string' },
+            overallMatch: { type: 'number', minimum: 0, maximum: 100 },
+            skillGaps: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  skillName: { type: 'string' },
+                  currentLevel: { type: 'string' },
+                  requiredLevel: { type: 'string' },
+                  gapSeverity: { type: 'string', enum: ['critical', 'moderate', 'minor'] },
+                  priority: { type: 'string', enum: ['high', 'medium', 'low'] }
+                }
+              }
+            },
+            recommendations: {
+              type: 'array',
+              items: { type: 'string' }
+            },
+            strengths: {
+              type: 'array',
+              items: { type: 'string' }
+            }
+          },
+          required: ['analysisId', 'overallMatch', 'skillGaps']
+        },
+        TeamAnalysisResult: {
+          type: 'object',
+          properties: {
+            analysisId: { type: 'string' },
+            teamSummary: {
+              type: 'object',
+              properties: {
+                totalMembers: { type: 'number' },
+                overallMatch: { type: 'number' },
+                criticalGapsCount: { type: 'number' },
+                skillCoveragePercentage: { type: 'number' }
+              }
+            },
+            recommendations: {
+              type: 'array',
+              items: { type: 'string' }
+            }
+          },
+          required: ['analysisId', 'teamSummary']
+        },
+        EmergingSkill: {
+          type: 'object',
+          properties: {
+            skillName: { type: 'string' },
+            category: { type: 'string' },
+            emergenceScore: { type: 'number' },
+            growthVelocity: { type: 'number' },
+            relatedSkills: {
+              type: 'array',
+              items: { type: 'string' }
+            },
+            adoptionRate: { type: 'number' }
+          },
+          required: ['skillName', 'category', 'emergenceScore', 'growthVelocity']
+        },
+        AuditLog: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            userId: { type: 'string' },
+            action: { type: 'string' },
+            resourceType: { type: 'string' },
+            resourceId: { type: 'string' },
+            timestamp: { type: 'string', format: 'date-time' },
+            ipAddress: { type: 'string' },
+            metadata: { type: 'object' }
+          },
+          required: ['id', 'userId', 'action', 'resourceType', 'timestamp']
+        }
       }
     }
   });
@@ -227,6 +331,141 @@ Error responses:
               timestamp: z.string(),
               version: z.string(),
               environment: z.string()
+            })
+          }
+        }
+      }
+    }
+  });
+
+  const detailedHealthRoute = createRoute({
+    method: 'get',
+    path: '/health/detailed',
+    tags: ['Health'],
+    summary: 'Detailed health check',
+    description: 'Check detailed health status including dependencies',
+    responses: {
+      200: {
+        description: 'Detailed health information',
+        content: {
+          'application/json': {
+            schema: z.object({
+              status: z.string(),
+              timestamp: z.string(),
+              version: z.string(),
+              environment: z.string(),
+              dependencies: z.object({
+                database: z.string(),
+                cache: z.string()
+              }),
+              cloudflare: z.object({
+                colo: z.string(),
+                country: z.string(),
+                ray: z.string()
+              })
+            })
+          }
+        }
+      }
+    }
+  });
+
+  const gapAnalysisHistoryRoute = createRoute({
+    method: 'get',
+    path: '/api/v1/analyze/gap/history',
+    tags: ['Analysis'],
+    summary: 'Get gap analysis history',
+    description: 'Retrieve user\'s gap analysis history',
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: 'page',
+        in: 'query',
+        required: false,
+        schema: { type: 'number', default: 1 }
+      },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        schema: { type: 'number', default: 10 }
+      }
+    ],
+    responses: {
+      200: {
+        description: 'Gap analysis history',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean(),
+              data: z.object({
+                analyses: z.array(z.object({
+                  id: z.string(),
+                  targetJobTitle: z.string(),
+                  overallMatch: z.number(),
+                  skillGapsCount: z.number(),
+                  createdAt: z.string().datetime()
+                })),
+                pagination: z.object({
+                  page: z.number(),
+                  limit: z.number(),
+                  total: z.number(),
+                  pages: z.number()
+                })
+              })
+            })
+          }
+        }
+      }
+    }
+  });
+
+  const teamAnalysisRoute = createRoute({
+    method: 'post',
+    path: '/api/v1/analyze/team',
+    tags: ['Analysis'],
+    summary: 'Team skill analysis',
+    description: 'Analyze team capabilities against project requirements',
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: z.object({
+            teamMembers: z.array(z.object({
+              id: z.string(),
+              name: z.string(),
+              skills: z.array(z.object({
+                skill: z.string(),
+                level: z.enum(['beginner', 'intermediate', 'advanced', 'expert']),
+                yearsExperience: z.number().optional()
+              }))
+            })),
+            projectRequirements: z.object({
+              name: z.string(),
+              description: z.string(),
+              requiredSkills: z.array(z.string()),
+              timeline: z.string().optional(),
+              priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium')
+            })
+          })
+        }
+      }
+    },
+    responses: {
+      200: {
+        description: 'Team analysis completed',
+        content: {
+          'application/json': {
+            schema: z.object({
+              analysisId: z.string(),
+              teamSummary: z.object({
+                totalMembers: z.number(),
+                overallMatch: z.number(),
+                criticalGapsCount: z.number(),
+                skillCoveragePercentage: z.number()
+              }),
+              recommendations: z.array(z.string())
             })
           }
         }
@@ -415,12 +654,333 @@ Error responses:
     }
   });
 
+  // Additional Authentication endpoints
+  const logoutRoute = createRoute({
+    method: 'post',
+    path: '/api/v1/auth/logout',
+    tags: ['Authentication'],
+    summary: 'User logout',
+    description: 'Logout user and invalidate token',
+    security: [{ bearerAuth: [] }],
+    responses: {
+      200: {
+        description: 'Logout successful',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean(),
+              message: z.string()
+            })
+          }
+        }
+      }
+    }
+  });
+
+  const changePasswordRoute = createRoute({
+    method: 'post',
+    path: '/api/v1/auth/change-password',
+    tags: ['Authentication'],
+    summary: 'Change password',
+    description: 'Change user password',
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: z.object({
+            currentPassword: z.string(),
+            newPassword: z.string().min(8)
+          })
+        }
+      }
+    },
+    responses: {
+      200: {
+        description: 'Password changed successfully',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean(),
+              message: z.string()
+            })
+          }
+        }
+      }
+    }
+  });
+
+  // User Profile endpoints
+  const getUserProfileRoute = createRoute({
+    method: 'get',
+    path: '/api/v1/users/profile',
+    tags: ['Users'],
+    summary: 'Get user profile',
+    description: 'Retrieve current user profile and skills',
+    security: [{ bearerAuth: [] }],
+    responses: {
+      200: {
+        description: 'User profile data',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean(),
+              data: z.object({
+                user: z.object({
+                  id: z.string(),
+                  email: z.string(),
+                  name: z.string(),
+                  bio: z.string().optional(),
+                  location: z.string().optional()
+                }),
+                skills: z.array(z.object({
+                  skill: z.string(),
+                  level: z.enum(['beginner', 'intermediate', 'advanced', 'expert']),
+                  yearsExperience: z.number().optional()
+                }))
+              })
+            })
+          }
+        }
+      }
+    }
+  });
+
+  const updateUserProfileRoute = createRoute({
+    method: 'post',
+    path: '/api/v1/users/profile',
+    tags: ['Users'],
+    summary: 'Update user profile',
+    description: 'Update user profile information and skills',
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: z.object({
+            name: z.string().optional(),
+            bio: z.string().optional(),
+            location: z.string().optional(),
+            skills: z.array(z.object({
+              skill: z.string(),
+              level: z.enum(['beginner', 'intermediate', 'advanced', 'expert']),
+              yearsExperience: z.number().optional()
+            })).optional()
+          })
+        }
+      }
+    },
+    responses: {
+      200: {
+        description: 'Profile updated successfully',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean(),
+              data: z.object({
+                message: z.string()
+              })
+            })
+          }
+        }
+      }
+    }
+  });
+
+  // Job endpoints
+  const jobSearchRoute = createRoute({
+    method: 'get',
+    path: '/api/v1/jobs/search',
+    tags: ['Jobs'],
+    summary: 'Search jobs',
+    description: 'Search for jobs with filters',
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: 'title',
+        in: 'query',
+        required: false,
+        schema: { type: 'string' }
+      },
+      {
+        name: 'company',
+        in: 'query',
+        required: false,
+        schema: { type: 'string' }
+      },
+      {
+        name: 'location',
+        in: 'query',
+        required: false,
+        schema: { type: 'string' }
+      },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        schema: { type: 'number', default: 20 }
+      }
+    ],
+    responses: {
+      200: {
+        description: 'Job search results',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean(),
+              data: z.array(z.object({
+                id: z.string(),
+                title: z.string(),
+                company: z.string(),
+                location: z.string(),
+                description: z.string(),
+                requiredSkills: z.array(z.string()),
+                salaryRange: z.object({
+                  min: z.number().optional(),
+                  max: z.number().optional(),
+                  currency: z.string().optional()
+                }).optional()
+              }))
+            })
+          }
+        }
+      }
+    }
+  });
+
+  // Monitoring endpoints
+  const cacheStatsRoute = createRoute({
+    method: 'get',
+    path: '/api/v1/monitoring/cache/stats',
+    tags: ['Monitoring'],
+    summary: 'Get cache statistics',
+    description: 'Retrieve cache performance statistics',
+    security: [{ bearerAuth: [] }],
+    responses: {
+      200: {
+        description: 'Cache statistics',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean(),
+              data: z.object({
+                hitRate: z.number(),
+                missRate: z.number(),
+                totalRequests: z.number(),
+                cacheSize: z.number(),
+                lastCleared: z.string().datetime().optional()
+              })
+            })
+          }
+        }
+      }
+    }
+  });
+
+  // GDPR endpoints
+  const gdprExportRoute = createRoute({
+    method: 'post',
+    path: '/api/v1/gdpr/export',
+    tags: ['GDPR'],
+    summary: 'Request data export',
+    description: 'Request export of user data for GDPR compliance',
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: z.object({
+            format: z.enum(['json', 'csv']).default('json'),
+            categories: z.array(z.string()).optional()
+          })
+        }
+      }
+    },
+    responses: {
+      202: {
+        description: 'Export request accepted',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean(),
+              data: z.object({
+                exportId: z.string(),
+                status: z.string(),
+                estimatedCompletion: z.string().datetime()
+              })
+            })
+          }
+        }
+      }
+    }
+  });
+
+  // Audit endpoints
+  const auditLogsRoute = createRoute({
+    method: 'get',
+    path: '/api/v1/audit/my-logs',
+    tags: ['Audit'],
+    summary: 'Get user audit logs',
+    description: 'Retrieve audit logs for the current user',
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        schema: { type: 'number', default: 50 }
+      },
+      {
+        name: 'startDate',
+        in: 'query',
+        required: false,
+        schema: { type: 'string', format: 'date-time' }
+      },
+      {
+        name: 'endDate',
+        in: 'query',
+        required: false,
+        schema: { type: 'string', format: 'date-time' }
+      }
+    ],
+    responses: {
+      200: {
+        description: 'User audit logs',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean(),
+              data: z.array(z.object({
+                id: z.string(),
+                action: z.string(),
+                resourceType: z.string(),
+                timestamp: z.string().datetime(),
+                ipAddress: z.string().optional()
+              }))
+            })
+          }
+        }
+      }
+    }
+  });
+
   // Register the routes (these are just for documentation, not actual handlers)
   app.openapi(healthRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(detailedHealthRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(loginRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(registerRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(logoutRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(changePasswordRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(gapAnalysisRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(gapAnalysisHistoryRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(teamAnalysisRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(trendsRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(getUserProfileRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(updateUserProfileRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(jobSearchRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(cacheStatsRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(gdprExportRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(auditLogsRoute, (c) => c.json({ message: 'Documentation only' }));
 
   // Add Swagger UI with better configuration
   app.get('/api/v1/docs', swaggerUI({ 
