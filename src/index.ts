@@ -75,10 +75,10 @@ app.use('*', cors({
   maxAge: 86400, // 24 hours
 }));
 
-// Compression middleware (exclude root path to prevent HTML corruption)
+// Compression middleware (exclude root path and auth endpoints)
 app.use('*', async (c, next) => {
-  // Skip compression for HTML pages
-  if (c.req.path === '/') {
+  // Skip compression for HTML pages and auth endpoints
+  if (c.req.path === '/' || c.req.path.startsWith('/api/v1/auth/')) {
     return next();
   }
   return compressionMiddleware(c, next);
