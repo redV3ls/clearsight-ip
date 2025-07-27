@@ -154,161 +154,347 @@ Error responses:
         Error: {
           type: 'object',
           properties: {
-            success: { type: 'boolean', enum: [false] },
+            success: { type: 'boolean', enum: [false], example: false },
             error: {
               type: 'object',
               properties: {
-                code: { type: 'string' },
-                message: { type: 'string' },
-                details: { type: 'object' }
+                code: { type: 'string', example: 'VALIDATION_ERROR' },
+                message: { type: 'string', example: 'Invalid email format provided' },
+                details: { 
+                  type: 'object',
+                  example: {
+                    field: 'email',
+                    value: 'invalid-email',
+                    constraint: 'Must be a valid email address'
+                  }
+                }
               },
               required: ['code', 'message']
             }
           },
-          required: ['success', 'error']
+          required: ['success', 'error'],
+          example: {
+            success: false,
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'Invalid email format provided',
+              details: {
+                field: 'email',
+                value: 'invalid-email',
+                constraint: 'Must be a valid email address'
+              }
+            }
+          }
         },
         SuccessResponse: {
           type: 'object',
           properties: {
-            success: { type: 'boolean', enum: [true] },
-            data: { type: 'object' },
+            success: { type: 'boolean', enum: [true], example: true },
+            data: { 
+              type: 'object',
+              example: {
+                message: 'Operation completed successfully',
+                id: 'usr_1234567890abcdef'
+              }
+            },
             meta: {
               type: 'object',
               properties: {
-                timestamp: { type: 'string', format: 'date-time' },
-                version: { type: 'string' }
+                timestamp: { type: 'string', format: 'date-time', example: '2024-01-15T10:30:00Z' },
+                version: { type: 'string', example: '1.0.0' }
               }
             }
           },
-          required: ['success', 'data']
+          required: ['success', 'data'],
+          example: {
+            success: true,
+            data: {
+              message: 'Operation completed successfully',
+              id: 'usr_1234567890abcdef'
+            },
+            meta: {
+              timestamp: '2024-01-15T10:30:00Z',
+              version: '1.0.0'
+            }
+          }
         },
         User: {
           type: 'object',
           properties: {
-            id: { type: 'string' },
-            email: { type: 'string', format: 'email' },
-            name: { type: 'string' },
-            role: { type: 'string', enum: ['user', 'admin'] },
-            createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' }
+            id: { type: 'string', example: 'usr_1234567890abcdef' },
+            email: { type: 'string', format: 'email', example: 'sarah.johnson@techcorp.com' },
+            name: { type: 'string', example: 'Sarah Johnson' },
+            role: { type: 'string', enum: ['user', 'admin'], example: 'user' },
+            createdAt: { type: 'string', format: 'date-time', example: '2024-01-15T09:30:00Z' },
+            updatedAt: { type: 'string', format: 'date-time', example: '2024-01-20T14:45:00Z' }
           },
-          required: ['id', 'email', 'role', 'createdAt', 'updatedAt']
+          required: ['id', 'email', 'role', 'createdAt', 'updatedAt'],
+          example: {
+            id: 'usr_1234567890abcdef',
+            email: 'sarah.johnson@techcorp.com',
+            name: 'Sarah Johnson',
+            role: 'user',
+            createdAt: '2024-01-15T09:30:00Z',
+            updatedAt: '2024-01-20T14:45:00Z'
+          }
         },
         Skill: {
           type: 'object',
           properties: {
-            id: { type: 'string' },
-            name: { type: 'string' },
-            category: { type: 'string' },
-            level: { type: 'string', enum: ['beginner', 'intermediate', 'advanced', 'expert'] },
-            yearsOfExperience: { type: 'number', minimum: 0 },
-            lastUsed: { type: 'string', format: 'date-time' },
-            verified: { type: 'boolean' }
+            id: { type: 'string', example: 'skl_javascript_001' },
+            name: { type: 'string', example: 'JavaScript' },
+            category: { type: 'string', example: 'Programming Languages' },
+            level: { type: 'string', enum: ['beginner', 'intermediate', 'advanced', 'expert'], example: 'advanced' },
+            yearsOfExperience: { type: 'number', minimum: 0, example: 5 },
+            lastUsed: { type: 'string', format: 'date-time', example: '2024-01-20T16:30:00Z' },
+            verified: { type: 'boolean', example: true }
           },
-          required: ['id', 'name', 'category', 'level']
+          required: ['id', 'name', 'category', 'level'],
+          example: {
+            id: 'skl_javascript_001',
+            name: 'JavaScript',
+            category: 'Programming Languages',
+            level: 'advanced',
+            yearsOfExperience: 5,
+            lastUsed: '2024-01-20T16:30:00Z',
+            verified: true
+          }
         },
         Job: {
           type: 'object',
           properties: {
-            id: { type: 'string' },
-            title: { type: 'string' },
-            company: { type: 'string' },
-            location: { type: 'string' },
-            description: { type: 'string' },
+            id: { type: 'string', example: 'job_senior_frontend_dev_001' },
+            title: { type: 'string', example: 'Senior Frontend Developer' },
+            company: { type: 'string', example: 'TechCorp Solutions' },
+            location: { type: 'string', example: 'San Francisco, CA (Remote)' },
+            description: { 
+              type: 'string', 
+              example: 'We are seeking a Senior Frontend Developer to join our dynamic team. You will be responsible for building responsive web applications using modern JavaScript frameworks and collaborating with our design and backend teams.'
+            },
             requiredSkills: {
               type: 'array',
-              items: { type: 'string' }
+              items: { type: 'string' },
+              example: ['JavaScript', 'React', 'TypeScript', 'CSS', 'HTML', 'Git']
             },
             salaryRange: {
               type: 'object',
               properties: {
-                min: { type: 'number' },
-                max: { type: 'number' },
-                currency: { type: 'string' }
+                min: { type: 'number', example: 120000 },
+                max: { type: 'number', example: 160000 },
+                currency: { type: 'string', example: 'USD' }
+              },
+              example: {
+                min: 120000,
+                max: 160000,
+                currency: 'USD'
               }
             },
-            createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' }
+            createdAt: { type: 'string', format: 'date-time', example: '2024-01-18T10:00:00Z' },
+            updatedAt: { type: 'string', format: 'date-time', example: '2024-01-20T15:30:00Z' }
           },
-          required: ['id', 'title', 'description', 'requiredSkills']
+          required: ['id', 'title', 'description', 'requiredSkills'],
+          example: {
+            id: 'job_senior_frontend_dev_001',
+            title: 'Senior Frontend Developer',
+            company: 'TechCorp Solutions',
+            location: 'San Francisco, CA (Remote)',
+            description: 'We are seeking a Senior Frontend Developer to join our dynamic team. You will be responsible for building responsive web applications using modern JavaScript frameworks and collaborating with our design and backend teams.',
+            requiredSkills: ['JavaScript', 'React', 'TypeScript', 'CSS', 'HTML', 'Git'],
+            salaryRange: {
+              min: 120000,
+              max: 160000,
+              currency: 'USD'
+            },
+            createdAt: '2024-01-18T10:00:00Z',
+            updatedAt: '2024-01-20T15:30:00Z'
+          }
         },
         GapAnalysisResult: {
           type: 'object',
           properties: {
-            analysisId: { type: 'string' },
-            overallMatch: { type: 'number', minimum: 0, maximum: 100 },
+            analysisId: { type: 'string', example: 'gap_analysis_20240120_001' },
+            overallMatch: { type: 'number', minimum: 0, maximum: 100, example: 78 },
             skillGaps: {
               type: 'array',
               items: {
                 type: 'object',
                 properties: {
-                  skillName: { type: 'string' },
-                  currentLevel: { type: 'string' },
-                  requiredLevel: { type: 'string' },
-                  gapSeverity: { type: 'string', enum: ['critical', 'moderate', 'minor'] },
-                  priority: { type: 'string', enum: ['high', 'medium', 'low'] }
+                  skillName: { type: 'string', example: 'TypeScript' },
+                  currentLevel: { type: 'string', example: 'beginner' },
+                  requiredLevel: { type: 'string', example: 'advanced' },
+                  gapSeverity: { type: 'string', enum: ['critical', 'moderate', 'minor'], example: 'moderate' },
+                  priority: { type: 'string', enum: ['high', 'medium', 'low'], example: 'high' }
                 }
-              }
+              },
+              example: [
+                {
+                  skillName: 'TypeScript',
+                  currentLevel: 'beginner',
+                  requiredLevel: 'advanced',
+                  gapSeverity: 'moderate',
+                  priority: 'high'
+                },
+                {
+                  skillName: 'Docker',
+                  currentLevel: 'none',
+                  requiredLevel: 'intermediate',
+                  gapSeverity: 'critical',
+                  priority: 'high'
+                }
+              ]
             },
             recommendations: {
               type: 'array',
-              items: { type: 'string' }
+              items: { type: 'string' },
+              example: [
+                'Complete TypeScript fundamentals course',
+                'Build a project using Docker containers',
+                'Practice advanced React patterns',
+                'Learn GraphQL query optimization'
+              ]
             },
             strengths: {
               type: 'array',
-              items: { type: 'string' }
+              items: { type: 'string' },
+              example: [
+                'Strong JavaScript fundamentals',
+                'Excellent React component design',
+                'Good understanding of REST APIs',
+                'Solid CSS and responsive design skills'
+              ]
             }
           },
-          required: ['analysisId', 'overallMatch', 'skillGaps']
+          required: ['analysisId', 'overallMatch', 'skillGaps'],
+          example: {
+            analysisId: 'gap_analysis_20240120_001',
+            overallMatch: 78,
+            skillGaps: [
+              {
+                skillName: 'TypeScript',
+                currentLevel: 'beginner',
+                requiredLevel: 'advanced',
+                gapSeverity: 'moderate',
+                priority: 'high'
+              }
+            ],
+            recommendations: [
+              'Complete TypeScript fundamentals course',
+              'Build a project using Docker containers'
+            ],
+            strengths: [
+              'Strong JavaScript fundamentals',
+              'Excellent React component design'
+            ]
+          }
         },
         TeamAnalysisResult: {
           type: 'object',
           properties: {
-            analysisId: { type: 'string' },
+            analysisId: { type: 'string', example: 'team_analysis_mobile_app_001' },
             teamSummary: {
               type: 'object',
               properties: {
-                totalMembers: { type: 'number' },
-                overallMatch: { type: 'number' },
-                criticalGapsCount: { type: 'number' },
-                skillCoveragePercentage: { type: 'number' }
+                totalMembers: { type: 'number', example: 5 },
+                overallMatch: { type: 'number', example: 82 },
+                criticalGapsCount: { type: 'number', example: 2 },
+                skillCoveragePercentage: { type: 'number', example: 85 }
+              },
+              example: {
+                totalMembers: 5,
+                overallMatch: 82,
+                criticalGapsCount: 2,
+                skillCoveragePercentage: 85
               }
             },
             recommendations: {
               type: 'array',
-              items: { type: 'string' }
+              items: { type: 'string' },
+              example: [
+                'Hire a senior iOS developer with Swift expertise',
+                'Provide Kotlin training for Android team members',
+                'Consider cross-training frontend developers in mobile technologies',
+                'Establish code review process for mobile-specific patterns'
+              ]
             }
           },
-          required: ['analysisId', 'teamSummary']
+          required: ['analysisId', 'teamSummary'],
+          example: {
+            analysisId: 'team_analysis_mobile_app_001',
+            teamSummary: {
+              totalMembers: 5,
+              overallMatch: 82,
+              criticalGapsCount: 2,
+              skillCoveragePercentage: 85
+            },
+            recommendations: [
+              'Hire a senior iOS developer with Swift expertise',
+              'Provide Kotlin training for Android team members'
+            ]
+          }
         },
         EmergingSkill: {
           type: 'object',
           properties: {
-            skillName: { type: 'string' },
-            category: { type: 'string' },
-            emergenceScore: { type: 'number' },
-            growthVelocity: { type: 'number' },
+            skillName: { type: 'string', example: 'Large Language Models (LLMs)' },
+            category: { type: 'string', example: 'Artificial Intelligence' },
+            emergenceScore: { type: 'number', example: 0.92 },
+            growthVelocity: { type: 'number', example: 0.85 },
             relatedSkills: {
               type: 'array',
-              items: { type: 'string' }
+              items: { type: 'string' },
+              example: ['Machine Learning', 'Natural Language Processing', 'Python', 'TensorFlow', 'PyTorch']
             },
-            adoptionRate: { type: 'number' }
+            adoptionRate: { type: 'number', example: 0.34 }
           },
-          required: ['skillName', 'category', 'emergenceScore', 'growthVelocity']
+          required: ['skillName', 'category', 'emergenceScore', 'growthVelocity'],
+          example: {
+            skillName: 'Large Language Models (LLMs)',
+            category: 'Artificial Intelligence',
+            emergenceScore: 0.92,
+            growthVelocity: 0.85,
+            relatedSkills: ['Machine Learning', 'Natural Language Processing', 'Python', 'TensorFlow', 'PyTorch'],
+            adoptionRate: 0.34
+          }
         },
         AuditLog: {
           type: 'object',
           properties: {
-            id: { type: 'string' },
-            userId: { type: 'string' },
-            action: { type: 'string' },
-            resourceType: { type: 'string' },
-            resourceId: { type: 'string' },
-            timestamp: { type: 'string', format: 'date-time' },
-            ipAddress: { type: 'string' },
-            metadata: { type: 'object' }
+            id: { type: 'string', example: 'audit_20240120_143052_001' },
+            userId: { type: 'string', example: 'usr_1234567890abcdef' },
+            action: { type: 'string', example: 'profile.skills.updated' },
+            resourceType: { type: 'string', example: 'user_profile' },
+            resourceId: { type: 'string', example: 'profile_usr_1234567890abcdef' },
+            timestamp: { type: 'string', format: 'date-time', example: '2024-01-20T14:30:52Z' },
+            ipAddress: { type: 'string', example: '192.168.1.100' },
+            metadata: { 
+              type: 'object',
+              example: {
+                skillsAdded: ['Docker', 'Kubernetes'],
+                skillsRemoved: ['jQuery'],
+                skillsUpdated: [
+                  { skill: 'React', oldLevel: 'intermediate', newLevel: 'advanced' }
+                ],
+                userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+              }
+            }
           },
-          required: ['id', 'userId', 'action', 'resourceType', 'timestamp']
+          required: ['id', 'userId', 'action', 'resourceType', 'timestamp'],
+          example: {
+            id: 'audit_20240120_143052_001',
+            userId: 'usr_1234567890abcdef',
+            action: 'profile.skills.updated',
+            resourceType: 'user_profile',
+            resourceId: 'profile_usr_1234567890abcdef',
+            timestamp: '2024-01-20T14:30:52Z',
+            ipAddress: '192.168.1.100',
+            metadata: {
+              skillsAdded: ['Docker', 'Kubernetes'],
+              skillsRemoved: ['jQuery'],
+              skillsUpdated: [
+                { skill: 'React', oldLevel: 'intermediate', newLevel: 'advanced' }
+              ]
+            }
+          }
         }
       }
     }
@@ -486,7 +672,11 @@ Error responses:
           schema: z.object({
             email: z.string().email(),
             password: z.string().min(8)
-          })
+          }),
+          example: {
+            email: 'sarah.johnson@techcorp.com',
+            password: 'MySecurePassword123!'
+          }
         }
       }
     },
@@ -505,7 +695,18 @@ Error responses:
                   name: z.string()
                 })
               })
-            })
+            }),
+            example: {
+              success: true,
+              data: {
+                token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfMTIzNDU2Nzg5MGFiY2RlZiIsImVtYWlsIjoic2FyYWguam9obnNvbkB0ZWNoY29ycC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTc1MjAwMCwiZXhwIjoxNzA1ODM4NDAwfQ.example_signature',
+                user: {
+                  id: 'usr_1234567890abcdef',
+                  email: 'sarah.johnson@techcorp.com',
+                  name: 'Sarah Johnson'
+                }
+              }
+            }
           }
         }
       },
@@ -518,7 +719,13 @@ Error responses:
                 code: z.string(),
                 message: z.string()
               })
-            })
+            }),
+            example: {
+              error: {
+                code: 'INVALID_CREDENTIALS',
+                message: 'Invalid email or password provided'
+              }
+            }
           }
         }
       }
@@ -539,7 +746,12 @@ Error responses:
             email: z.string().email(),
             password: z.string().min(8),
             name: z.string().min(1)
-          })
+          }),
+          example: {
+            email: 'alex.developer@newcompany.com',
+            password: 'SecureNewPassword456!',
+            name: 'Alex Developer'
+          }
         }
       }
     },
@@ -558,7 +770,18 @@ Error responses:
                   name: z.string()
                 })
               })
-            })
+            }),
+            example: {
+              success: true,
+              data: {
+                token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOTg3NjU0MzIxMGZlZGNiYSIsImVtYWlsIjoiYWxleC5kZXZlbG9wZXJAbmV3Y29tcGFueS5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTc1MjAwMCwiZXhwIjoxNzA1ODM4NDAwfQ.example_new_user_signature',
+                user: {
+                  id: 'usr_9876543210fedcba',
+                  email: 'alex.developer@newcompany.com',
+                  name: 'Alex Developer'
+                }
+              }
+            }
           }
         }
       }
