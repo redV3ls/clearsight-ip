@@ -177,10 +177,10 @@ app.route('/api/v1/trends', trendsRoutes);
 
 // OpenAPI documentation
 const openAPIApp = createOpenAPIApp();
-app.route('/', openAPIApp);
+app.route('/api', openAPIApp);
 
 // Redirect /docs to the actual documentation location
-app.get('/docs', (c) => c.redirect('/api/v1/docs'));
+app.get('/docs', (c) => c.redirect('/api/docs'));
 
 // API root endpoint (public - no auth required)
 app.get('/api/v1', (c) => {
