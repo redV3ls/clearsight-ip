@@ -192,13 +192,13 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         <div class="container mx-auto px-6 flex flex-col md:flex-row items-center">
             <div class="md:w-1/2 mb-12 md:mb-0">
                 <div class="mb-6">
-                    <span class="bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded-full">The Problem</span>
+                    <span class="bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded-full">Career Challenge</span>
                 </div>
                 <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
-                    <span class="text-red-600">73% of companies</span> struggle to identify skill gaps, costing them <span class="gradient-text">$1.2M annually</span> in missed opportunities
+                    Struggling to <span class="text-red-600">stand out</span> in today's competitive job market? <span class="gradient-text">You're not alone.</span>
                 </h1>
                 <p class="text-xl text-gray-300 mb-8">
-                    Traditional hiring and development processes are blind to hidden talents and critical skill gaps. Teams waste months on mismatched hires while existing employees plateau without clear growth paths.
+                    Most professionals don't know which skills they're missing or how to showcase their expertise effectively. Your dream job might be just one skill gap away.
                 </p>
                 
                 <div class="bg-red-900/20 border-l-4 border-red-500 p-4 mb-8">
@@ -208,7 +208,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-red-300">
-                                <strong>The Hidden Costs:</strong> 6 months average time-to-productivity for new hires • 40% of internal promotions fail due to skill misalignment • $15K average cost per bad hire
+                                <strong>The Reality:</strong> 67% of professionals feel underqualified for their dream jobs • Average job search takes 5+ months • Most resumes get only 6 seconds of attention
                             </p>
                         </div>
                     </div>
@@ -216,10 +216,10 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 
                 <div class="flex flex-wrap gap-4">
                     <button class="bg-primary hover:bg-blue-800 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
-                        See The Solution
+                        Discover Your Gaps
                     </button>
                     <button class="bg-transparent hover:bg-slate-800 border-2 border-primary text-accent font-semibold py-3 px-8 rounded-lg transition duration-300">
-                        Calculate Your Costs
+                        Try Free Analysis
                     </button>
                 </div>
             </div>
@@ -230,32 +230,32 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <div class="w-64 h-64 md:w-80 md:h-80 bg-gradient-to-tr from-orange-500 to-red-500 rounded-full opacity-10 absolute -bottom-10 -right-10 animate-float animation-delay-2000"></div>
                     <div class="relative bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-lg text-red-400">The Reality Check</h3>
-                            <span class="bg-red-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded ml-3">Hidden Costs</span>
+                            <h3 class="font-bold text-lg text-red-400">Your Career Reality</h3>
+                            <span class="bg-red-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded ml-3">The Struggle</span>
                         </div>
                         
                         <div class="space-y-4">
                             <div class="flex justify-between items-center p-3 bg-red-900/20 rounded">
-                                <span class="text-sm font-medium">Time to Fill Positions</span>
-                                <span class="text-sm font-bold text-red-400">89 days</span>
+                                <span class="text-sm font-medium">Job Search Duration</span>
+                                <span class="text-sm font-bold text-red-400">5+ months</span>
                             </div>
                             
                             <div class="flex justify-between items-center p-3 bg-orange-900/20 rounded">
-                                <span class="text-sm font-medium">Bad Hire Cost</span>
-                                <span class="text-sm font-bold text-orange-400">$240K</span>
+                                <span class="text-sm font-medium">Resume Review Time</span>
+                                <span class="text-sm font-bold text-orange-400">6 seconds</span>
                             </div>
                             
                             <div class="flex justify-between items-center p-3 bg-yellow-900/20 rounded">
-                                <span class="text-sm font-medium">Skill Gap Impact</span>
-                                <span class="text-sm font-bold text-yellow-400">-23% productivity</span>
+                                <span class="text-sm font-medium">Feel Underqualified</span>
+                                <span class="text-sm font-bold text-yellow-400">67% of pros</span>
                             </div>
                             
                             <div class="pt-4 border-t border-slate-700">
-                                <h4 class="font-semibold mb-2 text-red-400">What You're Missing:</h4>
+                                <h4 class="font-semibold mb-2 text-red-400">What's Holding You Back:</h4>
                                 <ul class="space-y-1 text-sm">
-                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Internal talent going unnoticed</li>
-                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Expensive external hiring</li>
-                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Team skill imbalances</li>
+                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Don't know which skills to learn</li>
+                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Can't showcase expertise effectively</li>
+                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Missing key requirements for dream jobs</li>
                                 </ul>
                             </div>
                         </div>
@@ -269,12 +269,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     <section class="py-16 bg-gradient-to-r from-green-900/20 to-blue-900/20">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
-                <span class="bg-green-600 text-white text-sm font-semibold px-3 py-1 rounded-full">The Solution</span>
+                <span class="bg-green-600 text-white text-sm font-semibold px-3 py-1 rounded-full">Your Solution</span>
                 <h2 class="text-3xl md:text-4xl font-bold mt-4 mb-6">
-                    AI-Powered Skills Intelligence That <span class="text-green-400">Actually Works</span>
+                    AI-Powered Career Intelligence That <span class="text-green-400">Accelerates Your Growth</span>
                 </h2>
                 <p class="text-xl text-gray-300 max-w-3xl mx-auto">
-                    Transform your workforce development with intelligent skills analysis that identifies hidden talents, predicts future needs, and creates personalized growth paths.
+                    Discover exactly which skills you need, get personalized learning paths, and showcase your expertise with confidence. Your next career breakthrough starts here.
                 </p>
             </div>
 
@@ -282,15 +282,15 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 <div class="md:w-1/2 mb-8 md:mb-0">
                     <div class="relative bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-lg text-green-400">Smart Analysis Results</h3>
-                            <span class="bg-green-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded">92% Match</span>
+                            <h3 class="font-bold text-lg text-green-400">Your Skills Analysis</h3>
+                            <span class="bg-green-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded">Ready to Apply</span>
                         </div>
                         
                         <div class="space-y-4">
                             <div>
                                 <div class="flex justify-between mb-1">
                                     <span class="text-sm font-medium">JavaScript</span>
-                                    <span class="text-sm font-medium text-green-400">Expert Level</span>
+                                    <span class="text-sm font-medium text-green-400">Strong Match</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2.5">
                                     <div class="bg-green-600 h-2.5 rounded-full" style="width: 92%"></div>
@@ -299,8 +299,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                             
                             <div>
                                 <div class="flex justify-between mb-1">
-                                    <span class="text-sm font-medium">Team Leadership</span>
-                                    <span class="text-sm font-medium text-blue-400">Hidden Strength</span>
+                                    <span class="text-sm font-medium">React</span>
+                                    <span class="text-sm font-medium text-blue-400">Good Foundation</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2.5">
                                     <div class="bg-blue-600 h-2.5 rounded-full" style="width: 78%"></div>
@@ -309,20 +309,20 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                             
                             <div>
                                 <div class="flex justify-between mb-1">
-                                    <span class="text-sm font-medium">Cloud Architecture</span>
-                                    <span class="text-sm font-medium text-purple-400">Growth Opportunity</span>
+                                    <span class="text-sm font-medium">TypeScript</span>
+                                    <span class="text-sm font-medium text-purple-400">Learn This</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                    <div class="bg-purple-600 h-2.5 rounded-full" style="width: 45%"></div>
+                                    <div class="bg-purple-600 h-2.5 rounded-full" style="width: 25%"></div>
                                 </div>
                             </div>
                             
                             <div class="pt-4 border-t border-slate-700">
-                                <h4 class="font-semibold mb-2 text-green-400">Recommended Actions:</h4>
+                                <h4 class="font-semibold mb-2 text-green-400">Your Next Steps:</h4>
                                 <ul class="space-y-1 text-sm">
-                                    <li class="flex items-center"><i class="fas fa-arrow-up text-green-500 mr-2"></i>Promote to Senior Developer</li>
-                                    <li class="flex items-center"><i class="fas fa-users text-blue-500 mr-2"></i>Consider for Team Lead role</li>
-                                    <li class="flex items-center"><i class="fas fa-graduation-cap text-purple-500 mr-2"></i>AWS Certification path (3 months)</li>
+                                    <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i>Apply for Senior Frontend roles</li>
+                                    <li class="flex items-center"><i class="fas fa-book text-blue-500 mr-2"></i>Complete TypeScript course (2 weeks)</li>
+                                    <li class="flex items-center"><i class="fas fa-star text-purple-500 mr-2"></i>Add portfolio projects</li>
                                 </ul>
                             </div>
                         </div>
@@ -336,8 +336,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                                 <i class="fas fa-search text-green-400 text-xl"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold mb-2">Discover Hidden Talents</h3>
-                                <p class="text-gray-300">Uncover skills and potential that traditional methods miss. Our AI analyzes context, not just keywords.</p>
+                                <h3 class="text-xl font-bold mb-2">Discover Your Strengths</h3>
+                                <p class="text-gray-300">Uncover hidden skills in your experience that you might not even realize you have. Our AI finds what recruiters are looking for.</p>
                             </div>
                         </div>
 
@@ -346,8 +346,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                                 <i class="fas fa-chart-line text-blue-400 text-xl"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold mb-2">Predict Future Needs</h3>
-                                <p class="text-gray-300">Stay ahead with industry trend analysis and emerging skills detection. Plan your workforce evolution.</p>
+                                <h3 class="text-xl font-bold mb-2">Know What's Trending</h3>
+                                <p class="text-gray-300">Stay ahead of the curve with real-time industry insights. Learn the skills that will matter most in your next role.</p>
                             </div>
                         </div>
 
@@ -356,8 +356,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                                 <i class="fas fa-route text-purple-400 text-xl"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold mb-2">Create Growth Paths</h3>
-                                <p class="text-gray-300">Generate personalized development roadmaps with time estimates, costs, and success metrics.</p>
+                                <h3 class="text-xl font-bold mb-2">Get Your Roadmap</h3>
+                                <p class="text-gray-300">Receive a personalized learning plan with exact courses, timeframes, and priorities to land your dream job.</p>
                             </div>
                         </div>
                     </div>
@@ -370,9 +370,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     <section id="features" class="py-16 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">What You Get</h2>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Transform Your Career</h2>
                 <p class="text-xl text-gray-300 max-w-3xl mx-auto">
-                    Complete skills management solution that integrates seamlessly with your existing workflow
+                    Everything you need to identify skill gaps, showcase your expertise, and accelerate your professional growth
                 </p>
             </div>
             
