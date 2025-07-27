@@ -513,10 +513,10 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              status: z.string(),
-              timestamp: z.string(),
-              version: z.string(),
-              environment: z.string()
+              status: z.string().openapi({ example: 'healthy' }),
+              timestamp: z.string().openapi({ example: '2024-01-20T15:30:00Z' }),
+              version: z.string().openapi({ example: '1.0.0' }),
+              environment: z.string().openapi({ example: 'production' })
             })
           }
         }
@@ -536,18 +536,18 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              status: z.string(),
-              timestamp: z.string(),
-              version: z.string(),
-              environment: z.string(),
+              status: z.string().openapi({ example: 'healthy' }),
+              timestamp: z.string().openapi({ example: '2024-01-20T15:30:00Z' }),
+              version: z.string().openapi({ example: '1.0.0' }),
+              environment: z.string().openapi({ example: 'production' }),
               dependencies: z.object({
-                database: z.string(),
-                cache: z.string()
+                database: z.string().openapi({ example: 'connected' }),
+                cache: z.string().openapi({ example: 'connected' })
               }),
               cloudflare: z.object({
-                colo: z.string(),
-                country: z.string(),
-                ray: z.string()
+                colo: z.string().openapi({ example: 'SFO' }),
+                country: z.string().openapi({ example: 'US' }),
+                ray: z.string().openapi({ example: '8a1b2c3d4e5f6789' })
               })
             })
           }
@@ -586,11 +586,11 @@ Error responses:
               success: z.boolean(),
               data: z.object({
                 analyses: z.array(z.object({
-                  id: z.string(),
-                  targetJobTitle: z.string(),
-                  overallMatch: z.number(),
-                  skillGapsCount: z.number(),
-                  createdAt: z.string().datetime()
+                  id: z.string().openapi({ example: 'gap_analysis_20240120_001' }),
+                  targetJobTitle: z.string().openapi({ example: 'Senior Frontend Developer' }),
+                  overallMatch: z.number().openapi({ example: 78 }),
+                  skillGapsCount: z.number().openapi({ example: 3 }),
+                  createdAt: z.string().datetime().openapi({ example: '2024-01-20T10:30:00Z' })
                 })),
                 pagination: z.object({
                   page: z.number(),
@@ -619,20 +619,20 @@ Error responses:
         'application/json': {
           schema: z.object({
             teamMembers: z.array(z.object({
-              id: z.string(),
-              name: z.string(),
+              id: z.string().openapi({ example: 'usr_1234567890abcdef' }),
+              name: z.string().openapi({ example: 'Sarah Johnson' }),
               skills: z.array(z.object({
-                skill: z.string(),
-                level: z.enum(['beginner', 'intermediate', 'advanced', 'expert']),
-                yearsExperience: z.number().optional()
+                skill: z.string().openapi({ example: 'JavaScript' }),
+                level: z.enum(['beginner', 'intermediate', 'advanced', 'expert']).openapi({ example: 'advanced' }),
+                yearsExperience: z.number().optional().openapi({ example: 5 })
               }))
             })),
             projectRequirements: z.object({
-              name: z.string(),
-              description: z.string(),
-              requiredSkills: z.array(z.string()),
-              timeline: z.string().optional(),
-              priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium')
+              name: z.string().openapi({ example: 'Mobile App Development' }),
+              description: z.string().openapi({ example: 'Build a cross-platform mobile application using React Native' }),
+              requiredSkills: z.array(z.string()).openapi({ example: ['React Native', 'JavaScript', 'iOS', 'Android'] }),
+              timeline: z.string().optional().openapi({ example: '6 months' }),
+              priority: z.enum(['low', 'medium', 'high', 'critical']).default('medium').openapi({ example: 'high' })
             })
           })
         }
@@ -644,14 +644,14 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              analysisId: z.string(),
+              analysisId: z.string().openapi({ example: 'team_analysis_mobile_app_001' }),
               teamSummary: z.object({
-                totalMembers: z.number(),
-                overallMatch: z.number(),
-                criticalGapsCount: z.number(),
-                skillCoveragePercentage: z.number()
+                totalMembers: z.number().openapi({ example: 5 }),
+                overallMatch: z.number().openapi({ example: 82 }),
+                criticalGapsCount: z.number().openapi({ example: 2 }),
+                skillCoveragePercentage: z.number().openapi({ example: 85 })
               }),
-              recommendations: z.array(z.string())
+              recommendations: z.array(z.string()).openapi({ example: ['Hire a senior iOS developer with Swift expertise', 'Provide Kotlin training for Android team members'] })
             })
           }
         }
@@ -670,8 +670,8 @@ Error responses:
       content: {
         'application/json': {
           schema: z.object({
-            email: z.string().email(),
-            password: z.string().min(8)
+            email: z.string().email().openapi({ example: 'sarah.johnson@techcorp.com' }),
+            password: z.string().min(8).openapi({ example: 'MySecurePassword123!' })
           }),
           example: {
             email: 'sarah.johnson@techcorp.com',
@@ -686,13 +686,13 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
+              success: z.boolean().openapi({ example: true }),
               data: z.object({
-                token: z.string(),
+                token: z.string().openapi({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfMTIzNDU2Nzg5MGFiY2RlZiIsImVtYWlsIjoic2FyYWguam9obnNvbkB0ZWNoY29ycC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTc1MjAwMCwiZXhwIjoxNzA1ODM4NDAwfQ.example_signature' }),
                 user: z.object({
-                  id: z.string(),
-                  email: z.string(),
-                  name: z.string()
+                  id: z.string().openapi({ example: 'usr_1234567890abcdef' }),
+                  email: z.string().openapi({ example: 'sarah.johnson@techcorp.com' }),
+                  name: z.string().openapi({ example: 'Sarah Johnson' })
                 })
               })
             }),
@@ -716,8 +716,8 @@ Error responses:
           'application/json': {
             schema: z.object({
               error: z.object({
-                code: z.string(),
-                message: z.string()
+                code: z.string().openapi({ example: 'INVALID_CREDENTIALS' }),
+                message: z.string().openapi({ example: 'Invalid email or password provided' })
               })
             }),
             example: {
@@ -743,9 +743,9 @@ Error responses:
       content: {
         'application/json': {
           schema: z.object({
-            email: z.string().email(),
-            password: z.string().min(8),
-            name: z.string().min(1)
+            email: z.string().email().openapi({ example: 'alex.developer@newcompany.com' }),
+            password: z.string().min(8).openapi({ example: 'SecureNewPassword456!' }),
+            name: z.string().min(1).openapi({ example: 'Alex Developer' })
           }),
           example: {
             email: 'alex.developer@newcompany.com',
@@ -761,13 +761,13 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
+              success: z.boolean().openapi({ example: true }),
               data: z.object({
-                token: z.string(),
+                token: z.string().openapi({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOTg3NjU0MzIxMGZlZGNiYSIsImVtYWlsIjoiYWxleC5kZXZlbG9wZXJAbmV3Y29tcGFueS5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTcwNTc1MjAwMCwiZXhwIjoxNzA1ODM4NDAwfQ.example_new_user_signature' }),
                 user: z.object({
-                  id: z.string(),
-                  email: z.string(),
-                  name: z.string()
+                  id: z.string().openapi({ example: 'usr_9876543210fedcba' }),
+                  email: z.string().openapi({ example: 'alex.developer@newcompany.com' }),
+                  name: z.string().openapi({ example: 'Alex Developer' })
                 })
               })
             }),
@@ -801,14 +801,14 @@ Error responses:
         'application/json': {
           schema: z.object({
             user_skills: z.array(z.object({
-              skill: z.string(),
-              level: z.enum(['beginner', 'intermediate', 'advanced', 'expert']),
-              years_experience: z.number().optional()
+              skill: z.string().openapi({ example: 'JavaScript' }),
+              level: z.enum(['beginner', 'intermediate', 'advanced', 'expert']).openapi({ example: 'advanced' }),
+              years_experience: z.number().optional().openapi({ example: 5 })
             })),
             target_job: z.object({
-              title: z.string(),
-              description: z.string(),
-              required_skills: z.array(z.string())
+              title: z.string().openapi({ example: 'Senior Frontend Developer' }),
+              description: z.string().openapi({ example: 'We are seeking a Senior Frontend Developer to join our dynamic team. You will be responsible for building responsive web applications using modern JavaScript frameworks and collaborating with our design and backend teams.' }),
+              required_skills: z.array(z.string()).openapi({ example: ['JavaScript', 'React', 'TypeScript', 'CSS', 'HTML', 'Git'] })
             })
           })
         }
@@ -820,13 +820,13 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              analysis_id: z.string(),
-              overall_match: z.number(),
+              analysis_id: z.string().openapi({ example: 'gap_analysis_20240120_001' }),
+              overall_match: z.number().openapi({ example: 78 }),
               skill_gaps: z.array(z.object({
-                skill_name: z.string(),
-                current_level: z.string(),
-                required_level: z.string(),
-                gap_severity: z.string()
+                skill_name: z.string().openapi({ example: 'TypeScript' }),
+                current_level: z.string().openapi({ example: 'beginner' }),
+                required_level: z.string().openapi({ example: 'advanced' }),
+                gap_severity: z.string().openapi({ example: 'moderate' })
               }))
             })
           }
@@ -847,7 +847,7 @@ Error responses:
         name: 'category',
         in: 'query',
         required: false,
-        schema: { type: 'string' }
+        schema: { type: 'string', example: 'Programming Languages' }
       },
       {
         name: 'limit',
@@ -865,9 +865,9 @@ Error responses:
               success: z.boolean(),
               data: z.object({
                 emergingSkills: z.array(z.object({
-                  skillName: z.string(),
-                  category: z.string(),
-                  growthVelocity: z.number()
+                  skillName: z.string().openapi({ example: 'Large Language Models (LLMs)' }),
+                  category: z.string().openapi({ example: 'Artificial Intelligence' }),
+                  growthVelocity: z.number().openapi({ example: 0.85 })
                 }))
               })
             })
@@ -891,8 +891,8 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
-              message: z.string()
+              success: z.boolean().openapi({ example: true }),
+              message: z.string().openapi({ example: 'Successfully logged out' })
             })
           }
         }
@@ -912,8 +912,8 @@ Error responses:
       content: {
         'application/json': {
           schema: z.object({
-            currentPassword: z.string(),
-            newPassword: z.string().min(8)
+            currentPassword: z.string().openapi({ example: 'MyCurrentPassword123!' }),
+            newPassword: z.string().min(8).openapi({ example: 'MyNewSecurePassword456!' })
           })
         }
       }
@@ -924,8 +924,8 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
-              message: z.string()
+              success: z.boolean().openapi({ example: true }),
+              message: z.string().openapi({ example: 'Password changed successfully' })
             })
           }
         }
@@ -950,16 +950,16 @@ Error responses:
               success: z.boolean(),
               data: z.object({
                 user: z.object({
-                  id: z.string(),
-                  email: z.string(),
-                  name: z.string(),
-                  bio: z.string().optional(),
-                  location: z.string().optional()
+                  id: z.string().openapi({ example: 'usr_1234567890abcdef' }),
+                  email: z.string().openapi({ example: 'sarah.johnson@techcorp.com' }),
+                  name: z.string().openapi({ example: 'Sarah Johnson' }),
+                  bio: z.string().optional().openapi({ example: 'Experienced frontend developer passionate about creating user-friendly web applications' }),
+                  location: z.string().optional().openapi({ example: 'San Francisco, CA' })
                 }),
                 skills: z.array(z.object({
-                  skill: z.string(),
-                  level: z.enum(['beginner', 'intermediate', 'advanced', 'expert']),
-                  yearsExperience: z.number().optional()
+                  skill: z.string().openapi({ example: 'JavaScript' }),
+                  level: z.enum(['beginner', 'intermediate', 'advanced', 'expert']).openapi({ example: 'advanced' }),
+                  yearsExperience: z.number().optional().openapi({ example: 5 })
                 }))
               })
             })
@@ -981,13 +981,13 @@ Error responses:
       content: {
         'application/json': {
           schema: z.object({
-            name: z.string().optional(),
-            bio: z.string().optional(),
-            location: z.string().optional(),
+            name: z.string().optional().openapi({ example: 'Sarah Johnson' }),
+            bio: z.string().optional().openapi({ example: 'Experienced frontend developer passionate about creating user-friendly web applications' }),
+            location: z.string().optional().openapi({ example: 'San Francisco, CA' }),
             skills: z.array(z.object({
-              skill: z.string(),
-              level: z.enum(['beginner', 'intermediate', 'advanced', 'expert']),
-              yearsExperience: z.number().optional()
+              skill: z.string().openapi({ example: 'JavaScript' }),
+              level: z.enum(['beginner', 'intermediate', 'advanced', 'expert']).openapi({ example: 'advanced' }),
+              yearsExperience: z.number().optional().openapi({ example: 5 })
             })).optional()
           })
         }
@@ -1001,7 +1001,7 @@ Error responses:
             schema: z.object({
               success: z.boolean(),
               data: z.object({
-                message: z.string()
+                message: z.string().openapi({ example: 'Profile updated successfully' })
               })
             })
           }
@@ -1023,19 +1023,19 @@ Error responses:
         name: 'title',
         in: 'query',
         required: false,
-        schema: { type: 'string' }
+        schema: { type: 'string', example: 'Senior Frontend Developer' }
       },
       {
         name: 'company',
         in: 'query',
         required: false,
-        schema: { type: 'string' }
+        schema: { type: 'string', example: 'TechCorp Solutions' }
       },
       {
         name: 'location',
         in: 'query',
         required: false,
-        schema: { type: 'string' }
+        schema: { type: 'string', example: 'San Francisco, CA' }
       },
       {
         name: 'limit',
@@ -1052,16 +1052,16 @@ Error responses:
             schema: z.object({
               success: z.boolean(),
               data: z.array(z.object({
-                id: z.string(),
-                title: z.string(),
-                company: z.string(),
-                location: z.string(),
-                description: z.string(),
-                requiredSkills: z.array(z.string()),
+                id: z.string().openapi({ example: 'job_senior_frontend_dev_001' }),
+                title: z.string().openapi({ example: 'Senior Frontend Developer' }),
+                company: z.string().openapi({ example: 'TechCorp Solutions' }),
+                location: z.string().openapi({ example: 'San Francisco, CA (Remote)' }),
+                description: z.string().openapi({ example: 'We are seeking a Senior Frontend Developer to join our dynamic team. You will be responsible for building responsive web applications using modern JavaScript frameworks and collaborating with our design and backend teams.' }),
+                requiredSkills: z.array(z.string()).openapi({ example: ['JavaScript', 'React', 'TypeScript', 'CSS', 'HTML', 'Git'] }),
                 salaryRange: z.object({
-                  min: z.number().optional(),
-                  max: z.number().optional(),
-                  currency: z.string().optional()
+                  min: z.number().optional().openapi({ example: 120000 }),
+                  max: z.number().optional().openapi({ example: 160000 }),
+                  currency: z.string().optional().openapi({ example: 'USD' })
                 }).optional()
               }))
             })
@@ -1091,7 +1091,7 @@ Error responses:
                 missRate: z.number(),
                 totalRequests: z.number(),
                 cacheSize: z.number(),
-                lastCleared: z.string().datetime().optional()
+                lastCleared: z.string().datetime().optional().openapi({ example: '2024-01-20T08:00:00Z' })
               })
             })
           }
@@ -1114,7 +1114,7 @@ Error responses:
         'application/json': {
           schema: z.object({
             format: z.enum(['json', 'csv']).default('json'),
-            categories: z.array(z.string()).optional()
+            categories: z.array(z.string()).optional().openapi({ example: ['skills', 'profile', 'analysis_history'] })
           })
         }
       }
@@ -1127,9 +1127,9 @@ Error responses:
             schema: z.object({
               success: z.boolean(),
               data: z.object({
-                exportId: z.string(),
-                status: z.string(),
-                estimatedCompletion: z.string().datetime()
+                exportId: z.string().openapi({ example: 'export_20240120_143052_001' }),
+                status: z.string().openapi({ example: 'processing' }),
+                estimatedCompletion: z.string().datetime().openapi({ example: '2024-01-20T14:35:00Z' })
               })
             })
           }
@@ -1157,13 +1157,13 @@ Error responses:
         name: 'startDate',
         in: 'query',
         required: false,
-        schema: { type: 'string', format: 'date-time' }
+        schema: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00Z' }
       },
       {
         name: 'endDate',
         in: 'query',
         required: false,
-        schema: { type: 'string', format: 'date-time' }
+        schema: { type: 'string', format: 'date-time', example: '2024-01-31T23:59:59Z' }
       }
     ],
     responses: {
@@ -1174,11 +1174,11 @@ Error responses:
             schema: z.object({
               success: z.boolean(),
               data: z.array(z.object({
-                id: z.string(),
-                action: z.string(),
-                resourceType: z.string(),
-                timestamp: z.string().datetime(),
-                ipAddress: z.string().optional()
+                id: z.string().openapi({ example: 'audit_20240120_143052_001' }),
+                action: z.string().openapi({ example: 'profile.skills.updated' }),
+                resourceType: z.string().openapi({ example: 'user_profile' }),
+                timestamp: z.string().datetime().openapi({ example: '2024-01-20T14:30:52Z' }),
+                ipAddress: z.string().optional().openapi({ example: '192.168.1.100' })
               }))
             })
           }
