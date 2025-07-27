@@ -94,15 +94,7 @@ Error responses:
     servers: [
       {
         url: 'https://clearsight-ip.com',
-        description: 'Production server'
-      },
-      {
-        url: 'https://clearsight-ip.vchernev93.workers.dev',
-        description: 'Cloudflare Workers development server'
-      },
-      {
-        url: 'http://localhost:8787',
-        description: 'Local development server'
+        description: 'Production API Server'
       }
     ],
     tags: [
