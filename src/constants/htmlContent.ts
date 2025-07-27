@@ -52,7 +52,7 @@
         }
         
         .hero-pattern {
-            background-image: radial-gradient(rgba(20, 184, 166, 0.08) 2px, transparent 1px);
+            background-image: radial-gradient(rgba(20, 184, 166, 0.04) 1px, transparent 1px);
             background-size: 20px 20px;
         }
         
@@ -185,9 +185,6 @@
             </nav>
             
             <div class="flex items-center space-x-4">
-                <button id="theme-toggle" class="focus:outline-none">
-                    <i class="fas fa-moon text-gray-300 text-yellow-300 text-xl"></i>
-                </button>
                 <a href="#api" class="bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
                     Get API Access
                 </a>
@@ -199,7 +196,7 @@
     </header>
 
     <!-- Hero Section - Problem Statement -->
-    <section class="py-16 md:py-24 hero-pattern">
+    <section class="py-20 md:py-32 hero-pattern">
         <div class="container mx-auto px-6 flex flex-col md:flex-row items-center">
             <div class="md:w-1/2 mb-12 md:mb-0">
                 <div class="mb-6">
@@ -219,7 +216,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-red-700 text-red-300">
-                                <strong>The Hidden Costs:</strong> 6 months average time-to-productivity for new hires вЂў 40% of internal promotions fail due to skill misalignment вЂў $15K average cost per bad hire
+                                <strong>The Hidden Costs:</strong> 6 months average time-to-productivity for new hires • 40% of internal promotions fail due to skill misalignment • $15K average cost per bad hire
                             </p>
                         </div>
                     </div>
@@ -274,7 +271,7 @@
     </section>
 
     <!-- Solution Section -->
-    <section class="py-16 bg-gradient-to-r from-green-50 to-blue-50 from-green-900/20 to-blue-900/20">
+    <section class="py-20 md:py-24 bg-gradient-to-r from-green-50 to-blue-50 from-green-900/20 to-blue-900/20">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
                 <span class="bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">The Solution</span>
@@ -375,7 +372,7 @@
     </section>
 
     <!-- Proof Section -->
-    <section id="features" class="py-16 bg-slate-800 bg-slate-800">
+    <section id="features" class="py-20 md:py-24 bg-slate-800 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">Proven Results</span>
@@ -429,7 +426,7 @@
                         "We discovered 15 internal candidates ready for promotion that we never knew existed. The AI found skills in contexts we completely missed."
                     </blockquote>
                     <div class="text-xs text-gray-500">
-                        <strong>Key Features Used:</strong> Team Analysis вЂў Skills Matching вЂў Internal Mobility
+                        <strong>Key Features Used:</strong> Team Analysis • Skills Matching • Internal Mobility
                     </div>
                 </div>
                 
@@ -452,7 +449,7 @@
                         "The gap analysis showed us exactly what skills we needed vs. what candidates actually had. No more expensive hiring mistakes."
                     </blockquote>
                     <div class="text-xs text-gray-500">
-                        <strong>Key Features Used:</strong> Resume Parsing вЂў Gap Analysis вЂў Trend Insights
+                        <strong>Key Features Used:</strong> Resume Parsing • Gap Analysis • Trend Insights
                     </div>
                 </div>
                 
@@ -475,7 +472,7 @@
                         "Our learning budget became strategic instead of scattered. People are getting promoted faster and staying longer."
                     </blockquote>
                     <div class="text-xs text-gray-500">
-                        <strong>Key Features Used:</strong> Learning Paths вЂў Career Planning вЂў Performance Tracking
+                        <strong>Key Features Used:</strong> Learning Paths • Career Planning • Performance Tracking
                     </div>
                 </div>
                 
@@ -583,7 +580,7 @@
     </section>
 
     <!-- How It Works -->
-    <section id="how-it-works" class="py-16 bg-slate-800 bg-slate-800">
+    <section id="how-it-works" class="py-20 md:py-24 bg-slate-900">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Discover Your Career Path in 3 Simple Steps</h2>
@@ -668,7 +665,7 @@
     </section>
 
     <!-- Call to Action Section -->
-    <section id="api" class="py-16 bg-gradient-to-r from-primary to-accent text-white">
+    <section id="api" class="py-20 md:py-24 bg-gradient-to-r from-primary to-accent text-white">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
                 <span class="bg-slate-800/20 text-white text-sm font-semibold px-3 py-1 rounded-full">Take Action</span>
@@ -753,14 +750,14 @@
                 </div>
                 
                 <p class="text-white/70 text-sm">
-                    Trusted by Fortune 500 companies вЂў SOC 2 compliant вЂў 99.9% uptime SLA
+                    Trusted by Fortune 500 companies • SOC 2 compliant • 99.9% uptime SLA
                 </p>
             </div>
         </div>
     </section>
 
     <!-- Why Choose Clearsight IP -->
-    <section class="py-16">
+    <section class="py-20 md:py-24 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Why Choose Clearsight IP</h2>
@@ -823,7 +820,7 @@
 
 
     <!-- Pricing -->
-    <section id="pricing" class="py-16">
+    <section id="pricing" class="py-20 md:py-24 bg-slate-900">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
@@ -941,7 +938,7 @@
     </section>
 
     <!-- Trust & Security -->
-    <section class="py-16 bg-slate-800 bg-slate-800">
+    <section class="py-20 md:py-24 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Your Privacy Matters</h2>
@@ -979,7 +976,7 @@
     </section>
 
     <!-- Live Demo -->
-    <section class="py-16">
+    <section class="py-20 md:py-24 bg-slate-900">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Live Demo</h2>
@@ -1137,12 +1134,15 @@
                     <a href="#" class="hover:text-accent transition">Cookie Policy</a>
                     <a href="#" class="hover:text-accent transition">GDPR Compliance</a>
                 </div>
-                <p>&copy; 2023 Clearsight IP. All rights reserved.</p>
+                <p>&copy; <span id="currentYear"></span> Clearsight IP. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script>
+        // Set current year
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
         // Demo functionality
         const analyzeBtn = document.getElementById('analyze-btn');
         const demoResults = document.getElementById('demo-results');
