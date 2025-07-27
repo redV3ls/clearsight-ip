@@ -1207,7 +1207,7 @@ Error responses:
 
   // Add Swagger UI with better configuration
   app.get('/api/v1/docs', swaggerUI({ 
-    url: '/openapi.json',
+    url: '/api/openapi.json',
     documentTitle: 'Clearsight IP - Skill Gap Analysis API Documentation',
     persistAuthorization: true,
     theme: 'light'
