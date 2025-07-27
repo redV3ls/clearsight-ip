@@ -180,13 +180,12 @@
                 <a href="#how-it-works" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">How It Works</a>
                 <a href="#demo" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Try Demo</a>
                 <a href="#pricing" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Pricing</a>
-                <a href="#documentation" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Documentation</a>
                 <a href="#contact" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Contact</a>
             </nav>
             
             <div class="flex items-center space-x-4">
-                <a href="#documentation" class="bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
-                    View Documentation
+                <a href="/api/docs" class="bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
+                    View API Docs
                 </a>
                 <button class="md:hidden text-gray-300 text-gray-300">
                     <i class="fas fa-bars text-2xl"></i>
