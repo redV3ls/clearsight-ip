@@ -154,9 +154,15 @@ All API endpoints require authentication via:
 ### Core Endpoints
 
 - `GET /api/v1` - API information and available endpoints
-- `POST /api/v1/analyze/gap` - Individual skill gap analysis (coming soon)
-- `POST /api/v1/analyze/team` - Team skill gap analysis (coming soon)
-- `GET /api/v1/trends/industry/{id}` - Industry skill trends (coming soon)
+- `POST /api/v1/analyze/gap` - Individual skill gap analysis ✅
+- `POST /api/v1/analyze/team` - Team skill gap analysis ✅
+- `GET /api/v1/trends/industry/{id}` - Industry skill trends ✅
+- `GET /api/v1/trends/skills/emerging` - Emerging skills analysis ✅
+- `GET /api/v1/jobs/search` - Job search and matching ✅
+- `GET /api/v1/users/profile` - User profile management ✅
+- `GET /api/v1/monitoring/cache/stats` - System monitoring ✅
+- `POST /api/v1/gdpr/export` - GDPR data export ✅
+- `GET /api/v1/audit/my-logs` - Audit trail access ✅
 
 ## Development
 
@@ -246,16 +252,25 @@ MIT License - see LICENSE file for details.
 
 ```bash
 # Health check
-curl https://clearsight-ip-api.vchernev93.workers.dev/health
+curl https://clearsight-ip.vchernev93.workers.dev/health
 
 # Detailed health check (includes database and cache status)
-curl https://clearsight-ip-api.vchernev93.workers.dev/health/detailed
+curl https://clearsight-ip.vchernev93.workers.dev/health/detailed
 
 # API information and available endpoints
-curl https://clearsight-ip-api.vchernev93.workers.dev/api/v1
+curl https://clearsight-ip.vchernev93.workers.dev/api/v1
 
-# Root endpoint
-curl https://clearsight-ip-api.vchernev93.workers.dev/
+# Root endpoint (HTML interface)
+curl https://clearsight-ip.vchernev93.workers.dev/
+
+# Authentication endpoints (public)
+curl -X POST https://clearsight-ip.vchernev93.workers.dev/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"SecurePass123","name":"Test User"}'
+
+curl -X POST https://clearsight-ip.vchernev93.workers.dev/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"SecurePass123"}'
 ```
 
 ### **Infrastructure Status:**
@@ -263,9 +278,12 @@ curl https://clearsight-ip-api.vchernev93.workers.dev/
 - ✅ **D1 Database**: Connected and healthy (ID: 96482268-37bf-4082-bacd-18509c947738)
 - ✅ **KV Cache**: Connected and healthy (ID: 747058b5407243d9846eb3ca1d6ef563)
 - ✅ **Database Schema**: 10 tables migrated successfully
-- ✅ **JWT Authentication**: Configured and ready
+- ✅ **JWT Authentication**: Configured with secure secret
+- ✅ **Environment Validation**: All checks passing
 - ✅ **CORS**: Enabled for cross-origin requests
 - ✅ **Security Headers**: Applied via Hono middleware
+- ✅ **Caching**: Intelligent caching enabled for performance
+- ✅ **All API Routes**: Skill analysis, trends, monitoring, GDPR, audit - all active
 
 ### **Next Steps for GitHub Integration:**
 

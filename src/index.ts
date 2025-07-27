@@ -14,14 +14,14 @@ import { environmentValidationMiddleware, getEnvironmentHealthStatus } from './m
 import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
 import jobsRoutes from './routes/jobs';
-// import analyzeRoutes from './routes/analyze';
-// import monitoringRoutes from './routes/monitoring';
-// import gdprRoutes from './routes/gdpr';
-// import auditRoutes from './routes/audit';
-// import trendsRoutes from './routes/trends';
-// Temporarily commented out cache imports
-// import { cacheMiddleware, userCacheMiddleware } from './middleware/cache';
-// import { CacheNamespaces, CacheTTL } from './services/cache';
+import analyzeRoutes from './routes/analyze';
+import monitoringRoutes from './routes/monitoring';
+import gdprRoutes from './routes/gdpr';
+import auditRoutes from './routes/audit';
+import trendsRoutes from './routes/trends';
+// Cache imports - re-enabling
+import { cacheMiddleware, userCacheMiddleware } from './middleware/cache';
+import { CacheNamespaces, CacheTTL } from './services/cache';
 import { createOpenAPIApp } from './lib/openapi';
 
 export interface Env {
@@ -83,13 +83,33 @@ app.use('*', async (c, next) => {
   return compressionMiddleware(c, next);
 });
 
+// Cache middleware for specific routes
+app.use('/api/v1/trends/*', cacheMiddleware({
+  namespace: CacheNamespaces.TREND_DATA,
+  ttl: CacheTTL.MEDIUM, // 1 hour cache for trends
+}));
+
+app.use('/api/v1/jobs/search', cacheMiddleware({
+  namespace: CacheNamespaces.API_RESPONSES,
+  ttl: CacheTTL.SHORT, // 15 minutes for job searches
+}));
+
+app.use('/api/v1/users/profile', userCacheMiddleware({
+  namespace: CacheNamespaces.USER_PROFILES,
+  ttl: CacheTTL.SHORT, // 15 minutes for user profiles
+}));
+
 // Rate limiting middleware
 app.use('*', rateLimiter);
 
 // Authentication middleware for protected routes
 app.use('/api/v1/*', async (c, next) => {
-  const publicPaths = ['/api/v1/auth/login', '/api/v1/auth/register'];
-  if (publicPaths.some(path => c.req.path.startsWith(path))) {
+  const publicPaths = [
+    '/api/v1/auth/login', 
+    '/api/v1/auth/register',
+    '/api/v1' // Make API root endpoint public
+  ];
+  if (publicPaths.some(path => c.req.path === path || c.req.path.startsWith(path + '/'))) {
     return next();
   }
   return authMiddleware(c, next);
@@ -98,6 +118,9 @@ app.use('/api/v1/*', async (c, next) => {
 // Basic health check
 app.get('/health', (c) => {
   const envHealth = getEnvironmentHealthStatus();
+  
+  // Disable compression for health checks
+  c.header('Content-Encoding', 'identity');
   
   return c.json({
     status: envHealth.status === 'valid' ? 'healthy' : 'degraded',
@@ -110,6 +133,9 @@ app.get('/health', (c) => {
 
 // Detailed health check
 app.get('/health/detailed', async (c) => {
+  // Disable compression for health checks
+  c.header('Content-Encoding', 'identity');
+  
   const healthStatus = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -153,28 +179,56 @@ app.get('/health/detailed', async (c) => {
 app.route('/api/v1/auth', authRoutes);
 app.route('/api/v1/users', usersRoutes);
 app.route('/api/v1/jobs', jobsRoutes);
-// app.route('/api/v1/analyze', analyzeRoutes);
-// app.route('/api/v1/monitoring', monitoringRoutes);
-// app.route('/api/v1/gdpr', gdprRoutes);
-// app.route('/api/v1/audit', auditRoutes);
-// app.route('/api/v1/trends', trendsRoutes);
+app.route('/api/v1/analyze', analyzeRoutes);
+app.route('/api/v1/monitoring', monitoringRoutes);
+app.route('/api/v1/gdpr', gdprRoutes);
+app.route('/api/v1/audit', auditRoutes);
+app.route('/api/v1/trends', trendsRoutes);
 
-// Temporarily commented out OpenAPI docs
-// const openAPIApp = createOpenAPIApp();
-// app.route('/', openAPIApp);
+// OpenAPI documentation
+const openAPIApp = createOpenAPIApp();
+app.route('/docs', openAPIApp);
 
-// API root endpoint
+// API root endpoint (public - no auth required)
 app.get('/api/v1', (c) => {
+  // Disable compression for API info
+  c.header('Content-Encoding', 'identity');
+  
   return c.json({
     message: 'Clearsight IP API v1',
     version: '1.0.0',
-    status: 'Basic endpoints active',
+    status: 'All endpoints active',
     endpoints: {
       health: '/health',
       root: '/',
       api: '/api/v1',
+      auth: '/api/v1/auth',
+      users: '/api/v1/users',
+      jobs: '/api/v1/jobs',
+      analyze: '/api/v1/analyze',
+      trends: '/api/v1/trends',
+      monitoring: '/api/v1/monitoring',
+      gdpr: '/api/v1/gdpr',
+      audit: '/api/v1/audit',
+      docs: '/docs'
     },
-    note: 'Full API endpoints will be available once database is configured',
+    features: {
+      skill_gap_analysis: 'active',
+      team_analysis: 'active',
+      industry_trends: 'active',
+      job_matching: 'active',
+      user_profiles: 'active',
+      caching: 'active',
+      monitoring: 'active'
+    },
+    authentication: {
+      required: true,
+      methods: ['JWT', 'API_KEY'],
+      endpoints: {
+        login: '/api/v1/auth/login',
+        register: '/api/v1/auth/register'
+      }
+    },
     timestamp: new Date().toISOString(),
     cloudflare: {
       colo: c.req.header('CF-RAY')?.split('-')[1] || 'unknown',
