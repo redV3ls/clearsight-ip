@@ -22,6 +22,7 @@ import trendsRoutes from './routes/trends';
 // Cache imports - re-enabling
 import { cacheMiddleware, userCacheMiddleware } from './middleware/cache';
 import { CacheNamespaces, CacheTTL } from './services/cache';
+import { readOnlyRateLimiter } from './middleware/rateLimiter';
 import { createOpenAPIApp } from './lib/openapi';
 
 export interface Env {
@@ -99,8 +100,8 @@ app.use('/api/v1/users/profile', userCacheMiddleware({
   ttl: CacheTTL.SHORT, // 15 minutes for user profiles
 }));
 
-// Rate limiting middleware
-app.use('*', rateLimiter);
+// Temporarily disable rate limiting for testing
+// app.use('*', readOnlyRateLimiter);
 
 // Authentication middleware for protected routes
 app.use('/api/v1/*', async (c, next) => {
@@ -187,7 +188,10 @@ app.route('/api/v1/trends', trendsRoutes);
 
 // OpenAPI documentation
 const openAPIApp = createOpenAPIApp();
-app.route('/docs', openAPIApp);
+app.route('/', openAPIApp);
+
+// Redirect /docs to the actual documentation location
+app.get('/docs', (c) => c.redirect('/api/v1/docs'));
 
 // API root endpoint (public - no auth required)
 app.get('/api/v1', (c) => {

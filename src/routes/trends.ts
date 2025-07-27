@@ -7,6 +7,13 @@ import { zValidator } from '@hono/zod-validator';
 
 const trends = new Hono<{ Bindings: { DB: D1Database; CACHE: KVNamespace } }>();
 
+// Apply authentication to trends routes
+trends.use('*', async (c, next) => {
+  // Import auth middleware
+  const { requireAuth } = await import('../middleware/auth');
+  return requireAuth(c, next);
+});
+
 // Validation schemas
 const industryTrendsSchema = z.object({
   region: z.string().optional(),

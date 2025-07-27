@@ -5,6 +5,12 @@ import { AuditService } from '../services/auditService';
 
 const auditRoutes = new Hono<{ Bindings: Env }>();
 
+// Apply authentication to audit routes
+auditRoutes.use('*', async (c, next) => {
+  const { requireAuth } = await import('../middleware/auth');
+  return requireAuth(c, next);
+});
+
 // Query schema
 const querySchema = z.object({
   userId: z.string().optional(),

@@ -6,6 +6,12 @@ import { auditLog } from '../services/auditService';
 
 const gdprRoutes = new Hono<{ Bindings: Env }>();
 
+// Apply authentication to GDPR routes
+gdprRoutes.use('*', async (c, next) => {
+  const { requireAuth } = await import('../middleware/auth');
+  return requireAuth(c, next);
+});
+
 // Request data export schema
 const requestExportSchema = z.object({
   format: z.enum(['json', 'csv']).optional().default('json'),
