@@ -75,14 +75,9 @@ app.use('*', cors({
   maxAge: 86400, // 24 hours
 }));
 
-// Compression middleware (exclude root path and auth endpoints)
-app.use('*', async (c, next) => {
-  // Skip compression for HTML pages and auth endpoints
-  if (c.req.path === '/' || c.req.path.startsWith('/api/v1/auth/')) {
-    return next();
-  }
-  return compressionMiddleware(c, next);
-});
+// Temporarily disable compression middleware to fix display issues
+// TODO: Re-enable with proper configuration later
+// app.use('*', compressionMiddleware);
 
 // Cache middleware for specific routes
 app.use('/api/v1/trends/*', cacheMiddleware({
@@ -120,9 +115,6 @@ app.use('/api/v1/*', async (c, next) => {
 app.get('/health', (c) => {
   const envHealth = getEnvironmentHealthStatus();
   
-  // Disable compression for health checks
-  c.header('Content-Encoding', 'identity');
-  
   return c.json({
     status: envHealth.status === 'valid' ? 'healthy' : 'degraded',
     timestamp: new Date().toISOString(),
@@ -134,9 +126,6 @@ app.get('/health', (c) => {
 
 // Detailed health check
 app.get('/health/detailed', async (c) => {
-  // Disable compression for health checks
-  c.header('Content-Encoding', 'identity');
-  
   const healthStatus = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -195,9 +184,6 @@ app.get('/docs', (c) => c.redirect('/api/v1/docs'));
 
 // API root endpoint (public - no auth required)
 app.get('/api/v1', (c) => {
-  // Disable compression for API info
-  c.header('Content-Encoding', 'identity');
-  
   return c.json({
     message: 'Clearsight IP API v1',
     version: '1.0.0',
@@ -246,7 +232,7 @@ app.get('/', (c) => {
   // Set cache header
   c.header('Cache-Control', 'public, max-age=3600');
   
-  // Return HTML content using Hono's html method (compression is bypassed above)
+  // Return HTML content using Hono's html method
   return c.html(HTML_CONTENT);
 });
 
