@@ -583,7 +583,7 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
+              success: z.boolean().openapi({ example: true }),
               data: z.object({
                 analyses: z.array(z.object({
                   id: z.string().openapi({ example: 'gap_analysis_20240120_001' }),
@@ -593,10 +593,10 @@ Error responses:
                   createdAt: z.string().datetime().openapi({ example: '2024-01-20T10:30:00Z' })
                 })),
                 pagination: z.object({
-                  page: z.number(),
-                  limit: z.number(),
-                  total: z.number(),
-                  pages: z.number()
+                  page: z.number().openapi({ example: 1 }),
+                  limit: z.number().openapi({ example: 10 }),
+                  total: z.number().openapi({ example: 25 }),
+                  pages: z.number().openapi({ example: 3 })
                 })
               })
             })
@@ -862,7 +862,7 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
+              success: z.boolean().openapi({ example: true }),
               data: z.object({
                 emergingSkills: z.array(z.object({
                   skillName: z.string().openapi({ example: 'Large Language Models (LLMs)' }),
@@ -947,7 +947,7 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
+              success: z.boolean().openapi({ example: true }),
               data: z.object({
                 user: z.object({
                   id: z.string().openapi({ example: 'usr_1234567890abcdef' }),
@@ -999,7 +999,7 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
+              success: z.boolean().openapi({ example: true }),
               data: z.object({
                 message: z.string().openapi({ example: 'Profile updated successfully' })
               })
@@ -1050,7 +1050,7 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
+              success: z.boolean().openapi({ example: true }),
               data: z.array(z.object({
                 id: z.string().openapi({ example: 'job_senior_frontend_dev_001' }),
                 title: z.string().openapi({ example: 'Senior Frontend Developer' }),
@@ -1085,12 +1085,12 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
+              success: z.boolean().openapi({ example: true }),
               data: z.object({
-                hitRate: z.number(),
-                missRate: z.number(),
-                totalRequests: z.number(),
-                cacheSize: z.number(),
+                hitRate: z.number().openapi({ example: 0.85 }),
+                missRate: z.number().openapi({ example: 0.15 }),
+                totalRequests: z.number().openapi({ example: 12500 }),
+                cacheSize: z.number().openapi({ example: 2048 }),
                 lastCleared: z.string().datetime().optional().openapi({ example: '2024-01-20T08:00:00Z' })
               })
             })
@@ -1113,7 +1113,7 @@ Error responses:
       content: {
         'application/json': {
           schema: z.object({
-            format: z.enum(['json', 'csv']).default('json'),
+            format: z.enum(['json', 'csv']).default('json').openapi({ example: 'json' }),
             categories: z.array(z.string()).optional().openapi({ example: ['skills', 'profile', 'analysis_history'] })
           })
         }
@@ -1125,7 +1125,7 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
+              success: z.boolean().openapi({ example: true }),
               data: z.object({
                 exportId: z.string().openapi({ example: 'export_20240120_143052_001' }),
                 status: z.string().openapi({ example: 'processing' }),
@@ -1172,7 +1172,7 @@ Error responses:
         content: {
           'application/json': {
             schema: z.object({
-              success: z.boolean(),
+              success: z.boolean().openapi({ example: true }),
               data: z.array(z.object({
                 id: z.string().openapi({ example: 'audit_20240120_143052_001' }),
                 action: z.string().openapi({ example: 'profile.skills.updated' }),
