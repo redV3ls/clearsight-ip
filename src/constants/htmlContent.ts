@@ -45,7 +45,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         }
         
         .hero-pattern {
-            background-image: radial-gradient(#14b8a6 1px, transparent 1px);
+            background-image: radial-gradient(rgba(20, 184, 166, 0.1) 1px, transparent 1px);
             background-size: 20px 20px;
         }
         
@@ -231,7 +231,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <div class="relative bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-lg text-red-400">The Reality Check</h3>
-                            <span class="bg-red-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded">Hidden Costs</span>
+                            <span class="bg-red-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded ml-3">Hidden Costs</span>
                         </div>
                         
                         <div class="space-y-4">
@@ -574,53 +574,80 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         </div>
     </section>
 
-    <!-- API Endpoints -->
+    <!-- Developer Integration -->
     <section id="api" class="py-16 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Developer Integration</h2>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Built for Developers</h2>
                 <p class="text-xl text-gray-300 max-w-3xl mx-auto">
-                    Seamlessly integrate with your existing systems using our comprehensive API
+                    Enterprise-grade API designed for seamless integration with your existing systems
                 </p>
             </div>
             
-            <div class="max-w-4xl mx-auto">
-                <div class="code-block">
-                    <pre class="text-gray-200"><code>// Authentication
-POST /api/v1/auth/register
-POST /api/v1/auth/login
-POST /api/v1/auth/change-password
-GET  /api/v1/auth/me
-
-// User Profile Management
-POST /api/v1/users/profile
-GET  /api/v1/users/{userId}/profile
-PUT  /api/v1/users/{userId}/profile
-DELETE /api/v1/users/{userId}/profile
-
-// Skills Management
-POST /api/v1/users/{userId}/skills
-GET  /api/v1/users/{userId}/skills
-PUT  /api/v1/users/{userId}/skills/{skillId}
-DELETE /api/v1/users/{userId}/skills/{skillId}
-
-// Job Management
-POST /api/v1/jobs
-GET  /api/v1/jobs/search
-GET  /api/v1/jobs/{jobId}
-PUT  /api/v1/jobs/{jobId}
-DELETE /api/v1/jobs/{jobId}
-
-// Health Monitoring
-GET  /health
-GET  /health/detailed</code></pre>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                <div class="card p-6 rounded-xl text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-900/50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Secure Authentication</h3>
+                    <p class="text-gray-300">JWT-based auth with API keys for service-to-service communication</p>
                 </div>
                 
-                <div class="mt-8 text-center">
-                    <button class="inline-flex items-center text-accent font-semibold">
-                        View Full API Documentation
-                        <i class="fas fa-arrow-right ml-2"></i>
-                    </button>
+                <div class="card p-6 rounded-xl text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-900/50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-users text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">User Management</h3>
+                    <p class="text-gray-300">Complete user profiles, skills tracking, and team management</p>
+                </div>
+                
+                <div class="card p-6 rounded-xl text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-900/50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Analytics & Insights</h3>
+                    <p class="text-gray-300">Skills analysis, gap detection, and performance monitoring</p>
+                </div>
+                
+                <div class="card p-6 rounded-xl text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-900/50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-briefcase text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Job Matching</h3>
+                    <p class="text-gray-300">Smart job search and candidate matching algorithms</p>
+                </div>
+                
+                <div class="card p-6 rounded-xl text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-900/50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-database text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">GDPR Compliant</h3>
+                    <p class="text-gray-300">Data export, audit logs, and privacy controls built-in</p>
+                </div>
+                
+                <div class="card p-6 rounded-xl text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-blue-900/50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-tachometer-alt text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">High Performance</h3>
+                    <p class="text-gray-300">Sub-100ms response times with global edge deployment</p>
+                </div>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-slate-700 p-8 rounded-xl text-center">
+                    <h3 class="text-2xl font-bold mb-4">Ready to Integrate?</h3>
+                    <p class="text-gray-300 mb-6">
+                        Get started with our comprehensive API documentation and SDKs for popular programming languages.
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button class="bg-accent hover:bg-teal-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300">
+                            View API Documentation
+                        </button>
+                        <button class="bg-transparent border-2 border-accent text-accent hover:bg-accent hover:text-white font-semibold py-3 px-6 rounded-lg transition duration-300">
+                            Download SDKs
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
