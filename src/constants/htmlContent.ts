@@ -202,10 +202,10 @@
                     <span class="bg-red-100 text-red-800 text-sm font-semibold px-3 py-1 rounded-full">The Problem</span>
                 </div>
                 <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
-                    <span class="text-red-600">73% of companies</span> struggle to identify skill gaps, costing them <span class="gradient-text">$1.2M annually</span> in missed opportunities
+                    Struggling to <span class="text-red-600">stand out</span> in today's competitive job market? <span class="gradient-text">You're not alone.</span>
                 </h1>
-                <p class="text-xl text-gray-400 text-gray-300 mb-8">
-                    Traditional hiring and development processes are blind to hidden talents and critical skill gaps. Teams waste months on mismatched hires while existing employees plateau without clear growth paths.
+                <p class="text-xl text-gray-300 mb-8">
+                    Most professionals don't know which skills they're missing or how to showcase their expertise effectively. Your dream job might be just one skill gap away.
                 </p>
                 
                 <div class="bg-red-50 bg-red-900/20 border-l-4 border-red-500 p-4 mb-8">
@@ -254,9 +254,9 @@
                             <div class="pt-4 border-t border-slate-700 border-slate-700">
                                 <h4 class="font-semibold mb-2 text-red-600">What You're Missing:</h4>
                                 <ul class="space-y-1 text-sm">
-                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Internal talent going unnoticed</li>
-                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Expensive external hiring</li>
-                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Team skill imbalances</li>
+                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Don't know which skills to learn</li>
+                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Can't showcase expertise effectively</li>
+                                    <li class="flex items-center"><i class="fas fa-times text-red-500 mr-2"></i>Missing key requirements for dream jobs</li>
                                 </ul>
                             </div>
                         </div>
