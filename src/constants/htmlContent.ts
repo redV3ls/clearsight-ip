@@ -371,10 +371,10 @@
     <section id="features" class="py-20 md:py-24 bg-slate-800 bg-slate-800">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">Proven Results</span>
-                <h2 class="text-3xl md:text-4xl font-bold mt-4 mb-6">Real Companies, Real Impact</h2>
-                <p class="text-xl text-gray-400 text-gray-300 max-w-3xl mx-auto">
-                    See how leading organizations are transforming their workforce development with our AI-powered platform
+                <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">Success Stories</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-4 mb-6">Real People, Real Career Growth</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    See how professionals like you are accelerating their careers with AI-powered skills intelligence
                 </p>
             </div>
 
@@ -472,40 +472,40 @@
                     </div>
                 </div>
                 
-                <!-- API Integration Success -->
+                <!-- Platform Features -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300 border-l-4 border-orange-500">
                     <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-orange-100 bg-orange-900/50 flex items-center justify-center mr-3">
-                            <i class="fas fa-code text-orange-600 text-xl"></i>
+                        <div class="w-12 h-12 rounded-full bg-orange-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-rocket text-orange-400 text-xl"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold">Developer Integration</h3>
-                            <p class="text-sm text-gray-500">Enterprise API</p>
+                            <h3 class="text-lg font-bold">Platform Features</h3>
+                            <p class="text-sm text-gray-500">Everything you need</p>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <div class="text-2xl font-bold text-orange-600 mb-1">&lt;100ms</div>
-                        <p class="text-sm text-gray-400 text-gray-300">Average API response time</p>
+                        <div class="text-2xl font-bold text-orange-400 mb-1">All-in-One</div>
+                        <p class="text-sm text-gray-300">Complete career development suite</p>
                     </div>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
-                            <span>Authentication & Security</span>
+                            <span>Resume Analysis</span>
                             <i class="fas fa-check text-green-500"></i>
                         </div>
                         <div class="flex justify-between">
-                            <span>Skills Analysis</span>
+                            <span>Skills Gap Detection</span>
                             <i class="fas fa-check text-green-500"></i>
                         </div>
                         <div class="flex justify-between">
-                            <span>Team Assessment</span>
+                            <span>Career Path Planning</span>
                             <i class="fas fa-check text-green-500"></i>
                         </div>
                         <div class="flex justify-between">
-                            <span>Trend Analysis</span>
+                            <span>Industry Insights</span>
                             <i class="fas fa-check text-green-500"></i>
                         </div>
                         <div class="flex justify-between">
-                            <span>GDPR Compliance</span>
+                            <span>Privacy Protection</span>
                             <i class="fas fa-check text-green-500"></i>
                         </div>
                     </div>
