@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clearsight IP - Bridge Your Skills Gap with AI-Powered Insights</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>

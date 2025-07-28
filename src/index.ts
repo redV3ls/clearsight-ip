@@ -227,6 +227,28 @@ app.get('/api/v1', (c) => {
   });
 });
 
+// Favicon route
+app.get('/favicon.ico', (c) => {
+  const faviconSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+    <defs>
+      <linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'>
+        <stop offset='0%' style='stop-color:#14b8a6;stop-opacity:1' />
+        <stop offset='100%' style='stop-color:#2563eb;stop-opacity:1' />
+      </linearGradient>
+    </defs>
+    <circle cx='50' cy='50' r='45' fill='url(#grad)'/>
+    <path d='M30 35h40v6H30z' fill='white' opacity='0.9'/>
+    <path d='M30 45h32v4H30z' fill='white' opacity='0.7'/>
+    <path d='M30 53h28v4H30z' fill='white' opacity='0.5'/>
+    <path d='M30 61h24v4H30z' fill='white' opacity='0.3'/>
+    <path d='M65 42l8 8-8 8-3-3 5-5-5-5z' fill='white'/>
+  </svg>`;
+
+  c.header('Content-Type', 'image/svg+xml');
+  c.header('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+  return c.body(faviconSvg);
+});
+
 // Root endpoint - serve the HTML home page
 app.get('/', (c) => {
   // Set cache header
