@@ -160,7 +160,7 @@ Error responses:
               properties: {
                 code: { type: 'string', example: 'VALIDATION_ERROR' },
                 message: { type: 'string', example: 'Invalid email format provided' },
-                details: { 
+                details: {
                   type: 'object',
                   example: {
                     field: 'email',
@@ -190,7 +190,7 @@ Error responses:
           type: 'object',
           properties: {
             success: { type: 'boolean', enum: [true], example: true },
-            data: { 
+            data: {
               type: 'object',
               example: {
                 message: 'Operation completed successfully',
@@ -267,8 +267,8 @@ Error responses:
             title: { type: 'string', example: 'Senior Frontend Developer' },
             company: { type: 'string', example: 'TechCorp Solutions' },
             location: { type: 'string', example: 'San Francisco, CA (Remote)' },
-            description: { 
-              type: 'string', 
+            description: {
+              type: 'string',
               example: 'We are seeking a Senior Frontend Developer to join our dynamic team. You will be responsible for building responsive web applications using modern JavaScript frameworks and collaborating with our design and backend teams.'
             },
             requiredSkills: {
@@ -466,7 +466,7 @@ Error responses:
             resourceId: { type: 'string', example: 'profile_usr_1234567890abcdef' },
             timestamp: { type: 'string', format: 'date-time', example: '2024-01-20T14:30:52Z' },
             ipAddress: { type: 'string', example: '192.168.1.100' },
-            metadata: { 
+            metadata: {
               type: 'object',
               example: {
                 skillsAdded: ['Docker', 'Kubernetes'],
@@ -1206,7 +1206,7 @@ Error responses:
   app.openapi(auditLogsRoute, (c) => c.json({ message: 'Documentation only' }));
 
   // Add Swagger UI with better configuration
-  app.get('/api/v1/docs', swaggerUI({ 
+  app.get('/api/v1/docs', swaggerUI({
     url: '/openapi.json',
     documentTitle: 'Clearsight IP - Skill Gap Analysis API Documentation',
     persistAuthorization: true,
