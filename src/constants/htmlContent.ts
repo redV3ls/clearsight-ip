@@ -176,11 +176,10 @@
             </div>
             
             <nav class="hidden md:flex space-x-8">
-                <a href="#features" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Features</a>
-                <a href="#how-it-works" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">How It Works</a>
-                <a href="#demo" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Try Demo</a>
-                <a href="#pricing" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Pricing</a>
-                <a href="#contact" class="nav-link text-gray-300 text-gray-300 hover:text-accent hover:text-accent">Contact</a>
+                <a href="#features" class="nav-link text-gray-300 hover:text-accent">Success Stories</a>
+                <a href="#how-it-works" class="nav-link text-gray-300 hover:text-accent">How It Works</a>
+                <a href="#pricing" class="nav-link text-gray-300 hover:text-accent">Pricing</a>
+                <a href="#demo" class="nav-link text-gray-300 hover:text-accent">Try Demo</a>
             </nav>
             
             <div class="flex items-center space-x-4">
