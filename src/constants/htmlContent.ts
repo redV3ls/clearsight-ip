@@ -221,6 +221,12 @@
                 </div>
                 
                 <div class="flex flex-wrap gap-4">
+                    <button class="bg-accent hover:bg-teal-600 text-white font-semibold py-4 px-10 rounded-lg transition duration-300 text-lg shadow-lg">
+                        Analyze My Skills Now
+                    </button>
+                    <a href="/api/v1/docs" class="bg-transparent hover:bg-slate-800 border-2 border-slate-600 text-gray-300 hover:text-white font-medium py-4 px-8 rounded-lg transition duration-300">
+                        View API Docs
+                    </a>
                 </div>
             </div>
             
@@ -229,25 +235,25 @@
                     <div class="w-80 h-80 md:w-96 md:h-96 bg-gradient-to-br from-red-500 to-orange-500 rounded-full opacity-10 absolute -top-10 -left-10 animate-float"></div>
                     <div class="w-64 h-64 md:w-80 md:h-80 bg-gradient-to-tr from-orange-500 to-red-500 rounded-full opacity-10 absolute -bottom-10 -right-10 animate-float animation-delay-2000"></div>
                     <div class="relative bg-slate-800 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 border-slate-700">
-                        <div class="flex justify-between items-center mb-8">
-                            <h3 class="font-bold text-lg text-red-600">The Reality Check</h3>
-                            <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">Hidden Costs</span>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg text-red-400">Your Career Reality</h3>
+                            <span class="bg-red-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded ml-3">The Struggle</span>
                         </div>
                         
                         <div class="space-y-4">
-                            <div class="flex justify-between items-center p-3 bg-red-50 bg-red-900/20 rounded">
-                                <span class="text-sm font-medium">Time to Fill Positions</span>
-                                <span class="text-sm font-bold text-red-600">89 days</span>
+                            <div class="flex justify-between items-center p-3 bg-red-900/20 rounded">
+                                <span class="text-sm font-medium">Average Job Search</span>
+                                <span class="text-sm font-bold text-red-400">5.2 months</span>
                             </div>
                             
-                            <div class="flex justify-between items-center p-3 bg-orange-50 bg-orange-900/20 rounded">
-                                <span class="text-sm font-medium">Bad Hire Cost</span>
-                                <span class="text-sm font-bold text-orange-600">$240K</span>
+                            <div class="flex justify-between items-center p-3 bg-orange-900/20 rounded">
+                                <span class="text-sm font-medium">Resume Review Time</span>
+                                <span class="text-sm font-bold text-orange-400">6 seconds</span>
                             </div>
                             
-                            <div class="flex justify-between items-center p-3 bg-yellow-50 bg-yellow-900/20 rounded">
-                                <span class="text-sm font-medium">Skill Gap Impact</span>
-                                <span class="text-sm font-bold text-yellow-600">-23% productivity</span>
+                            <div class="flex justify-between items-center p-3 bg-yellow-900/20 rounded">
+                                <span class="text-sm font-medium">Feel Underqualified</span>
+                                <span class="text-sm font-bold text-yellow-400">67%</span>
                             </div>
                             
                             <div class="pt-4 border-t border-slate-700 border-slate-700">
@@ -566,7 +572,7 @@
                             <span class="text-lg font-bold text-pink-600">94%</span>
                         </div>
                         <div class="text-xs text-gray-500 mt-3">
-                            Based on 500+ customer reviews and 2+ years of data
+                            Based on anonymized user feedback and platform usage metrics (2022-2024)
                         </div>
                     </div>
                 </div>
@@ -698,7 +704,7 @@
                         <i class="fas fa-shield-alt text-pink-600 text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Privacy First</h3>
-                    <p class="text-gray-400 text-gray-300">Your data is never stored permanently. Complete analysis with full privacy protection.</p>
+                    <p class="text-gray-300">Your personal data is processed securely and never stored. We only retain anonymized metrics for service improvement.</p>
                 </div>
             </div>
         </div>
@@ -838,8 +844,8 @@
                     <div class="w-16 h-16 rounded-full bg-green-100 bg-green-900/50 flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-trash-alt text-green-600 text-2xl"></i>
                     </div>
-                    <h3 class="font-bold mb-2">No Data Storage</h3>
-                    <p class="text-gray-400 text-gray-300 text-sm">Your resume and personal data are never permanently stored</p>
+                    <h3 class="font-bold mb-2">Privacy Protected</h3>
+                    <p class="text-gray-300 text-sm">Your resume and personal data are never stored. We only retain anonymized usage metrics for service improvement.</p>
                 </div>
                 
                 <div class="text-center">
@@ -967,7 +973,7 @@
                 <div class="lg:col-span-2">
                     <h2 class="text-2xl font-bold mb-4">Clearsight IP</h2>
                     <p class="mb-6 max-w-md">
-                        Bridge Your Skills Gap with AI-Powered Insights. Transform career development with intelligent skill gap analysis.
+                        Transform your career with AI-powered skills intelligence. Discover gaps, unlock opportunities, accelerate growth.
                     </p>
                     <div class="flex space-x-4">
                         <a href="#" class="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
