@@ -217,7 +217,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-red-700 text-red-300">
-                                <strong>The Hidden Costs:</strong> 6 months average time-to-productivity for new hires • 40% of internal promotions fail due to skill misalignment • $15K average cost per bad hire
+                                <strong>The Hidden Costs:</strong> 6-month average time-to-productivity • 40% promotion failure rate due to skill gaps • $15,000 average cost per bad hire
                             </p>
                         </div>
                     </div>
@@ -394,7 +394,7 @@
                     <p class="text-sm text-gray-500">Reduced search time from 5+ to 2 months</p>
                 </div>
                 <div class="text-center">
-                    <div class="stats-number text-blue-600">$25K</div>
+                    <div class="stats-number text-blue-600">$25,000</div>
                     <p class="text-gray-300 font-medium">Salary Increase</p>
                     <p class="text-sm text-gray-500">Average salary boost after skill upgrade</p>
                 </div>
@@ -423,7 +423,7 @@
                         </div>
                     </div>
                     <div class="mb-4">
-                        <div class="text-2xl font-bold text-green-400 mb-1">$35K raise</div>
+                        <div class="text-2xl font-bold text-green-400 mb-1">$35,000 raise</div>
                         <p class="text-sm text-gray-300">Promoted to Senior Developer in 4 months</p>
                     </div>
                     <blockquote class="text-sm italic text-gray-300 mb-4">
@@ -473,7 +473,7 @@
                         <p class="text-sm text-gray-300">Landed role at top tech company</p>
                     </div>
                     <blockquote class="text-sm italic text-gray-300 mb-4">
-                        "The personalized learning path was spot-on. I focused on exactly the right skills and got my dream job at Google in 6 months."
+                        "The personalized learning path was spot-on. I focused on exactly the right skills and got my dream job at a major technology company in 6 months."
                     </blockquote>
                     <div class="text-xs text-gray-500">
                         <strong>Skills Developed:</strong> Machine Learning • Python • Statistical Analysis
@@ -537,15 +537,15 @@
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-shield-alt text-green-500 mr-2"></i>
-                            <span class="text-sm">ISO 27001 Security Certified</span>
+                            <span class="text-sm">Enterprise Security Standards</span>
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-check-circle text-blue-500 mr-2"></i>
-                            <span class="text-sm">GDPR Compliant</span>
+                            <span class="text-sm">Privacy-First Design</span>
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-clock text-purple-500 mr-2"></i>
-                            <span class="text-sm">99.9% Uptime SLA</span>
+                            <span class="text-sm">High Availability Platform</span>
                         </div>
                     </div>
                 </div>
@@ -575,7 +575,7 @@
                             <span class="text-lg font-bold text-pink-600">94%</span>
                         </div>
                         <div class="text-xs text-gray-500 mt-3">
-                            Based on anonymized user feedback and platform usage metrics (2022-2024)
+                            Based on anonymized platform usage metrics and user feedback surveys
                         </div>
                     </div>
                 </div>
@@ -618,6 +618,7 @@
                             <span class="ml-2 text-sm">Analyzing...</span>
                         </div>
                         <div class="text-xs text-gray-500 mt-2">Average processing time: &lt;30 seconds</div>
+                        <div class="text-xs text-gray-400 mt-1">* Processing speed may vary based on file size, content complexity, and network conditions</div>
                     </div>
                     <p class="text-gray-400 text-gray-300">
                         Our AI identifies your current skills, discovers hidden strengths, and reveals opportunities for growth.
@@ -699,7 +700,8 @@
                         <i class="fas fa-bolt text-teal-600 text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Instant Results</h3>
-                    <p class="text-gray-400 text-gray-300">No waiting days for feedback. Get comprehensive analysis in under 30 seconds.</p>
+                    <p class="text-gray-400 text-gray-300">No waiting days for feedback. Get comprehensive analysis in under 30 seconds.*</p>
+                    <p class="text-xs text-gray-500 mt-1">* Processing speed may vary based on file size, content complexity, and network conditions</p>
                 </div>
                 
                 <div class="card p-6 rounded-xl">
@@ -707,7 +709,7 @@
                         <i class="fas fa-shield-alt text-pink-600 text-2xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Privacy First</h3>
-                    <p class="text-gray-300">Your personal data is processed securely and never stored. We only retain anonymized metrics for service improvement.</p>
+                    <p class="text-gray-300">Your personal data is processed securely and never stored permanently. We only retain anonymized usage metrics for service improvement.</p>
                 </div>
             </div>
         </div>
@@ -848,7 +850,7 @@
                         <i class="fas fa-trash-alt text-green-600 text-2xl"></i>
                     </div>
                     <h3 class="font-bold mb-2">Privacy Protected</h3>
-                    <p class="text-gray-300 text-sm">Your resume and personal data are never stored. We only retain anonymized usage metrics for service improvement.</p>
+                    <p class="text-gray-300 text-sm">Your resume and personal data are never stored permanently. We only retain anonymized usage metrics for service improvement.</p>
                 </div>
                 
                 <div class="text-center">
@@ -864,7 +866,7 @@
                         <i class="fas fa-gavel text-purple-600 text-2xl"></i>
                     </div>
                     <h3 class="font-bold mb-2">GDPR Compliant</h3>
-                    <p class="text-gray-400 text-gray-300 text-sm">Full compliance with global privacy regulations</p>
+                    <p class="text-gray-400 text-gray-300 text-sm">Designed with privacy regulations in mind</p>
                 </div>
             </div>
         </div>
@@ -1027,7 +1029,7 @@
                     <a href="#" class="hover:text-accent transition">Terms of Service</a>
                     <a href="#" class="hover:text-accent transition">Privacy Policy</a>
                     <a href="#" class="hover:text-accent transition">Cookie Policy</a>
-                    <a href="#" class="hover:text-accent transition">GDPR Compliance</a>
+                    <a href="#" class="hover:text-accent transition">Data Protection</a>
                 </div>
                 <p>&copy; <span id="currentYear"></span> Clearsight IP. All rights reserved.</p>
             </div>
