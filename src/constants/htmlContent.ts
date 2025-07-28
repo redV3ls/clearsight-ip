@@ -272,10 +272,10 @@
             <div class="text-center mb-12">
                 <span class="bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">The Solution</span>
                 <h2 class="text-3xl md:text-4xl font-bold mt-4 mb-6">
-                    AI-Powered Skills Intelligence That <span class="text-green-600">Actually Works</span>
+                    AI-Powered Career Intelligence That <span class="text-green-400">Accelerates Your Growth</span>
                 </h2>
-                <p class="text-xl text-gray-400 text-gray-300 max-w-3xl mx-auto">
-                    Transform your workforce development with intelligent skills analysis that identifies hidden talents, predicts future needs, and creates personalized growth paths.
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Discover exactly which skills you need, get personalized learning paths, and showcase your expertise with confidence. Your next career breakthrough starts here.
                 </p>
             </div>
 
@@ -337,28 +337,28 @@
                                 <i class="fas fa-search text-green-600 text-xl"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold mb-2">Discover Hidden Talents</h3>
-                                <p class="text-gray-400 text-gray-300">Uncover skills and potential that traditional methods miss. Our AI analyzes context, not just keywords.</p>
+                                <h3 class="text-xl font-bold mb-2">Discover Your Strengths</h3>
+                                <p class="text-gray-300">Uncover hidden skills in your experience that you might not even realize you have. Our AI finds what recruiters are looking for.</p>
                             </div>
                         </div>
 
                         <div class="flex items-start">
-                            <div class="w-12 h-12 rounded-full bg-blue-100 bg-blue-900/50 flex items-center justify-center mr-4 flex-shrink-0">
-                                <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                            <div class="w-12 h-12 rounded-full bg-blue-900/50 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-chart-line text-blue-400 text-xl"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold mb-2">Predict Future Needs</h3>
-                                <p class="text-gray-400 text-gray-300">Stay ahead with industry trend analysis and emerging skills detection. Plan your workforce evolution.</p>
+                                <h3 class="text-xl font-bold mb-2">Know What's Trending</h3>
+                                <p class="text-gray-300">Stay ahead of the curve with real-time industry insights. Learn the skills that will matter most in your next role.</p>
                             </div>
                         </div>
 
                         <div class="flex items-start">
-                            <div class="w-12 h-12 rounded-full bg-purple-100 bg-purple-900/50 flex items-center justify-center mr-4 flex-shrink-0">
-                                <i class="fas fa-route text-purple-600 text-xl"></i>
+                            <div class="w-12 h-12 rounded-full bg-purple-900/50 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-route text-purple-400 text-xl"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold mb-2">Create Growth Paths</h3>
-                                <p class="text-gray-400 text-gray-300">Generate personalized development roadmaps with time estimates, costs, and success metrics.</p>
+                                <h3 class="text-xl font-bold mb-2">Get Your Roadmap</h3>
+                                <p class="text-gray-300">Receive a personalized learning plan with exact courses, timeframes, and priorities to land your dream job.</p>
                             </div>
                         </div>
                     </div>
@@ -381,94 +381,94 @@
             <!-- Success Metrics -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
                 <div class="text-center">
-                    <div class="stats-number text-green-600">40%</div>
-                    <p class="text-gray-400 text-gray-300 font-medium">Faster Hiring</p>
-                    <p class="text-sm text-gray-500">Average time-to-fill reduced</p>
+                    <div class="stats-number text-green-600">67%</div>
+                    <p class="text-gray-300 font-medium">Faster Job Search</p>
+                    <p class="text-sm text-gray-500">Reduced search time from 5+ to 2 months</p>
                 </div>
                 <div class="text-center">
-                    <div class="stats-number text-blue-600">$1.2M</div>
-                    <p class="text-gray-400 text-gray-300 font-medium">Cost Savings</p>
-                    <p class="text-sm text-gray-500">Annual hiring cost reduction</p>
+                    <div class="stats-number text-blue-600">$25K</div>
+                    <p class="text-gray-300 font-medium">Salary Increase</p>
+                    <p class="text-sm text-gray-500">Average salary boost after skill upgrade</p>
                 </div>
                 <div class="text-center">
-                    <div class="stats-number text-purple-600">85%</div>
-                    <p class="text-gray-400 text-gray-300 font-medium">Internal Promotions</p>
-                    <p class="text-sm text-gray-500">Increase in successful promotions</p>
+                    <div class="stats-number text-purple-600">89%</div>
+                    <p class="text-gray-300 font-medium">Interview Success</p>
+                    <p class="text-sm text-gray-500">Users who get interviews after optimization</p>
                 </div>
                 <div class="text-center">
-                    <div class="stats-number text-orange-600">3x</div>
-                    <p class="text-gray-400 text-gray-300 font-medium">ROI</p>
-                    <p class="text-sm text-gray-500">Return on investment</p>
+                    <div class="stats-number text-orange-600">4.8/5</div>
+                    <p class="text-gray-300 font-medium">User Rating</p>
+                    <p class="text-sm text-gray-500">Average satisfaction score</p>
                 </div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Case Study 1 -->
+                <!-- Success Story 1 -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300 border-l-4 border-green-500">
                     <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-green-100 bg-green-900/50 flex items-center justify-center mr-3">
-                            <i class="fas fa-building text-green-600 text-xl"></i>
+                        <div class="w-12 h-12 rounded-full bg-green-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-green-400 text-xl"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold">TechCorp Solutions</h3>
-                            <p class="text-sm text-gray-500">500+ employees</p>
+                            <h3 class="text-lg font-bold">Sarah M.</h3>
+                            <p class="text-sm text-gray-500">Frontend Developer</p>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <div class="text-2xl font-bold text-green-600 mb-1">67% faster hiring</div>
-                        <p class="text-sm text-gray-400 text-gray-300">Reduced time-to-fill from 89 to 29 days</p>
+                        <div class="text-2xl font-bold text-green-400 mb-1">$35K raise</div>
+                        <p class="text-sm text-gray-300">Promoted to Senior Developer in 4 months</p>
                     </div>
-                    <blockquote class="text-sm italic text-gray-400 text-gray-300 mb-4">
-                        "We discovered 15 internal candidates ready for promotion that we never knew existed. The AI found skills in contexts we completely missed."
+                    <blockquote class="text-sm italic text-gray-300 mb-4">
+                        "I discovered I had leadership skills I never knew about. The AI found patterns in my project management experience that I completely missed on my resume."
                     </blockquote>
                     <div class="text-xs text-gray-500">
-                        <strong>Key Features Used:</strong> Team Analysis • Skills Matching • Internal Mobility
+                        <strong>Skills Discovered:</strong> Team Leadership • Project Management • Mentoring
                     </div>
                 </div>
                 
-                <!-- Case Study 2 -->
+                <!-- Success Story 2 -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300 border-l-4 border-blue-500">
                     <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 bg-blue-900/50 flex items-center justify-center mr-3">
-                            <i class="fas fa-rocket text-blue-600 text-xl"></i>
+                        <div class="w-12 h-12 rounded-full bg-blue-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-blue-400 text-xl"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold">StartupX</h3>
-                            <p class="text-sm text-gray-500">50+ employees</p>
+                            <h3 class="text-lg font-bold">Marcus T.</h3>
+                            <p class="text-sm text-gray-500">Career Changer</p>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <div class="text-2xl font-bold text-blue-600 mb-1">$240K saved</div>
-                        <p class="text-sm text-gray-400 text-gray-300">Avoided 3 bad hires in first quarter</p>
+                        <div class="text-2xl font-bold text-blue-400 mb-1">2 months</div>
+                        <p class="text-sm text-gray-300">From marketing to UX design role</p>
                     </div>
-                    <blockquote class="text-sm italic text-gray-400 text-gray-300 mb-4">
-                        "The gap analysis showed us exactly what skills we needed vs. what candidates actually had. No more expensive hiring mistakes."
+                    <blockquote class="text-sm italic text-gray-300 mb-4">
+                        "The platform showed me how my marketing background was actually perfect for UX. I got 3 interviews in my first week of applying."
                     </blockquote>
                     <div class="text-xs text-gray-500">
-                        <strong>Key Features Used:</strong> Resume Parsing • Gap Analysis • Trend Insights
+                        <strong>Transferable Skills:</strong> User Research • Data Analysis • Communication
                     </div>
                 </div>
                 
-                <!-- Case Study 3 -->
+                <!-- Success Story 3 -->
                 <div class="feature-card card p-6 rounded-xl transition-all duration-300 border-l-4 border-purple-500">
                     <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 rounded-full bg-purple-100 bg-purple-900/50 flex items-center justify-center mr-3">
-                            <i class="fas fa-university text-purple-600 text-xl"></i>
+                        <div class="w-12 h-12 rounded-full bg-purple-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-purple-400 text-xl"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold">Global Consulting</h3>
-                            <p class="text-sm text-gray-500">2000+ employees</p>
+                            <h3 class="text-lg font-bold">Jennifer L.</h3>
+                            <p class="text-sm text-gray-500">Data Analyst</p>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <div class="text-2xl font-bold text-purple-600 mb-1">3x ROI</div>
-                        <p class="text-sm text-gray-400 text-gray-300">$1.2M investment returned $3.6M value</p>
+                        <div class="text-2xl font-bold text-purple-400 mb-1">Dream job</div>
+                        <p class="text-sm text-gray-300">Landed role at top tech company</p>
                     </div>
-                    <blockquote class="text-sm italic text-gray-400 text-gray-300 mb-4">
-                        "Our learning budget became strategic instead of scattered. People are getting promoted faster and staying longer."
+                    <blockquote class="text-sm italic text-gray-300 mb-4">
+                        "The personalized learning path was spot-on. I focused on exactly the right skills and got my dream job at Google in 6 months."
                     </blockquote>
                     <div class="text-xs text-gray-500">
-                        <strong>Key Features Used:</strong> Learning Paths • Career Planning • Performance Tracking
+                        <strong>Skills Developed:</strong> Machine Learning • Python • Statistical Analysis
                     </div>
                 </div>
                 
