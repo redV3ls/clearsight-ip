@@ -56,7 +56,7 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     // Security validations for files
     if (resumeFile) {
       if (resumeFile.size > MAX_FILE_SIZE) {
-        throw new AppError(\`Resume file too large. Maximum size is \${MAX_FILE_SIZE / (1024 * 1024)}MB\`, 400, 'FILE_TOO_LARGE');
+        throw new AppError(`Resume file too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB`, 400, 'FILE_TOO_LARGE');
       }
       
       if (!ALLOWED_MIME_TYPES.includes(resumeFile.type)) {
@@ -71,7 +71,7 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     
     if (jobDescriptionFile) {
       if (jobDescriptionFile.size > MAX_JOB_FILE_SIZE) {
-        throw new AppError(\`Job description file too large. Maximum size is \${MAX_JOB_FILE_SIZE / (1024 * 1024)}MB\`, 400, 'FILE_TOO_LARGE');
+        throw new AppError(`Job description file too large. Maximum size is ${MAX_JOB_FILE_SIZE / (1024 * 1024)}MB`, 400, 'FILE_TOO_LARGE');
       }
       
       if (!ALLOWED_MIME_TYPES.includes(jobDescriptionFile.type)) {
@@ -85,23 +85,23 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     
     // Security validations for text inputs
     if (resumeText && resumeText.length > MAX_TEXT_LENGTH) {
-      throw new AppError(\`Resume text too long. Maximum \${MAX_TEXT_LENGTH} characters allowed\`, 400, 'TEXT_TOO_LONG');
+      throw new AppError(`Resume text too long. Maximum ${MAX_TEXT_LENGTH} characters allowed`, 400, 'TEXT_TOO_LONG');
     }
     
     if (jobDescriptionText && jobDescriptionText.length > MAX_TEXT_LENGTH) {
-      throw new AppError(\`Job description text too long. Maximum \${MAX_TEXT_LENGTH} characters allowed\`, 400, 'TEXT_TOO_LONG');
+      throw new AppError(`Job description text too long. Maximum ${MAX_TEXT_LENGTH} characters allowed`, 400, 'TEXT_TOO_LONG');
     }
     
     // Rate limiting check (30 seconds between requests)
     const userId = c.user!.id;
-    const rateLimitKey = \`resume_analysis:\${userId}\`;
+    const rateLimitKey = `resume_analysis:${userId}`;
     const lastAnalysis = await c.env.CACHE.get(rateLimitKey);
     
     if (lastAnalysis) {
       const timeSinceLastAnalysis = Date.now() - parseInt(lastAnalysis);
       if (timeSinceLastAnalysis < 30000) { // 30 seconds
         const remainingTime = Math.ceil((30000 - timeSinceLastAnalysis) / 1000);
-        throw new AppError(\`Please wait \${remainingTime} seconds before starting another analysis\`, 429, 'RATE_LIMITED');
+        throw new AppError(`Please wait ${remainingTime} seconds before starting another analysis`, 429, 'RATE_LIMITED');
       }
     }
     
@@ -172,7 +172,7 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
           requiredLevel: gap.requiredLevel,
           priority: gap.priority,
           learningTime: gap.timeToCompetency,
-          description: \`Skill gap in \${gap.skillName}\`,
+          description: `Skill gap in ${gap.skillName}`,
           resources: ['Online courses', 'Certification programs', 'Hands-on projects']
         })),
         strengths: gapAnalysisResult.strengths.map(strength => ({
@@ -200,9 +200,9 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
         trends: trends.map(trend => ({
           skill: trend.skillName,
           trend: trend.trendDirection,
-          demandGrowth: \`\${trend.growthRate > 0 ? '+' : ''}\${(trend.growthRate * 100).toFixed(1)}%\`,
+          demandGrowth: `${trend.growthRate > 0 ? '+' : ''}${(trend.growthRate * 100).toFixed(1)}%`,
           salaryImpact: trend.salaryImpact || 'Neutral',
-          description: \`\${trend.skillName} is \${trend.trendDirection.toLowerCase()} in demand\`
+          description: `${trend.skillName} is ${trend.trendDirection.toLowerCase()} in demand`
         }))
       };
     }
@@ -224,11 +224,11 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     // Store analysis result for future reference
     try {
       await c.env.DB
-        .prepare(\`
+        .prepare(`
           INSERT INTO resume_analyses (
             id, user_id, analysis_data, created_at
           ) VALUES (?, ?, ?, ?)
-        \`)
+        `)
         .bind(
           response.analysis_id,
           userId,
@@ -275,8 +275,8 @@ async function extractTextFromFile(file: File): Promise<string> {
     
     // Basic text cleaning and extraction simulation
     return content
-      .replace(/[\\x00-\\x1F\\x7F-\\x9F]/g, '') // Remove control characters
-      .replace(/\\s+/g, ' ') // Normalize whitespace
+      .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // Remove control characters
+      .replace(/\s+/g, ' ') // Normalize whitespace
       .trim()
       .substring(0, MAX_TEXT_LENGTH); // Ensure length limit
       
@@ -326,7 +326,7 @@ async function analyzeResumeContent(content: string): Promise<{
     for (const keyword of keywords) {
       if (contentLower.includes(keyword)) {
         // Estimate experience level based on context
-        const experienceMatch = contentLower.match(new RegExp(\`(\\\d+)\\\\s*(?:years?|yrs?).*?\${keyword}\`, 'i'));
+        const experienceMatch = contentLower.match(new RegExp(`(\\d+)\\s*(?:years?|yrs?).*?${keyword}`, 'i'));
         const yearsExp = experienceMatch ? parseInt(experienceMatch[1]) : 2;
         
         let level = 'Beginner';
@@ -347,10 +347,10 @@ async function analyzeResumeContent(content: string): Promise<{
   }
   
   // Extract education
-  const educationMatch = content.match(/(?:bachelor|master|phd|degree|university|college).*?(?:\\n|$)/gi) || [];
+  const educationMatch = content.match(/(?:bachelor|master|phd|degree|university|college).*?(?:\n|$)/gi) || [];
   
   // Extract certifications
-  const certificationMatch = content.match(/(?:certified|certification|certificate).*?(?:\\n|$)/gi) || [];
+  const certificationMatch = content.match(/(?:certified|certification|certificate).*?(?:\n|$)/gi) || [];
   
   return {
     skills: extractedSkills,
