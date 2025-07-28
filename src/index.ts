@@ -177,7 +177,7 @@ app.route('/api/v1/trends', trendsRoutes);
 
 // OpenAPI documentation
 const openAPIApp = createOpenAPIApp();
-app.route('/api', openAPIApp);
+app.route('/', openAPIApp);
 
 // Redirect /docs to the actual documentation location
 app.get('/docs', (c) => c.redirect('/api/v1/docs'));
