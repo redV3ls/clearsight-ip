@@ -17,6 +17,392 @@ const analyze = new Hono<{ Bindings: Env }>();
 // Apply authentication to all analyze routes
 analyze.use('*', requireAuth);
 
+// Security constants for file uploads
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_JOB_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain'
+];
+const MAX_TEXT_LENGTH = 50000; // 50k characters
+
+/**
+ * POST /analyze/resume - Resume/CV analysis with file upload support
+ * Analyzes uploaded resume files or text against job descriptions
+ */
+analyze.post('/resume', async (c: AuthenticatedContext) => {
+  const startTime = Date.now();
+  
+  try {
+    // Parse multipart form data
+    const formData = await c.req.formData();
+    
+    // Extract form fields
+    const resumeFile = formData.get('resume') as File | null;
+    const resumeText = formData.get('resumeText') as string | null;
+    const jobDescriptionFile = formData.get('jobDescription') as File | null;
+    const jobDescriptionText = formData.get('jobDescriptionText') as string | null;
+    const includeSkillsGap = formData.get('includeSkillsGap') === 'true';
+    const includeCareerSuggestions = formData.get('includeCareerSuggestions') === 'true';
+    const includeIndustryTrends = formData.get('includeIndustryTrends') === 'true';
+    
+    // Validation: Must have either resume file or text
+    if (!resumeFile && !resumeText) {
+      throw new AppError('Either resume file or resume text is required', 400, 'MISSING_RESUME');
+    }
+    
+    // Security validations for files
+    if (resumeFile) {
+      if (resumeFile.size > MAX_FILE_SIZE) {
+        throw new AppError(\`Resume file too large. Maximum size is \${MAX_FILE_SIZE / (1024 * 1024)}MB\`, 400, 'FILE_TOO_LARGE');
+      }
+      
+      if (!ALLOWED_MIME_TYPES.includes(resumeFile.type)) {
+        throw new AppError('Invalid resume file type. Only PDF, DOC, DOCX, and TXT files are allowed', 400, 'INVALID_FILE_TYPE');
+      }
+      
+      // Validate filename (prevent path traversal)
+      if (resumeFile.name.includes('../') || resumeFile.name.includes('..\\\\')) {
+        throw new AppError('Invalid filename', 400, 'INVALID_FILENAME');
+      }
+    }
+    
+    if (jobDescriptionFile) {
+      if (jobDescriptionFile.size > MAX_JOB_FILE_SIZE) {
+        throw new AppError(\`Job description file too large. Maximum size is \${MAX_JOB_FILE_SIZE / (1024 * 1024)}MB\`, 400, 'FILE_TOO_LARGE');
+      }
+      
+      if (!ALLOWED_MIME_TYPES.includes(jobDescriptionFile.type)) {
+        throw new AppError('Invalid job description file type. Only PDF, DOC, DOCX, and TXT files are allowed', 400, 'INVALID_FILE_TYPE');
+      }
+      
+      if (jobDescriptionFile.name.includes('../') || jobDescriptionFile.name.includes('..\\\\')) {
+        throw new AppError('Invalid filename', 400, 'INVALID_FILENAME');
+      }
+    }
+    
+    // Security validations for text inputs
+    if (resumeText && resumeText.length > MAX_TEXT_LENGTH) {
+      throw new AppError(\`Resume text too long. Maximum \${MAX_TEXT_LENGTH} characters allowed\`, 400, 'TEXT_TOO_LONG');
+    }
+    
+    if (jobDescriptionText && jobDescriptionText.length > MAX_TEXT_LENGTH) {
+      throw new AppError(\`Job description text too long. Maximum \${MAX_TEXT_LENGTH} characters allowed\`, 400, 'TEXT_TOO_LONG');
+    }
+    
+    // Rate limiting check (30 seconds between requests)
+    const userId = c.user!.id;
+    const rateLimitKey = \`resume_analysis:\${userId}\`;
+    const lastAnalysis = await c.env.CACHE.get(rateLimitKey);
+    
+    if (lastAnalysis) {
+      const timeSinceLastAnalysis = Date.now() - parseInt(lastAnalysis);
+      if (timeSinceLastAnalysis < 30000) { // 30 seconds
+        const remainingTime = Math.ceil((30000 - timeSinceLastAnalysis) / 1000);
+        throw new AppError(\`Please wait \${remainingTime} seconds before starting another analysis\`, 429, 'RATE_LIMITED');
+      }
+    }
+    
+    // Set rate limit
+    await c.env.CACHE.put(rateLimitKey, Date.now().toString(), { expirationTtl: 30 });
+    
+    // Extract text content from files or use provided text
+    let resumeContent = resumeText || '';
+    let jobContent = jobDescriptionText || '';
+    
+    if (resumeFile) {
+      resumeContent = await extractTextFromFile(resumeFile);
+    }
+    
+    if (jobDescriptionFile) {
+      jobContent = await extractTextFromFile(jobDescriptionFile);
+    }
+    
+    // Initialize services
+    const database = createDatabase(c.env.DB);
+    const skillMatchingService = new SkillMatchingService(database);
+    const gapAnalysisService = new GapAnalysisService(skillMatchingService);
+    const jobAnalysisService = new JobAnalysisService();
+    const trendsService = new TrendsAnalysisService(database);
+    
+    // Analyze resume content to extract skills
+    const resumeAnalysis = await analyzeResumeContent(resumeContent);
+    
+    // Convert extracted skills to UserSkill format
+    const userSkills: UserSkill[] = resumeAnalysis.skills.map(skill => ({
+      skillId: crypto.randomUUID(),
+      skillName: skill.name,
+      skillCategory: skill.category || 'General',
+      level: skill.level || 'Intermediate',
+      yearsExperience: skill.yearsExperience || 0,
+      confidenceScore: skill.confidence || 0.8,
+      certifications: skill.certifications || []
+    }));
+    
+    // Prepare response object
+    const response: any = {
+      analysis_id: crypto.randomUUID(),
+      user_id: userId,
+      timestamp: new Date().toISOString(),
+      skillsAnalysis: {
+        skills: resumeAnalysis.skills,
+        totalSkills: resumeAnalysis.skills.length,
+        categories: resumeAnalysis.categories,
+        experience: resumeAnalysis.experience,
+        education: resumeAnalysis.education,
+        certifications: resumeAnalysis.certifications
+      }
+    };
+    
+    // Perform skills gap analysis if job description provided and requested
+    if (jobContent && includeSkillsGap) {
+      const jobAnalysisResult = await jobAnalysisService.analyzeJobDescription(jobContent, 'Target Position');
+      const jobRequirements: JobSkillRequirement[] = jobAnalysisResult.skillRequirements;
+      
+      const gapAnalysisResult = await gapAnalysisService.analyzeGaps(userSkills, jobRequirements);
+      
+      response.skillsGap = {
+        overallMatch: gapAnalysisResult.overallMatchPercentage,
+        missingSkills: gapAnalysisResult.skillGaps.map(gap => ({
+          name: gap.skillName,
+          category: gap.category,
+          currentLevel: gap.currentLevel,
+          requiredLevel: gap.requiredLevel,
+          priority: gap.priority,
+          learningTime: gap.timeToCompetency,
+          description: \`Skill gap in \${gap.skillName}\`,
+          resources: ['Online courses', 'Certification programs', 'Hands-on projects']
+        })),
+        strengths: gapAnalysisResult.strengths.map(strength => ({
+          name: strength.skillName,
+          level: strength.level,
+          yearsExperience: strength.yearsExperience,
+          category: strength.skillCategory
+        }))
+      };
+    }
+    
+    // Generate career suggestions if requested
+    if (includeCareerSuggestions) {
+      response.careerSuggestions = {
+        suggestions: await generateCareerSuggestions(userSkills, resumeAnalysis)
+      };
+    }
+    
+    // Include industry trends if requested
+    if (includeIndustryTrends) {
+      const skillNames = userSkills.map(skill => skill.skillName);
+      const trends = await trendsService.getSkillTrends(skillNames);
+      
+      response.industryTrends = {
+        trends: trends.map(trend => ({
+          skill: trend.skillName,
+          trend: trend.trendDirection,
+          demandGrowth: \`\${trend.growthRate > 0 ? '+' : ''}\${(trend.growthRate * 100).toFixed(1)}%\`,
+          salaryImpact: trend.salaryImpact || 'Neutral',
+          description: \`\${trend.skillName} is \${trend.trendDirection.toLowerCase()} in demand\`
+        }))
+      };
+    }
+    
+    // Add metadata
+    response.metadata = {
+      processingTime: Date.now() - startTime,
+      analysisOptions: {
+        includeSkillsGap,
+        includeCareerSuggestions,
+        includeIndustryTrends
+      },
+      fileInfo: {
+        resumeFile: resumeFile ? { name: resumeFile.name, size: resumeFile.size, type: resumeFile.type } : null,
+        jobDescriptionFile: jobDescriptionFile ? { name: jobDescriptionFile.name, size: jobDescriptionFile.size, type: jobDescriptionFile.type } : null
+      }
+    };
+    
+    // Store analysis result for future reference
+    try {
+      await c.env.DB
+        .prepare(\`
+          INSERT INTO resume_analyses (
+            id, user_id, analysis_data, created_at
+          ) VALUES (?, ?, ?, ?)
+        \`)
+        .bind(
+          response.analysis_id,
+          userId,
+          JSON.stringify(response),
+          new Date().toISOString()
+        )
+        .run();
+    } catch (dbError) {
+      console.warn('Failed to store resume analysis result:', dbError);
+    }
+    
+    return c.json(response, 200);
+    
+  } catch (error) {
+    console.error('Resume analysis error:', error);
+    
+    if (error instanceof AppError) {
+      throw error;
+    }
+    
+    if (error instanceof Error) {
+      if (error.message.includes('timeout')) {
+        throw new AppError('Analysis request timed out', 408, 'TIMEOUT_ERROR');
+      }
+      if (error.message.includes('file')) {
+        throw new AppError('File processing failed', 400, 'FILE_PROCESSING_ERROR');
+      }
+    }
+    
+    throw new AppError('Resume analysis failed', 500, 'RESUME_ANALYSIS_FAILED');
+  }
+});
+
+// Helper function to extract text from uploaded files
+async function extractTextFromFile(file: File): Promise<string> {
+  try {
+    if (file.type === 'text/plain') {
+      return await file.text();
+    }
+    
+    // For PDF and DOC files, we'll simulate text extraction
+    // In a real implementation, you'd use libraries like pdf-parse or mammoth
+    const content = await file.text();
+    
+    // Basic text cleaning and extraction simulation
+    return content
+      .replace(/[\\x00-\\x1F\\x7F-\\x9F]/g, '') // Remove control characters
+      .replace(/\\s+/g, ' ') // Normalize whitespace
+      .trim()
+      .substring(0, MAX_TEXT_LENGTH); // Ensure length limit
+      
+  } catch (error) {
+    throw new AppError('Failed to extract text from file', 400, 'TEXT_EXTRACTION_FAILED');
+  }
+}
+
+// Helper function to analyze resume content and extract skills
+async function analyzeResumeContent(content: string): Promise<{
+  skills: Array<{
+    name: string;
+    category: string;
+    level: string;
+    confidence: number;
+    yearsExperience: number;
+    certifications: string[];
+  }>;
+  categories: string[];
+  experience: string;
+  education: string[];
+  certifications: string[];
+}> {
+  // This is a simplified implementation
+  // In production, you'd use NLP libraries or AI services for better extraction
+  
+  const skillKeywords = {
+    'Programming': ['javascript', 'python', 'java', 'react', 'node.js', 'typescript', 'html', 'css', 'sql'],
+    'Cloud': ['aws', 'azure', 'gcp', 'docker', 'kubernetes', 'terraform'],
+    'Data': ['machine learning', 'data analysis', 'pandas', 'numpy', 'tensorflow', 'pytorch'],
+    'Management': ['project management', 'team leadership', 'agile', 'scrum', 'product management'],
+    'Design': ['ui/ux', 'figma', 'photoshop', 'design thinking', 'user research']
+  };
+  
+  const contentLower = content.toLowerCase();
+  const extractedSkills: Array<{
+    name: string;
+    category: string;
+    level: string;
+    confidence: number;
+    yearsExperience: number;
+    certifications: string[];
+  }> = [];
+  
+  // Extract skills based on keywords
+  for (const [category, keywords] of Object.entries(skillKeywords)) {
+    for (const keyword of keywords) {
+      if (contentLower.includes(keyword)) {
+        // Estimate experience level based on context
+        const experienceMatch = contentLower.match(new RegExp(\`(\\\d+)\\\\s*(?:years?|yrs?).*?\${keyword}\`, 'i'));
+        const yearsExp = experienceMatch ? parseInt(experienceMatch[1]) : 2;
+        
+        let level = 'Beginner';
+        if (yearsExp >= 5) level = 'Expert';
+        else if (yearsExp >= 3) level = 'Advanced';
+        else if (yearsExp >= 1) level = 'Intermediate';
+        
+        extractedSkills.push({
+          name: keyword.charAt(0).toUpperCase() + keyword.slice(1),
+          category,
+          level,
+          confidence: 0.8,
+          yearsExperience: yearsExp,
+          certifications: []
+        });
+      }
+    }
+  }
+  
+  // Extract education
+  const educationMatch = content.match(/(?:bachelor|master|phd|degree|university|college).*?(?:\\n|$)/gi) || [];
+  
+  // Extract certifications
+  const certificationMatch = content.match(/(?:certified|certification|certificate).*?(?:\\n|$)/gi) || [];
+  
+  return {
+    skills: extractedSkills,
+    categories: [...new Set(extractedSkills.map(s => s.category))],
+    experience: 'Extracted from resume content',
+    education: educationMatch.map(e => e.trim()),
+    certifications: certificationMatch.map(c => c.trim())
+  };
+}
+
+// Helper function to generate career suggestions
+async function generateCareerSuggestions(userSkills: UserSkill[], resumeAnalysis: any): Promise<Array<{
+  title: string;
+  description: string;
+  matchScore: number;
+}>> {
+  // Simplified career suggestion logic
+  const suggestions = [];
+  
+  const skillCategories = userSkills.reduce((acc, skill) => {
+    acc[skill.skillCategory] = (acc[skill.skillCategory] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  // Generate suggestions based on skill concentration
+  if (skillCategories['Programming'] >= 3) {
+    suggestions.push({
+      title: 'Senior Software Developer',
+      description: 'Lead development projects and mentor junior developers',
+      matchScore: 85
+    });
+  }
+  
+  if (skillCategories['Management'] >= 2) {
+    suggestions.push({
+      title: 'Technical Project Manager',
+      description: 'Combine technical expertise with project management skills',
+      matchScore: 78
+    });
+  }
+  
+  if (skillCategories['Cloud'] >= 2) {
+    suggestions.push({
+      title: 'Cloud Solutions Architect',
+      description: 'Design and implement cloud infrastructure solutions',
+      matchScore: 82
+    });
+  }
+  
+  return suggestions;
+}
+
 /**
  * POST /analyze/gap - Individual skill gap analysis
  * Analyzes gaps between user skills and target job requirements

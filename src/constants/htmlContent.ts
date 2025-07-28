@@ -224,7 +224,7 @@
                 </div>
                 
                 <div class="flex flex-wrap gap-4">
-                    <button class="bg-accent hover:bg-teal-600 text-white font-semibold py-4 px-10 rounded-lg transition duration-300 text-lg shadow-lg">
+                    <button id="analyzeSkillsBtn" class="bg-accent hover:bg-teal-600 text-white font-semibold py-4 px-10 rounded-lg transition duration-300 text-lg shadow-lg">
                         Analyze My Skills Now
                     </button>
                     <a href="/api/v1/docs" class="bg-transparent hover:bg-slate-800 border-2 border-slate-600 text-gray-300 hover:text-white font-medium py-4 px-8 rounded-lg transition duration-300">
@@ -1068,6 +1068,903 @@
                 }
             });
         });
+    </script>
+
+    <!-- Authentication Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-slate-800 rounded-lg p-8 max-w-md w-full mx-4 border border-slate-700">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">Sign In Required</h2>
+                <button id="closeAuthModal" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div id="authTabs" class="flex mb-6 border-b border-slate-600">
+                <button id="loginTab" class="px-4 py-2 text-accent border-b-2 border-accent">Login</button>
+                <button id="registerTab" class="px-4 py-2 text-gray-400 hover:text-white ml-4">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                    <input type="email" id="loginEmail" required 
+                           class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-accent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <input type="password" id="loginPassword" required 
+                           class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-accent">
+                </div>
+                <button type="submit" class="w-full bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300">
+                    Sign In
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                    <input type="text" id="registerName" required 
+                           class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-accent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                    <input type="email" id="registerEmail" required 
+                           class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-accent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <input type="password" id="registerPassword" required minlength="8"
+                           class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-accent">
+                    <p class="text-xs text-gray-400 mt-1">Minimum 8 characters</p>
+                </div>
+                <button type="submit" class="w-full bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300">
+                    Create Account
+                </button>
+            </form>
+
+            <div id="authError" class="mt-4 p-3 bg-red-900/20 border border-red-500 rounded-md text-red-300 text-sm hidden"></div>
+        </div>
+    </div>
+
+    <!-- CV Analysis Modal -->
+    <div id="analysisModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-slate-800 rounded-lg p-8 max-w-4xl w-full mx-4 border border-slate-700 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">CV Skills Analysis</h2>
+                <button id="closeAnalysisModal" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Upload Section -->
+            <div id="uploadSection" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- CV Upload -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-white">Upload Your CV</h3>
+                        <div class="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center">
+                            <input type="file" id="cvFileInput" accept=".pdf,.doc,.docx,.txt" class="hidden">
+                            <div id="cvDropZone" class="cursor-pointer">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-accent mb-4"></i>
+                                <p class="text-gray-300 mb-2">Drop your CV here or click to browse</p>
+                                <p class="text-sm text-gray-500">Supports PDF, DOC, DOCX, TXT (Max 5MB)</p>
+                            </div>
+                            <div id="cvFileInfo" class="hidden mt-4 p-3 bg-slate-700 rounded-md">
+                                <div class="flex items-center justify-between">
+                                    <span id="cvFileName" class="text-sm text-gray-300"></span>
+                                    <button id="removeCvFile" class="text-red-400 hover:text-red-300">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Or Text Input -->
+                        <div class="text-center text-gray-400">OR</div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Paste CV Text</label>
+                            <textarea id="cvTextInput" rows="8" placeholder="Paste your CV content here..."
+                                    class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-accent resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Job Description -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-white">Job Description (Optional)</h3>
+                        <div class="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center">
+                            <input type="file" id="jobFileInput" accept=".pdf,.doc,.docx,.txt" class="hidden">
+                            <div id="jobDropZone" class="cursor-pointer">
+                                <i class="fas fa-briefcase text-4xl text-blue-400 mb-4"></i>
+                                <p class="text-gray-300 mb-2">Drop job description here or click to browse</p>
+                                <p class="text-sm text-gray-500">Supports PDF, DOC, DOCX, TXT (Max 2MB)</p>
+                            </div>
+                            <div id="jobFileInfo" class="hidden mt-4 p-3 bg-slate-700 rounded-md">
+                                <div class="flex items-center justify-between">
+                                    <span id="jobFileName" class="text-sm text-gray-300"></span>
+                                    <button id="removeJobFile" class="text-red-400 hover:text-red-300">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Or Text Input -->
+                        <div class="text-center text-gray-400">OR</div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Paste Job Description</label>
+                            <textarea id="jobTextInput" rows="8" placeholder="Paste the job description here..."
+                                    class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-accent resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Options -->
+                <div class="border-t border-slate-600 pt-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Analysis Options</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" id="skillsGapAnalysis" checked class="text-accent focus:ring-accent">
+                            <span class="text-gray-300">Skills Gap Analysis</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" id="careerSuggestions" checked class="text-accent focus:ring-accent">
+                            <span class="text-gray-300">Career Suggestions</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" id="industryTrends" checked class="text-accent focus:ring-accent">
+                            <span class="text-gray-300">Industry Trends</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-slate-600">
+                    <button id="cancelAnalysis" class="px-6 py-2 border border-slate-600 text-gray-300 rounded-md hover:bg-slate-700 transition duration-300">
+                        Cancel
+                    </button>
+                    <button id="startAnalysis" class="px-6 py-2 bg-accent hover:bg-teal-600 text-white rounded-md transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Start Analysis
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading Section -->
+            <div id="loadingSection" class="hidden text-center py-12">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-accent mx-auto mb-4"></div>
+                <h3 class="text-xl font-semibold text-white mb-2">Analyzing Your CV...</h3>
+                <p class="text-gray-400 mb-4">This may take up to 30 seconds</p>
+                <div class="w-full bg-slate-700 rounded-full h-2 mb-4">
+                    <div id="progressBar" class="bg-accent h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="loadingStatus" class="text-sm text-gray-500">Initializing analysis...</p>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="hidden space-y-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-white">Analysis Results</h3>
+                    <div class="flex space-x-2">
+                        <button id="downloadResults" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition duration-300">
+                            <i class="fas fa-download mr-2"></i>Download Report
+                        </button>
+                        <button id="newAnalysis" class="px-4 py-2 border border-slate-600 text-gray-300 rounded-md hover:bg-slate-700 transition duration-300">
+                            New Analysis
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="analysisResults" class="space-y-6">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+
+            <div id="analysisError" class="mt-4 p-3 bg-red-900/20 border border-red-500 rounded-md text-red-300 text-sm hidden"></div>
+        </div>
+    </div>
+
+    <!-- CV Analysis JavaScript -->
+    <script>
+        // Global state
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+        let analysisInProgress = false;
+
+        // Security configuration
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB for CV
+        const MAX_JOB_FILE_SIZE = 2 * 1024 * 1024; // 2MB for job description
+        const ALLOWED_FILE_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+        const MAX_TEXT_LENGTH = 50000; // 50k characters max
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAuth();
+            initializeFileHandlers();
+            initializeAnalysis();
+        });
+
+        // Authentication functions
+        function initializeAuth() {
+            const analyzeBtn = document.getElementById('analyzeSkillsBtn');
+            const authModal = document.getElementById('authModal');
+            const closeAuthModal = document.getElementById('closeAuthModal');
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            // Check if user is already authenticated
+            if (authToken) {
+                validateToken();
+            }
+
+            analyzeBtn.addEventListener('click', function() {
+                if (authToken && currentUser) {
+                    showAnalysisModal();
+                } else {
+                    showAuthModal();
+                }
+            });
+
+            closeAuthModal.addEventListener('click', hideAuthModal);
+            
+            loginTab.addEventListener('click', function() {
+                showLoginForm();
+            });
+            
+            registerTab.addEventListener('click', function() {
+                showRegisterForm();
+            });
+
+            loginForm.addEventListener('submit', handleLogin);
+            registerForm.addEventListener('submit', handleRegister);
+
+            // Close modal on outside click
+            authModal.addEventListener('click', function(e) {
+                if (e.target === authModal) {
+                    hideAuthModal();
+                }
+            });
+        }
+
+        function showAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            clearAuthError();
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginTab').classList.add('text-accent', 'border-b-2', 'border-accent');
+            document.getElementById('loginTab').classList.remove('text-gray-400');
+            document.getElementById('registerTab').classList.remove('text-accent', 'border-b-2', 'border-accent');
+            document.getElementById('registerTab').classList.add('text-gray-400');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+        }
+
+        function showRegisterForm() {
+            document.getElementById('registerTab').classList.add('text-accent', 'border-b-2', 'border-accent');
+            document.getElementById('registerTab').classList.remove('text-gray-400');
+            document.getElementById('loginTab').classList.remove('text-accent', 'border-b-2', 'border-accent');
+            document.getElementById('loginTab').classList.add('text-gray-400');
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('authToken', authToken);
+                    hideAuthModal();
+                    showAnalysisModal();
+                } else {
+                    showAuthError(data.error?.message || 'Login failed');
+                }
+            } catch (error) {
+                showAuthError('Network error. Please try again.');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            // Client-side validation
+            if (password.length < 8) {
+                showAuthError('Password must be at least 8 characters long');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('authToken', authToken);
+                    hideAuthModal();
+                    showAnalysisModal();
+                } else {
+                    showAuthError(data.error?.message || 'Registration failed');
+                }
+            } catch (error) {
+                showAuthError('Network error. Please try again.');
+            }
+        }
+
+        async function validateToken() {
+            try {
+                const response = await fetch('/api/v1/users/profile', {
+                    headers: {
+                        'Authorization': \`Bearer \${authToken}\`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                } else {
+                    // Token invalid, clear it
+                    authToken = null;
+                    currentUser = null;
+                    localStorage.removeItem('authToken');
+                }
+            } catch (error) {
+                console.error('Token validation failed:', error);
+                authToken = null;
+                currentUser = null;
+                localStorage.removeItem('authToken');
+            }
+        }
+
+        function showAuthError(message) {
+            const errorDiv = document.getElementById('authError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function clearAuthError() {
+            const errorDiv = document.getElementById('authError');
+            errorDiv.classList.add('hidden');
+        }
+
+        // File handling functions
+        function initializeFileHandlers() {
+            const cvFileInput = document.getElementById('cvFileInput');
+            const jobFileInput = document.getElementById('jobFileInput');
+            const cvDropZone = document.getElementById('cvDropZone');
+            const jobDropZone = document.getElementById('jobDropZone');
+            const removeCvFile = document.getElementById('removeCvFile');
+            const removeJobFile = document.getElementById('removeJobFile');
+
+            // CV file handling
+            cvDropZone.addEventListener('click', () => cvFileInput.click());
+            cvFileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0], 'cv'));
+            removeCvFile.addEventListener('click', () => clearFile('cv'));
+
+            // Job file handling
+            jobDropZone.addEventListener('click', () => jobFileInput.click());
+            jobFileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0], 'job'));
+            removeJobFile.addEventListener('click', () => clearFile('job'));
+
+            // Drag and drop for CV
+            cvDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                cvDropZone.classList.add('border-accent');
+            });
+            cvDropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                cvDropZone.classList.remove('border-accent');
+            });
+            cvDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                cvDropZone.classList.remove('border-accent');
+                handleFileSelect(e.dataTransfer.files[0], 'cv');
+            });
+
+            // Drag and drop for Job
+            jobDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                jobDropZone.classList.add('border-blue-400');
+            });
+            jobDropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                jobDropZone.classList.remove('border-blue-400');
+            });
+            jobDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                jobDropZone.classList.remove('border-blue-400');
+                handleFileSelect(e.dataTransfer.files[0], 'job');
+            });
+        }
+
+        function handleFileSelect(file, type) {
+            if (!file) return;
+
+            const maxSize = type === 'cv' ? MAX_FILE_SIZE : MAX_JOB_FILE_SIZE;
+            
+            // Security validations
+            if (file.size > maxSize) {
+                showAnalysisError(\`File too large. Maximum size is \${maxSize / (1024 * 1024)}MB\`);
+                return;
+            }
+
+            if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+                showAnalysisError('Invalid file type. Please upload PDF, DOC, DOCX, or TXT files only.');
+                return;
+            }
+
+            // Validate file name (prevent path traversal)
+            if (file.name.includes('../') || file.name.includes('..\\\\')) {
+                showAnalysisError('Invalid file name.');
+                return;
+            }
+
+            // Store file and show info
+            if (type === 'cv') {
+                window.cvFile = file;
+                document.getElementById('cvFileName').textContent = file.name;
+                document.getElementById('cvFileInfo').classList.remove('hidden');
+                document.getElementById('cvDropZone').classList.add('hidden');
+                // Clear text input if file is selected
+                document.getElementById('cvTextInput').value = '';
+            } else {
+                window.jobFile = file;
+                document.getElementById('jobFileName').textContent = file.name;
+                document.getElementById('jobFileInfo').classList.remove('hidden');
+                document.getElementById('jobDropZone').classList.add('hidden');
+                // Clear text input if file is selected
+                document.getElementById('jobTextInput').value = '';
+            }
+
+            clearAnalysisError();
+        }
+
+        function clearFile(type) {
+            if (type === 'cv') {
+                window.cvFile = null;
+                document.getElementById('cvFileInfo').classList.add('hidden');
+                document.getElementById('cvDropZone').classList.remove('hidden');
+                document.getElementById('cvFileInput').value = '';
+            } else {
+                window.jobFile = null;
+                document.getElementById('jobFileInfo').classList.add('hidden');
+                document.getElementById('jobDropZone').classList.remove('hidden');
+                document.getElementById('jobFileInput').value = '';
+            }
+        }
+
+        // Analysis functions
+        function initializeAnalysis() {
+            const analysisModal = document.getElementById('analysisModal');
+            const closeAnalysisModal = document.getElementById('closeAnalysisModal');
+            const cancelAnalysis = document.getElementById('cancelAnalysis');
+            const startAnalysis = document.getElementById('startAnalysis');
+            const newAnalysis = document.getElementById('newAnalysis');
+            const downloadResults = document.getElementById('downloadResults');
+
+            closeAnalysisModal.addEventListener('click', hideAnalysisModal);
+            cancelAnalysis.addEventListener('click', hideAnalysisModal);
+            startAnalysis.addEventListener('click', performAnalysis);
+            newAnalysis.addEventListener('click', resetAnalysis);
+            downloadResults.addEventListener('click', downloadAnalysisResults);
+
+            // Close modal on outside click
+            analysisModal.addEventListener('click', function(e) {
+                if (e.target === analysisModal && !analysisInProgress) {
+                    hideAnalysisModal();
+                }
+            });
+
+            // Text input validation
+            const cvTextInput = document.getElementById('cvTextInput');
+            const jobTextInput = document.getElementById('jobTextInput');
+
+            cvTextInput.addEventListener('input', function() {
+                if (this.value.length > MAX_TEXT_LENGTH) {
+                    this.value = this.value.substring(0, MAX_TEXT_LENGTH);
+                    showAnalysisError(\`Text too long. Maximum \${MAX_TEXT_LENGTH} characters allowed.\`);
+                }
+                // Clear file if text is entered
+                if (this.value.trim() && window.cvFile) {
+                    clearFile('cv');
+                }
+            });
+
+            jobTextInput.addEventListener('input', function() {
+                if (this.value.length > MAX_TEXT_LENGTH) {
+                    this.value = this.value.substring(0, MAX_TEXT_LENGTH);
+                    showAnalysisError(\`Text too long. Maximum \${MAX_TEXT_LENGTH} characters allowed.\`);
+                }
+                // Clear file if text is entered
+                if (this.value.trim() && window.jobFile) {
+                    clearFile('job');
+                }
+            });
+        }
+
+        function showAnalysisModal() {
+            document.getElementById('analysisModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            resetAnalysis();
+        }
+
+        function hideAnalysisModal() {
+            if (analysisInProgress) {
+                if (!confirm('Analysis is in progress. Are you sure you want to cancel?')) {
+                    return;
+                }
+            }
+            document.getElementById('analysisModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            resetAnalysis();
+        }
+
+        function resetAnalysis() {
+            // Show upload section, hide others
+            document.getElementById('uploadSection').classList.remove('hidden');
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            
+            // Clear files and inputs
+            clearFile('cv');
+            clearFile('job');
+            document.getElementById('cvTextInput').value = '';
+            document.getElementById('jobTextInput').value = '';
+            
+            // Reset checkboxes
+            document.getElementById('skillsGapAnalysis').checked = true;
+            document.getElementById('careerSuggestions').checked = true;
+            document.getElementById('industryTrends').checked = true;
+            
+            clearAnalysisError();
+            analysisInProgress = false;
+        }
+
+        async function performAnalysis() {
+            // Validate inputs
+            const cvText = document.getElementById('cvTextInput').value.trim();
+            const jobText = document.getElementById('jobTextInput').value.trim();
+            
+            if (!window.cvFile && !cvText) {
+                showAnalysisError('Please upload a CV file or enter CV text.');
+                return;
+            }
+
+            // Prepare form data
+            const formData = new FormData();
+            
+            if (window.cvFile) {
+                formData.append('resume', window.cvFile);
+            } else {
+                formData.append('resumeText', cvText);
+            }
+            
+            if (window.jobFile) {
+                formData.append('jobDescription', window.jobFile);
+            } else if (jobText) {
+                formData.append('jobDescriptionText', jobText);
+            }
+
+            // Add analysis options
+            formData.append('includeSkillsGap', document.getElementById('skillsGapAnalysis').checked);
+            formData.append('includeCareerSuggestions', document.getElementById('careerSuggestions').checked);
+            formData.append('includeIndustryTrends', document.getElementById('industryTrends').checked);
+
+            // Show loading
+            analysisInProgress = true;
+            document.getElementById('uploadSection').classList.add('hidden');
+            document.getElementById('loadingSection').classList.remove('hidden');
+            
+            // Simulate progress
+            simulateProgress();
+
+            try {
+                const response = await fetch('/api/v1/analyze/resume', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': \`Bearer \${authToken}\`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResults(data);
+                } else {
+                    throw new Error(data.error?.message || 'Analysis failed');
+                }
+            } catch (error) {
+                showAnalysisError(error.message || 'Analysis failed. Please try again.');
+                resetAnalysis();
+            } finally {
+                analysisInProgress = false;
+            }
+        }
+
+        function simulateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const loadingStatus = document.getElementById('loadingStatus');
+            const statuses = [
+                'Initializing analysis...',
+                'Processing CV content...',
+                'Extracting skills...',
+                'Analyzing job requirements...',
+                'Identifying skill gaps...',
+                'Generating recommendations...',
+                'Finalizing results...'
+            ];
+            
+            let progress = 0;
+            let statusIndex = 0;
+            
+            const interval = setInterval(() => {
+                if (!analysisInProgress) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                progress += Math.random() * 15;
+                if (progress > 95) progress = 95;
+                
+                progressBar.style.width = progress + '%';
+                
+                if (statusIndex < statuses.length - 1 && progress > (statusIndex + 1) * 14) {
+                    statusIndex++;
+                    loadingStatus.textContent = statuses[statusIndex];
+                }
+            }, 1000);
+        }
+
+        function displayResults(data) {
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+            
+            const resultsContainer = document.getElementById('analysisResults');
+            
+            // Store results for download
+            window.analysisData = data;
+            
+            // Generate results HTML
+            let resultsHTML = '';
+            
+            if (data.skillsAnalysis) {
+                resultsHTML += generateSkillsAnalysisHTML(data.skillsAnalysis);
+            }
+            
+            if (data.skillsGap) {
+                resultsHTML += generateSkillsGapHTML(data.skillsGap);
+            }
+            
+            if (data.careerSuggestions) {
+                resultsHTML += generateCareerSuggestionsHTML(data.careerSuggestions);
+            }
+            
+            if (data.industryTrends) {
+                resultsHTML += generateIndustryTrendsHTML(data.industryTrends);
+            }
+            
+            resultsContainer.innerHTML = resultsHTML;
+        }
+
+        function generateSkillsAnalysisHTML(skillsAnalysis) {
+            return \`
+                <div class="bg-slate-700 rounded-lg p-6">
+                    <h4 class="text-lg font-semibold text-white mb-4">
+                        <i class="fas fa-chart-bar text-accent mr-2"></i>
+                        Skills Analysis
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        \${skillsAnalysis.skills.map(skill => \`
+                            <div class="bg-slate-800 rounded-md p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-medium text-gray-300">\${skill.name}</span>
+                                    <span class="text-sm font-semibold \${getSkillLevelColor(skill.level)}">\${skill.level}</span>
+                                </div>
+                                <div class="w-full bg-slate-600 rounded-full h-2">
+                                    <div class="bg-accent h-2 rounded-full transition-all duration-300" style="width: \${skill.confidence}%"></div>
+                                </div>
+                                <div class="text-xs text-gray-400 mt-1">\${skill.confidence}% confidence</div>
+                            </div>
+                        \`).join('')}
+                    </div>
+                </div>
+            \`;
+        }
+
+        function generateSkillsGapHTML(skillsGap) {
+            return \`
+                <div class="bg-slate-700 rounded-lg p-6">
+                    <h4 class="text-lg font-semibold text-white mb-4">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                        Skills Gap Analysis
+                    </h4>
+                    <div class="space-y-4">
+                        \${skillsGap.missingSkills.map(skill => \`
+                            <div class="bg-red-900/20 border border-red-500 rounded-md p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-medium text-red-300">\${skill.name}</h5>
+                                    <span class="text-xs bg-red-600 text-white px-2 py-1 rounded">\${skill.priority}</span>
+                                </div>
+                                <p class="text-sm text-gray-300 mb-2">\${skill.description}</p>
+                                <div class="text-xs text-gray-400">
+                                    <strong>Learning Time:</strong> \${skill.learningTime} | 
+                                    <strong>Resources:</strong> \${skill.resources.join(', ')}
+                                </div>
+                            </div>
+                        \`).join('')}
+                    </div>
+                </div>
+            \`;
+        }
+
+        function generateCareerSuggestionsHTML(careerSuggestions) {
+            return \`
+                <div class="bg-slate-700 rounded-lg p-6">
+                    <h4 class="text-lg font-semibold text-white mb-4">
+                        <i class="fas fa-rocket text-blue-400 mr-2"></i>
+                        Career Suggestions
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        \${careerSuggestions.suggestions.map(suggestion => \`
+                            <div class="bg-slate-800 rounded-md p-4">
+                                <h5 class="font-medium text-blue-300 mb-2">\${suggestion.title}</h5>
+                                <p class="text-sm text-gray-300 mb-3">\${suggestion.description}</p>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-gray-400">Match Score</span>
+                                    <span class="text-sm font-semibold text-blue-400">\${suggestion.matchScore}%</span>
+                                </div>
+                                <div class="w-full bg-slate-600 rounded-full h-2">
+                                    <div class="bg-blue-400 h-2 rounded-full" style="width: \${suggestion.matchScore}%"></div>
+                                </div>
+                            </div>
+                        \`).join('')}
+                    </div>
+                </div>
+            \`;
+        }
+
+        function generateIndustryTrendsHTML(industryTrends) {
+            return \`
+                <div class="bg-slate-700 rounded-lg p-6">
+                    <h4 class="text-lg font-semibold text-white mb-4">
+                        <i class="fas fa-trending-up text-green-400 mr-2"></i>
+                        Industry Trends
+                    </h4>
+                    <div class="space-y-4">
+                        \${industryTrends.trends.map(trend => \`
+                            <div class="bg-slate-800 rounded-md p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-medium text-green-300">\${trend.skill}</h5>
+                                    <span class="text-xs \${getTrendColor(trend.trend)} px-2 py-1 rounded">\${trend.trend}</span>
+                                </div>
+                                <p class="text-sm text-gray-300 mb-2">\${trend.description}</p>
+                                <div class="text-xs text-gray-400">
+                                    <strong>Demand Growth:</strong> \${trend.demandGrowth} | 
+                                    <strong>Salary Impact:</strong> \${trend.salaryImpact}
+                                </div>
+                            </div>
+                        \`).join('')}
+                    </div>
+                </div>
+            \`;
+        }
+
+        function getSkillLevelColor(level) {
+            switch(level.toLowerCase()) {
+                case 'expert': return 'text-green-400';
+                case 'advanced': return 'text-blue-400';
+                case 'intermediate': return 'text-yellow-400';
+                case 'beginner': return 'text-orange-400';
+                default: return 'text-gray-400';
+            }
+        }
+
+        function getTrendColor(trend) {
+            switch(trend.toLowerCase()) {
+                case 'rising': return 'bg-green-600 text-white';
+                case 'stable': return 'bg-blue-600 text-white';
+                case 'declining': return 'bg-red-600 text-white';
+                default: return 'bg-gray-600 text-white';
+            }
+        }
+
+        function downloadAnalysisResults() {
+            if (!window.analysisData) return;
+            
+            const results = {
+                timestamp: new Date().toISOString(),
+                user: currentUser?.name || 'Anonymous',
+                ...window.analysisData
+            };
+            
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = \`cv-analysis-\${new Date().toISOString().split('T')[0]}.json\`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showAnalysisError(message) {
+            const errorDiv = document.getElementById('analysisError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function clearAnalysisError() {
+            const errorDiv = document.getElementById('analysisError');
+            errorDiv.classList.add('hidden');
+        }
+
+        // Security: Prevent XSS in dynamic content
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Security: Rate limiting for analysis requests
+        let lastAnalysisTime = 0;
+        const ANALYSIS_COOLDOWN = 30000; // 30 seconds
+
+        function checkAnalysisRateLimit() {
+            const now = Date.now();
+            if (now - lastAnalysisTime < ANALYSIS_COOLDOWN) {
+                const remainingTime = Math.ceil((ANALYSIS_COOLDOWN - (now - lastAnalysisTime)) / 1000);
+                showAnalysisError(\`Please wait \${remainingTime} seconds before starting another analysis.\`);
+                return false;
+            }
+            lastAnalysisTime = now;
+            return true;
+        }
+
+        // Update performAnalysis to include rate limiting
+        const originalPerformAnalysis = performAnalysis;
+        performAnalysis = function() {
+            if (!checkAnalysisRateLimit()) {
+                return;
+            }
+            return originalPerformAnalysis.call(this);
+        };
     </script>
 </body>
 </html>

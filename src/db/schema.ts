@@ -200,3 +200,23 @@ export const marketForecasts = sqliteTable('market_forecasts', {
   methodology: text('methodology'), // Algorithm/model used
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });
+
+// Resume analyses table
+export const resumeAnalyses = sqliteTable('resume_analyses', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  analysisData: text('analysis_data').notNull(), // JSON data of the complete analysis
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Team analyses table (for storing team analysis results)
+export const teamAnalyses = sqliteTable('team_analyses', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  projectName: text('project_name').notNull(),
+  teamSize: integer('team_size').notNull(),
+  overallMatch: real('overall_match').notNull(),
+  criticalGapsCount: integer('critical_gaps_count').notNull(),
+  analysisData: text('analysis_data').notNull(), // JSON data of the complete analysis
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+});
