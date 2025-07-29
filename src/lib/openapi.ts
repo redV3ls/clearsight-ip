@@ -933,6 +933,83 @@ Error responses:
     }
   });
 
+  const requestResetRoute = createRoute({
+    method: 'post',
+    path: '/api/v1/auth/request-reset',
+    tags: ['Authentication'],
+    summary: 'Request password reset',
+    description: 'Request a password reset token to be sent via email',
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: z.object({
+            email: z.string().email().openapi({ example: 'user@example.com' })
+          })
+        }
+      }
+    },
+    responses: {
+      200: {
+        description: 'Reset request processed',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean().openapi({ example: true }),
+              message: z.string().openapi({ example: 'If this email exists, a reset link has been sent' })
+            })
+          }
+        }
+      }
+    }
+  });
+
+  const resetPasswordRoute = createRoute({
+    method: 'post',
+    path: '/api/v1/auth/reset-password',
+    tags: ['Authentication'],
+    summary: 'Reset password',
+    description: 'Reset password using a valid reset token',
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: z.object({
+            token: z.string().openapi({ example: 'abc123def456...' }),
+            newPassword: z.string().min(8).openapi({ example: 'MyNewSecurePassword789!' })
+          })
+        }
+      }
+    },
+    responses: {
+      200: {
+        description: 'Password reset successful',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean().openapi({ example: true }),
+              message: z.string().openapi({ example: 'Password reset successfully' })
+            })
+          }
+        }
+      },
+      400: {
+        description: 'Invalid or expired token',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean().openapi({ example: false }),
+              error: z.object({
+                code: z.string().openapi({ example: 'INVALID_TOKEN' }),
+                message: z.string().openapi({ example: 'Invalid reset token' })
+              })
+            })
+          }
+        }
+      }
+    }
+  });
+
   // User Profile endpoints
   const getUserProfileRoute = createRoute({
     method: 'get',
@@ -1194,6 +1271,8 @@ Error responses:
   app.openapi(registerRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(logoutRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(changePasswordRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(requestResetRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(resetPasswordRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(gapAnalysisRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(gapAnalysisHistoryRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(teamAnalysisRoute, (c) => c.json({ message: 'Documentation only' }));

@@ -220,3 +220,13 @@ export const teamAnalyses = sqliteTable('team_analyses', {
   analysisData: text('analysis_data').notNull(), // JSON data of the complete analysis
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });
+
+// Password reset tokens table
+export const passwordResetTokens = sqliteTable('password_reset_tokens', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  tokenHash: text('token_hash').notNull().unique(),
+  expiresAt: text('expires_at').notNull(),
+  usedAt: text('used_at'),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+});

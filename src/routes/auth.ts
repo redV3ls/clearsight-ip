@@ -28,6 +28,15 @@ const changePasswordSchema = z.object({
   newPassword: z.string().min(8, 'New password must be at least 8 characters').max(128)
 });
 
+const requestResetSchema = z.object({
+  email: z.string().email('Invalid email format').max(255)
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Reset token is required').max(128),
+  newPassword: z.string().min(8, 'New password must be at least 8 characters').max(128)
+});
+
 // Apply rate limiting to all auth routes
 auth.use('*', authRateLimiter);
 
@@ -160,6 +169,62 @@ auth.post('/logout',
       success: true,
       message: 'Logged out successfully'
     });
+  }
+);
+
+/**
+ * POST /auth/request-reset
+ * Request password reset token
+ */
+auth.post('/request-reset',
+  validateBody(requestResetSchema, { sanitize: true }),
+  async (c) => {
+    try {
+      const { email } = c.get('validatedBody');
+      const db = DatabaseManager.initialize(c.env.DB);
+      const authService = new UserAuthService(db);
+
+      await authService.generatePasswordResetToken(email);
+
+      // Always return success to prevent email enumeration
+      return c.json({
+        success: true,
+        message: 'If this email exists, a reset link has been sent'
+      });
+    } catch (error) {
+      // Always return success for security (don't reveal if email exists)
+      return c.json({
+        success: true,
+        message: 'If this email exists, a reset link has been sent'
+      });
+    }
+  }
+);
+
+/**
+ * POST /auth/reset-password
+ * Reset password using token
+ */
+auth.post('/reset-password',
+  validateBody(resetPasswordSchema, { sanitize: true }),
+  async (c) => {
+    try {
+      const { token, newPassword } = c.get('validatedBody');
+      const db = DatabaseManager.initialize(c.env.DB);
+      const authService = new UserAuthService(db);
+
+      await authService.resetPassword(token, newPassword);
+
+      return c.json({
+        success: true,
+        message: 'Password reset successfully'
+      });
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Password reset failed', 500, 'PASSWORD_RESET_ERROR');
+    }
   }
 );
 

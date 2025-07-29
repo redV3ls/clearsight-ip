@@ -295,24 +295,20 @@ export class UserAuthService {
   }
 
   /**
-   * Generate password reset token (placeholder for future implementation)
+   * Generate password reset token
    */
   async generatePasswordResetToken(email: string): Promise<string> {
-    // TODO: Implement password reset functionality
-    // This would typically:
-    // 1. Generate a secure random token
-    // 2. Store it in the database with expiration
-    // 3. Send email to user
-    // 4. Return token for testing purposes
-    
-    throw new AppError('Password reset not yet implemented', 501, 'NOT_IMPLEMENTED');
+    const { SecurePasswordResetService } = await import('./passwordResetService');
+    const resetService = new SecurePasswordResetService(this.db);
+    return await resetService.generateResetToken(email);
   }
 
   /**
-   * Reset password using token (placeholder for future implementation)
+   * Reset password using token
    */
   async resetPassword(token: string, newPassword: string): Promise<void> {
-    // TODO: Implement password reset functionality
-    throw new AppError('Password reset not yet implemented', 501, 'NOT_IMPLEMENTED');
+    const { SecurePasswordResetService } = await import('./passwordResetService');
+    const resetService = new SecurePasswordResetService(this.db);
+    await resetService.resetPassword(token, newPassword);
   }
 }

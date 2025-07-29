@@ -28,6 +28,9 @@ export default async function scheduled(
     // Run data retention purging
     await runDataRetentionPurge(env);
     
+    // Clean up expired password reset tokens
+    await cleanupPasswordResetTokens(env);
+    
     // Then process async jobs
     // Create job scheduler with appropriate configuration
     const scheduler = new JobScheduler(env, {
@@ -114,6 +117,30 @@ async function storeScheduledRunMetrics(
     }));
   } catch (error) {
     logger.error('Failed to store scheduled run metrics:', error);
+  }
+}
+
+/**
+ * Clean up expired password reset tokens
+ */
+async function cleanupPasswordResetTokens(env: Env): Promise<void> {
+  const startTime = Date.now();
+  logger.info('Starting password reset token cleanup');
+  
+  try {
+    const { SecurePasswordResetService } = await import('./services/passwordResetService');
+    const { DatabaseManager } = await import('./config/database');
+    
+    const db = DatabaseManager.initialize(env.DB);
+    const resetService = new SecurePasswordResetService(db);
+    
+    await resetService.cleanupExpiredTokens();
+    
+    const duration = Date.now() - startTime;
+    logger.info('Password reset token cleanup completed', { duration });
+    
+  } catch (error) {
+    logger.error('Password reset token cleanup failed:', error);
   }
 }
 
