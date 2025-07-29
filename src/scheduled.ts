@@ -31,6 +31,9 @@ export default async function scheduled(
     // Clean up expired password reset tokens
     await cleanupPasswordResetTokens(env);
     
+    // Process GDPR deletion requests
+    await processGDPRDeletionRequests(env);
+    
     // Then process async jobs
     // Create job scheduler with appropriate configuration
     const scheduler = new JobScheduler(env, {
@@ -141,6 +144,30 @@ async function cleanupPasswordResetTokens(env: Env): Promise<void> {
     
   } catch (error) {
     logger.error('Password reset token cleanup failed:', error);
+  }
+}
+
+/**
+ * Process GDPR deletion requests
+ */
+async function processGDPRDeletionRequests(env: Env): Promise<void> {
+  const startTime = Date.now();
+  logger.info('Starting GDPR deletion request processing');
+  
+  try {
+    const { SecureGDPRDeletionService } = await import('./services/gdprDeletionService');
+    const { DatabaseManager } = await import('./config/database');
+    
+    const db = DatabaseManager.initialize(env.DB);
+    const deletionService = new SecureGDPRDeletionService(db, env);
+    
+    await deletionService.cleanupExpiredRequests();
+    
+    const duration = Date.now() - startTime;
+    logger.info('GDPR deletion request processing completed', { duration });
+    
+  } catch (error) {
+    logger.error('GDPR deletion request processing failed:', error);
   }
 }
 

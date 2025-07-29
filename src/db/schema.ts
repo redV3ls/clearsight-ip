@@ -230,3 +230,15 @@ export const passwordResetTokens = sqliteTable('password_reset_tokens', {
   usedAt: text('used_at'),
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });
+
+// GDPR deletion requests table
+export const gdprDeletionRequests = sqliteTable('gdpr_deletion_requests', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  confirmationToken: text('confirmation_token').notNull().unique(),
+  status: text('status').notNull().default('pending'), // 'pending', 'processing', 'completed', 'failed'
+  scheduledFor: text('scheduled_for').notNull(),
+  completedAt: text('completed_at'),
+  gracePeriodHours: integer('grace_period_hours').notNull().default(72), // 72 hours default
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+});

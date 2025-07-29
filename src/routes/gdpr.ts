@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { Env } from '../index';
 import { GDPRExportService } from '../services/gdprExportService';
 import { auditLog } from '../services/auditService';
+import { AppError } from '../middleware/errorHandler';
+import { logger } from '../utils/logger';
 
 const gdprRoutes = new Hono<{ Bindings: Env }>();
 
@@ -167,30 +169,103 @@ gdprRoutes.delete('/data', async (c) => {
       }, 400);
     }
     
-    // TODO: Implement actual data deletion logic
-    // This is a placeholder - in production, this would:
-    // 1. Verify the confirmation token
-    // 2. Schedule deletion of all user data
-    // 3. Send confirmation email
-    // 4. Log the deletion request
+    // Implement actual data deletion logic
+    try {
+      const { SecureGDPRDeletionService } = await import('../services/gdprDeletionService');
+      const { DatabaseManager } = await import('../config/database');
+      
+      const db = DatabaseManager.initialize(c.env.DB);
+      const deletionService = new SecureGDPRDeletionService(db, c.env);
+      
+      const deletionId = await deletionService.requestDeletion(userId, confirmationToken);
+      
+      await auditLog(c.env, {
+        action: 'gdpr.deletion.requested',
+        userId,
+        resourceType: 'user_data',
+        resourceId: userId,
+        metadata: {
+          deletionId,
+          confirmationToken: confirmationToken.substring(0, 8) + '...',
+        },
+      });
+
+      return c.json({
+        success: true,
+        message: 'Data deletion has been scheduled. You will receive a confirmation email.',
+        deletionId,
+        gracePeriod: '72 hours'
+      });
+      
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      
+      logger.error('GDPR deletion request failed:', error);
+      throw new AppError('Failed to process deletion request', 500, 'DELETION_REQUEST_FAILED');
+    }
+  } catch (error) {
+    throw error;
+  }
+});
+
+/**
+ * POST /gdpr/cancel-deletion
+ * Cancel a pending data deletion request during grace period
+ */
+gdprRoutes.post('/cancel-deletion', async (c) => {
+  try {
+    const user = c.get('user');
+    if (!user) {
+      return c.json({
+        success: false,
+        error: 'Authentication required',
+      }, 401);
+    }
+
+    const userId = user.id;
+    const body = await c.req.json();
+    const { deletionId } = body;
+
+    if (!deletionId) {
+      return c.json({
+        success: false,
+        error: 'Deletion ID is required',
+      }, 400);
+    }
+
+    const { SecureGDPRDeletionService } = await import('../services/gdprDeletionService');
+    const { DatabaseManager } = await import('../config/database');
+    
+    const db = DatabaseManager.initialize(c.env.DB);
+    const deletionService = new SecureGDPRDeletionService(db, c.env);
+    
+    // Cancel the deletion request
+    await deletionService.cancelDeletion(deletionId, userId);
     
     await auditLog(c.env, {
-      action: 'gdpr.deletion.requested',
+      action: 'gdpr.deletion.cancelled',
       userId,
       resourceType: 'user_data',
       resourceId: userId,
       metadata: {
-        confirmationToken: confirmationToken.substring(0, 8) + '...',
+        deletionId,
       },
     });
-    
+
     return c.json({
       success: true,
-      message: 'Data deletion request submitted. You will receive a confirmation email.',
-      deletionScheduledFor: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+      message: 'Data deletion request has been cancelled successfully.'
     });
+    
   } catch (error) {
-    throw error;
+    if (error instanceof AppError) {
+      throw error;
+    }
+    
+    logger.error('GDPR deletion cancellation failed:', error);
+    throw new AppError('Failed to cancel deletion request', 500, 'DELETION_CANCELLATION_FAILED');
   }
 });
 

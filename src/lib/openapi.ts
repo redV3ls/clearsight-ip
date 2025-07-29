@@ -1215,6 +1215,72 @@ Error responses:
     }
   });
 
+  const gdprDeleteRoute = createRoute({
+    method: 'post',
+    path: '/api/v1/gdpr/delete',
+    tags: ['GDPR'],
+    summary: 'Request data deletion',
+    description: 'Request permanent deletion of all user data (GDPR Right to be Forgotten)',
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: z.object({
+            confirmationToken: z.string().openapi({ example: 'delete_usr123_1642684800000' })
+          })
+        }
+      }
+    },
+    responses: {
+      200: {
+        description: 'Deletion request accepted',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean().openapi({ example: true }),
+              message: z.string().openapi({ example: 'Data deletion has been scheduled. You will receive a confirmation email.' }),
+              deletionId: z.string().openapi({ example: 'del_20240120_143052_001' }),
+              gracePeriod: z.string().openapi({ example: '72 hours' })
+            })
+          }
+        }
+      }
+    }
+  });
+
+  const gdprCancelDeletionRoute = createRoute({
+    method: 'post',
+    path: '/api/v1/gdpr/cancel-deletion',
+    tags: ['GDPR'],
+    summary: 'Cancel data deletion',
+    description: 'Cancel a pending data deletion request during the grace period',
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: z.object({
+            deletionId: z.string().openapi({ example: 'del_20240120_143052_001' })
+          })
+        }
+      }
+    },
+    responses: {
+      200: {
+        description: 'Deletion cancelled successfully',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean().openapi({ example: true }),
+              message: z.string().openapi({ example: 'Data deletion request has been cancelled successfully.' })
+            })
+          }
+        }
+      }
+    }
+  });
+
   // Audit endpoints
   const auditLogsRoute = createRoute({
     method: 'get',
@@ -1282,6 +1348,8 @@ Error responses:
   app.openapi(jobSearchRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(cacheStatsRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(gdprExportRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(gdprDeleteRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(gdprCancelDeletionRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(auditLogsRoute, (c) => c.json({ message: 'Documentation only' }));
 
   // Add Swagger UI with better configuration
