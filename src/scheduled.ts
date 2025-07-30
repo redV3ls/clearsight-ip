@@ -34,6 +34,9 @@ export default async function scheduled(
     // Process GDPR deletion requests
     await processGDPRDeletionRequests(env);
     
+    // Clean up expired rate limit entries
+    await cleanupRateLimitEntries(env);
+    
     // Then process async jobs
     // Create job scheduler with appropriate configuration
     const scheduler = new JobScheduler(env, {
@@ -168,6 +171,27 @@ async function processGDPRDeletionRequests(env: Env): Promise<void> {
     
   } catch (error) {
     logger.error('GDPR deletion request processing failed:', error);
+  }
+}
+
+/**
+ * Clean up expired rate limit entries
+ */
+async function cleanupRateLimitEntries(env: Env): Promise<void> {
+  const startTime = Date.now();
+  logger.info('Starting rate limit cleanup');
+  
+  try {
+    const { ProductionRateLimiterService } = await import('./services/productionRateLimiter');
+    
+    const rateLimiter = new ProductionRateLimiterService(env);
+    await rateLimiter.cleanupExpiredEntries();
+    
+    const duration = Date.now() - startTime;
+    logger.info('Rate limit cleanup completed', { duration });
+    
+  } catch (error) {
+    logger.error('Rate limit cleanup failed:', error);
   }
 }
 

@@ -95,8 +95,11 @@ app.use('/api/v1/users/profile', userCacheMiddleware({
   ttl: CacheTTL.SHORT, // 15 minutes for user profiles
 }));
 
-// Temporarily disable rate limiting for testing
-// app.use('*', readOnlyRateLimiter);
+// Production rate limiting
+app.use('*', async (c, next) => {
+  const { productionRateLimiter } = await import('./services/productionRateLimiter');
+  return productionRateLimiter()(c, next);
+});
 
 // Authentication middleware for protected routes
 app.use('/api/v1/*', async (c, next) => {

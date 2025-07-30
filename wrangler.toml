@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [env.production]
 name = "clearsight-ip"
-vars = { NODE_ENV = "production", LOG_LEVEL = "info", CORS_ORIGIN = "https://clearsight-ip.com", RATE_LIMIT_WINDOW_MS = "900000", RATE_LIMIT_MAX_REQUESTS = "100" }
+vars = { NODE_ENV = "production", LOG_LEVEL = "info", CORS_ORIGIN = "https://clearsight-ip.com", RATE_LIMIT_WINDOW_MS = "900000", RATE_LIMIT_MAX_REQUESTS = "100", ENABLE_RATE_LIMITING = "true" }
 
 # D1 Database binding for production
 [[env.production.d1_databases]]
@@ -20,11 +20,11 @@ id = "747058b5407243d9846eb3ca1d6ef563"
 
 [env.staging]
 name = "clearsight-ip-staging"
-vars = { NODE_ENV = "staging", LOG_LEVEL = "debug" }
+vars = { NODE_ENV = "staging", LOG_LEVEL = "debug", ENABLE_RATE_LIMITING = "true" }
 
 [env.development]
 name = "clearsight-ip-dev"
-vars = { NODE_ENV = "development", LOG_LEVEL = "debug" }
+vars = { NODE_ENV = "development", LOG_LEVEL = "debug", ENABLE_RATE_LIMITING = "false" }
 
 # Environment variables (set these in Cloudflare dashboard or via wrangler secret) 
 [vars]
@@ -33,6 +33,7 @@ CORS_ORIGIN = "https://clearsight-ip.com"
 RATE_LIMIT_WINDOW_MS = "900000"
 RATE_LIMIT_MAX_REQUESTS = "100"
 LOG_LEVEL = "info"
+ENABLE_RATE_LIMITING = "true"
 
 # Secrets (use: wrangler secret put SECRET_NAME)
 # JWT_SECRET

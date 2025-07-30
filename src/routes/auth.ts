@@ -37,8 +37,11 @@ const resetPasswordSchema = z.object({
   newPassword: z.string().min(8, 'New password must be at least 8 characters').max(128)
 });
 
-// Apply rate limiting to all auth routes
-auth.use('*', authRateLimiter);
+// Apply specialized authentication rate limiting
+auth.use('*', async (c, next) => {
+  const { authenticationRateLimiter } = await import('../services/productionRateLimiter');
+  return authenticationRateLimiter()(c, next);
+});
 
 /**
  * POST /auth/login

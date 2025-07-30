@@ -216,6 +216,38 @@ monitoring.get('/jobs/stats', async (c: AuthenticatedContext) => {
 });
 
 /**
+ * GET /monitoring/rate-limits/stats - Get rate limiting statistics
+ */
+monitoring.get('/rate-limits/stats', async (c) => {
+  try {
+    const { ProductionRateLimiterService } = await import('../services/productionRateLimiter');
+    
+    const rateLimiter = new ProductionRateLimiterService(c.env);
+    const stats = await rateLimiter.getRateLimitStats();
+    
+    return c.json({
+      rateLimits: {
+        totalActiveKeys: stats.totalKeys,
+        tierBreakdown: stats.tierBreakdown,
+        tiers: {
+          anonymous: { limit: 100, window: '15 minutes' },
+          authenticated: { limit: 500, window: '15 minutes' },
+          api_key_basic: { limit: 1000, window: '15 minutes' },
+          api_key_premium: { limit: 5000, window: '15 minutes' },
+          auth_endpoints: { limit: 10, window: '15 minutes' }
+        }
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Error getting rate limit stats:', error);
+    return c.json({
+      error: 'Failed to retrieve rate limit statistics'
+    }, 500);
+  }
+});
+
+/**
  * GET /monitoring/errors/stats - Get error statistics
  */
 monitoring.get('/errors/stats', async (c: AuthenticatedContext) => {

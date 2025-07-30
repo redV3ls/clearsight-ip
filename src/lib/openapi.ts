@@ -1177,6 +1177,46 @@ Error responses:
     }
   });
 
+  const rateLimitStatsRoute = createRoute({
+    method: 'get',
+    path: '/api/v1/monitoring/rate-limits/stats',
+    tags: ['Monitoring'],
+    summary: 'Get rate limiting statistics',
+    description: 'Retrieve current rate limiting statistics and tier information',
+    security: [{ bearerAuth: [] }],
+    responses: {
+      200: {
+        description: 'Rate limiting statistics',
+        content: {
+          'application/json': {
+            schema: z.object({
+              rateLimits: z.object({
+                totalActiveKeys: z.number().openapi({ example: 1247 }),
+                tierBreakdown: z.record(z.number()).openapi({ 
+                  example: { 
+                    anonymous: 856, 
+                    authenticated: 234, 
+                    api_key_basic: 157 
+                  } 
+                }),
+                tiers: z.record(z.object({
+                  limit: z.number(),
+                  window: z.string()
+                })).openapi({
+                  example: {
+                    anonymous: { limit: 100, window: '15 minutes' },
+                    authenticated: { limit: 500, window: '15 minutes' }
+                  }
+                })
+              }),
+              timestamp: z.string().datetime().openapi({ example: '2024-01-20T15:30:00Z' })
+            })
+          }
+        }
+      }
+    }
+  });
+
   // GDPR endpoints
   const gdprExportRoute = createRoute({
     method: 'post',
@@ -1347,6 +1387,7 @@ Error responses:
   app.openapi(updateUserProfileRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(jobSearchRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(cacheStatsRoute, (c) => c.json({ message: 'Documentation only' }));
+  app.openapi(rateLimitStatsRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(gdprExportRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(gdprDeleteRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(gdprCancelDeletionRoute, (c) => c.json({ message: 'Documentation only' }));
