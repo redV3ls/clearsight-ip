@@ -168,9 +168,14 @@ export class UserAuthService {
     organization?: string;
   }): Promise<AuthResult> {
     try {
+      console.log('Starting user registration for:', userData.email);
+      
       // Validate password strength
       const passwordValidation = passwordService.validatePasswordStrength(userData.password);
+      console.log('Password validation result:', passwordValidation);
+      
       if (!passwordValidation.isValid) {
+        console.log('Password validation failed:', passwordValidation.errors);
         throw new AppError(
           `Password does not meet requirements: ${passwordValidation.errors.join(', ')}`,
           400,
@@ -179,13 +184,16 @@ export class UserAuthService {
       }
 
       // Check if user already exists
+      console.log('Checking if user exists:', userData.email);
       const existingUser = await this.db
         .select()
         .from(users)
         .where(eq(users.email, userData.email))
         .limit(1);
 
+      console.log('Existing user check result:', existingUser.length);
       if (existingUser.length > 0) {
+        console.log('User already exists');
         throw new AppError('User already exists with this email', 409, 'USER_EXISTS');
       }
 

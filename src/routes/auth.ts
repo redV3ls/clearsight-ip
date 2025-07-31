@@ -123,10 +123,30 @@ auth.post('/register',
       }, 201);
     } catch (error) {
       console.error('Registration error details:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      console.error('Error message:', error instanceof Error ? error.message : error);
+      
       if (error instanceof AppError) {
-        throw error;
+        // Return the specific error message for debugging
+        return c.json({
+          success: false,
+          error: {
+            code: error.code,
+            message: error.message,
+            details: error.details
+          }
+        }, error.statusCode);
       }
-      throw new AppError('Registration failed', 500, 'REGISTRATION_ERROR');
+      
+      // Return generic error for unknown errors
+      return c.json({
+        success: false,
+        error: {
+          code: 'REGISTRATION_ERROR',
+          message: 'Registration failed. Please try again.',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        }
+      }, 500);
     }
   }
 );
