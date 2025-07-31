@@ -120,92 +120,23 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       jobContent = await extractTextFromFile(jobDescriptionFile);
     }
     
-    // Initialize services
-    const database = createDatabase(c.env.DB);
-    const skillMatchingService = new SkillMatchingService(database);
-    const gapAnalysisService = new GapAnalysisService(skillMatchingService);
-    const jobAnalysisService = new JobAnalysisService();
-    const trendsService = new TrendsAnalysisService(database);
+    // Initialize AI-powered analysis service
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const aiAnalysisService = new AIAnalysisService(c.env);
     
-    // Analyze resume content to extract skills
-    const resumeAnalysis = await analyzeResumeContent(resumeContent);
-    
-    // Convert extracted skills to UserSkill format
-    const userSkills: UserSkill[] = resumeAnalysis.skills.map(skill => ({
-      skillId: crypto.randomUUID(),
-      skillName: skill.name,
-      skillCategory: skill.category || 'General',
-      level: skill.level || 'Intermediate',
-      yearsExperience: skill.yearsExperience || 0,
-      confidenceScore: skill.confidence || 0.8,
-      certifications: skill.certifications || []
-    }));
-    
-    // Prepare response object
-    const response: any = {
-      analysis_id: crypto.randomUUID(),
-      user_id: userId,
-      timestamp: new Date().toISOString(),
-      skillsAnalysis: {
-        skills: resumeAnalysis.skills,
-        totalSkills: resumeAnalysis.skills.length,
-        categories: resumeAnalysis.categories,
-        experience: resumeAnalysis.experience,
-        education: resumeAnalysis.education,
-        certifications: resumeAnalysis.certifications
+    // Perform AI-powered analysis
+    const response = await aiAnalysisService.analyzeCV(
+      resumeContent,
+      jobContent,
+      {
+        includeSkillsGap,
+        includeCareerSuggestions,
+        includeIndustryTrends,
       }
-    };
+    );
     
-    // Perform skills gap analysis if job description provided and requested
-    if (jobContent && includeSkillsGap) {
-      const jobAnalysisResult = await jobAnalysisService.analyzeJobDescription(jobContent, 'Target Position');
-      const jobRequirements: JobSkillRequirement[] = jobAnalysisResult.skillRequirements;
-      
-      const gapAnalysisResult = await gapAnalysisService.analyzeGaps(userSkills, jobRequirements);
-      
-      response.skillsGap = {
-        overallMatch: gapAnalysisResult.overallMatchPercentage,
-        missingSkills: gapAnalysisResult.skillGaps.map(gap => ({
-          name: gap.skillName,
-          category: gap.category,
-          currentLevel: gap.currentLevel,
-          requiredLevel: gap.requiredLevel,
-          priority: gap.priority,
-          learningTime: gap.timeToCompetency,
-          description: `Skill gap in ${gap.skillName}`,
-          resources: ['Online courses', 'Certification programs', 'Hands-on projects']
-        })),
-        strengths: gapAnalysisResult.strengths.map(strength => ({
-          name: strength.skillName,
-          level: strength.level,
-          yearsExperience: strength.yearsExperience,
-          category: strength.skillCategory
-        }))
-      };
-    }
-    
-    // Generate career suggestions if requested
-    if (includeCareerSuggestions) {
-      response.careerSuggestions = {
-        suggestions: await generateCareerSuggestions(userSkills, resumeAnalysis)
-      };
-    }
-    
-    // Include industry trends if requested
-    if (includeIndustryTrends) {
-      const skillNames = userSkills.map(skill => skill.skillName);
-      const trends = await trendsService.getSkillTrends(skillNames);
-      
-      response.industryTrends = {
-        trends: trends.map(trend => ({
-          skill: trend.skillName,
-          trend: trend.trendDirection,
-          demandGrowth: `${trend.growthRate > 0 ? '+' : ''}${(trend.growthRate * 100).toFixed(1)}%`,
-          salaryImpact: trend.salaryImpact || 'Neutral',
-          description: `${trend.skillName} is ${trend.trendDirection.toLowerCase()} in demand`
-        }))
-      };
-    }
+    // Set the actual user ID
+    response.user_id = userId;
     
     // Add metadata
     response.metadata = {
