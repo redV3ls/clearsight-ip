@@ -82,6 +82,58 @@ users.post('/profile',
 );
 
 /**
+ * GET /users/profile
+ * Get current user's profile
+ */
+users.get('/profile', async (c) => {
+  try {
+    const user = c.get('user');
+    if (!user) {
+      throw new AppError('Authentication required', 401, 'AUTHENTICATION_REQUIRED');
+    }
+
+    const db = DatabaseManager.initialize(c.env.DB);
+    const profileService = new UserProfileService(db, c.env);
+
+    const profile = await profileService.getUserProfile(user.id);
+    
+    if (!profile) {
+      // Return user info even if no profile exists yet
+      return c.json({
+        success: true,
+        data: {
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role
+          },
+          profile: null
+        }
+      });
+    }
+
+    return c.json({
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        },
+        profile
+      }
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError('Failed to get user profile', 500, 'PROFILE_FETCH_ERROR');
+  }
+});
+
+/**
  * GET /users/:userId/profile
  * Get user profile
  */
