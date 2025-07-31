@@ -39,6 +39,10 @@ const resetPasswordSchema = z.object({
 
 // Apply specialized authentication rate limiting
 auth.use('*', async (c, next) => {
+  // Temporarily disable rate limiting for debugging
+  if (c.env.NODE_ENV === 'development') {
+    return next();
+  }
   const { authenticationRateLimiter } = await import('../services/productionRateLimiter');
   return authenticationRateLimiter()(c, next);
 });
@@ -118,6 +122,7 @@ auth.post('/register',
         }
       }, 201);
     } catch (error) {
+      console.error('Registration error details:', error);
       if (error instanceof AppError) {
         throw error;
       }
