@@ -32,6 +32,8 @@ export interface AIJobRequirement {
   context: string;
   reasoning: string;
   confidence: number;
+  marketDemand: 'high' | 'medium' | 'low';
+  salaryImpact: 'high' | 'medium' | 'low' | 'neutral';
 }
 
 export interface AISkillGap {
@@ -87,6 +89,18 @@ export interface AIJobAnalysis {
   benefits: string[];
   salaryRange?: { min?: number; max?: number; currency?: string };
   workArrangement: 'remote' | 'hybrid' | 'onsite' | 'flexible';
+  companySize?: 'startup' | 'small' | 'medium' | 'large' | 'enterprise';
+  teamStructure?: 'individual' | 'small-team' | 'large-team' | 'cross-functional';
+  growthOpportunities: string[];
+  culturalFit: string[];
+  urgencyLevel: 'urgent' | 'normal' | 'flexible';
+  competitiveAdvantages: string[];
+  redFlags: string[];
+  implicitRequirements: Array<{
+    skill: string;
+    reasoning: string;
+    confidence: number;
+  }>;
   reasoning: string;
 }
 
@@ -291,7 +305,7 @@ Focus on:
    */
   private createJobAnalysisPrompt(jobText: string): string {
     return `
-Analyze the following job description and extract comprehensive requirements and insights. Use reasoning to understand implicit requirements and industry context.
+Analyze the following job description and extract comprehensive requirements and insights. Use advanced reasoning to understand implicit requirements, industry context, and market positioning.
 
 Job Description:
 """
@@ -303,34 +317,91 @@ Please provide a detailed analysis in the following JSON format:
 {
   "jobTitle": "extracted job title",
   "company": "company name if mentioned",
-  "industry": "industry/sector",
+  "industry": "industry/sector (Technology, Healthcare, Finance, etc.)",
   "experienceLevel": "entry|mid|senior|executive",
   "skillRequirements": [
     {
-      "skill": "skill name (normalized)",
-      "category": "category",
+      "skill": "skill name (normalized to industry standards)",
+      "category": "Programming|Cloud|Data|Management|Design|Security|DevOps|etc.",
       "importance": "critical|important|nice-to-have",
       "minimumLevel": "beginner|intermediate|advanced|expert",
       "yearsRequired": number or null,
-      "context": "how it was mentioned in the job description",
-      "reasoning": "why you classified it this way",
-      "confidence": 0.0-1.0
+      "context": "exact context from job description",
+      "reasoning": "detailed reasoning for classification and importance",
+      "confidence": 0.0-1.0,
+      "marketDemand": "high|medium|low",
+      "salaryImpact": "high|medium|low|neutral"
     }
   ],
-  "softSkills": ["communication", "leadership", etc.],
-  "responsibilities": ["key responsibilities"],
+  "softSkills": ["communication", "leadership", "problem-solving", etc.],
+  "responsibilities": ["key responsibilities extracted"],
   "benefits": ["benefits and perks mentioned"],
   "salaryRange": {"min": number, "max": number, "currency": "USD"} or null,
   "workArrangement": "remote|hybrid|onsite|flexible",
-  "reasoning": "overall reasoning for the analysis"
+  "companySize": "startup|small|medium|large|enterprise" or null,
+  "teamStructure": "individual|small-team|large-team|cross-functional" or null,
+  "growthOpportunities": ["career advancement opportunities mentioned"],
+  "culturalFit": ["cultural values and work environment indicators"],
+  "urgencyLevel": "urgent|normal|flexible",
+  "competitiveAdvantages": ["unique selling points of the role"],
+  "redFlags": ["potential concerns or warning signs"],
+  "implicitRequirements": [
+    {
+      "skill": "inferred skill name",
+      "reasoning": "why this skill is likely required",
+      "confidence": 0.0-1.0
+    }
+  ],
+  "reasoning": "comprehensive reasoning for the entire analysis including industry context and market positioning"
 }
 
-Focus on:
-1. Identifying both explicit and implicit skill requirements
-2. Understanding the seniority level from context
-3. Extracting soft skills and cultural requirements
-4. Recognizing industry-specific needs
-5. Inferring missing but likely required skills
+Advanced Analysis Instructions:
+1. SKILL EXTRACTION: Identify both explicit and implicit skill requirements
+   - Look for technical skills mentioned directly
+   - Infer skills from job responsibilities and context
+   - Consider industry-standard skill combinations
+   - Normalize skill names to industry standards (e.g., "JS" → "JavaScript")
+
+2. IMPORTANCE CLASSIFICATION: Use contextual reasoning
+   - "critical": Must-have skills, deal-breakers, explicitly required
+   - "important": Strongly preferred, mentioned multiple times, core to role
+   - "nice-to-have": Bonus skills, "preferred", "plus if you have"
+
+3. EXPERIENCE LEVEL INFERENCE: Look for multiple indicators
+   - Years of experience mentioned
+   - Job title seniority (Junior, Senior, Lead, Principal)
+   - Responsibility level (mentoring, architecture, leadership)
+   - Decision-making authority described
+
+4. INDUSTRY CONTEXT: Consider sector-specific requirements
+   - Healthcare: HIPAA, HL7, medical device regulations
+   - Finance: SOX compliance, financial regulations, security
+   - E-commerce: scalability, payment processing, fraud detection
+   - Startups: versatility, rapid development, resource constraints
+
+5. IMPLICIT REQUIREMENTS: Infer likely skills from context
+   - If React is mentioned, likely need JavaScript, HTML, CSS
+   - If AWS is mentioned, likely need cloud architecture knowledge
+   - If "full-stack" is mentioned, need both frontend and backend skills
+   - If "senior" role, likely need mentoring and architectural skills
+
+6. MARKET ANALYSIS: Consider current market trends
+   - Assess skill demand in current job market
+   - Evaluate salary impact of specific skills
+   - Consider emerging vs. declining technologies
+
+7. CULTURAL AND SOFT SKILLS: Extract work environment clues
+   - Team collaboration requirements
+   - Communication style preferences
+   - Work pace and pressure indicators
+   - Learning and growth mindset requirements
+
+8. RED FLAGS DETECTION: Identify potential concerns
+   - Unrealistic skill combinations for experience level
+   - Extremely long requirement lists
+   - Vague job descriptions
+   - Concerning language about work-life balance
+   - Unrealistic timeline expectations
 `;
   }
 

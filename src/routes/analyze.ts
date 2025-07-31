@@ -843,6 +843,291 @@ analyze.get('/trends/skills/emerging', async (c: AuthenticatedContext) => {
 });
 
 /**
+ * POST /analyze/job - Intelligent job description analysis
+ * Analyzes job descriptions with AI-powered insights and market intelligence
+ */
+analyze.post('/job', async (c: AuthenticatedContext) => {
+  const startTime = Date.now();
+  
+  try {
+    // Parse request body
+    const body = await c.req.json();
+    const { jobDescription, includeInsights = true, includeApplicationTips = true } = body;
+    
+    // Validation
+    if (!jobDescription || typeof jobDescription !== 'string') {
+      throw new AppError('Job description is required', 400, 'MISSING_JOB_DESCRIPTION');
+    }
+    
+    if (jobDescription.length > MAX_TEXT_LENGTH) {
+      throw new AppError(`Job description too long. Maximum ${MAX_TEXT_LENGTH} characters allowed`, 400, 'TEXT_TOO_LONG');
+    }
+    
+    // Rate limiting check
+    const userId = c.user!.id;
+    const rateLimitKey = `job_analysis:${userId}`;
+    const lastAnalysis = await c.env.CACHE.get(rateLimitKey);
+    
+    if (lastAnalysis) {
+      const timeSinceLastAnalysis = Date.now() - parseInt(lastAnalysis);
+      if (timeSinceLastAnalysis < 15000) { // 15 seconds
+        const remainingTime = Math.ceil((15000 - timeSinceLastAnalysis) / 1000);
+        throw new AppError(`Please wait ${remainingTime} seconds before starting another job analysis`, 429, 'RATE_LIMITED');
+      }
+    }
+    
+    // Set rate limit
+    await c.env.CACHE.put(rateLimitKey, Date.now().toString(), { expirationTtl: 15 });
+    
+    // Initialize AI services
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const { IntelligentJobAnalysisService } = await import('../services/intelligentJobAnalysis');
+    
+    const aiAnalysisService = new AIAnalysisService(c.env);
+    
+    // Check if AI is available
+    const isAIHealthy = await aiAnalysisService.isAIHealthy();
+    
+    let response;
+    
+    if (isAIHealthy && includeInsights) {
+      // Use intelligent job analysis with AI insights
+      const aiConfig = {
+        provider: 'deepseek' as const,
+        model: 'deepseek-reasoner' as const,
+        apiKey: c.env.DEEPSEEK_API_KEY,
+        baseUrl: c.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1',
+        maxTokens: parseInt(c.env.DEEPSEEK_MAX_TOKENS || '4000'),
+        temperature: parseFloat(c.env.DEEPSEEK_TEMPERATURE || '0.1'),
+        timeout: parseInt(c.env.DEEPSEEK_TIMEOUT || '30000')
+      };
+      
+      const { DeepSeekAIService } = await import('../services/deepseekAI');
+      const deepseekService = new DeepSeekAIService(aiConfig);
+      const intelligentJobService = new IntelligentJobAnalysisService(deepseekService);
+      
+      const enhancedAnalysis = await intelligentJobService.analyzeJobIntelligently(jobDescription);
+      
+      response = {
+        analysis_id: crypto.randomUUID(),
+        user_id: userId,
+        timestamp: new Date().toISOString(),
+        aiPowered: true,
+        jobAnalysis: enhancedAnalysis,
+        metadata: {
+          processingTime: Date.now() - startTime,
+          analysisOptions: {
+            includeInsights,
+            includeApplicationTips
+          },
+          aiProvider: 'deepseek',
+          aiModel: 'deepseek-reasoner'
+        }
+      };
+    } else {
+      // Fallback to basic job analysis
+      const basicAnalysis = await aiAnalysisService.analyzeCV('', jobDescription, {
+        includeSkillsGap: false,
+        includeCareerSuggestions: false,
+        includeIndustryTrends: false
+      });
+      
+      response = {
+        analysis_id: crypto.randomUUID(),
+        user_id: userId,
+        timestamp: new Date().toISOString(),
+        aiPowered: false,
+        jobAnalysis: {
+          jobTitle: 'Extracted from description',
+          industry: 'General',
+          experienceLevel: 'mid',
+          skillRequirements: [],
+          softSkills: [],
+          responsibilities: [],
+          benefits: [],
+          workArrangement: 'flexible',
+          reasoning: 'Basic analysis due to AI unavailability'
+        },
+        metadata: {
+          processingTime: Date.now() - startTime,
+          analysisOptions: {
+            includeInsights,
+            includeApplicationTips
+          },
+          fallbackUsed: true
+        }
+      };
+    }
+    
+    // Store analysis result
+    try {
+      await c.env.DB
+        .prepare(`
+          INSERT INTO job_analyses (
+            id, user_id, job_title, analysis_data, created_at
+          ) VALUES (?, ?, ?, ?, ?)
+        `)
+        .bind(
+          response.analysis_id,
+          userId,
+          response.jobAnalysis.jobTitle || 'Unknown',
+          JSON.stringify(response),
+          new Date().toISOString()
+        )
+        .run();
+    } catch (dbError) {
+      console.warn('Failed to store job analysis result:', dbError);
+    }
+    
+    return c.json(response, 200);
+    
+  } catch (error) {
+    console.error('Job analysis error:', error);
+    
+    if (error instanceof AppError) {
+      throw error;
+    }
+    
+    if (error instanceof Error) {
+      if (error.message.includes('timeout')) {
+        throw new AppError('Job analysis request timed out', 408, 'TIMEOUT_ERROR');
+      }
+    }
+    
+    throw new AppError('Job analysis failed', 500, 'JOB_ANALYSIS_FAILED');
+  }
+});
+
+/**
+ * POST /analyze/job/compare - Compare multiple job descriptions
+ * Analyzes and compares multiple job descriptions for strategic insights
+ */
+analyze.post('/job/compare', async (c: AuthenticatedContext) => {
+  const startTime = Date.now();
+  
+  try {
+    // Parse request body
+    const body = await c.req.json();
+    const { jobDescriptions } = body;
+    
+    // Validation
+    if (!jobDescriptions || !Array.isArray(jobDescriptions)) {
+      throw new AppError('Job descriptions array is required', 400, 'MISSING_JOB_DESCRIPTIONS');
+    }
+    
+    if (jobDescriptions.length < 2 || jobDescriptions.length > 5) {
+      throw new AppError('Please provide 2-5 job descriptions for comparison', 400, 'INVALID_JOB_COUNT');
+    }
+    
+    // Validate each job description
+    for (const [index, jobDesc] of jobDescriptions.entries()) {
+      if (!jobDesc || typeof jobDesc !== 'string') {
+        throw new AppError(`Job description ${index + 1} is invalid`, 400, 'INVALID_JOB_DESCRIPTION');
+      }
+      
+      if (jobDesc.length > MAX_TEXT_LENGTH) {
+        throw new AppError(`Job description ${index + 1} is too long. Maximum ${MAX_TEXT_LENGTH} characters allowed`, 400, 'TEXT_TOO_LONG');
+      }
+    }
+    
+    // Rate limiting check (stricter for comparison)
+    const userId = c.user!.id;
+    const rateLimitKey = `job_comparison:${userId}`;
+    const lastComparison = await c.env.CACHE.get(rateLimitKey);
+    
+    if (lastComparison) {
+      const timeSinceLastComparison = Date.now() - parseInt(lastComparison);
+      if (timeSinceLastComparison < 60000) { // 1 minute
+        const remainingTime = Math.ceil((60000 - timeSinceLastComparison) / 1000);
+        throw new AppError(`Please wait ${remainingTime} seconds before starting another job comparison`, 429, 'RATE_LIMITED');
+      }
+    }
+    
+    // Set rate limit
+    await c.env.CACHE.put(rateLimitKey, Date.now().toString(), { expirationTtl: 60 });
+    
+    // Initialize AI services
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const { IntelligentJobAnalysisService } = await import('../services/intelligentJobAnalysis');
+    
+    const aiAnalysisService = new AIAnalysisService(c.env);
+    const isAIHealthy = await aiAnalysisService.isAIHealthy();
+    
+    if (!isAIHealthy) {
+      throw new AppError('AI service is currently unavailable for job comparison', 503, 'AI_SERVICE_UNAVAILABLE');
+    }
+    
+    // Perform intelligent job comparison
+    const aiConfig = {
+      provider: 'deepseek' as const,
+      model: 'deepseek-reasoner' as const,
+      apiKey: c.env.DEEPSEEK_API_KEY,
+      baseUrl: c.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1',
+      maxTokens: parseInt(c.env.DEEPSEEK_MAX_TOKENS || '4000'),
+      temperature: parseFloat(c.env.DEEPSEEK_TEMPERATURE || '0.1'),
+      timeout: parseInt(c.env.DEEPSEEK_TIMEOUT || '30000')
+    };
+    
+    const { DeepSeekAIService } = await import('../services/deepseekAI');
+    const deepseekService = new DeepSeekAIService(aiConfig);
+    const intelligentJobService = new IntelligentJobAnalysisService(deepseekService);
+    
+    const comparisonResult = await intelligentJobService.compareJobs(jobDescriptions);
+    
+    const response = {
+      analysis_id: crypto.randomUUID(),
+      user_id: userId,
+      timestamp: new Date().toISOString(),
+      aiPowered: true,
+      jobComparison: comparisonResult,
+      metadata: {
+        processingTime: Date.now() - startTime,
+        jobCount: jobDescriptions.length,
+        aiProvider: 'deepseek',
+        aiModel: 'deepseek-reasoner'
+      }
+    };
+    
+    // Store comparison result
+    try {
+      await c.env.DB
+        .prepare(`
+          INSERT INTO job_comparisons (
+            id, user_id, job_count, analysis_data, created_at
+          ) VALUES (?, ?, ?, ?, ?)
+        `)
+        .bind(
+          response.analysis_id,
+          userId,
+          jobDescriptions.length,
+          JSON.stringify(response),
+          new Date().toISOString()
+        )
+        .run();
+    } catch (dbError) {
+      console.warn('Failed to store job comparison result:', dbError);
+    }
+    
+    return c.json(response, 200);
+    
+  } catch (error) {
+    console.error('Job comparison error:', error);
+    
+    if (error instanceof AppError) {
+      throw error;
+    }
+    
+    if (error instanceof Error) {
+      if (error.message.includes('timeout')) {
+        throw new AppError('Job comparison request timed out', 408, 'TIMEOUT_ERROR');
+      }
+    }
+    
+    throw new AppError('Job comparison failed', 500, 'JOB_COMPARISON_FAILED');
+  }
+});
+
+/**
  * GET /trends/geographic/:region? - Get geographic/regional trends
  * Retrieve skill trends by geographic region
  */

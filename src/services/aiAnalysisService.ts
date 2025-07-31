@@ -343,11 +343,8 @@ export class AIAnalysisService {
     options: any,
     startTime: number
   ): Promise<EnhancedAnalysisResult> {
-    // Import the legacy analysis function
-    const { analyzeResumeContent } = await import('../routes/analyze');
-    
-    // Perform rule-based analysis
-    const resumeAnalysis = await analyzeResumeContent(cvContent);
+    // Perform basic rule-based analysis
+    const resumeAnalysis = await this.performBasicAnalysis(cvContent);
 
     const result: EnhancedAnalysisResult = {
       analysis_id: analysisId,
@@ -418,6 +415,82 @@ export class AIAnalysisService {
       healthy: this.isAIEnabled, // Will be updated by health checks
       provider: this.isAIEnabled ? 'deepseek' : undefined,
       model: this.isAIEnabled ? 'deepseek-reasoner' : undefined,
+    };
+  }
+
+  /**
+   * Perform basic rule-based analysis as fallback
+   */
+  private async performBasicAnalysis(content: string): Promise<{
+    skills: Array<{
+      name: string;
+      category: string;
+      level: string;
+      confidence: number;
+      yearsExperience: number;
+      certifications: string[];
+    }>;
+    categories: string[];
+    experience: string;
+    education: string[];
+    certifications: string[];
+  }> {
+    // Basic skill extraction using keywords
+    const skillKeywords = {
+      'Programming': ['javascript', 'python', 'java', 'react', 'node.js', 'typescript', 'html', 'css', 'sql'],
+      'Cloud': ['aws', 'azure', 'gcp', 'docker', 'kubernetes', 'terraform'],
+      'Data': ['machine learning', 'data analysis', 'pandas', 'numpy', 'tensorflow', 'pytorch'],
+      'Management': ['project management', 'team leadership', 'agile', 'scrum', 'product management'],
+      'Design': ['ui/ux', 'figma', 'photoshop', 'design thinking', 'user research']
+    };
+    
+    const contentLower = content.toLowerCase();
+    const extractedSkills: Array<{
+      name: string;
+      category: string;
+      level: string;
+      confidence: number;
+      yearsExperience: number;
+      certifications: string[];
+    }> = [];
+    
+    // Extract skills based on keywords
+    for (const [category, keywords] of Object.entries(skillKeywords)) {
+      for (const keyword of keywords) {
+        if (contentLower.includes(keyword)) {
+          // Estimate experience level based on context
+          const experienceMatch = contentLower.match(new RegExp(`(\\d+)\\s*(?:years?|yrs?).*?${keyword}`, 'i'));
+          const yearsExp = experienceMatch ? parseInt(experienceMatch[1]) : 2;
+          
+          let level = 'Beginner';
+          if (yearsExp >= 5) level = 'Expert';
+          else if (yearsExp >= 3) level = 'Advanced';
+          else if (yearsExp >= 1) level = 'Intermediate';
+          
+          extractedSkills.push({
+            name: keyword.charAt(0).toUpperCase() + keyword.slice(1),
+            category,
+            level,
+            confidence: 0.8,
+            yearsExperience: yearsExp,
+            certifications: []
+          });
+        }
+      }
+    }
+    
+    // Extract education
+    const educationMatch = content.match(/(?:bachelor|master|phd|degree|university|college).*?(?:\n|$)/gi) || [];
+    
+    // Extract certifications
+    const certificationMatch = content.match(/(?:certified|certification|certificate).*?(?:\n|$)/gi) || [];
+    
+    return {
+      skills: extractedSkills,
+      categories: [...new Set(extractedSkills.map(s => s.category))],
+      experience: 'Extracted from content',
+      education: educationMatch.map(e => e.trim()),
+      certifications: certificationMatch.map(c => c.trim())
     };
   }
 }

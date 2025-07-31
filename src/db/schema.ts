@@ -242,3 +242,28 @@ export const gdprDeletionRequests = sqliteTable('gdpr_deletion_requests', {
   gracePeriodHours: integer('grace_period_hours').notNull().default(72), // 72 hours default
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });
+
+// Job analyses table (for storing individual job analysis results)
+export const jobAnalyses = sqliteTable('job_analyses', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  jobTitle: text('job_title').notNull(),
+  company: text('company'),
+  industry: text('industry'),
+  experienceLevel: text('experience_level'), // 'entry', 'mid', 'senior', 'executive'
+  workArrangement: text('work_arrangement'), // 'remote', 'hybrid', 'onsite', 'flexible'
+  salaryMin: integer('salary_min'),
+  salaryMax: integer('salary_max'),
+  currency: text('currency').default('USD'),
+  analysisData: text('analysis_data').notNull(), // JSON data of the complete analysis
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Job comparisons table (for storing job comparison results)
+export const jobComparisons = sqliteTable('job_comparisons', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  jobCount: integer('job_count').notNull(),
+  analysisData: text('analysis_data').notNull(), // JSON data of the complete comparison
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+});

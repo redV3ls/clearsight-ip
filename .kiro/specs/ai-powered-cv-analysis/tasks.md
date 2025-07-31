@@ -26,7 +26,8 @@
   - Create comprehensive testing for skills extraction accuracy
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7_
 
-- [ ] 3. Build Intelligent Job Description Analysis
+- [-] 3. Build Intelligent Job Description Analysis
+
   - Design prompts for job requirement extraction
   - Implement importance classification using AI reasoning
   - Add skill level interpretation from natural language
