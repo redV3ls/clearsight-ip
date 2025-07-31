@@ -9,17 +9,17 @@ export function createOpenAPIApp() {
   app.doc('/openapi.json', {
     openapi: '3.0.0',
     info: {
-      title: 'Skill Gap Analysis API',
+      title: 'Clearsight IP API',
       version: '1.0.0',
       description: `
-# Skill Gap Analysis API
+# Clearsight IP API
 
-A comprehensive API for analyzing skill gaps, tracking professional development, and providing insights for career growth.
+A comprehensive API for professional skills analysis, career development insights, and talent intelligence powered by AI.
 
 ## Key Features
 
-- **Skill Gap Analysis**: Compare current skills against job requirements
-- **Team Analysis**: Analyze team capabilities and identify skill gaps
+- **Skills Intelligence**: Compare current skills against job requirements with AI-powered insights
+- **Team Analysis**: Analyze team capabilities and identify development opportunities
 - **Industry Trends**: Track emerging and declining skills in various industries
 - **User Profiles**: Manage user skills and track progression
 - **GDPR Compliance**: Data export, retention, and deletion features
@@ -108,7 +108,7 @@ Error responses:
       },
       {
         name: 'Analysis',
-        description: 'Skill gap and team analysis endpoints'
+        description: 'Skills intelligence and team analysis endpoints'
       },
       {
         name: 'Users',
@@ -792,8 +792,8 @@ Error responses:
     method: 'post',
     path: '/api/v1/analyze/gap',
     tags: ['Analysis'],
-    summary: 'Skill gap analysis',
-    description: 'Analyze skill gaps between user skills and job requirements',
+    summary: 'Skills intelligence analysis',
+    description: 'Analyze skills alignment between user capabilities and job requirements',
     security: [{ bearerAuth: [] }],
     requestBody: {
       required: true,
@@ -1396,7 +1396,7 @@ Error responses:
   // Add Swagger UI with better configuration
   app.get('/api/v1/docs', swaggerUI({
     url: '/openapi.json',
-    documentTitle: 'Clearsight IP - Skill Gap Analysis API Documentation',
+    documentTitle: 'Clearsight IP - Professional Skills Intelligence API Documentation',
     persistAuthorization: true,
     theme: 'light'
   }));

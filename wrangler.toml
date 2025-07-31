@@ -10,8 +10,8 @@ vars = { NODE_ENV = "production", LOG_LEVEL = "info", CORS_ORIGIN = "https://cle
 # D1 Database binding for production
 [[env.production.d1_databases]]
 binding = "DB"
-database_name = "skill-gap-db"
-database_id = "96482268-37bf-4082-bacd-18509c947738"
+database_name = "clearsight-ip-db"
+database_id = "cd183d35-d22b-4a22-bbfb-f40c2d69cd16"
 
 # KV namespace for caching in production
 [[env.production.kv_namespaces]]
@@ -43,8 +43,8 @@ ENABLE_RATE_LIMITING = "true"
 # D1 Database binding
 [[d1_databases]]
 binding = "DB"
-database_name = "skill-gap-db"
-database_id = "96482268-37bf-4082-bacd-18509c947738"
+database_name = "clearsight-ip-db"
+database_id = "cd183d35-d22b-4a22-bbfb-f40c2d69cd16"
 
 # KV namespace for caching
 [[kv_namespaces]]

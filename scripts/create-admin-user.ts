@@ -218,7 +218,7 @@ async function main() {
     console.log('\n🚀 Next Steps:');
     console.log('1. Copy the SQL statement above');
     console.log('2. Run it against your database using wrangler d1 execute');
-    console.log('3. Example: wrangler d1 execute skill-gap-db --command="[SQL_STATEMENT]"');
+    console.log('3. Example: wrangler d1 execute clearsight-ip-db --command="[SQL_STATEMENT]"');
     console.log('\n⚠️  Security Note: Store this SQL securely and delete after use');
     
   } catch (error) {

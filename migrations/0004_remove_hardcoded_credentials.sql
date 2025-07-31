@@ -2,7 +2,7 @@
 -- Created: 2025-01-26
 
 -- Remove the hardcoded admin user that was insecurely added
-DELETE FROM users WHERE id = 'admin-user-001' AND email = 'admin@skillgap.dev';
+DELETE FROM users WHERE id = 'admin-user-001' AND email = 'admin@clearsight-ip.com';
 
 -- Add additional security constraints
 -- Ensure password_hash is required for all users

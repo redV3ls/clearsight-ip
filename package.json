@@ -1,7 +1,7 @@
 {
   "name": "clearsight-ip",
   "version": "1.0.0",
-  "description": "Comprehensive skill gap analysis API service",
+  "description": "Comprehensive professional skills intelligence API service",
   "main": "dist/index.js",
   "scripts": {
     "dev": "wrangler dev",
@@ -17,20 +17,21 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:migrate": "wrangler d1 migrations apply skill-gap-db",
+    "db:migrate": "wrangler d1 migrations apply clearsight-ip-db",
     "db:studio": "drizzle-kit studio",
     "cf:login": "wrangler auth login",
     "cf:whoami": "wrangler auth whoami",
     "create-admin": "tsx scripts/create-admin-user.ts"
   },
   "keywords": [
-    "skill-analysis",
+    "skills-intelligence",
     "career-development",
+    "talent-analytics",
     "api",
     "typescript",
-    "express"
+    "cloudflare-workers"
   ],
-  "author": "Skill Gap Analysis Team",
+  "author": "Clearsight IP Team",
   "license": "MIT",
   "dependencies": {
     "@hono/swagger-ui": "^0.5.2",

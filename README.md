@@ -47,7 +47,7 @@ A comprehensive RESTful API service built on Cloudflare Workers that analyzes sk
 
 3. **Create D1 database**
    ```bash
-   wrangler d1 create skill-gap-db
+   wrangler d1 create clearsight-ip-db
    ```
    Update the `database_id` in `wrangler.toml` with the returned ID.
 

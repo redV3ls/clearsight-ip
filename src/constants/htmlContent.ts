@@ -207,7 +207,7 @@
                     Struggling to <span class="text-red-600">stand out</span> in today's competitive job market? <span class="gradient-text">You're not alone.</span>
                 </h1>
                 <p class="text-xl text-gray-300 mb-8">
-                    Most professionals don't know which skills they're missing or how to showcase their expertise effectively. Your dream job might be just one skill gap away.
+                    Most professionals don't know which skills they're missing or how to showcase their expertise effectively. Your dream job might be just one skills insight away.
                 </p>
                 
                 <div class="bg-red-50 bg-red-900/20 border-l-4 border-red-500 p-4 mb-8">
@@ -217,7 +217,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-red-700 text-red-300">
-                                <strong>The Hidden Costs:</strong> 6-month average time-to-productivity • 40% promotion failure rate due to skill gaps • $15,000 average cost per bad hire
+                                <strong>The Hidden Costs:</strong> 6-month average time-to-productivity • 40% promotion failure rate due to skills misalignment • $15,000 average cost per bad hire
                             </p>
                         </div>
                     </div>
@@ -645,7 +645,7 @@
                         </div>
                     </div>
                     <p class="text-gray-400 text-gray-300">
-                        Receive personalized career paths with clear milestones, skill gaps to fill, and timeline estimates.
+                        Receive personalized career paths with clear milestones, skills to develop, and timeline estimates.
                     </p>
                 </div>
             </div>
@@ -878,7 +878,7 @@
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Ready to see it in action?</h2>
                 <p class="text-xl text-gray-400 text-gray-300 max-w-3xl mx-auto">
-                    Experience skill gap analysis in action with our live demo
+                    Experience skills intelligence analysis in action with our live demo
                 </p>
             </div>
             
@@ -1206,8 +1206,8 @@
                     <h3 class="text-lg font-semibold text-white mb-4">Analysis Options</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" id="skillsGapAnalysis" checked class="text-accent focus:ring-accent">
-                            <span class="text-gray-300">Skills Gap Analysis</span>
+                            <input type="checkbox" id="skillsIntelligenceAnalysis" checked class="text-accent focus:ring-accent">
+                            <span class="text-gray-300">Skills Intelligence Analysis</span>
                         </label>
                         <label class="flex items-center space-x-2 cursor-pointer">
                             <input type="checkbox" id="careerSuggestions" checked class="text-accent focus:ring-accent">
@@ -1647,7 +1647,7 @@
             document.getElementById('jobTextInput').value = '';
             
             // Reset checkboxes
-            document.getElementById('skillsGapAnalysis').checked = true;
+            document.getElementById('skillsIntelligenceAnalysis').checked = true;
             document.getElementById('careerSuggestions').checked = true;
             document.getElementById('industryTrends').checked = true;
             
@@ -1681,7 +1681,7 @@
             }
 
             // Add analysis options
-            formData.append('includeSkillsGap', document.getElementById('skillsGapAnalysis').checked);
+            formData.append('includeSkillsGap', document.getElementById('skillsIntelligenceAnalysis').checked);
             formData.append('includeCareerSuggestions', document.getElementById('careerSuggestions').checked);
             formData.append('includeIndustryTrends', document.getElementById('industryTrends').checked);
 
@@ -1725,7 +1725,7 @@
                 'Processing CV content...',
                 'Extracting skills...',
                 'Analyzing job requirements...',
-                'Identifying skill gaps...',
+                'Identifying skills opportunities...',
                 'Generating recommendations...',
                 'Finalizing results...'
             ];

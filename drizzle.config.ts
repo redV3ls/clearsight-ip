@@ -7,6 +7,6 @@ export default defineConfig({
   driver: 'd1-http',
   dbCredentials: {
     wranglerConfigPath: './wrangler.toml',
-    dbName: 'skill-gap-db',
+    dbName: 'clearsight-ip-db',
   },
 });

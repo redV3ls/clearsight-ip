@@ -22,7 +22,7 @@ npm run cf:login
 
 #### Create D1 Database
 ```bash
-wrangler d1 create skill-gap-db
+wrangler d1 create clearsight-ip-db
 ```
 
 **Copy the output and update `wrangler.toml`:**
@@ -136,6 +136,6 @@ wrangler secret list
 wrangler tail
 
 # Delete resources (be careful!)
-wrangler d1 delete skill-gap-db
+wrangler d1 delete clearsight-ip-db
 wrangler kv namespace delete --namespace-id YOUR_NAMESPACE_ID
 ```
