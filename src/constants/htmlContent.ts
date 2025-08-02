@@ -1407,12 +1407,20 @@
             // Initialize UI to logged-out state first
             updateAuthUI();
             
-            // Check if user is already authenticated via cookie
-            console.log('Checking authentication status...');
-            validateToken().then(() => {
-                console.log('Authentication check complete, updating UI');
-                updateAuthUI();
-            });
+            // Check if there's an auth cookie before making the API call
+            const hasAuthCookie = document.cookie.includes('auth_token=');
+            console.log('Has auth cookie:', hasAuthCookie);
+            
+            if (hasAuthCookie) {
+                // Only check authentication if we have a cookie
+                console.log('Auth cookie found, validating...');
+                validateToken().then(() => {
+                    console.log('Authentication check complete, updating UI');
+                    updateAuthUI();
+                });
+            } else {
+                console.log('No auth cookie found, staying in logged-out state');
+            }
 
             // Main analyze button
             analyzeBtn.addEventListener('click', function() {
@@ -1593,15 +1601,15 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    currentUser = data.user;
+                    currentUser = data.data.user;
                     console.log('Authentication valid, user loaded:', currentUser?.email);
                 } else {
-                    // Token invalid, clear state
-                    console.log('Authentication invalid, clearing auth state');
+                    // Token invalid or no auth cookie (expected on first visit)
+                    console.log('No authentication found (expected on first visit)');
                     currentUser = null;
                 }
             } catch (error) {
-                console.error('Authentication validation failed:', error);
+                console.log('Authentication check failed (normal on first visit):', error.message || error);
                 currentUser = null;
             }
         }
