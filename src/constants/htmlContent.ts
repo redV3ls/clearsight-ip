@@ -1298,10 +1298,14 @@
 
             // Check if user is already authenticated
             if (authToken) {
+                console.log('Found existing auth token, validating...');
                 validateToken();
+            } else {
+                console.log('No auth token found');
             }
 
             analyzeBtn.addEventListener('click', function() {
+                console.log('Analyze button clicked. Auth state:', { authToken: !!authToken, currentUser: !!currentUser });
                 if (authToken && currentUser) {
                     showAnalysisModal();
                 } else {
@@ -1364,6 +1368,8 @@
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
+            console.log('Attempting login for:', email);
+
             try {
                 const response = await fetch('/api/v1/auth/login', {
                     method: 'POST',
@@ -1374,14 +1380,17 @@
                 });
 
                 const data = await response.json();
+                console.log('Login response:', { status: response.status, ok: response.ok });
 
                 if (response.ok) {
                     authToken = data.token;
                     currentUser = data.user;
                     localStorage.setItem('authToken', authToken);
+                    console.log('Login successful, token stored');
                     hideAuthModal();
                     showAnalysisModal();
                 } else {
+                    console.error('Login failed:', data);
                     showAuthError(data.error?.message || 'Login failed');
                 }
             } catch (error) {
@@ -1427,6 +1436,7 @@
         }
 
         async function validateToken() {
+            console.log('Validating token...');
             try {
                 const response = await fetch('/api/v1/users/profile', {
                     headers: {
@@ -1434,11 +1444,15 @@
                     }
                 });
 
+                console.log('Token validation response:', { status: response.status, ok: response.ok });
+
                 if (response.ok) {
                     const data = await response.json();
                     currentUser = data.user;
+                    console.log('Token valid, user loaded:', currentUser?.email);
                 } else {
                     // Token invalid, clear it
+                    console.log('Token invalid, clearing auth state');
                     authToken = null;
                     currentUser = null;
                     localStorage.removeItem('authToken');
@@ -1694,6 +1708,7 @@
             simulateProgress();
 
             try {
+                console.log('Starting analysis with auth token:', !!authToken);
                 const response = await fetch('/api/v1/analyze/resume', {
                     method: 'POST',
                     headers: {
@@ -1702,11 +1717,13 @@
                     body: formData
                 });
 
+                console.log('Analysis response:', { status: response.status, ok: response.ok });
                 const data = await response.json();
 
                 if (response.ok) {
                     displayResults(data);
                 } else {
+                    console.error('Analysis failed:', data);
                     throw new Error(data.error?.message || 'Analysis failed');
                 }
             } catch (error) {
