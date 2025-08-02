@@ -1378,6 +1378,8 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded - Starting initialization');
+            console.log('Document ready state:', document.readyState);
+            console.log('All elements in DOM:', document.querySelectorAll('*').length);
             
             // Force hide user menu on page load
             const userMenu = document.getElementById('userMenu');
@@ -1392,15 +1394,26 @@
             }
             console.log('Forced user menus to be hidden on page load');
             
+            // Test if basic elements exist
+            console.log('Testing element existence:');
+            console.log('- analyzeSkillsBtn:', !!document.getElementById('analyzeSkillsBtn'));
+            console.log('- headerLoginBtn:', !!document.getElementById('headerLoginBtn'));
+            console.log('- headerRegisterBtn:', !!document.getElementById('headerRegisterBtn'));
+            console.log('- authModal:', !!document.getElementById('authModal'));
+            
             try {
+                console.log('Starting initializeAuth...');
                 initializeAuth();
                 console.log('Auth initialization completed');
+                console.log('Starting initializeFileHandlers...');
                 initializeFileHandlers();
                 console.log('File handlers initialization completed');
+                console.log('Starting initializeAnalysis...');
                 initializeAnalysis();
                 console.log('Analysis initialization completed');
             } catch (error) {
                 console.error('Initialization error:', error);
+                console.error('Error stack:', error.stack);
             }
         });
 
@@ -1427,6 +1440,26 @@
                 headerRegisterBtn: !!headerRegisterBtn,
                 authModal: !!authModal
             });
+            
+            // Add direct onclick handlers as backup
+            if (analyzeBtn) {
+                analyzeBtn.onclick = function(e) {
+                    console.log('Direct onclick handler triggered for analyze button');
+                    return false;
+                };
+            }
+            if (headerLoginBtn) {
+                headerLoginBtn.onclick = function(e) {
+                    console.log('Direct onclick handler triggered for login button');
+                    return false;
+                };
+            }
+            if (headerRegisterBtn) {
+                headerRegisterBtn.onclick = function(e) {
+                    console.log('Direct onclick handler triggered for register button');
+                    return false;
+                };
+            }
             
             // Mobile auth buttons
             const mobileLoginBtn = document.getElementById('mobileLoginBtn');
@@ -1455,38 +1488,57 @@
 
             // Main analyze button
             if (analyzeBtn) {
-                analyzeBtn.addEventListener('click', function() {
-                    console.log('Analyze button clicked. Auth state:', { currentUser: !!currentUser });
+                console.log('Found analyze button, adding event listener...');
+                analyzeBtn.addEventListener('click', function(e) {
+                    console.log('Analyze button clicked! Event:', e);
+                    console.log('Auth state:', { currentUser: !!currentUser });
+                    e.preventDefault();
+                    e.stopPropagation();
                     if (currentUser) {
+                        console.log('User is logged in, showing analysis modal');
                         showAnalysisModal();
                     } else {
+                        console.log('User not logged in, showing auth modal');
                         showAuthModal();
                     }
                 });
-                console.log('Analyze button event listener added');
+                console.log('Analyze button event listener added successfully');
+                
+                // Test the button immediately
+                console.log('Testing analyze button properties:');
+                console.log('- Button element:', analyzeBtn);
+                console.log('- Button disabled:', analyzeBtn.disabled);
+                console.log('- Button style display:', analyzeBtn.style.display);
+                console.log('- Button computed style:', window.getComputedStyle(analyzeBtn).display);
             } else {
                 console.error('Analyze button not found!');
             }
 
             // Header login/register buttons
             if (headerLoginBtn) {
-                headerLoginBtn.addEventListener('click', function() {
-                    console.log('Header login button clicked');
+                console.log('Found header login button, adding event listener...');
+                headerLoginBtn.addEventListener('click', function(e) {
+                    console.log('Header login button clicked! Event:', e);
+                    e.preventDefault();
+                    e.stopPropagation();
                     showAuthModal();
                     showLoginForm();
                 });
-                console.log('Header login button event listener added');
+                console.log('Header login button event listener added successfully');
             } else {
                 console.error('Header login button not found!');
             }
 
             if (headerRegisterBtn) {
-                headerRegisterBtn.addEventListener('click', function() {
-                    console.log('Header register button clicked');
+                console.log('Found header register button, adding event listener...');
+                headerRegisterBtn.addEventListener('click', function(e) {
+                    console.log('Header register button clicked! Event:', e);
+                    e.preventDefault();
+                    e.stopPropagation();
                     showAuthModal();
                     showRegisterForm();
                 });
-                console.log('Header register button event listener added');
+                console.log('Header register button event listener added successfully');
             } else {
                 console.error('Header register button not found!');
             }
