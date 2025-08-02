@@ -167,6 +167,36 @@
             50% { transform: translateY(-20px); }
             100% { transform: translateY(0px); }
         }
+
+        /* Authentication UI Styles */
+        .auth-button {
+            transition: all 0.3s ease;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .user-avatar {
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        #mobileMenu {
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-item {
+            transition: all 0.2s ease;
+        }
+
+        .mobile-menu-item:hover {
+            background-color: rgba(20, 184, 166, 0.1);
+            padding-left: 1rem;
+        }
     </style>
 </head>
 <body class=\"bg-slate-900 text-gray-200\">
@@ -186,15 +216,82 @@
             </nav>
             
             <div class="flex items-center space-x-4">
-                <a href="/api/v1/docs" class="bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
-                    View API Docs
+                <!-- Authentication Buttons (shown when not logged in) -->
+                <div id="authButtons" class="hidden md:flex items-center space-x-3">
+                    <button id="headerLoginBtn" class="auth-button text-gray-300 hover:text-accent font-medium px-3 py-2 rounded-lg hover:bg-slate-700 transition-all duration-300">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                    <button id="headerRegisterBtn" class="auth-button bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-user-plus mr-2"></i>Sign Up
+                    </button>
+                </div>
+                
+                <!-- User Menu (shown when logged in) -->
+                <div id="userMenu" class="hidden md:flex items-center space-x-4">
+                    <div class="flex items-center space-x-3 bg-slate-700 px-3 py-2 rounded-lg">
+                        <div class="user-avatar w-8 h-8 bg-accent rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-400">Welcome back</div>
+                            <div id="userEmail" class="text-accent font-medium text-sm"></div>
+                        </div>
+                    </div>
+                    <button id="logoutBtn" class="text-gray-400 hover:text-red-400 font-medium px-2 py-2 rounded-lg hover:bg-slate-700 transition-all duration-300" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+                
+                <a href="/api/v1/docs" class="bg-transparent border border-slate-600 hover:bg-slate-800 text-gray-300 hover:text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+                    API Docs
                 </a>
-                <button class="md:hidden text-gray-300 text-gray-300">
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" class="md:hidden text-gray-300">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
             </div>
         </div>
     </header>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="md:hidden bg-slate-800 border-t border-slate-700 hidden shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <nav class="space-y-3">
+                <a href="#features" class="mobile-menu-item block py-2 text-gray-300 hover:text-accent transition-all duration-200">Success Stories</a>
+                <a href="#how-it-works" class="mobile-menu-item block py-2 text-gray-300 hover:text-accent transition-all duration-200">How It Works</a>
+                <a href="#pricing" class="mobile-menu-item block py-2 text-gray-300 hover:text-accent transition-all duration-200">Pricing</a>
+                <a href="#demo" class="mobile-menu-item block py-2 text-gray-300 hover:text-accent transition-all duration-200">Try Demo</a>
+                <hr class="border-slate-700 my-4">
+                
+                <!-- Mobile Auth Buttons (shown when not logged in) -->
+                <div id="mobileAuthButtons" class="space-y-3">
+                    <button id="mobileLoginBtn" class="mobile-menu-item auth-button block w-full text-left py-2 text-gray-300 hover:text-accent font-medium transition-all duration-200">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                    <button id="mobileRegisterBtn" class="auth-button block w-full bg-accent hover:bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 text-center">
+                        <i class="fas fa-user-plus mr-2"></i>Sign Up
+                    </button>
+                </div>
+                
+                <!-- Mobile User Menu (shown when logged in) -->
+                <div id="mobileUserMenu" class="hidden space-y-3">
+                    <div class="flex items-center space-x-3 py-2 px-3 bg-slate-700 rounded-lg">
+                        <div class="user-avatar w-10 h-10 bg-accent rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-300">Logged in as</div>
+                            <div id="mobileUserEmail" class="text-accent font-medium text-sm"></div>
+                        </div>
+                    </div>
+                    <button id="mobileLogoutBtn" class="mobile-menu-item block w-full text-left py-2 text-red-400 hover:text-red-300 font-medium transition-all duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </div>
 
     <!-- Hero Section - Problem Statement -->
     <section class="py-20 md:py-32 hero-pattern">
@@ -1296,14 +1393,28 @@
             const loginForm = document.getElementById('loginForm');
             const registerForm = document.getElementById('registerForm');
 
+            // Header auth buttons
+            const headerLoginBtn = document.getElementById('headerLoginBtn');
+            const headerRegisterBtn = document.getElementById('headerRegisterBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            // Mobile auth buttons
+            const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+            const mobileRegisterBtn = document.getElementById('mobileRegisterBtn');
+            const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+
             // Check if user is already authenticated
             if (authToken) {
                 console.log('Found existing auth token, validating...');
-                validateToken();
+                validateToken().then(() => updateAuthUI());
             } else {
                 console.log('No auth token found');
+                updateAuthUI();
             }
 
+            // Main analyze button
             analyzeBtn.addEventListener('click', function() {
                 console.log('Analyze button clicked. Auth state:', { authToken: !!authToken, currentUser: !!currentUser });
                 if (authToken && currentUser) {
@@ -1313,6 +1424,41 @@
                 }
             });
 
+            // Header login/register buttons
+            headerLoginBtn?.addEventListener('click', function() {
+                showAuthModal();
+                showLoginForm();
+            });
+
+            headerRegisterBtn?.addEventListener('click', function() {
+                showAuthModal();
+                showRegisterForm();
+            });
+
+            // Mobile login/register buttons
+            mobileLoginBtn?.addEventListener('click', function() {
+                hideMobileMenu();
+                showAuthModal();
+                showLoginForm();
+            });
+
+            mobileRegisterBtn?.addEventListener('click', function() {
+                hideMobileMenu();
+                showAuthModal();
+                showRegisterForm();
+            });
+
+            // Logout buttons
+            logoutBtn?.addEventListener('click', handleLogout);
+            mobileLogoutBtn?.addEventListener('click', function() {
+                hideMobileMenu();
+                handleLogout();
+            });
+
+            // Mobile menu toggle
+            mobileMenuBtn?.addEventListener('click', toggleMobileMenu);
+
+            // Modal controls
             closeAuthModal.addEventListener('click', hideAuthModal);
             
             loginTab.addEventListener('click', function() {
@@ -1387,6 +1533,7 @@
                     currentUser = data.user;
                     localStorage.setItem('authToken', authToken);
                     console.log('Login successful, token stored');
+                    updateAuthUI();
                     hideAuthModal();
                     showAnalysisModal();
                 } else {
@@ -1425,6 +1572,7 @@
                     authToken = data.token;
                     currentUser = data.user;
                     localStorage.setItem('authToken', authToken);
+                    updateAuthUI();
                     hideAuthModal();
                     showAnalysisModal();
                 } else {
@@ -1474,6 +1622,52 @@
         function clearAuthError() {
             const errorDiv = document.getElementById('authError');
             errorDiv.classList.add('hidden');
+        }
+
+        // UI update functions
+        function updateAuthUI() {
+            const authButtons = document.getElementById('authButtons');
+            const userMenu = document.getElementById('userMenu');
+            const userEmail = document.getElementById('userEmail');
+            const mobileAuthButtons = document.getElementById('mobileAuthButtons');
+            const mobileUserMenu = document.getElementById('mobileUserMenu');
+            const mobileUserEmail = document.getElementById('mobileUserEmail');
+
+            if (authToken && currentUser) {
+                // User is logged in
+                authButtons?.classList.add('hidden');
+                userMenu?.classList.remove('hidden');
+                if (userEmail) userEmail.textContent = currentUser.email;
+                
+                mobileAuthButtons?.classList.add('hidden');
+                mobileUserMenu?.classList.remove('hidden');
+                if (mobileUserEmail) mobileUserEmail.textContent = currentUser.email;
+            } else {
+                // User is not logged in
+                authButtons?.classList.remove('hidden');
+                userMenu?.classList.add('hidden');
+                
+                mobileAuthButtons?.classList.remove('hidden');
+                mobileUserMenu?.classList.add('hidden');
+            }
+        }
+
+        function handleLogout() {
+            authToken = null;
+            currentUser = null;
+            localStorage.removeItem('authToken');
+            updateAuthUI();
+            console.log('User logged out');
+        }
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu?.classList.toggle('hidden');
+        }
+
+        function hideMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu?.classList.add('hidden');
         }
 
         // File handling functions
