@@ -1377,6 +1377,8 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded - Starting initialization');
+            
             // Force hide user menu on page load
             const userMenu = document.getElementById('userMenu');
             const mobileUserMenu = document.getElementById('mobileUserMenu');
@@ -1390,13 +1392,22 @@
             }
             console.log('Forced user menus to be hidden on page load');
             
-            initializeAuth();
-            initializeFileHandlers();
-            initializeAnalysis();
+            try {
+                initializeAuth();
+                console.log('Auth initialization completed');
+                initializeFileHandlers();
+                console.log('File handlers initialization completed');
+                initializeAnalysis();
+                console.log('Analysis initialization completed');
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
         });
 
         // Authentication functions
         function initializeAuth() {
+            console.log('Initializing authentication...');
+            
             const analyzeBtn = document.getElementById('analyzeSkillsBtn');
             const authModal = document.getElementById('authModal');
             const closeAuthModal = document.getElementById('closeAuthModal');
@@ -1409,6 +1420,13 @@
             const headerLoginBtn = document.getElementById('headerLoginBtn');
             const headerRegisterBtn = document.getElementById('headerRegisterBtn');
             const logoutBtn = document.getElementById('logoutBtn');
+            
+            console.log('Elements found:', {
+                analyzeBtn: !!analyzeBtn,
+                headerLoginBtn: !!headerLoginBtn,
+                headerRegisterBtn: !!headerRegisterBtn,
+                authModal: !!authModal
+            });
             
             // Mobile auth buttons
             const mobileLoginBtn = document.getElementById('mobileLoginBtn');
@@ -1436,25 +1454,42 @@
             }
 
             // Main analyze button
-            analyzeBtn.addEventListener('click', function() {
-                console.log('Analyze button clicked. Auth state:', { currentUser: !!currentUser });
-                if (currentUser) {
-                    showAnalysisModal();
-                } else {
-                    showAuthModal();
-                }
-            });
+            if (analyzeBtn) {
+                analyzeBtn.addEventListener('click', function() {
+                    console.log('Analyze button clicked. Auth state:', { currentUser: !!currentUser });
+                    if (currentUser) {
+                        showAnalysisModal();
+                    } else {
+                        showAuthModal();
+                    }
+                });
+                console.log('Analyze button event listener added');
+            } else {
+                console.error('Analyze button not found!');
+            }
 
             // Header login/register buttons
-            headerLoginBtn?.addEventListener('click', function() {
-                showAuthModal();
-                showLoginForm();
-            });
+            if (headerLoginBtn) {
+                headerLoginBtn.addEventListener('click', function() {
+                    console.log('Header login button clicked');
+                    showAuthModal();
+                    showLoginForm();
+                });
+                console.log('Header login button event listener added');
+            } else {
+                console.error('Header login button not found!');
+            }
 
-            headerRegisterBtn?.addEventListener('click', function() {
-                showAuthModal();
-                showRegisterForm();
-            });
+            if (headerRegisterBtn) {
+                headerRegisterBtn.addEventListener('click', function() {
+                    console.log('Header register button clicked');
+                    showAuthModal();
+                    showRegisterForm();
+                });
+                console.log('Header register button event listener added');
+            } else {
+                console.error('Header register button not found!');
+            }
 
             // Mobile login/register buttons
             mobileLoginBtn?.addEventListener('click', function() {
