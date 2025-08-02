@@ -200,6 +200,46 @@
     </style>
 </head>
 <body class=\"bg-slate-900 text-gray-200\">
+    <script>
+        console.log('BASIC SCRIPT TEST: JavaScript is working!');
+        console.log('Page loaded at:', new Date());
+        
+        // Test if we can find elements immediately
+        setTimeout(function() {
+            console.log('Testing element access after timeout:');
+            console.log('analyzeSkillsBtn exists:', !!document.getElementById('analyzeSkillsBtn'));
+            console.log('headerLoginBtn exists:', !!document.getElementById('headerLoginBtn'));
+            console.log('headerRegisterBtn exists:', !!document.getElementById('headerRegisterBtn'));
+            
+            // Try to add a simple click handler
+            const testBtn = document.getElementById('analyzeSkillsBtn');
+            if (testBtn) {
+                console.log('Adding simple click handler to analyze button');
+                testBtn.addEventListener('click', function() {
+                    console.log('ANALYZE BUTTON CLICKED!');
+                    alert('Analyze button works!');
+                });
+            }
+            
+            const loginBtn = document.getElementById('headerLoginBtn');
+            if (loginBtn) {
+                console.log('Adding simple click handler to login button');
+                loginBtn.addEventListener('click', function() {
+                    console.log('LOGIN BUTTON CLICKED!');
+                    alert('Login button works!');
+                });
+            }
+            
+            const registerBtn = document.getElementById('headerRegisterBtn');
+            if (registerBtn) {
+                console.log('Adding simple click handler to register button');
+                registerBtn.addEventListener('click', function() {
+                    console.log('REGISTER BUTTON CLICKED!');
+                    alert('Register button works!');
+                });
+            }
+        }, 1000);
+    </script>
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-slate-800 bg-slate-900 shadow-md py-4 px-6">
         <div class="container mx-auto flex justify-between items-center">
@@ -1365,6 +1405,7 @@
 
     <!-- CV Analysis JavaScript -->
     <script>
+        console.log('Starting main JavaScript section...');
         // Global state
         let currentUser = null;
         let analysisInProgress = false;
