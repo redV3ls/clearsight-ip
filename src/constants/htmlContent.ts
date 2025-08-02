@@ -217,7 +217,7 @@
             
             <div class="flex items-center space-x-4">
                 <!-- Authentication Buttons (shown when not logged in) -->
-                <div id="authButtons" class="hidden md:flex items-center space-x-3">
+                <div id="authButtons" class="md:flex items-center space-x-3">
                     <button id="headerLoginBtn" class="auth-button text-gray-300 hover:text-accent font-medium px-3 py-2 rounded-lg hover:bg-slate-700 transition-all duration-300">
                         <i class="fas fa-sign-in-alt mr-2"></i>Login
                     </button>
@@ -1404,9 +1404,15 @@
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const mobileMenu = document.getElementById('mobileMenu');
 
+            // Initialize UI to logged-out state first
+            updateAuthUI();
+            
             // Check if user is already authenticated via cookie
             console.log('Checking authentication status...');
-            validateToken().then(() => updateAuthUI());
+            validateToken().then(() => {
+                console.log('Authentication check complete, updating UI');
+                updateAuthUI();
+            });
 
             // Main analyze button
             analyzeBtn.addEventListener('click', function() {
@@ -1613,6 +1619,8 @@
 
         // UI update functions
         function updateAuthUI() {
+            console.log('updateAuthUI called, currentUser:', currentUser);
+            
             const authButtons = document.getElementById('authButtons');
             const userMenu = document.getElementById('userMenu');
             const userEmail = document.getElementById('userEmail');
@@ -1620,8 +1628,9 @@
             const mobileUserMenu = document.getElementById('mobileUserMenu');
             const mobileUserEmail = document.getElementById('mobileUserEmail');
 
-            if (currentUser) {
+            if (currentUser && currentUser.email) {
                 // User is logged in
+                console.log('Showing user menu for:', currentUser.email);
                 authButtons?.classList.add('hidden');
                 userMenu?.classList.remove('hidden');
                 if (userEmail) userEmail.textContent = currentUser.email;
@@ -1629,17 +1638,14 @@
                 mobileAuthButtons?.classList.add('hidden');
                 mobileUserMenu?.classList.remove('hidden');
                 if (mobileUserEmail) mobileUserEmail.textContent = currentUser.email;
-                
-                console.log('UI updated: User logged in as', currentUser.email);
             } else {
                 // User is not logged in
+                console.log('Showing login buttons - user not authenticated');
                 authButtons?.classList.remove('hidden');
                 userMenu?.classList.add('hidden');
                 
                 mobileAuthButtons?.classList.remove('hidden');
                 mobileUserMenu?.classList.add('hidden');
-                
-                console.log('UI updated: User not logged in');
             }
         }
 
