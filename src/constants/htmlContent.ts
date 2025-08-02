@@ -222,18 +222,20 @@
             });
             
             // Simple modal functions
-            function showAuthModal() {
+            window.showAuthModal = function() {
                 if (authModal) {
                     authModal.classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
+                    window.clearAuthError();
                     console.log('Auth modal shown');
                 }
             }
             
-            function hideAuthModal() {
+            window.hideAuthModal = function() {
                 if (authModal) {
                     authModal.classList.add('hidden');
                     document.body.style.overflow = 'auto';
+                    window.clearAuthError();
                     console.log('Auth modal hidden');
                 }
             }
@@ -243,7 +245,7 @@
                 analyzeBtn.addEventListener('click', function(e) {
                     console.log('Analyze button clicked');
                     e.preventDefault();
-                    showAuthModal();
+                    window.showAuthModal();
                 });
                 console.log('Analyze button handler added');
             }
@@ -252,10 +254,12 @@
                 headerLoginBtn.addEventListener('click', function(e) {
                     console.log('Login button clicked');
                     e.preventDefault();
-                    showAuthModal();
+                    window.showAuthModal();
                     // Show login form
-                    const loginTab = document.getElementById('loginTab');
-                    if (loginTab) loginTab.click();
+                    setTimeout(() => {
+                        const loginTab = document.getElementById('loginTab');
+                        if (loginTab) loginTab.click();
+                    }, 100);
                 });
                 console.log('Login button handler added');
             }
@@ -264,10 +268,12 @@
                 headerRegisterBtn.addEventListener('click', function(e) {
                     console.log('Register button clicked');
                     e.preventDefault();
-                    showAuthModal();
+                    window.showAuthModal();
                     // Show register form
-                    const registerTab = document.getElementById('registerTab');
-                    if (registerTab) registerTab.click();
+                    setTimeout(() => {
+                        const registerTab = document.getElementById('registerTab');
+                        if (registerTab) registerTab.click();
+                    }, 100);
                 });
                 console.log('Register button handler added');
             }
@@ -311,19 +317,164 @@
             // Modal close functionality
             const closeAuthModal = document.getElementById('closeAuthModal');
             if (closeAuthModal) {
-                closeAuthModal.addEventListener('click', hideAuthModal);
+                closeAuthModal.addEventListener('click', window.hideAuthModal);
             }
             
             // Close modal on outside click
             if (authModal) {
                 authModal.addEventListener('click', function(e) {
                     if (e.target === authModal) {
-                        hideAuthModal();
+                        window.hideAuthModal();
                     }
                 });
             }
             
+            // Form submission handlers
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+                console.log('Login form handler added');
+            }
+            
+            if (registerForm) {
+                registerForm.addEventListener('submit', handleRegister);
+                console.log('Register form handler added');
+            }
+            
             console.log('All button handlers and modal functionality initialized successfully');
+        }, 500);
+        
+        // Authentication functions
+        async function handleLogin(e) {
+            e.preventDefault();
+            console.log('Login form submitted');
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            console.log('Attempting login for:', email);
+
+            try {
+                const response = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                console.log('Login response:', { status: response.status, ok: response.ok });
+
+                if (response.ok) {
+                    currentUser = data.data.user;
+                    console.log('Login successful, cookie set');
+                    updateAuthUI();
+                    hideAuthModal();
+                    // For now, just show success message
+                    alert('Login successful!');
+                } else {
+                    console.error('Login failed:', data);
+                    showAuthError(data.error?.message || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAuthError('Network error. Please try again.');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            console.log('Register form submitted');
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            if (password.length < 8) {
+                showAuthError('Password must be at least 8 characters long');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentUser = data.data.user;
+                    console.log('Registration successful, cookie set');
+                    updateAuthUI();
+                    hideAuthModal();
+                    alert('Registration successful!');
+                } else {
+                    showAuthError(data.error?.message || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showAuthError('Network error. Please try again.');
+            }
+        }
+        
+        function showAuthError(message) {
+            const errorDiv = document.getElementById('authError');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        window.clearAuthError = function() {
+            const errorDiv = document.getElementById('authError');
+            if (errorDiv) {
+                errorDiv.classList.add('hidden');
+            }
+        }
+        
+        function updateAuthUI() {
+            console.log('updateAuthUI called, currentUser:', currentUser);
+            
+            const authButtons = document.getElementById('authButtons');
+            const userMenu = document.getElementById('userMenu');
+            const userEmail = document.getElementById('userEmail');
+
+            if (currentUser && currentUser.email) {
+                console.log('Showing user menu for:', currentUser.email);
+                if (authButtons) authButtons.classList.add('hidden');
+                if (userMenu) {
+                    userMenu.classList.remove('hidden');
+                    userMenu.style.display = 'flex';
+                }
+                if (userEmail) userEmail.textContent = currentUser.email;
+            } else {
+                console.log('Hiding user menu - user not authenticated');
+                if (authButtons) {
+                    authButtons.classList.remove('hidden');
+                    authButtons.style.display = 'flex';
+                }
+                if (userMenu) {
+                    userMenu.classList.add('hidden');
+                    userMenu.style.display = 'none';
+                }
+            }
+        }
+        
+        function hideAuthModal() {
+            const authModal = document.getElementById('authModal');
+            if (authModal) {
+                authModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                window.clearAuthError();
+                console.log('Auth modal hidden');
+            }
+        }
         }, 500);
     </script>
     <!-- Header -->
