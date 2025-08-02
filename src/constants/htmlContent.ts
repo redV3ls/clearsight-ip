@@ -227,7 +227,7 @@
                 </div>
                 
                 <!-- User Menu (shown when logged in) -->
-                <div id="userMenu" class="hidden md:flex items-center space-x-4">
+                <div id="userMenu" class="hidden items-center space-x-4">
                     <div class="flex items-center space-x-3 bg-slate-700 px-3 py-2 rounded-lg">
                         <div class="user-avatar w-8 h-8 bg-accent rounded-full flex items-center justify-center">
                             <i class="fas fa-user text-white text-sm"></i>
@@ -1377,6 +1377,19 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Force hide user menu on page load
+            const userMenu = document.getElementById('userMenu');
+            const mobileUserMenu = document.getElementById('mobileUserMenu');
+            if (userMenu) {
+                userMenu.style.display = 'none';
+                userMenu.classList.add('hidden');
+            }
+            if (mobileUserMenu) {
+                mobileUserMenu.style.display = 'none';
+                mobileUserMenu.classList.add('hidden');
+            }
+            console.log('Forced user menus to be hidden on page load');
+            
             initializeAuth();
             initializeFileHandlers();
             initializeAnalysis();
@@ -1641,19 +1654,26 @@
                 console.log('Showing user menu for:', currentUser.email);
                 authButtons?.classList.add('hidden');
                 userMenu?.classList.remove('hidden');
+                userMenu?.style.display = 'flex'; // Force show
                 if (userEmail) userEmail.textContent = currentUser.email;
                 
                 mobileAuthButtons?.classList.add('hidden');
                 mobileUserMenu?.classList.remove('hidden');
                 if (mobileUserEmail) mobileUserEmail.textContent = currentUser.email;
             } else {
-                // User is not logged in
-                console.log('Showing login buttons - user not authenticated');
+                // User is not logged in - FORCE HIDE user menu
+                console.log('Hiding user menu - user not authenticated');
                 authButtons?.classList.remove('hidden');
+                authButtons?.style.display = 'flex'; // Force show
+                
                 userMenu?.classList.add('hidden');
+                userMenu?.style.display = 'none'; // Force hide
                 
                 mobileAuthButtons?.classList.remove('hidden');
                 mobileUserMenu?.classList.add('hidden');
+                
+                console.log('Auth buttons display:', authButtons?.style.display);
+                console.log('User menu display:', userMenu?.style.display);
             }
         }
 
