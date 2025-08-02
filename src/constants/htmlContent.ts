@@ -264,15 +264,31 @@
                 const authButtons = document.getElementById('authButtons');
                 const userMenu = document.getElementById('userMenu');
                 const userEmail = document.getElementById('userEmail');
+                
+                console.log('UI Elements found:', {
+                    authButtons: !!authButtons,
+                    userMenu: !!userMenu,
+                    userEmail: !!userEmail
+                });
 
                 if (currentUser && currentUser.email) {
                     console.log('Showing user menu for:', currentUser.email);
-                    if (authButtons) authButtons.classList.add('hidden');
+                    if (authButtons) {
+                        console.log('Hiding auth buttons...');
+                        authButtons.classList.add('hidden');
+                        authButtons.style.display = 'none';
+                        console.log('Auth buttons hidden. Classes:', authButtons.className);
+                    }
                     if (userMenu) {
+                        console.log('Showing user menu...');
                         userMenu.classList.remove('hidden');
                         userMenu.style.display = 'flex';
+                        console.log('User menu shown. Classes:', userMenu.className);
                     }
-                    if (userEmail) userEmail.textContent = currentUser.email;
+                    if (userEmail) {
+                        userEmail.textContent = currentUser.email;
+                        console.log('User email set to:', currentUser.email);
+                    }
                 } else {
                     console.log('Hiding user menu - user not authenticated');
                     if (authButtons) {
@@ -312,8 +328,16 @@
                     if (response.ok) {
                         currentUser = data.data.user;
                         console.log('Login successful, cookie set');
+                        console.log('Current user data:', currentUser);
                         updateAuthUI();
                         hideAuthModal();
+                        
+                        // Force UI update after a short delay to ensure DOM is ready
+                        setTimeout(() => {
+                            console.log('Force updating UI after delay...');
+                            updateAuthUI();
+                        }, 200);
+                        
                         alert('Login successful!');
                     } else {
                         console.error('Login failed:', data);
