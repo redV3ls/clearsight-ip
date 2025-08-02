@@ -136,8 +136,19 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
 
     const apiKey = c.req.header('X-API-Key');
     const authHeader = c.req.header('Authorization');
+    
+    // Check for auth token in cookies first
+    const cookieHeader = c.req.header('Cookie');
+    let authToken = null;
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';').map(c => c.trim());
+      const authCookie = cookies.find(cookie => cookie.startsWith('auth_token='));
+      if (authCookie) {
+        authToken = authCookie.split('=')[1];
+      }
+    }
 
-    if (!apiKey && !authHeader) {
+    if (!apiKey && !authHeader && !authToken) {
       throw new AppError('API key or authorization token required', 401, 'UNAUTHORIZED');
     }
 
@@ -184,9 +195,13 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
       }
     }
 
-    // JWT token authentication
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
+    // JWT token authentication (from cookie or Authorization header)
+    let token = authToken; // From cookie
+    if (!token && authHeader?.startsWith('Bearer ')) {
+      token = authHeader.substring(7); // From Authorization header
+    }
+    
+    if (token) {
       
       try {
         // Ensure JWT secret is available

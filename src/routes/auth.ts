@@ -72,11 +72,21 @@ auth.post('/login',
         role: authResult.user.role
       }, c.env.JWT_SECRET);
 
+      // Set secure HTTP-only cookie
+      const cookieOptions = {
+        httpOnly: true,
+        secure: c.env.NODE_ENV === 'production',
+        sameSite: 'Strict' as const,
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        path: '/'
+      };
+
+      c.header('Set-Cookie', `auth_token=${token}; HttpOnly; Secure=${cookieOptions.secure}; SameSite=${cookieOptions.sameSite}; Max-Age=${cookieOptions.maxAge}; Path=${cookieOptions.path}`);
+
       return c.json({
         success: true,
         data: {
           user: authResult.user,
-          token,
           passwordMigrated: authResult.passwordMigrated
         }
       });
@@ -114,11 +124,21 @@ auth.post('/register',
         role: authResult.user.role
       }, c.env.JWT_SECRET);
 
+      // Set secure HTTP-only cookie
+      const cookieOptions = {
+        httpOnly: true,
+        secure: c.env.NODE_ENV === 'production',
+        sameSite: 'Strict' as const,
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        path: '/'
+      };
+
+      c.header('Set-Cookie', `auth_token=${token}; HttpOnly; Secure=${cookieOptions.secure}; SameSite=${cookieOptions.sameSite}; Max-Age=${cookieOptions.maxAge}; Path=${cookieOptions.path}`);
+
       return c.json({
         success: true,
         data: {
-          user: authResult.user,
-          token
+          user: authResult.user
         }
       }, 201);
     } catch (error) {
@@ -189,10 +209,10 @@ auth.post('/change-password',
  * Logout user (placeholder for token invalidation)
  */
 auth.post('/logout',
-  validateHeaders(['Authorization']),
   async (c) => {
-    // In a stateless JWT system, logout is typically handled client-side
-    // In the future, we could implement token blacklisting
+    // Clear the auth cookie
+    c.header('Set-Cookie', `auth_token=; HttpOnly; Secure=${c.env.NODE_ENV === 'production'}; SameSite=Strict; Max-Age=0; Path=/`);
+    
     return c.json({
       success: true,
       message: 'Logged out successfully'

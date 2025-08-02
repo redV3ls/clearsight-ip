@@ -1366,7 +1366,6 @@
     <!-- CV Analysis JavaScript -->
     <script>
         // Global state
-        let authToken = localStorage.getItem('authToken');
         let currentUser = null;
         let analysisInProgress = false;
 
@@ -1405,19 +1404,14 @@
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const mobileMenu = document.getElementById('mobileMenu');
 
-            // Check if user is already authenticated
-            if (authToken) {
-                console.log('Found existing auth token, validating...');
-                validateToken().then(() => updateAuthUI());
-            } else {
-                console.log('No auth token found');
-                updateAuthUI();
-            }
+            // Check if user is already authenticated via cookie
+            console.log('Checking authentication status...');
+            validateToken().then(() => updateAuthUI());
 
             // Main analyze button
             analyzeBtn.addEventListener('click', function() {
-                console.log('Analyze button clicked. Auth state:', { authToken: !!authToken, currentUser: !!currentUser });
-                if (authToken && currentUser) {
+                console.log('Analyze button clicked. Auth state:', { currentUser: !!currentUser });
+                if (currentUser) {
                     showAnalysisModal();
                 } else {
                     showAuthModal();
@@ -1522,6 +1516,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include', // Include cookies
                     body: JSON.stringify({ email, password })
                 });
 
@@ -1529,10 +1524,8 @@
                 console.log('Login response:', { status: response.status, ok: response.ok });
 
                 if (response.ok) {
-                    authToken = data.token;
-                    currentUser = data.user;
-                    localStorage.setItem('authToken', authToken);
-                    console.log('Login successful, token stored');
+                    currentUser = data.data.user;
+                    console.log('Login successful, cookie set');
                     updateAuthUI();
                     hideAuthModal();
                     showAnalysisModal();
@@ -1563,15 +1556,15 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include', // Include cookies
                     body: JSON.stringify({ name, email, password })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    authToken = data.token;
-                    currentUser = data.user;
-                    localStorage.setItem('authToken', authToken);
+                    currentUser = data.data.user;
+                    console.log('Registration successful, cookie set');
                     updateAuthUI();
                     hideAuthModal();
                     showAnalysisModal();
@@ -1584,12 +1577,10 @@
         }
 
         async function validateToken() {
-            console.log('Validating token...');
+            console.log('Validating authentication via cookie...');
             try {
                 const response = await fetch('/api/v1/users/profile', {
-                    headers: {
-                        'Authorization': \`Bearer \${authToken}\`
-                    }
+                    credentials: 'include' // Include cookies in request
                 });
 
                 console.log('Token validation response:', { status: response.status, ok: response.ok });
@@ -1597,19 +1588,15 @@
                 if (response.ok) {
                     const data = await response.json();
                     currentUser = data.user;
-                    console.log('Token valid, user loaded:', currentUser?.email);
+                    console.log('Authentication valid, user loaded:', currentUser?.email);
                 } else {
-                    // Token invalid, clear it
-                    console.log('Token invalid, clearing auth state');
-                    authToken = null;
+                    // Token invalid, clear state
+                    console.log('Authentication invalid, clearing auth state');
                     currentUser = null;
-                    localStorage.removeItem('authToken');
                 }
             } catch (error) {
-                console.error('Token validation failed:', error);
-                authToken = null;
+                console.error('Authentication validation failed:', error);
                 currentUser = null;
-                localStorage.removeItem('authToken');
             }
         }
 
@@ -1633,7 +1620,7 @@
             const mobileUserMenu = document.getElementById('mobileUserMenu');
             const mobileUserEmail = document.getElementById('mobileUserEmail');
 
-            if (authToken && currentUser) {
+            if (currentUser) {
                 // User is logged in
                 authButtons?.classList.add('hidden');
                 userMenu?.classList.remove('hidden');
@@ -1642,6 +1629,8 @@
                 mobileAuthButtons?.classList.add('hidden');
                 mobileUserMenu?.classList.remove('hidden');
                 if (mobileUserEmail) mobileUserEmail.textContent = currentUser.email;
+                
+                console.log('UI updated: User logged in as', currentUser.email);
             } else {
                 // User is not logged in
                 authButtons?.classList.remove('hidden');
@@ -1649,13 +1638,23 @@
                 
                 mobileAuthButtons?.classList.remove('hidden');
                 mobileUserMenu?.classList.add('hidden');
+                
+                console.log('UI updated: User not logged in');
             }
         }
 
-        function handleLogout() {
-            authToken = null;
+        async function handleLogout() {
+            try {
+                await fetch('/api/v1/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                console.log('Logout request sent');
+            } catch (error) {
+                console.error('Logout request failed:', error);
+            }
+            
             currentUser = null;
-            localStorage.removeItem('authToken');
             updateAuthUI();
             console.log('User logged out');
         }
@@ -1902,12 +1901,10 @@
             simulateProgress();
 
             try {
-                console.log('Starting analysis with auth token:', !!authToken);
+                console.log('Starting analysis with cookie authentication');
                 const response = await fetch('/api/v1/analyze/resume', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': \`Bearer \${authToken}\`
-                    },
+                    credentials: 'include', // Include cookies
                     body: formData
                 });
 
