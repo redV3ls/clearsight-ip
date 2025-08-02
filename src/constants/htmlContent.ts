@@ -204,41 +204,127 @@
         console.log('BASIC SCRIPT TEST: JavaScript is working!');
         console.log('Page loaded at:', new Date());
         
-        // Test if we can find elements immediately
+        // Initialize functionality after DOM is ready
         setTimeout(function() {
-            console.log('Testing element access after timeout:');
-            console.log('analyzeSkillsBtn exists:', !!document.getElementById('analyzeSkillsBtn'));
-            console.log('headerLoginBtn exists:', !!document.getElementById('headerLoginBtn'));
-            console.log('headerRegisterBtn exists:', !!document.getElementById('headerRegisterBtn'));
+            console.log('Initializing button functionality...');
             
-            // Try to add a simple click handler
-            const testBtn = document.getElementById('analyzeSkillsBtn');
-            if (testBtn) {
-                console.log('Adding simple click handler to analyze button');
-                testBtn.addEventListener('click', function() {
-                    console.log('ANALYZE BUTTON CLICKED!');
-                    alert('Analyze button works!');
+            // Get all the buttons
+            const analyzeBtn = document.getElementById('analyzeSkillsBtn');
+            const headerLoginBtn = document.getElementById('headerLoginBtn');
+            const headerRegisterBtn = document.getElementById('headerRegisterBtn');
+            const authModal = document.getElementById('authModal');
+            
+            console.log('Elements found:', {
+                analyzeBtn: !!analyzeBtn,
+                headerLoginBtn: !!headerLoginBtn,
+                headerRegisterBtn: !!headerRegisterBtn,
+                authModal: !!authModal
+            });
+            
+            // Simple modal functions
+            function showAuthModal() {
+                if (authModal) {
+                    authModal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                    console.log('Auth modal shown');
+                }
+            }
+            
+            function hideAuthModal() {
+                if (authModal) {
+                    authModal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                    console.log('Auth modal hidden');
+                }
+            }
+            
+            // Add click handlers
+            if (analyzeBtn) {
+                analyzeBtn.addEventListener('click', function(e) {
+                    console.log('Analyze button clicked');
+                    e.preventDefault();
+                    showAuthModal();
+                });
+                console.log('Analyze button handler added');
+            }
+            
+            if (headerLoginBtn) {
+                headerLoginBtn.addEventListener('click', function(e) {
+                    console.log('Login button clicked');
+                    e.preventDefault();
+                    showAuthModal();
+                    // Show login form
+                    const loginTab = document.getElementById('loginTab');
+                    if (loginTab) loginTab.click();
+                });
+                console.log('Login button handler added');
+            }
+            
+            if (headerRegisterBtn) {
+                headerRegisterBtn.addEventListener('click', function(e) {
+                    console.log('Register button clicked');
+                    e.preventDefault();
+                    showAuthModal();
+                    // Show register form
+                    const registerTab = document.getElementById('registerTab');
+                    if (registerTab) registerTab.click();
+                });
+                console.log('Register button handler added');
+            }
+            
+            // Tab switching functionality
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            
+            function showLoginForm() {
+                if (loginTab && registerTab && loginForm && registerForm) {
+                    loginTab.classList.add('text-accent', 'border-b-2', 'border-accent');
+                    loginTab.classList.remove('text-gray-400');
+                    registerTab.classList.add('text-gray-400');
+                    registerTab.classList.remove('text-accent', 'border-b-2', 'border-accent');
+                    loginForm.classList.remove('hidden');
+                    registerForm.classList.add('hidden');
+                }
+            }
+            
+            function showRegisterForm() {
+                if (loginTab && registerTab && loginForm && registerForm) {
+                    registerTab.classList.add('text-accent', 'border-b-2', 'border-accent');
+                    registerTab.classList.remove('text-gray-400');
+                    loginTab.classList.add('text-gray-400');
+                    loginTab.classList.remove('text-accent', 'border-b-2', 'border-accent');
+                    registerForm.classList.remove('hidden');
+                    loginForm.classList.add('hidden');
+                }
+            }
+            
+            if (loginTab) {
+                loginTab.addEventListener('click', showLoginForm);
+            }
+            
+            if (registerTab) {
+                registerTab.addEventListener('click', showRegisterForm);
+            }
+            
+            // Modal close functionality
+            const closeAuthModal = document.getElementById('closeAuthModal');
+            if (closeAuthModal) {
+                closeAuthModal.addEventListener('click', hideAuthModal);
+            }
+            
+            // Close modal on outside click
+            if (authModal) {
+                authModal.addEventListener('click', function(e) {
+                    if (e.target === authModal) {
+                        hideAuthModal();
+                    }
                 });
             }
             
-            const loginBtn = document.getElementById('headerLoginBtn');
-            if (loginBtn) {
-                console.log('Adding simple click handler to login button');
-                loginBtn.addEventListener('click', function() {
-                    console.log('LOGIN BUTTON CLICKED!');
-                    alert('Login button works!');
-                });
-            }
-            
-            const registerBtn = document.getElementById('headerRegisterBtn');
-            if (registerBtn) {
-                console.log('Adding simple click handler to register button');
-                registerBtn.addEventListener('click', function() {
-                    console.log('REGISTER BUTTON CLICKED!');
-                    alert('Register button works!');
-                });
-            }
-        }, 1000);
+            console.log('All button handlers and modal functionality initialized successfully');
+        }, 500);
     </script>
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-slate-800 bg-slate-900 shadow-md py-4 px-6">
@@ -1406,8 +1492,12 @@
     <!-- CV Analysis JavaScript -->
     <script>
         console.log('Starting main JavaScript section...');
-        // Global state
+        // Global state - simplified version
         let currentUser = null;
+        
+        // For now, we'll use the simple initialization above
+        // The complex initialization was causing issues, so we're using a cleaner approach
+        console.log('Using simplified initialization approach');
         let analysisInProgress = false;
 
         // Security configuration
@@ -1416,8 +1506,8 @@
         const ALLOWED_FILE_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
         const MAX_TEXT_LENGTH = 50000; // 50k characters max
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
+        // Initialize - COMMENTED OUT (using simple version above)
+        // document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded - Starting initialization');
             console.log('Document ready state:', document.readyState);
             console.log('All elements in DOM:', document.querySelectorAll('*').length);
@@ -1456,7 +1546,7 @@
                 console.error('Initialization error:', error);
                 console.error('Error stack:', error.stack);
             }
-        });
+        // }); // COMMENTED OUT - using simple version above
 
         // Authentication functions
         function initializeAuth() {
