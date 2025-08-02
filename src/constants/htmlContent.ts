@@ -1760,7 +1760,7 @@
             
             // Security validations
             if (file.size > maxSize) {
-                showAnalysisError(\`File too large. Maximum size is \${maxSize / (1024 * 1024)}MB\`);
+                showAnalysisError('File too large. Maximum size is ' + (maxSize / (1024 * 1024)) + 'MB');
                 return;
             }
 
@@ -1838,7 +1838,7 @@
             cvTextInput.addEventListener('input', function() {
                 if (this.value.length > MAX_TEXT_LENGTH) {
                     this.value = this.value.substring(0, MAX_TEXT_LENGTH);
-                    showAnalysisError(\`Text too long. Maximum \${MAX_TEXT_LENGTH} characters allowed.\`);
+                    showAnalysisError('Text too long. Maximum ' + MAX_TEXT_LENGTH + ' characters allowed.');
                 }
                 // Clear file if text is entered
                 if (this.value.trim() && window.cvFile) {
@@ -1849,7 +1849,7 @@
             jobTextInput.addEventListener('input', function() {
                 if (this.value.length > MAX_TEXT_LENGTH) {
                     this.value = this.value.substring(0, MAX_TEXT_LENGTH);
-                    showAnalysisError(\`Text too long. Maximum \${MAX_TEXT_LENGTH} characters allowed.\`);
+                    showAnalysisError('Text too long. Maximum ' + MAX_TEXT_LENGTH + ' characters allowed.');
                 }
                 // Clear file if text is entered
                 if (this.value.trim() && window.jobFile) {
@@ -2025,106 +2025,106 @@
         }
 
         function generateSkillsAnalysisHTML(skillsAnalysis) {
-            return \`
-                <div class="bg-slate-700 rounded-lg p-6">
-                    <h4 class="text-lg font-semibold text-white mb-4">
-                        <i class="fas fa-chart-bar text-accent mr-2"></i>
-                        Skills Analysis
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        \${skillsAnalysis.skills.map(skill => \`
-                            <div class="bg-slate-800 rounded-md p-4">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="font-medium text-gray-300">\${skill.name}</span>
-                                    <span class="text-sm font-semibold \${getSkillLevelColor(skill.level)}">\${skill.level}</span>
-                                </div>
-                                <div class="w-full bg-slate-600 rounded-full h-2">
-                                    <div class="bg-accent h-2 rounded-full transition-all duration-300" style="width: \${skill.confidence}%"></div>
-                                </div>
-                                <div class="text-xs text-gray-400 mt-1">\${skill.confidence}% confidence</div>
-                            </div>
-                        \`).join('')}
-                    </div>
-                </div>
-            \`;
+            var skillsHtml = skillsAnalysis.skills.map(function(skill) {
+                return '<div class="bg-slate-800 rounded-md p-4">' +
+                    '<div class="flex justify-between items-center mb-2">' +
+                        '<span class="font-medium text-gray-300">' + skill.name + '</span>' +
+                        '<span class="text-sm font-semibold ' + getSkillLevelColor(skill.level) + '">' + skill.level + '</span>' +
+                    '</div>' +
+                    '<div class="w-full bg-slate-600 rounded-full h-2">' +
+                        '<div class="bg-accent h-2 rounded-full transition-all duration-300" style="width: ' + skill.confidence + '%"></div>' +
+                    '</div>' +
+                    '<div class="text-xs text-gray-400 mt-1">' + skill.confidence + '% confidence</div>' +
+                '</div>';
+            }).join('');
+            
+            return '<div class="bg-slate-700 rounded-lg p-6">' +
+                '<h4 class="text-lg font-semibold text-white mb-4">' +
+                    '<i class="fas fa-chart-bar text-accent mr-2"></i>' +
+                    'Skills Analysis' +
+                '</h4>' +
+                '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
+                    skillsHtml +
+                '</div>' +
+            '</div>';
         }
 
         function generateSkillsGapHTML(skillsGap) {
-            return \`
-                <div class="bg-slate-700 rounded-lg p-6">
-                    <h4 class="text-lg font-semibold text-white mb-4">
-                        <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
-                        Skills Gap Analysis
-                    </h4>
-                    <div class="space-y-4">
-                        \${skillsGap.missingSkills.map(skill => \`
-                            <div class="bg-red-900/20 border border-red-500 rounded-md p-4">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h5 class="font-medium text-red-300">\${skill.name}</h5>
-                                    <span class="text-xs bg-red-600 text-white px-2 py-1 rounded">\${skill.priority}</span>
-                                </div>
-                                <p class="text-sm text-gray-300 mb-2">\${skill.description}</p>
-                                <div class="text-xs text-gray-400">
-                                    <strong>Learning Time:</strong> \${skill.learningTime} | 
-                                    <strong>Resources:</strong> \${skill.resources.join(', ')}
-                                </div>
-                            </div>
-                        \`).join('')}
-                    </div>
-                </div>
-            \`;
+            var gapsHtml = skillsGap.missingSkills.map(function(skill) {
+                return '<div class="bg-red-900/20 border border-red-500 rounded-md p-4">' +
+                    '<div class="flex justify-between items-start mb-2">' +
+                        '<h5 class="font-medium text-red-300">' + skill.name + '</h5>' +
+                        '<span class="text-xs bg-red-600 text-white px-2 py-1 rounded">' + skill.priority + '</span>' +
+                    '</div>' +
+                    '<p class="text-sm text-gray-300 mb-2">' + skill.description + '</p>' +
+                    '<div class="text-xs text-gray-400">' +
+                        '<strong>Learning Time:</strong> ' + skill.learningTime + ' | ' +
+                        '<strong>Resources:</strong> ' + skill.resources.join(', ') +
+                    '</div>' +
+                '</div>';
+            }).join('');
+            
+            return '<div class="bg-slate-700 rounded-lg p-6">' +
+                '<h4 class="text-lg font-semibold text-white mb-4">' +
+                    '<i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>' +
+                    'Skills Gap Analysis' +
+                '</h4>' +
+                '<div class="space-y-4">' +
+                    gapsHtml +
+                '</div>' +
+            '</div>';
         }
 
         function generateCareerSuggestionsHTML(careerSuggestions) {
-            return \`
-                <div class="bg-slate-700 rounded-lg p-6">
-                    <h4 class="text-lg font-semibold text-white mb-4">
-                        <i class="fas fa-rocket text-blue-400 mr-2"></i>
-                        Career Suggestions
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        \${careerSuggestions.suggestions.map(suggestion => \`
-                            <div class="bg-slate-800 rounded-md p-4">
-                                <h5 class="font-medium text-blue-300 mb-2">\${suggestion.title}</h5>
-                                <p class="text-sm text-gray-300 mb-3">\${suggestion.description}</p>
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs text-gray-400">Match Score</span>
-                                    <span class="text-sm font-semibold text-blue-400">\${suggestion.matchScore}%</span>
-                                </div>
-                                <div class="w-full bg-slate-600 rounded-full h-2">
-                                    <div class="bg-blue-400 h-2 rounded-full" style="width: \${suggestion.matchScore}%"></div>
-                                </div>
-                            </div>
-                        \`).join('')}
-                    </div>
-                </div>
-            \`;
+            var suggestionsHtml = careerSuggestions.suggestions.map(function(suggestion) {
+                return '<div class="bg-slate-800 rounded-md p-4">' +
+                    '<h5 class="font-medium text-blue-300 mb-2">' + suggestion.title + '</h5>' +
+                    '<p class="text-sm text-gray-300 mb-3">' + suggestion.description + '</p>' +
+                    '<div class="flex justify-between items-center mb-2">' +
+                        '<span class="text-xs text-gray-400">Match Score</span>' +
+                        '<span class="text-sm font-semibold text-blue-400">' + suggestion.matchScore + '%</span>' +
+                    '</div>' +
+                    '<div class="w-full bg-slate-600 rounded-full h-2">' +
+                        '<div class="bg-blue-400 h-2 rounded-full" style="width: ' + suggestion.matchScore + '%"></div>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+            
+            return '<div class="bg-slate-700 rounded-lg p-6">' +
+                '<h4 class="text-lg font-semibold text-white mb-4">' +
+                    '<i class="fas fa-rocket text-blue-400 mr-2"></i>' +
+                    'Career Suggestions' +
+                '</h4>' +
+                '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
+                    suggestionsHtml +
+                '</div>' +
+            '</div>';
         }
 
         function generateIndustryTrendsHTML(industryTrends) {
-            return \`
-                <div class="bg-slate-700 rounded-lg p-6">
-                    <h4 class="text-lg font-semibold text-white mb-4">
-                        <i class="fas fa-trending-up text-green-400 mr-2"></i>
-                        Industry Trends
-                    </h4>
-                    <div class="space-y-4">
-                        \${industryTrends.trends.map(trend => \`
-                            <div class="bg-slate-800 rounded-md p-4">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h5 class="font-medium text-green-300">\${trend.skill}</h5>
-                                    <span class="text-xs \${getTrendColor(trend.trend)} px-2 py-1 rounded">\${trend.trend}</span>
-                                </div>
-                                <p class="text-sm text-gray-300 mb-2">\${trend.description}</p>
-                                <div class="text-xs text-gray-400">
-                                    <strong>Demand Growth:</strong> \${trend.demandGrowth} | 
-                                    <strong>Salary Impact:</strong> \${trend.salaryImpact}
-                                </div>
-                            </div>
-                        \`).join('')}
-                    </div>
-                </div>
-            \`;
+            var trendsHtml = industryTrends.trends.map(function(trend) {
+                return '<div class="bg-slate-800 rounded-md p-4">' +
+                    '<div class="flex justify-between items-start mb-2">' +
+                        '<h5 class="font-medium text-green-300">' + trend.skill + '</h5>' +
+                        '<span class="text-xs ' + getTrendColor(trend.trend) + ' px-2 py-1 rounded">' + trend.trend + '</span>' +
+                    '</div>' +
+                    '<p class="text-sm text-gray-300 mb-2">' + trend.description + '</p>' +
+                    '<div class="text-xs text-gray-400">' +
+                        '<strong>Demand Growth:</strong> ' + trend.demandGrowth + ' | ' +
+                        '<strong>Salary Impact:</strong> ' + trend.salaryImpact +
+                    '</div>' +
+                '</div>';
+            }).join('');
+            
+            return '<div class="bg-slate-700 rounded-lg p-6">' +
+                '<h4 class="text-lg font-semibold text-white mb-4">' +
+                    '<i class="fas fa-trending-up text-green-400 mr-2"></i>' +
+                    'Industry Trends' +
+                '</h4>' +
+                '<div class="space-y-4">' +
+                    trendsHtml +
+                '</div>' +
+            '</div>';
         }
 
         function getSkillLevelColor(level) {
@@ -2159,7 +2159,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = \`cv-analysis-\${new Date().toISOString().split('T')[0]}.json\`;
+            a.download = 'cv-analysis-' + new Date().toISOString().split('T')[0] + '.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -2192,7 +2192,7 @@
             const now = Date.now();
             if (now - lastAnalysisTime < ANALYSIS_COOLDOWN) {
                 const remainingTime = Math.ceil((ANALYSIS_COOLDOWN - (now - lastAnalysisTime)) / 1000);
-                showAnalysisError(\`Please wait \${remainingTime} seconds before starting another analysis.\`);
+                showAnalysisError('Please wait ' + remainingTime + ' seconds before starting another analysis.');
                 return false;
             }
             lastAnalysisTime = now;
