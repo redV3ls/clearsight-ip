@@ -843,6 +843,222 @@ analyze.get('/trends/skills/emerging', async (c: AuthenticatedContext) => {
 });
 
 /**
+ * POST /analyze/advanced - Advanced AI-powered analysis with all features
+ * Comprehensive analysis including multi-language, industry-specific, coaching, and more
+ */
+analyze.post('/advanced', async (c: AuthenticatedContext) => {
+  const startTime = Date.now();
+  
+  try {
+    // Parse multipart form data
+    const formData = await c.req.formData();
+    
+    // Extract form fields
+    const resumeFile = formData.get('resume') as File | null;
+    const resumeText = formData.get('resumeText') as string | null;
+    const jobDescriptionFile = formData.get('jobDescription') as File | null;
+    const jobDescriptionText = formData.get('jobDescriptionText') as string | null;
+    const currentPortfolio = formData.get('currentPortfolio') as string | null;
+    
+    // Advanced options
+    const includeMultiLanguage = formData.get('includeMultiLanguage') === 'true';
+    const includeIndustrySpecific = formData.get('includeIndustrySpecific') === 'true';
+    const includePersonalizedCoaching = formData.get('includePersonalizedCoaching') === 'true';
+    const includeSkillTrendPredictions = formData.get('includeSkillTrendPredictions') === 'true';
+    const includeCompetitiveAnalysis = formData.get('includeCompetitiveAnalysis') === 'true';
+    const includeInterviewPreparation = formData.get('includeInterviewPreparation') === 'true';
+    const includePortfolioOptimization = formData.get('includePortfolioOptimization') === 'true';
+    const includeNetworkingInsights = formData.get('includeNetworkingInsights') === 'true';
+    
+    // Configuration options
+    const targetLanguage = formData.get('targetLanguage') as string | null;
+    const industry = formData.get('industry') as string | null;
+    const learningStyle = formData.get('learningStyle') as string | null;
+    const careerGoalsStr = formData.get('careerGoals') as string | null;
+    const timeAvailability = formData.get('timeAvailability') as string | null;
+    
+    // Parse career goals if provided
+    let careerGoals: string[] = [];
+    if (careerGoalsStr) {
+      try {
+        careerGoals = JSON.parse(careerGoalsStr);
+      } catch {
+        careerGoals = careerGoalsStr.split(',').map(goal => goal.trim());
+      }
+    }
+    
+    // Validation: Must have either resume file or text
+    if (!resumeFile && !resumeText) {
+      throw new AppError('Either resume file or resume text is required', 400, 'MISSING_RESUME');
+    }
+    
+    // Security validations (reuse existing validation logic)
+    if (resumeFile) {
+      if (resumeFile.size > MAX_FILE_SIZE) {
+        throw new AppError(`Resume file too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB`, 400, 'FILE_TOO_LARGE');
+      }
+      
+      if (!ALLOWED_MIME_TYPES.includes(resumeFile.type)) {
+        throw new AppError('Invalid resume file type. Only PDF, DOC, DOCX, and TXT files are allowed', 400, 'INVALID_FILE_TYPE');
+      }
+      
+      if (resumeFile.name.includes('../') || resumeFile.name.includes('..\\\\')) {
+        throw new AppError('Invalid filename', 400, 'INVALID_FILENAME');
+      }
+    }
+    
+    if (jobDescriptionFile) {
+      if (jobDescriptionFile.size > MAX_JOB_FILE_SIZE) {
+        throw new AppError(`Job description file too large. Maximum size is ${MAX_JOB_FILE_SIZE / (1024 * 1024)}MB`, 400, 'FILE_TOO_LARGE');
+      }
+      
+      if (!ALLOWED_MIME_TYPES.includes(jobDescriptionFile.type)) {
+        throw new AppError('Invalid job description file type. Only PDF, DOC, DOCX, and TXT files are allowed', 400, 'INVALID_FILE_TYPE');
+      }
+      
+      if (jobDescriptionFile.name.includes('../') || jobDescriptionFile.name.includes('..\\\\')) {
+        throw new AppError('Invalid filename', 400, 'INVALID_FILENAME');
+      }
+    }
+    
+    // Rate limiting check (60 seconds for advanced analysis)
+    const userId = c.user!.id;
+    const rateLimitKey = `advanced_analysis:${userId}`;
+    const lastAnalysis = await c.env.CACHE.get(rateLimitKey);
+    
+    if (lastAnalysis) {
+      const timeSinceLastAnalysis = Date.now() - parseInt(lastAnalysis);
+      if (timeSinceLastAnalysis < 60000) { // 60 seconds
+        const remainingTime = Math.ceil((60000 - timeSinceLastAnalysis) / 1000);
+        throw new AppError(`Please wait ${remainingTime} seconds before starting another advanced analysis`, 429, 'RATE_LIMITED');
+      }
+    }
+    
+    // Set rate limit
+    await c.env.CACHE.put(rateLimitKey, Date.now().toString(), { expirationTtl: 60 });
+    
+    // Extract text content from files or use provided text
+    let resumeContent = resumeText || '';
+    let jobContent = jobDescriptionText || '';
+    
+    if (resumeFile) {
+      resumeContent = await extractTextFromFile(resumeFile);
+    }
+    
+    if (jobDescriptionFile) {
+      jobContent = await extractTextFromFile(jobDescriptionFile);
+    }
+    
+    // Initialize AI-powered analysis service
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const aiAnalysisService = new AIAnalysisService(c.env);
+    
+    // Perform comprehensive AI-powered analysis with advanced features
+    const response = await aiAnalysisService.analyzeCV(
+      resumeContent,
+      jobContent,
+      {
+        includeSkillsGap: true,
+        includeCareerSuggestions: true,
+        includeIndustryTrends: true,
+        // Advanced AI Features
+        includeMultiLanguage,
+        includeIndustrySpecific,
+        includePersonalizedCoaching,
+        includeSkillTrendPredictions,
+        includeCompetitiveAnalysis,
+        includeInterviewPreparation,
+        includePortfolioOptimization,
+        includeNetworkingInsights,
+        targetLanguage: targetLanguage || undefined,
+        industry: industry || undefined,
+        userPreferences: {
+          learningStyle: learningStyle || undefined,
+          careerGoals: careerGoals.length > 0 ? careerGoals : undefined,
+          timeAvailability: timeAvailability || undefined,
+        },
+        currentPortfolio: currentPortfolio || undefined,
+      }
+    );
+    
+    // Set the actual user ID
+    response.user_id = userId;
+    
+    // Add metadata
+    response.metadata = {
+      ...response.metadata,
+      processingTime: Date.now() - startTime,
+      analysisOptions: {
+        includeSkillsGap: true,
+        includeCareerSuggestions: true,
+        includeIndustryTrends: true,
+        includeMultiLanguage,
+        includeIndustrySpecific,
+        includePersonalizedCoaching,
+        includeSkillTrendPredictions,
+        includeCompetitiveAnalysis,
+        includeInterviewPreparation,
+        includePortfolioOptimization,
+        includeNetworkingInsights,
+      },
+      advancedFeatures: {
+        targetLanguage,
+        industry,
+        userPreferences: {
+          learningStyle,
+          careerGoals,
+          timeAvailability,
+        },
+      },
+      fileInfo: {
+        resumeFile: resumeFile ? { name: resumeFile.name, size: resumeFile.size, type: resumeFile.type } : null,
+        jobDescriptionFile: jobDescriptionFile ? { name: jobDescriptionFile.name, size: jobDescriptionFile.size, type: jobDescriptionFile.type } : null,
+        currentPortfolio: currentPortfolio ? 'provided' : null,
+      }
+    };
+    
+    // Store analysis result for future reference
+    try {
+      await c.env.DB
+        .prepare(`
+          INSERT INTO resume_analyses (
+            id, user_id, analysis_data, created_at
+          ) VALUES (?, ?, ?, ?)
+        `)
+        .bind(
+          response.analysis_id,
+          userId,
+          JSON.stringify(response),
+          new Date().toISOString()
+        )
+        .run();
+    } catch (dbError) {
+      console.warn('Failed to store advanced analysis result:', dbError);
+    }
+    
+    return c.json(response, 200);
+    
+  } catch (error) {
+    console.error('Advanced analysis error:', error);
+    
+    if (error instanceof AppError) {
+      throw error;
+    }
+    
+    if (error instanceof Error) {
+      if (error.message.includes('timeout')) {
+        throw new AppError('Advanced analysis request timed out', 408, 'TIMEOUT_ERROR');
+      }
+      if (error.message.includes('file')) {
+        throw new AppError('File processing failed', 400, 'FILE_PROCESSING_ERROR');
+      }
+    }
+    
+    throw new AppError('Advanced analysis failed', 500, 'ADVANCED_ANALYSIS_FAILED');
+  }
+});
+
+/**
  * POST /analyze/job - Intelligent job description analysis
  * Analyzes job descriptions with AI-powered insights and market intelligence
  */

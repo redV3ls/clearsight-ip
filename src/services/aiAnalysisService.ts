@@ -2,6 +2,17 @@ import { DeepSeekAIService, AISkillsAnalysis, AIJobAnalysis, AIGapAnalysis } fro
 import { createAIConfig, validateAIConfig } from '../config/ai';
 import { logger } from '../utils/logger';
 import { AppError } from '../middleware/errorHandler';
+import { 
+  AdvancedAIFeaturesService,
+  MultiLanguageAnalysis,
+  IndustrySpecificAnalysis,
+  PersonalizedCoaching,
+  SkillTrendPrediction,
+  CompetitiveAnalysis,
+  InterviewPreparation,
+  PortfolioOptimization,
+  NetworkingInsights
+} from './advancedAIFeatures';
 
 // Legacy interfaces for backward compatibility
 import { UserSkill } from './skillMatching';
@@ -101,6 +112,15 @@ export interface EnhancedAnalysisResult {
   };
   marketInsights?: string[];
   competitiveAdvantage?: string[];
+  // Advanced AI Features
+  multiLanguageAnalysis?: MultiLanguageAnalysis;
+  industrySpecificAnalysis?: IndustrySpecificAnalysis;
+  personalizedCoaching?: PersonalizedCoaching;
+  skillTrendPredictions?: SkillTrendPrediction[];
+  competitiveAnalysis?: CompetitiveAnalysis;
+  interviewPreparation?: InterviewPreparation;
+  portfolioOptimization?: PortfolioOptimization;
+  networkingInsights?: NetworkingInsights;
   metadata: {
     processingTime: number;
     analysisOptions: {
@@ -116,6 +136,7 @@ export interface EnhancedAnalysisResult {
 
 export class AIAnalysisService {
   private deepseekAI: DeepSeekAIService | null = null;
+  private advancedAIFeatures: AdvancedAIFeaturesService | null = null;
   private isAIEnabled: boolean = false;
 
   constructor(private env: any) {
@@ -132,8 +153,9 @@ export class AIAnalysisService {
 
       if (validation.isValid) {
         this.deepseekAI = new DeepSeekAIService(aiConfig);
+        this.advancedAIFeatures = new AdvancedAIFeaturesService(this.deepseekAI);
         this.isAIEnabled = true;
-        logger.info('AI service initialized successfully');
+        logger.info('AI service initialized successfully with advanced features');
       } else {
         logger.warn('AI service not available:', validation.errors);
         this.isAIEnabled = false;
@@ -154,10 +176,35 @@ export class AIAnalysisService {
       includeSkillsGap: boolean;
       includeCareerSuggestions: boolean;
       includeIndustryTrends: boolean;
+      // Advanced AI Features options
+      includeMultiLanguage?: boolean;
+      includeIndustrySpecific?: boolean;
+      includePersonalizedCoaching?: boolean;
+      includeSkillTrendPredictions?: boolean;
+      includeCompetitiveAnalysis?: boolean;
+      includeInterviewPreparation?: boolean;
+      includePortfolioOptimization?: boolean;
+      includeNetworkingInsights?: boolean;
+      targetLanguage?: string;
+      industry?: string;
+      userPreferences?: {
+        learningStyle?: string;
+        careerGoals?: string[];
+        timeAvailability?: string;
+      };
+      currentPortfolio?: string;
     } = {
       includeSkillsGap: true,
       includeCareerSuggestions: true,
       includeIndustryTrends: true,
+      includeMultiLanguage: false,
+      includeIndustrySpecific: false,
+      includePersonalizedCoaching: false,
+      includeSkillTrendPredictions: false,
+      includeCompetitiveAnalysis: false,
+      includeInterviewPreparation: false,
+      includePortfolioOptimization: false,
+      includeNetworkingInsights: false,
     }
   ): Promise<EnhancedAnalysisResult> {
     const startTime = Date.now();
@@ -211,9 +258,22 @@ export class AIAnalysisService {
       throw new Error('AI service not initialized');
     }
 
-    // Step 1: AI-powered skills extraction
+    // Step 1: AI-powered skills extraction (with multi-language support if enabled)
     logger.info('Starting AI-powered skills extraction');
-    const skillsAnalysis = await this.deepseekAI.extractSkillsFromCV(cvContent);
+    let skillsAnalysis: AISkillsAnalysis;
+    let multiLanguageAnalysis: MultiLanguageAnalysis | undefined;
+
+    if (options.includeMultiLanguage && this.advancedAIFeatures) {
+      logger.info('Performing multi-language analysis');
+      const multiLangResult = await this.advancedAIFeatures.analyzeMultiLanguageCV(
+        cvContent,
+        options.targetLanguage
+      );
+      skillsAnalysis = multiLangResult.analysis;
+      multiLanguageAnalysis = multiLangResult.languageAnalysis;
+    } else {
+      skillsAnalysis = await this.deepseekAI.extractSkillsFromCV(cvContent);
+    }
 
     // Step 2: Job analysis if job description provided
     let jobAnalysis: AIJobAnalysis | undefined;
@@ -322,6 +382,83 @@ export class AIAnalysisService {
           description: `${skill.name} is in high demand in the current market`,
         })),
       };
+    }
+
+    // Add advanced AI features if enabled and available
+    if (this.advancedAIFeatures) {
+      // Multi-language analysis
+      if (multiLanguageAnalysis) {
+        result.multiLanguageAnalysis = multiLanguageAnalysis;
+      }
+
+      // Industry-specific analysis
+      if (options.includeIndustrySpecific && jobAnalysis && options.industry) {
+        logger.info('Performing industry-specific analysis');
+        result.industrySpecificAnalysis = await this.advancedAIFeatures.performIndustrySpecificAnalysis(
+          skillsAnalysis,
+          jobAnalysis,
+          options.industry
+        );
+      }
+
+      // Personalized coaching
+      if (options.includePersonalizedCoaching && gapAnalysis) {
+        logger.info('Generating personalized coaching recommendations');
+        result.personalizedCoaching = await this.advancedAIFeatures.generatePersonalizedCoaching(
+          skillsAnalysis,
+          gapAnalysis,
+          options.userPreferences
+        );
+      }
+
+      // Skill trend predictions
+      if (options.includeSkillTrendPredictions) {
+        logger.info('Predicting skill trends');
+        const skillNames = skillsAnalysis.skills.map(skill => skill.name);
+        result.skillTrendPredictions = await this.advancedAIFeatures.predictSkillTrends(
+          skillNames,
+          options.industry
+        );
+      }
+
+      // Competitive analysis
+      if (options.includeCompetitiveAnalysis && jobAnalysis && options.industry) {
+        logger.info('Performing competitive analysis');
+        result.competitiveAnalysis = await this.advancedAIFeatures.performCompetitiveAnalysis(
+          skillsAnalysis,
+          jobAnalysis,
+          options.industry
+        );
+      }
+
+      // Interview preparation
+      if (options.includeInterviewPreparation && jobAnalysis) {
+        logger.info('Generating interview preparation suggestions');
+        result.interviewPreparation = await this.advancedAIFeatures.generateInterviewPreparation(
+          skillsAnalysis,
+          jobAnalysis
+        );
+      }
+
+      // Portfolio optimization
+      if (options.includePortfolioOptimization && jobAnalysis) {
+        logger.info('Optimizing portfolio recommendations');
+        result.portfolioOptimization = await this.advancedAIFeatures.optimizePortfolio(
+          skillsAnalysis,
+          jobAnalysis,
+          options.currentPortfolio
+        );
+      }
+
+      // Networking insights
+      if (options.includeNetworkingInsights && options.industry && options.userPreferences?.careerGoals) {
+        logger.info('Generating networking insights');
+        result.networkingInsights = await this.advancedAIFeatures.generateNetworkingInsights(
+          skillsAnalysis,
+          options.userPreferences.careerGoals,
+          options.industry
+        );
+      }
     }
 
     logger.info('AI-powered analysis completed successfully', {
