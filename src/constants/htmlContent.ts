@@ -1843,6 +1843,123 @@
         });
     </script>
 
+    <!-- Analysis Modal -->
+    <div id="analysisModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-slate-800 rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <!-- Upload Section -->
+            <div id="uploadSection">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-white">AI-Powered Career Analysis</h3>
+                    <button id="closeAnalysisModal" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- CV Upload -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Your CV/Resume</label>
+                    <div id="cvDropZone" class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-accent transition-colors">
+                        <i class="fas fa-upload text-3xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-400">Drop your CV here or click to browse</p>
+                        <p class="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, TXT (max 5MB)</p>
+                    </div>
+                    <div id="cvFileInfo" class="hidden mt-2 p-3 bg-slate-700 rounded flex justify-between items-center">
+                        <span id="cvFileName" class="text-sm text-gray-300"></span>
+                        <button id="removeCvFile" class="text-red-400 hover:text-red-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <input type="file" id="cvFileInput" class="hidden" accept=".pdf,.doc,.docx,.txt">
+                    <div class="mt-3">
+                        <label class="block text-xs text-gray-400 mb-1">Or paste your CV text:</label>
+                        <textarea id="cvTextInput" class="w-full h-32 bg-slate-700 border border-gray-600 rounded p-3 text-white placeholder-gray-400" placeholder="Paste your CV content here..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Job Description -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Job Description (Optional)</label>
+                    <div id="jobDropZone" class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 transition-colors">
+                        <i class="fas fa-briefcase text-3xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-400">Drop job description here or click to browse</p>
+                        <p class="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, TXT (max 2MB)</p>
+                    </div>
+                    <div id="jobFileInfo" class="hidden mt-2 p-3 bg-slate-700 rounded flex justify-between items-center">
+                        <span id="jobFileName" class="text-sm text-gray-300"></span>
+                        <button id="removeJobFile" class="text-red-400 hover:text-red-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <input type="file" id="jobFileInput" class="hidden" accept=".pdf,.doc,.docx,.txt">
+                    <div class="mt-3">
+                        <label class="block text-xs text-gray-400 mb-1">Or paste job description:</label>
+                        <textarea id="jobTextInput" class="w-full h-24 bg-slate-700 border border-gray-600 rounded p-3 text-white placeholder-gray-400" placeholder="Paste job description here..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Analysis Options -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-3">Analysis Options</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="skillsIntelligenceAnalysis" class="mr-2" checked>
+                            <span class="text-sm text-gray-300">Skills Gap Analysis</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="careerSuggestions" class="mr-2" checked>
+                            <span class="text-sm text-gray-300">Career Suggestions</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="industryTrends" class="mr-2" checked>
+                            <span class="text-sm text-gray-300">Industry Trends</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Error Display -->
+                <div id="analysisError" class="hidden mb-4 p-3 bg-red-900/20 border border-red-500 rounded text-red-300 text-sm"></div>
+                
+                <!-- Action Buttons -->
+                <div class="flex justify-end space-x-3">
+                    <button id="cancelAnalysis" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
+                    <button id="startAnalysis" class="px-6 py-2 bg-accent hover:bg-teal-600 text-white rounded-lg transition-colors">
+                        <i class="fas fa-play mr-2"></i>Start AI Analysis
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Loading Section -->
+            <div id="loadingSection" class="hidden text-center py-12">
+                <div class="mb-6">
+                    <div class="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <h3 class="text-xl font-bold text-white mb-2">Analyzing Your Profile</h3>
+                    <p id="loadingStatus" class="text-gray-400">Initializing analysis...</p>
+                </div>
+                <div class="w-full bg-slate-700 rounded-full h-2 mb-4">
+                    <div id="progressBar" class="bg-accent h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <!-- Results Section -->
+            <div id="resultsSection" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-white">Analysis Results</h3>
+                    <div class="space-x-2">
+                        <button id="downloadResults" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors">
+                            <i class="fas fa-download mr-2"></i>Download
+                        </button>
+                        <button id="newAnalysis" class="px-4 py-2 bg-accent hover:bg-teal-600 text-white rounded transition-colors">
+                            New Analysis
+                        </button>
+                    </div>
+                </div>
+                <div id="analysisResults" class="space-y-6">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Authentication Modal -->
     <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
         <div class="bg-slate-800 rounded-lg p-8 max-w-md w-full mx-4 border border-slate-700">
