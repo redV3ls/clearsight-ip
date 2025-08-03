@@ -426,12 +426,30 @@
                         formData.append('jobDescriptionText', jobDescription);
                     }
                     
+                    // Test authentication first
+                    console.log('Testing authentication before analysis...');
+                    const authTestResponse = await fetch('/api/v1/analyze/test-auth', {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    
+                    if (!authTestResponse.ok) {
+                        console.error('Authentication test failed:', authTestResponse.status, authTestResponse.statusText);
+                        const authError = await authTestResponse.text();
+                        console.error('Auth error details:', authError);
+                        throw new Error(\`Authentication failed: \${authTestResponse.status} \${authTestResponse.statusText}\`);
+                    }
+                    
+                    const authTestData = await authTestResponse.json();
+                    console.log('Authentication test successful:', authTestData);
+                    
                     // Add advanced feature flags
                     formData.append('includeIndustrySpecific', document.getElementById('includeIndustrySpecific').checked);
                     formData.append('includePersonalizedCoaching', document.getElementById('includePersonalizedCoaching').checked);
                     formData.append('includeSkillTrendPredictions', document.getElementById('includeSkillTrends').checked);
                     formData.append('includeInterviewPreparation', document.getElementById('includeInterviewPrep').checked);
                     
+                    console.log('Starting analysis with authenticated user:', authTestData.user?.email);
                     const response = await fetch('/api/v1/analyze/advanced', {
                         method: 'POST',
                         credentials: 'include',

@@ -843,6 +843,31 @@ analyze.get('/trends/skills/emerging', async (c: AuthenticatedContext) => {
 });
 
 /**
+ * GET /analyze/test-auth - Test authentication endpoint for debugging
+ */
+analyze.get('/test-auth', async (c: AuthenticatedContext) => {
+  try {
+    const user = c.get('user');
+    return c.json({
+      success: true,
+      message: 'Authentication working',
+      user: user ? {
+        id: user.id,
+        email: user.email,
+        name: user.name
+      } : null,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    return c.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    }, 500);
+  }
+});
+
+/**
  * POST /analyze/advanced - Advanced AI-powered analysis with all features
  * Comprehensive analysis including multi-language, industry-specific, coaching, and more
  */
