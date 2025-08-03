@@ -878,6 +878,75 @@ analyze.get('/test-auth', async (c: AuthenticatedContext) => {
 });
 
 /**
+ * GET /analyze/test-ai - Test AI service endpoint
+ */
+analyze.get('/test-ai', async (c: AuthenticatedContext) => {
+  try {
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const aiAnalysisService = new AIAnalysisService(c.env);
+    
+    const aiStatus = aiAnalysisService.getAIStatus();
+    const isHealthy = await aiAnalysisService.isAIHealthy();
+    
+    return c.json({
+      aiStatus,
+      isHealthy,
+      environment: {
+        hasDeepSeekKey: !!c.env.DEEPSEEK_API_KEY,
+        nodeEnv: c.env.NODE_ENV,
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('AI test error:', error);
+    return c.json({
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    }, 500);
+  }
+});
+
+/**
+ * POST /analyze/test-simple - Test simple AI analysis
+ */
+analyze.post('/test-simple', async (c: AuthenticatedContext) => {
+  try {
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const aiAnalysisService = new AIAnalysisService(c.env);
+    
+    // Test with minimal CV content
+    const testCV = "Software Engineer with 3 years experience in JavaScript, React, and Node.js. Bachelor's degree in Computer Science.";
+    
+    console.log('Testing AI analysis with simple CV...');
+    const result = await aiAnalysisService.analyzeCV(testCV, undefined, {
+      includeSkillsGap: false,
+      includeCareerSuggestions: false,
+      includeIndustryTrends: false,
+    });
+    
+    return c.json({
+      success: true,
+      result: {
+        analysis_id: result.analysis_id,
+        aiPowered: result.aiPowered,
+        skillsCount: result.skillsAnalysis.skills.length,
+        fallbackUsed: result.metadata.fallbackUsed,
+        processingTime: result.metadata.processingTime,
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Simple AI test error:', error);
+    return c.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    }, 500);
+  }
+});
+
+/**
  * GET /analyze/debug-auth - Debug authentication endpoint
  */
 analyze.get('/debug-auth', async (c: AuthenticatedContext) => {
