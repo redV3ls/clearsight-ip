@@ -2703,6 +2703,33 @@
             }
             return originalPerformAnalysis.call(this);
         };
+
+        // Add missing startAnalysis function
+        function startAnalysis() {
+            console.log('Starting AI analysis...');
+            
+            if (analysisInProgress) {
+                console.log('Analysis already in progress');
+                return;
+            }
+
+            // Validate inputs
+            const cvText = document.getElementById('cvTextInput')?.value || '';
+            const jobText = document.getElementById('jobTextInput')?.value || '';
+            const cvFile = document.getElementById('cvFileInput')?.files[0];
+            const jobFile = document.getElementById('jobFileInput')?.files[0];
+
+            if (!cvText && !cvFile) {
+                showAnalysisError('Please provide your CV/resume content or upload a file.');
+                return;
+            }
+
+            // Call the existing performAnalysis function
+            performAnalysis();
+        }
+
+        // Make startAnalysis globally available
+        window.startAnalysis = startAnalysis;
     </script>
 </body>
 </html>
