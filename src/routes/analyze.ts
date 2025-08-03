@@ -123,7 +123,11 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     const { AIAnalysisService } = await import('../services/aiAnalysisService');
     const aiAnalysisService = new AIAnalysisService(c.env);
     
-    // Perform AI-powered analysis
+    // Check if AI service is available
+    const aiStatus = aiAnalysisService.getAIStatus();
+    console.log('AI Service Status:', aiStatus);
+    
+    // Perform AI-powered analysis (will fallback to rule-based if AI unavailable)
     const response = await aiAnalysisService.analyzeCV(
       resumeContent,
       jobContent,
@@ -180,15 +184,24 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     }
     
     if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      
       if (error.message.includes('timeout')) {
         throw new AppError('Analysis request timed out', 408, 'TIMEOUT_ERROR');
       }
       if (error.message.includes('file')) {
         throw new AppError('File processing failed', 400, 'FILE_PROCESSING_ERROR');
       }
+      if (error.message.includes('AI service') || error.message.includes('DEEPSEEK')) {
+        throw new AppError('AI service temporarily unavailable, using fallback analysis', 200, 'AI_FALLBACK');
+      }
     }
     
-    throw new AppError('Resume analysis failed', 500, 'RESUME_ANALYSIS_FAILED');
+    throw new AppError('Resume analysis failed. Please try again or contact support.', 500, 'RESUME_ANALYSIS_FAILED');
   }
 });
 
