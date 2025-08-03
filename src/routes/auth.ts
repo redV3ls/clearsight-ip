@@ -61,16 +61,12 @@ auth.post('/login',
 
       const authResult = await authService.authenticateUser(credentials);
 
-      // Generate JWT token
-      if (!c.env.JWT_SECRET) {
-        throw new AppError('JWT service unavailable', 500, 'SERVICE_UNAVAILABLE');
-      }
-
+      // Generate JWT token with RS256
       const token = await generateJWT({
         id: authResult.user.id,
         email: authResult.user.email,
         role: authResult.user.role
-      }, c.env.JWT_SECRET);
+      }, c.env);
 
       // Set secure HTTP-only cookie
       const cookieOptions = {
@@ -113,16 +109,12 @@ auth.post('/register',
 
       const authResult = await authService.registerUser(userData);
 
-      // Generate JWT token
-      if (!c.env.JWT_SECRET) {
-        throw new AppError('JWT service unavailable', 500, 'SERVICE_UNAVAILABLE');
-      }
-
+      // Generate JWT token with RS256
       const token = await generateJWT({
         id: authResult.user.id,
         email: authResult.user.email,
         role: authResult.user.role
-      }, c.env.JWT_SECRET);
+      }, c.env);
 
       // Set secure HTTP-only cookie
       const cookieOptions = {
@@ -304,9 +296,9 @@ auth.get('/me', async (c) => {
       throw new AppError('Authentication required', 401, 'AUTHENTICATION_REQUIRED');
     }
     
-    // Verify JWT token
+    // Verify JWT token with RS256
     const { verifyJWT } = await import('../middleware/auth');
-    const payload = await verifyJWT(authToken, c.env.JWT_SECRET);
+    const payload = await verifyJWT(authToken, c.env);
     
     // Check for both id and userId for compatibility
     const userId = payload.id || payload.userId;

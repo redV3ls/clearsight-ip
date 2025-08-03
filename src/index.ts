@@ -33,7 +33,9 @@ export interface Env {
   
   // Environment variables
   NODE_ENV?: string;
-  JWT_SECRET?: string;
+  JWT_SECRET?: string; // Legacy - kept for backward compatibility
+  JWT_PRIVATE_KEY?: string; // RSA private key for JWT signing (RS256)
+  JWT_PUBLIC_KEY?: string; // RSA public key for JWT verification (RS256)
   CORS_ORIGIN?: string;
   RATE_LIMIT_WINDOW_MS?: string;
   RATE_LIMIT_MAX_REQUESTS?: string;

@@ -90,7 +90,7 @@ describe('Users Routes', () => {
 
   beforeEach(async () => {
     // Generate test JWT token
-    authToken = await generateJWT(testUser, mockEnv.JWT_SECRET, 3600);
+    authToken = await generateJWT(testUser, mockEnv, 3600);
     
     // Reset all mocks
     vi.clearAllMocks();

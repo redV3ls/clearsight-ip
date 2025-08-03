@@ -18,6 +18,50 @@ export interface AuthenticatedContext extends Context<{
   };
 }> {}
 
+// RSA Key Generation Utilities
+export const generateRSAKeyPair = async (): Promise<{ privateKey: string; publicKey: string }> => {
+  // Generate RSA key pair using Web Crypto API
+  const keyPair = await crypto.subtle.generateKey(
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: 'SHA-256',
+    },
+    true,
+    ['sign', 'verify']
+  );
+
+  // Export private key
+  const privateKeyBuffer = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
+  const privateKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(privateKeyBuffer)));
+  const privateKey = `-----BEGIN PRIVATE KEY-----\n${privateKeyBase64.match(/.{1,64}/g)?.join('\n')}\n-----END PRIVATE KEY-----`;
+
+  // Export public key
+  const publicKeyBuffer = await crypto.subtle.exportKey('spki', keyPair.publicKey);
+  const publicKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(publicKeyBuffer)));
+  const publicKey = `-----BEGIN PUBLIC KEY-----\n${publicKeyBase64.match(/.{1,64}/g)?.join('\n')}\n-----END PUBLIC KEY-----`;
+
+  return { privateKey, publicKey };
+};
+
+// Helper function to get RSA keys from environment or generate new ones
+export const getRSAKeys = async (env: Env): Promise<{ privateKey: string; publicKey: string }> => {
+  // Check if RSA keys are already set in environment
+  if (env.JWT_PRIVATE_KEY && env.JWT_PUBLIC_KEY) {
+    return {
+      privateKey: env.JWT_PRIVATE_KEY,
+      publicKey: env.JWT_PUBLIC_KEY
+    };
+  }
+
+  // For development, generate keys on the fly (not recommended for production)
+  console.warn('RSA keys not found in environment. Generating temporary keys for development.');
+  console.warn('For production, set JWT_PRIVATE_KEY and JWT_PUBLIC_KEY environment variables.');
+  
+  return await generateRSAKeyPair();
+};
+
 export interface ApiKeyData {
   id: string;
   name: string;
@@ -38,8 +82,8 @@ export interface JWTPayload {
   [key: string]: any; // Add index signature for Hono compatibility
 }
 
-// Generate JWT token
-export const generateJWT = async (payload: Omit<JWTPayload, 'iat' | 'exp'>, secret: string, expiresIn: number = 86400): Promise<string> => {
+// Generate JWT token with RS256
+export const generateJWT = async (payload: Omit<JWTPayload, 'iat' | 'exp'>, env: Env, expiresIn: number = 86400): Promise<string> => {
   const now = Math.floor(Date.now() / 1000);
   const fullPayload: any = {
     ...payload,
@@ -47,14 +91,30 @@ export const generateJWT = async (payload: Omit<JWTPayload, 'iat' | 'exp'>, secr
     exp: now + expiresIn,
   };
   
-  // For now using HS256, but should migrate to RS256 for better security
-  return await sign(fullPayload, secret, 'HS256');
+  try {
+    // Get RSA keys for RS256 signing
+    const { privateKey } = await getRSAKeys(env);
+    
+    // Use RS256 algorithm with private key
+    return await sign(fullPayload, privateKey, 'RS256');
+  } catch (error) {
+    console.error('JWT generation error:', error);
+    throw new AppError('Failed to generate authentication token', 500, 'JWT_GENERATION_FAILED');
+  }
 };
 
-// Verify JWT token
-export const verifyJWT = async (token: string, secret: string): Promise<JWTPayload> => {
-  // For now using HS256, but should migrate to RS256 for better security
-  return await verify(token, secret, 'HS256') as JWTPayload;
+// Verify JWT token with RS256
+export const verifyJWT = async (token: string, env: Env): Promise<JWTPayload> => {
+  try {
+    // Get RSA keys for RS256 verification
+    const { publicKey } = await getRSAKeys(env);
+    
+    // Use RS256 algorithm with public key
+    return await verify(token, publicKey, 'RS256') as JWTPayload;
+  } catch (error) {
+    console.error('JWT verification error:', error);
+    throw new AppError('Invalid or expired authentication token', 401, 'INVALID_TOKEN');
+  }
 };
 
 // Generate API key
@@ -229,7 +289,7 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
         }
         
         console.log('Attempting JWT verification...');
-        const payload = await verifyJWT(token, c.env.JWT_SECRET);
+        const payload = await verifyJWT(token, c.env);
         console.log('JWT verification successful, payload:', { id: payload.id, email: payload.email });
         
         // Check token expiration
