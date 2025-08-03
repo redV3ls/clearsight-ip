@@ -201,36 +201,26 @@
 </head>
 <body class=\"bg-slate-900 text-gray-200\">
     <script>
-        console.log('BASIC SCRIPT TEST: JavaScript is working!');
-        console.log('Page loaded at:', new Date());
+
         
         // Global variables
         let currentUser = null;
         
         // Initialize functionality after DOM is ready
         setTimeout(function() {
-            console.log('Initializing button functionality...');
+
             
             // Get all the buttons
             const analyzeBtn = document.getElementById('analyzeSkillsBtn');
             const headerLoginBtn = document.getElementById('headerLoginBtn');
             const headerRegisterBtn = document.getElementById('headerRegisterBtn');
-            const authModal = document.getElementById('authModal');
-            
-            console.log('Elements found:', {
-                analyzeBtn: !!analyzeBtn,
-                headerLoginBtn: !!headerLoginBtn,
-                headerRegisterBtn: !!headerRegisterBtn,
-                authModal: !!authModal
-            });
-            
-            // Helper functions
+            const authModal = document.getElementById('authModal');// Helper functions
             function showAuthModal() {
                 if (authModal) {
                     authModal.classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
                     clearAuthError();
-                    console.log('Auth modal shown');
+
                 }
             }
             
@@ -238,9 +228,7 @@
                 if (authModal) {
                     authModal.classList.add('hidden');
                     document.body.style.overflow = 'auto';
-                    clearAuthError();
-                    console.log('Auth modal hidden');
-                }
+                    clearAuthError();}
             }
             
             function clearAuthError() {
@@ -258,9 +246,7 @@
                 }
             }
             
-            function showAnalysisInterface() {
-                console.log('Showing analysis interface for authenticated user');
-                // Create and show the analysis interface
+            function showAnalysisInterface() {// Create and show the analysis interface
                 const analysisModal = document.getElementById('analysisModal');
                 if (analysisModal) {
                     analysisModal.classList.remove('hidden');
@@ -271,9 +257,7 @@
                 }
             }
             
-            function createAnalysisModal() {
-                console.log('Creating analysis modal');
-                const modalHTML = \`
+            function createAnalysisModal() {const modalHTML = \`
                     <div id="analysisModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div class="bg-slate-800 rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                             <div class="flex justify-between items-center mb-6">
@@ -436,9 +420,7 @@
                 }
             }
             
-            async function performAnalysis() {
-                console.log('Starting analysis...');
-                const loadingDiv = document.getElementById('analysisLoading');
+            async function performAnalysis() {const loadingDiv = document.getElementById('analysisLoading');
                 const resultsDiv = document.getElementById('analysisResults');
                 const startBtn = document.getElementById('startAnalysisBtn');
                 
@@ -486,7 +468,7 @@
                     
                 } catch (error) {
                     console.error('Analysis error:', error);
-                    alert(\`Analysis failed: \${error.message}\`);
+                    showAuthError(\`Analysis failed: \${error.message}\`);
                 } finally {
                     if (loadingDiv) loadingDiv.classList.add('hidden');
                     if (startBtn) startBtn.disabled = false;
@@ -588,12 +570,8 @@
                     
                     if (response.ok) {
                         const data = await response.json();
-                        currentUser = data.data.user;
-                        console.log('User is authenticated:', currentUser);
-                        updateAuthUI();
-                    } else {
-                        console.log('User is not authenticated');
-                        currentUser = null;
+                        currentUser = data.data.user;updateAuthUI();
+                    } else {currentUser = null;
                         updateAuthUI();
                     }
                 } catch (error) {
@@ -603,47 +581,20 @@
                 }
             }
             
-            function updateAuthUI() {
-                console.log('updateAuthUI called, currentUser:', currentUser);
-                
-                const authButtons = document.getElementById('authButtons');
+            function updateAuthUI() {const authButtons = document.getElementById('authButtons');
                 const userMenu = document.getElementById('userMenu');
                 const userEmail = document.getElementById('userEmail');
                 
                 // Mobile elements
                 const mobileAuthButtons = document.getElementById('mobileAuthButtons');
                 const mobileUserMenu = document.getElementById('mobileUserMenu');
-                const mobileUserEmail = document.getElementById('mobileUserEmail');
-                
-                console.log('UI Elements found:', {
-                    authButtons: !!authButtons,
-                    userMenu: !!userMenu,
-                    userEmail: !!userEmail,
-                    mobileAuthButtons: !!mobileAuthButtons,
-                    mobileUserMenu: !!mobileUserMenu,
-                    mobileUserEmail: !!mobileUserEmail
-                });
-
-                if (currentUser && currentUser.email) {
-                    console.log('Showing user menu for:', currentUser.email);
-                    
-                    // Desktop UI
-                    if (authButtons) {
-                        console.log('Hiding auth buttons...');
-                        authButtons.classList.add('hidden');
-                        authButtons.style.display = 'none';
-                        console.log('Auth buttons hidden. Classes:', authButtons.className);
-                    }
-                    if (userMenu) {
-                        console.log('Showing user menu...');
-                        userMenu.classList.remove('hidden');
-                        userMenu.style.display = 'flex';
-                        console.log('User menu shown. Classes:', userMenu.className);
-                    }
+                const mobileUserEmail = document.getElementById('mobileUserEmail');if (currentUser && currentUser.email) {// Desktop UI
+                    if (authButtons) {authButtons.classList.add('hidden');
+                        authButtons.style.display = 'none';}
+                    if (userMenu) {userMenu.classList.remove('hidden');
+                        userMenu.style.display = 'flex';}
                     if (userEmail) {
-                        userEmail.textContent = currentUser.email;
-                        console.log('User email set to:', currentUser.email);
-                    }
+                        userEmail.textContent = currentUser.email;}
                     
                     // Mobile UI
                     if (mobileAuthButtons) {
@@ -655,10 +606,7 @@
                     if (mobileUserEmail) {
                         mobileUserEmail.textContent = currentUser.email;
                     }
-                } else {
-                    console.log('Hiding user menu - user not authenticated');
-                    
-                    // Desktop UI
+                } else {// Desktop UI
                     if (authButtons) {
                         authButtons.classList.remove('hidden');
                         authButtons.style.display = 'flex';
@@ -680,15 +628,8 @@
             
             // Authentication functions
             async function handleLogin(e) {
-                e.preventDefault();
-                console.log('Login form submitted');
-                
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-
-                console.log('Attempting login for:', email);
-
-                try {
+                e.preventDefault();const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;try {
                     const response = await fetch('/api/v1/auth/login', {
                         method: 'POST',
                         headers: {
@@ -698,23 +639,15 @@
                         body: JSON.stringify({ email, password })
                     });
 
-                    const data = await response.json();
-                    console.log('Login response:', { status: response.status, ok: response.ok });
-
-                    if (response.ok) {
-                        currentUser = data.data.user;
-                        console.log('Login successful, cookie set');
-                        console.log('Current user data:', currentUser);
-                        updateAuthUI();
+                    const data = await response.json();if (response.ok) {
+                        currentUser = data.data.user;updateAuthUI();
                         hideAuthModal();
                         
                         // Force UI update after a short delay to ensure DOM is ready
-                        setTimeout(() => {
-                            console.log('Force updating UI after delay...');
-                            updateAuthUI();
+                        setTimeout(() => {updateAuthUI();
                         }, 200);
                         
-                        alert('Login successful!');
+
                     } else {
                         console.error('Login failed:', data);
                         showAuthError(data.error?.message || 'Login failed');
@@ -726,10 +659,7 @@
             }
 
             async function handleRegister(e) {
-                e.preventDefault();
-                console.log('Register form submitted');
-                
-                const name = document.getElementById('registerName').value;
+                e.preventDefault();const name = document.getElementById('registerName').value;
                 const email = document.getElementById('registerEmail').value;
                 const password = document.getElementById('registerPassword').value;
 
@@ -751,11 +681,9 @@
                     const data = await response.json();
 
                     if (response.ok) {
-                        currentUser = data.data.user;
-                        console.log('Registration successful, cookie set');
-                        updateAuthUI();
+                        currentUser = data.data.user;updateAuthUI();
                         hideAuthModal();
-                        alert('Registration successful!');
+
                     } else {
                         showAuthError(data.error?.message || 'Registration failed');
                     }
@@ -767,48 +695,32 @@
             
             // Add click handlers
             if (analyzeBtn) {
-                analyzeBtn.addEventListener('click', function(e) {
-                    console.log('Analyze button clicked');
-                    e.preventDefault();
+                analyzeBtn.addEventListener('click', function(e) {e.preventDefault();
                     
                     // Check if user is already authenticated
-                    if (currentUser && currentUser.email) {
-                        console.log('User is authenticated, redirecting to analysis...');
-                        // User is authenticated, redirect to analysis page or show analysis interface
+                    if (currentUser && currentUser.email) {// User is authenticated, redirect to analysis page or show analysis interface
                         showAnalysisInterface();
-                    } else {
-                        console.log('User not authenticated, showing auth modal');
-                        showAuthModal();
+                    } else {showAuthModal();
                     }
-                });
-                console.log('Analyze button handler added');
-            }
+                });}
             
             if (headerLoginBtn) {
-                headerLoginBtn.addEventListener('click', function(e) {
-                    console.log('Login button clicked');
-                    e.preventDefault();
+                headerLoginBtn.addEventListener('click', function(e) {e.preventDefault();
                     showAuthModal();
                     setTimeout(() => {
                         const loginTab = document.getElementById('loginTab');
                         if (loginTab) loginTab.click();
                     }, 100);
-                });
-                console.log('Login button handler added');
-            }
+                });}
             
             if (headerRegisterBtn) {
-                headerRegisterBtn.addEventListener('click', function(e) {
-                    console.log('Register button clicked');
-                    e.preventDefault();
+                headerRegisterBtn.addEventListener('click', function(e) {e.preventDefault();
                     showAuthModal();
                     setTimeout(() => {
                         const registerTab = document.getElementById('registerTab');
                         if (registerTab) registerTab.click();
                     }, 100);
-                });
-                console.log('Register button handler added');
-            }
+                });}
             
             // Tab switching functionality
             const loginTab = document.getElementById('loginTab');
@@ -863,14 +775,10 @@
             
             // Form submission handlers
             if (loginForm) {
-                loginForm.addEventListener('submit', handleLogin);
-                console.log('Login form handler added');
-            }
+                loginForm.addEventListener('submit', handleLogin);}
             
             if (registerForm) {
-                registerForm.addEventListener('submit', handleRegister);
-                console.log('Register form handler added');
-            }
+                registerForm.addEventListener('submit', handleRegister);}
             
             // Logout functionality
             const logoutBtn = document.getElementById('logoutBtn');
@@ -886,7 +794,7 @@
                     if (response.ok) {
                         currentUser = null;
                         updateAuthUI();
-                        alert('Logged out successfully!');
+
                     } else {
                         console.error('Logout failed');
                     }
@@ -938,10 +846,7 @@
             }
             
             // Check authentication status on page load
-            checkAuthStatus();
-            
-            console.log('All button handlers and modal functionality initialized successfully');
-        }, 500);
+            checkAuthStatus();}, 500);
     </script>
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-slate-800 bg-slate-900 shadow-md py-4 px-6">
@@ -2107,15 +2012,11 @@
     </div>
 
     <!-- CV Analysis JavaScript -->
-    <script>
-        console.log('Starting main JavaScript section...');
-        // Global state - simplified version
+    <script>// Global state - simplified version
         let currentUser = null;
         
         // For now, we'll use the simple initialization above
-        // The complex initialization was causing issues, so we're using a cleaner approach
-        console.log('Using simplified initialization approach');
-        let analysisInProgress = false;
+        // The complex initialization was causing issues, so we're using a cleaner approachlet analysisInProgress = false;
 
         // Security configuration
         const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB for CV
@@ -2124,12 +2025,7 @@
         const MAX_TEXT_LENGTH = 50000; // 50k characters max
 
         // Initialize - COMMENTED OUT (using simple version above)
-        // document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded - Starting initialization');
-            console.log('Document ready state:', document.readyState);
-            console.log('All elements in DOM:', document.querySelectorAll('*').length);
-            
-            // Force hide user menu on page load
+        // document.addEventListener('DOMContentLoaded', function() {// Force hide user menu on page load
             const userMenu = document.getElementById('userMenu');
             const mobileUserMenu = document.getElementById('mobileUserMenu');
             if (userMenu) {
@@ -2139,37 +2035,14 @@
             if (mobileUserMenu) {
                 mobileUserMenu.style.display = 'none';
                 mobileUserMenu.classList.add('hidden');
-            }
-            console.log('Forced user menus to be hidden on page load');
-            
-            // Test if basic elements exist
-            console.log('Testing element existence:');
-            console.log('- analyzeSkillsBtn:', !!document.getElementById('analyzeSkillsBtn'));
-            console.log('- headerLoginBtn:', !!document.getElementById('headerLoginBtn'));
-            console.log('- headerRegisterBtn:', !!document.getElementById('headerRegisterBtn'));
-            console.log('- authModal:', !!document.getElementById('authModal'));
-            
-            try {
-                console.log('Starting initializeAuth...');
-                initializeAuth();
-                console.log('Auth initialization completed');
-                console.log('Starting initializeFileHandlers...');
-                initializeFileHandlers();
-                console.log('File handlers initialization completed');
-                console.log('Starting initializeAnalysis...');
-                initializeAnalysis();
-                console.log('Analysis initialization completed');
-            } catch (error) {
+            }// Test if basic elements existtry {initializeAuth();initializeFileHandlers();initializeAnalysis();} catch (error) {
                 console.error('Initialization error:', error);
                 console.error('Error stack:', error.stack);
             }
         // }); // COMMENTED OUT - using simple version above
 
         // Authentication functions
-        function initializeAuth() {
-            console.log('Initializing authentication...');
-            
-            const analyzeBtn = document.getElementById('analyzeSkillsBtn');
+        function initializeAuth() {const analyzeBtn = document.getElementById('analyzeSkillsBtn');
             const authModal = document.getElementById('authModal');
             const closeAuthModal = document.getElementById('closeAuthModal');
             const loginTab = document.getElementById('loginTab');
@@ -2180,32 +2053,17 @@
             // Header auth buttons
             const headerLoginBtn = document.getElementById('headerLoginBtn');
             const headerRegisterBtn = document.getElementById('headerRegisterBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-            
-            console.log('Elements found:', {
-                analyzeBtn: !!analyzeBtn,
-                headerLoginBtn: !!headerLoginBtn,
-                headerRegisterBtn: !!headerRegisterBtn,
-                authModal: !!authModal
-            });
-            
-            // Add direct onclick handlers as backup
+            const logoutBtn = document.getElementById('logoutBtn');// Add direct onclick handlers as backup
             if (analyzeBtn) {
-                analyzeBtn.onclick = function(e) {
-                    console.log('Direct onclick handler triggered for analyze button');
-                    return false;
+                analyzeBtn.onclick = function(e) {return false;
                 };
             }
             if (headerLoginBtn) {
-                headerLoginBtn.onclick = function(e) {
-                    console.log('Direct onclick handler triggered for login button');
-                    return false;
+                headerLoginBtn.onclick = function(e) {return false;
                 };
             }
             if (headerRegisterBtn) {
-                headerRegisterBtn.onclick = function(e) {
-                    console.log('Direct onclick handler triggered for register button');
-                    return false;
+                headerRegisterBtn.onclick = function(e) {return false;
                 };
             }
             
@@ -2220,74 +2078,35 @@
             updateAuthUI();
             
             // Check if there's an auth cookie before making the API call
-            const hasAuthCookie = document.cookie.includes('auth_token=');
-            console.log('Has auth cookie:', hasAuthCookie);
-            
-            if (hasAuthCookie) {
-                // Only check authentication if we have a cookie
-                console.log('Auth cookie found, validating...');
-                validateToken().then(() => {
-                    console.log('Authentication check complete, updating UI');
-                    updateAuthUI();
+            const hasAuthCookie = document.cookie.includes('auth_token=');if (hasAuthCookie) {
+                // Only check authentication if we have a cookievalidateToken().then(() => {updateAuthUI();
                 });
-            } else {
-                console.log('No auth cookie found, staying in logged-out state');
-            }
+            } else {}
 
             // Main analyze button
-            if (analyzeBtn) {
-                console.log('Found analyze button, adding event listener...');
-                analyzeBtn.addEventListener('click', function(e) {
-                    console.log('Analyze button clicked! Event:', e);
-                    console.log('Auth state:', { currentUser: !!currentUser });
-                    e.preventDefault();
+            if (analyzeBtn) {analyzeBtn.addEventListener('click', function(e) {e.preventDefault();
                     e.stopPropagation();
-                    if (currentUser) {
-                        console.log('User is logged in, showing analysis modal');
-                        showAnalysisModal();
-                    } else {
-                        console.log('User not logged in, showing auth modal');
-                        showAuthModal();
+                    if (currentUser) {showAnalysisModal();
+                    } else {showAuthModal();
                     }
-                });
-                console.log('Analyze button event listener added successfully');
-                
-                // Test the button immediately
-                console.log('Testing analyze button properties:');
-                console.log('- Button element:', analyzeBtn);
-                console.log('- Button disabled:', analyzeBtn.disabled);
-                console.log('- Button style display:', analyzeBtn.style.display);
-                console.log('- Button computed style:', window.getComputedStyle(analyzeBtn).display);
-            } else {
+                });// Test the button immediately} else {
                 console.error('Analyze button not found!');
             }
 
             // Header login/register buttons
-            if (headerLoginBtn) {
-                console.log('Found header login button, adding event listener...');
-                headerLoginBtn.addEventListener('click', function(e) {
-                    console.log('Header login button clicked! Event:', e);
-                    e.preventDefault();
+            if (headerLoginBtn) {headerLoginBtn.addEventListener('click', function(e) {e.preventDefault();
                     e.stopPropagation();
                     showAuthModal();
                     showLoginForm();
-                });
-                console.log('Header login button event listener added successfully');
-            } else {
+                });} else {
                 console.error('Header login button not found!');
             }
 
-            if (headerRegisterBtn) {
-                console.log('Found header register button, adding event listener...');
-                headerRegisterBtn.addEventListener('click', function(e) {
-                    console.log('Header register button clicked! Event:', e);
-                    e.preventDefault();
+            if (headerRegisterBtn) {headerRegisterBtn.addEventListener('click', function(e) {e.preventDefault();
                     e.stopPropagation();
                     showAuthModal();
                     showRegisterForm();
-                });
-                console.log('Header register button event listener added successfully');
-            } else {
+                });} else {
                 console.error('Header register button not found!');
             }
 
@@ -2368,11 +2187,7 @@
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            console.log('Attempting login for:', email);
-
-            try {
+            const password = document.getElementById('loginPassword').value;try {
                 const response = await fetch('/api/v1/auth/login', {
                     method: 'POST',
                     headers: {
@@ -2382,13 +2197,8 @@
                     body: JSON.stringify({ email, password })
                 });
 
-                const data = await response.json();
-                console.log('Login response:', { status: response.status, ok: response.ok });
-
-                if (response.ok) {
-                    currentUser = data.data.user;
-                    console.log('Login successful, cookie set');
-                    updateAuthUI();
+                const data = await response.json();if (response.ok) {
+                    currentUser = data.data.user;updateAuthUI();
                     hideAuthModal();
                     showAnalysisModal();
                 } else {
@@ -2425,9 +2235,7 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    currentUser = data.data.user;
-                    console.log('Registration successful, cookie set');
-                    updateAuthUI();
+                    currentUser = data.data.user;updateAuthUI();
                     hideAuthModal();
                     showAnalysisModal();
                 } else {
@@ -2438,27 +2246,15 @@
             }
         }
 
-        async function validateToken() {
-            console.log('Validating authentication via cookie...');
-            try {
+        async function validateToken() {try {
                 const response = await fetch('/api/v1/users/profile', {
                     credentials: 'include' // Include cookies in request
-                });
-
-                console.log('Token validation response:', { status: response.status, ok: response.ok });
-
-                if (response.ok) {
+                });if (response.ok) {
                     const data = await response.json();
-                    currentUser = data.data.user;
-                    console.log('Authentication valid, user loaded:', currentUser?.email);
-                } else {
-                    // Token invalid or no auth cookie (expected on first visit)
-                    console.log('No authentication found (expected on first visit)');
-                    currentUser = null;
+                    currentUser = data.data.user;} else {
+                    // Token invalid or no auth cookie (expected on first visit)currentUser = null;
                 }
-            } catch (error) {
-                console.log('Authentication check failed (normal on first visit):', error.message || error);
-                currentUser = null;
+            } catch (error) {currentUser = null;
             }
         }
 
@@ -2474,10 +2270,7 @@
         }
 
         // UI update functions
-        function updateAuthUI() {
-            console.log('updateAuthUI called, currentUser:', currentUser);
-            
-            const authButtons = document.getElementById('authButtons');
+        function updateAuthUI() {const authButtons = document.getElementById('authButtons');
             const userMenu = document.getElementById('userMenu');
             const userEmail = document.getElementById('userEmail');
             const mobileAuthButtons = document.getElementById('mobileAuthButtons');
@@ -2485,9 +2278,7 @@
             const mobileUserEmail = document.getElementById('mobileUserEmail');
 
             if (currentUser && currentUser.email) {
-                // User is logged in
-                console.log('Showing user menu for:', currentUser.email);
-                authButtons?.classList.add('hidden');
+                // User is logged inauthButtons?.classList.add('hidden');
                 userMenu?.classList.remove('hidden');
                 userMenu?.style.display = 'flex'; // Force show
                 if (userEmail) userEmail.textContent = currentUser.email;
@@ -2496,20 +2287,14 @@
                 mobileUserMenu?.classList.remove('hidden');
                 if (mobileUserEmail) mobileUserEmail.textContent = currentUser.email;
             } else {
-                // User is not logged in - FORCE HIDE user menu
-                console.log('Hiding user menu - user not authenticated');
-                authButtons?.classList.remove('hidden');
+                // User is not logged in - FORCE HIDE user menuauthButtons?.classList.remove('hidden');
                 authButtons?.style.display = 'flex'; // Force show
                 
                 userMenu?.classList.add('hidden');
                 userMenu?.style.display = 'none'; // Force hide
                 
                 mobileAuthButtons?.classList.remove('hidden');
-                mobileUserMenu?.classList.add('hidden');
-                
-                console.log('Auth buttons display:', authButtons?.style.display);
-                console.log('User menu display:', userMenu?.style.display);
-            }
+                mobileUserMenu?.classList.add('hidden');}
         }
 
         async function handleLogout() {
@@ -2517,16 +2302,12 @@
                 await fetch('/api/v1/auth/logout', {
                     method: 'POST',
                     credentials: 'include'
-                });
-                console.log('Logout request sent');
-            } catch (error) {
+                });} catch (error) {
                 console.error('Logout request failed:', error);
             }
             
             currentUser = null;
-            updateAuthUI();
-            console.log('User logged out');
-        }
+            updateAuthUI();}
 
         function toggleMobileMenu() {
             const mobileMenu = document.getElementById('mobileMenu');
@@ -2701,9 +2482,7 @@
 
         function hideAnalysisModal() {
             if (analysisInProgress) {
-                if (!confirm('Analysis is in progress. Are you sure you want to cancel?')) {
-                    return;
-                }
+                return;
             }
             document.getElementById('analysisModal').classList.add('hidden');
             document.body.style.overflow = 'auto';
@@ -2769,16 +2548,11 @@
             // Simulate progress
             simulateProgress();
 
-            try {
-                console.log('Starting analysis with cookie authentication');
-                const response = await fetch('/api/v1/analyze/resume', {
+            try {const response = await fetch('/api/v1/analyze/resume', {
                     method: 'POST',
                     credentials: 'include', // Include cookies
                     body: formData
-                });
-
-                console.log('Analysis response:', { status: response.status, ok: response.ok });
-                const data = await response.json();
+                });const data = await response.json();
 
                 if (response.ok) {
                     displayResults(data);
