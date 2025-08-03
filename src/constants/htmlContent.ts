@@ -2094,12 +2094,7 @@
                 
                 // Try to show a user-friendly error message
                 const errorDiv = document.createElement('div');
-                errorDiv.innerHTML = `
-                    <div style="position: fixed; top: 20px; right: 20px; background: #ef4444; color: white; padding: 12px; border-radius: 8px; z-index: 9999;">
-                        <strong>Application Error:</strong> Failed to initialize. Please refresh the page.
-                        <button onclick="this.parentElement.remove()" style="margin-left: 10px; background: none; border: none; color: white; cursor: pointer;">×</button>
-                    </div>
-                `;
+                errorDiv.innerHTML = '<div style="position: fixed; top: 20px; right: 20px; background: #ef4444; color: white; padding: 12px; border-radius: 8px; z-index: 9999;"><strong>Application Error:</strong> Failed to initialize. Please refresh the page.<button onclick="this.parentElement.remove()" style="margin-left: 10px; background: none; border: none; color: white; cursor: pointer;">×</button></div>';
                 document.body.appendChild(errorDiv);
             }
         // }); // COMMENTED OUT - using simple version above
@@ -2148,7 +2143,7 @@
             const hasAuthCookie = document.cookie.includes('auth_token=');if (hasAuthCookie) {
                 // Only check authentication if we have a cookie
             try {
-                validateToken().then(() => {
+                checkAuthStatus().then(() => {
                     updateAuthUI();
                 }).catch((error) => {
                     console.warn('Token validation failed:', error);
@@ -2334,21 +2329,7 @@
             }
         }
 
-        async function validateToken() {
-            try {
-                const response = await fetch('/api/v1/users/profile', {
-                    credentials: 'include' // Include cookies in request
-                });if (response.ok) {
-                    const data = await response.json();
-                    currentUser = data.data.user;
-                } else {
-                    // Token invalid or no auth cookie (expected on first visit)
-                    currentUser = null;
-                }
-            } catch (error) {
-                currentUser = null;
-            }
-        }
+
 
         function showAuthError(message) {
             const errorDiv = document.getElementById('authError');
