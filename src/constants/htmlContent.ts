@@ -233,7 +233,8 @@
                 if (authModal) {
                     authModal.classList.add('hidden');
                     document.body.style.overflow = 'auto';
-                    clearAuthError();}
+                    clearAuthError();
+                }
             }
             
             function clearAuthError() {
@@ -618,11 +619,18 @@
                 // Mobile elements
                 const mobileAuthButtons = document.getElementById('mobileAuthButtons');
                 const mobileUserMenu = document.getElementById('mobileUserMenu');
-                const mobileUserEmail = document.getElementById('mobileUserEmail');if (currentUser && currentUser.email) {// Desktop UI
-                    if (authButtons) {authButtons.classList.add('hidden');
-                        authButtons.style.display = 'none';}
-                    if (userMenu) {userMenu.classList.remove('hidden');
-                        userMenu.style.display = 'flex';}
+                const mobileUserEmail = document.getElementById('mobileUserEmail');
+                
+                if (currentUser && currentUser.email) {
+                    // Desktop UI
+                    if (authButtons) {
+                        authButtons.classList.add('hidden');
+                        authButtons.style.display = 'none';
+                    }
+                    if (userMenu) {
+                        userMenu.classList.remove('hidden');
+                        userMenu.style.display = 'flex';
+                    }
                     if (userEmail) {
                         userEmail.textContent = currentUser.email;}
                     
@@ -636,7 +644,8 @@
                     if (mobileUserEmail) {
                         mobileUserEmail.textContent = currentUser.email;
                     }
-                } else {// Desktop UI
+                } else {
+                    // Desktop UI
                     if (authButtons) {
                         authButtons.classList.remove('hidden');
                         authButtons.style.display = 'flex';
@@ -658,8 +667,11 @@
             
             // Authentication functions
             async function handleLogin(e) {
-                e.preventDefault();const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;try {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                try {
                     const response = await fetch('/api/v1/auth/login', {
                         method: 'POST',
                         headers: {
@@ -689,7 +701,8 @@
             }
 
             async function handleRegister(e) {
-                e.preventDefault();const name = document.getElementById('registerName').value;
+                e.preventDefault();
+                const name = document.getElementById('registerName').value;
                 const email = document.getElementById('registerEmail').value;
                 const password = document.getElementById('registerPassword').value;
 
@@ -2270,7 +2283,9 @@
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;try {
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
                 const response = await fetch('/api/v1/auth/login', {
                     method: 'POST',
                     headers: {
