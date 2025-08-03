@@ -54,18 +54,16 @@ export const RATE_LIMIT_TIERS: Record<string, RateLimitTier> = {
   },
   AUTH_ENDPOINTS: {
     name: 'auth_endpoints',
-    windowMs: 900000, // 15 minutes
-    maxRequests: 10,
-    description: 'Authentication endpoints (stricter)'
+    windowMs: 1000, // 1 second
+    maxRequests: 2,
+    description: 'Authentication endpoints (bot protection - max 2 requests per second)'
   }
 };
 
 export class ProductionRateLimiterService {
   private kv: KVNamespace;
-  private env: Env;
 
   constructor(env: Env) {
-    this.env = env;
     this.kv = env.CACHE;
   }
 

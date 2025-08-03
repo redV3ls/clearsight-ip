@@ -39,6 +39,7 @@ export interface Env {
   CORS_ORIGIN?: string;
   RATE_LIMIT_WINDOW_MS?: string;
   RATE_LIMIT_MAX_REQUESTS?: string;
+  ENABLE_RATE_LIMITING?: string;
   LOG_LEVEL?: string;
 }
 
