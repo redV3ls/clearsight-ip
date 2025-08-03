@@ -282,9 +282,9 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
     if (token) {
       
       try {
-        // Ensure JWT secret is available
-        if (!c.env?.JWT_SECRET) {
-          console.log('JWT secret not available');
+        // Ensure JWT keys are available (RS256 requires private/public key pair)
+        if (!c.env?.JWT_PRIVATE_KEY && !c.env?.JWT_PUBLIC_KEY && !c.env?.JWT_SECRET) {
+          console.log('JWT keys not available');
           throw new AppError('JWT service unavailable', 500, 'SERVICE_UNAVAILABLE');
         }
         
