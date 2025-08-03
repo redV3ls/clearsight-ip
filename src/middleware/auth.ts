@@ -47,7 +47,14 @@ export const generateJWT = async (payload: Omit<JWTPayload, 'iat' | 'exp'>, secr
     exp: now + expiresIn,
   };
   
-  return await sign(fullPayload, secret);
+  // For now using HS256, but should migrate to RS256 for better security
+  return await sign(fullPayload, secret, 'HS256');
+};
+
+// Verify JWT token
+export const verifyJWT = async (token: string, secret: string): Promise<JWTPayload> => {
+  // For now using HS256, but should migrate to RS256 for better security
+  return await verify(token, secret, 'HS256') as JWTPayload;
 };
 
 // Generate API key
@@ -222,7 +229,7 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
         }
         
         console.log('Attempting JWT verification...');
-        const payload = await verify(token, c.env.JWT_SECRET) as JWTPayload;
+        const payload = await verifyJWT(token, c.env.JWT_SECRET);
         console.log('JWT verification successful, payload:', { id: payload.id, email: payload.email });
         
         // Check token expiration

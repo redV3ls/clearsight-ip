@@ -308,13 +308,15 @@ auth.get('/me', async (c) => {
     const { verifyJWT } = await import('../middleware/auth');
     const payload = await verifyJWT(authToken, c.env.JWT_SECRET);
     
-    if (!payload || !payload.userId) {
+    // Check for both id and userId for compatibility
+    const userId = payload.id || payload.userId;
+    if (!payload || !userId) {
       throw new AppError('Invalid authentication token', 401, 'INVALID_TOKEN');
     }
     
     // Get user from database
     const db = new DatabaseManager(c.env.DB);
-    const user = await db.getUserById(payload.userId);
+    const user = await db.getUserById(userId);
     
     if (!user) {
       throw new AppError('User not found', 404, 'USER_NOT_FOUND');
