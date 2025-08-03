@@ -280,28 +280,65 @@ auth.post('/reset-password',
  * GET /auth/me
  * Get current user information
  */
-auth.get('/me',
-  validateHeaders(['Authorization']),
-  async (c) => {
-    try {
-      const user = c.get('user');
-      if (!user) {
-        throw new AppError('Authentication required', 401, 'AUTHENTICATION_REQUIRED');
+auth.get('/me', async (c) => {
+  try {
+    // Check for auth token in cookies
+    const cookieHeader = c.req.header('Cookie');
+    let authToken = null;
+    
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';').map(c => c.trim());
+      const authCookie = cookies.find(cookie => cookie.startsWith('auth_token='));
+      if (authCookie) {
+        authToken = authCookie.split('=')[1];
       }
-
-      return c.json({
-        success: true,
-        data: {
-          user
-        }
-      });
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError('Failed to get user information', 500, 'USER_INFO_ERROR');
     }
+    
+    // Also check Authorization header as fallback
+    const authHeader = c.req.header('Authorization');
+    if (!authToken && authHeader?.startsWith('Bearer ')) {
+      authToken = authHeader.substring(7);
+    }
+    
+    if (!authToken) {
+      throw new AppError('Authentication required', 401, 'AUTHENTICATION_REQUIRED');
+    }
+    
+    // Verify JWT token
+    const { verifyJWT } = await import('../middleware/auth');
+    const payload = await verifyJWT(authToken, c.env.JWT_SECRET);
+    
+    if (!payload || !payload.userId) {
+      throw new AppError('Invalid authentication token', 401, 'INVALID_TOKEN');
+    }
+    
+    // Get user from database
+    const db = new DatabaseManager(c.env.DB);
+    const user = await db.getUserById(payload.userId);
+    
+    if (!user) {
+      throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+    
+    return c.json({
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          organization: user.organization,
+          created_at: user.created_at
+        }
+      }
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    console.error('Auth check error:', error);
+    throw new AppError('Authentication failed', 401, 'AUTHENTICATION_FAILED');
   }
-);
+});
 
 export default auth;
