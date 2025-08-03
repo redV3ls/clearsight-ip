@@ -292,30 +292,13 @@
                                         placeholder="Paste the job description you're interested in..."></textarea>
                                 </div>
                                 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Industry</label>
-                                        <select id="industrySelect" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent">
-                                            <option value="">Select Industry</option>
-                                            <option value="Technology">Technology</option>
-                                            <option value="Healthcare">Healthcare</option>
-                                            <option value="Finance">Finance</option>
-                                            <option value="Education">Education</option>
-                                            <option value="Manufacturing">Manufacturing</option>
-                                            <option value="Retail">Retail</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Experience Level</label>
-                                        <select id="experienceSelect" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent">
-                                            <option value="">Select Level</option>
-                                            <option value="entry">Entry Level (0-2 years)</option>
-                                            <option value="mid">Mid Level (3-5 years)</option>
-                                            <option value="senior">Senior Level (6-10 years)</option>
-                                            <option value="executive">Executive (10+ years)</option>
-                                        </select>
+                                <div class="bg-blue-50 bg-blue-900/20 border border-blue-500 rounded-lg p-4 mb-4">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-info-circle text-blue-400 mt-1 mr-3"></i>
+                                        <div>
+                                            <h4 class="font-medium text-blue-300 mb-1">AI-Powered Analysis</h4>
+                                            <p class="text-sm text-blue-200">Industry and experience level will be automatically inferred from your resume and job description using advanced AI analysis.</p>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -433,8 +416,6 @@
                     const formData = new FormData();
                     const fileInput = document.getElementById('resumeFile');
                     const jobDescription = document.getElementById('jobDescription').value;
-                    const industry = document.getElementById('industrySelect').value;
-                    
                     if (fileInput.files[0]) {
                         formData.append('resume', fileInput.files[0]);
                     } else {
@@ -443,10 +424,6 @@
                     
                     if (jobDescription) {
                         formData.append('jobDescriptionText', jobDescription);
-                    }
-                    
-                    if (industry) {
-                        formData.append('industry', industry);
                     }
                     
                     // Add advanced feature flags
@@ -462,7 +439,16 @@
                     });
                     
                     if (!response.ok) {
-                        throw new Error(\`Analysis failed: \${response.statusText}\`);
+                        let errorMessage = \`Analysis failed: \${response.status} \${response.statusText}\`;
+                        try {
+                            const errorData = await response.json();
+                            if (errorData.error && errorData.error.message) {
+                                errorMessage = errorData.error.message;
+                            }
+                        } catch (e) {
+                            // If we can't parse the error response, use the default message
+                        }
+                        throw new Error(errorMessage);
                     }
                     
                     const results = await response.json();
@@ -470,6 +456,19 @@
                     
                 } catch (error) {
                     console.error('Analysis error:', error);
+                    
+                    // Check if it's an authentication error
+                    if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+                        // Try to re-authenticate
+                        const authCheck = await checkAuthStatus();
+                        if (!authCheck) {
+                            showAuthError('Authentication expired. Please log in again.');
+                            hideAnalysisModal();
+                            showAuthModal();
+                            return;
+                        }
+                    }
+                    
                     showAuthError(\`Analysis failed: \${error.message}\`);
                 } finally {
                     if (loadingDiv) loadingDiv.classList.add('hidden');
@@ -572,14 +571,19 @@
                     
                     if (response.ok) {
                         const data = await response.json();
-                        currentUser = data.data.user;updateAuthUI();
-                    } else {currentUser = null;
+                        currentUser = data.data.user;
                         updateAuthUI();
+                        return true;
+                    } else {
+                        currentUser = null;
+                        updateAuthUI();
+                        return false;
                     }
                 } catch (error) {
                     console.error('Auth check failed:', error);
                     currentUser = null;
                     updateAuthUI();
+                    return false;
                 }
             }
             
