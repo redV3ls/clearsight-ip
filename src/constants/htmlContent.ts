@@ -2704,8 +2704,8 @@
             return originalPerformAnalysis.call(this);
         };
 
-        // Add missing startAnalysis function
-        function startAnalysis() {
+        // Add missing performAnalysis function
+        async function performAnalysis() {
             console.log('Starting AI analysis...');
             
             if (analysisInProgress) {
@@ -2716,20 +2716,96 @@
             // Validate inputs
             const cvText = document.getElementById('cvTextInput')?.value || '';
             const jobText = document.getElementById('jobTextInput')?.value || '';
-            const cvFile = document.getElementById('cvFileInput')?.files[0];
-            const jobFile = document.getElementById('jobFileInput')?.files[0];
+            const cvFile = window.cvFile;
+            const jobFile = window.jobFile;
 
             if (!cvText && !cvFile) {
                 showAnalysisError('Please provide your CV/resume content or upload a file.');
                 return;
             }
 
-            // Call the existing performAnalysis function
+            analysisInProgress = true;
+            
+            // Show loading section
+            document.getElementById('uploadSection').classList.add('hidden');
+            document.getElementById('loadingSection').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            
+            // Start progress simulation
+            simulateProgress();
+
+            try {
+                // Prepare form data
+                const formData = new FormData();
+                
+                if (cvFile) {
+                    formData.append('resume', cvFile);
+                } else if (cvText) {
+                    formData.append('resumeText', cvText);
+                }
+                
+                if (jobFile) {
+                    formData.append('jobDescription', jobFile);
+                } else if (jobText) {
+                    formData.append('jobDescriptionText', jobText);
+                }
+                
+                // Add analysis options
+                formData.append('includeSkillsGap', document.getElementById('skillsIntelligenceAnalysis')?.checked || false);
+                formData.append('includeCareerSuggestions', document.getElementById('careerSuggestions')?.checked || false);
+                formData.append('includeIndustryTrends', document.getElementById('industryTrends')?.checked || false);
+
+                console.log('Sending analysis request...');
+                const response = await fetch('/api/v1/analyze/resume', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    console.log('Analysis successful:', data);
+                    displayResults(data);
+                } else {
+                    console.error('Analysis failed:', data);
+                    throw new Error(data.error?.message || 'Analysis failed');
+                }
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showAnalysisError(error.message || 'Analysis failed. Please try again.');
+                resetAnalysis();
+            } finally {
+                analysisInProgress = false;
+            }
+        }
+
+        // Add missing startAnalysis function for backward compatibility
+        function startAnalysis() {
             performAnalysis();
         }
 
-        // Make startAnalysis globally available
+        // Add missing helper functions
+        function showAnalysisError(message) {
+            const errorDiv = document.getElementById('analysisError');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.classList.remove('hidden');
+            }
+            console.error('Analysis error:', message);
+        }
+
+        function clearAnalysisError() {
+            const errorDiv = document.getElementById('analysisError');
+            if (errorDiv) {
+                errorDiv.classList.add('hidden');
+                errorDiv.textContent = '';
+            }
+        }
+
+        // Make functions globally available
         window.startAnalysis = startAnalysis;
+        window.performAnalysis = performAnalysis;
     </script>
 </body>
 </html>
