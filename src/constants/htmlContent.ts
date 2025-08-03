@@ -257,7 +257,8 @@
                 }
             }
             
-            function createAnalysisModal() {const modalHTML = \`
+            function createAnalysisModal() {
+                const modalHTML = \`
                     <div id="analysisModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div class="bg-slate-800 rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                             <div class="flex justify-between items-center mb-6">
@@ -420,7 +421,8 @@
                 }
             }
             
-            async function performAnalysis() {const loadingDiv = document.getElementById('analysisLoading');
+            async function performAnalysis() {
+                const loadingDiv = document.getElementById('analysisLoading');
                 const resultsDiv = document.getElementById('analysisResults');
                 const startBtn = document.getElementById('startAnalysisBtn');
                 
@@ -581,7 +583,8 @@
                 }
             }
             
-            function updateAuthUI() {const authButtons = document.getElementById('authButtons');
+            function updateAuthUI() {
+                const authButtons = document.getElementById('authButtons');
                 const userMenu = document.getElementById('userMenu');
                 const userEmail = document.getElementById('userEmail');
                 
@@ -695,7 +698,8 @@
             
             // Add click handlers
             if (analyzeBtn) {
-                analyzeBtn.addEventListener('click', function(e) {e.preventDefault();
+                analyzeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     
                     // Check if user is already authenticated
                     if (currentUser && currentUser.email) {// User is authenticated, redirect to analysis page or show analysis interface
@@ -705,7 +709,8 @@
                 });}
             
             if (headerLoginBtn) {
-                headerLoginBtn.addEventListener('click', function(e) {e.preventDefault();
+                headerLoginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     showAuthModal();
                     setTimeout(() => {
                         const loginTab = document.getElementById('loginTab');
@@ -714,7 +719,8 @@
                 });}
             
             if (headerRegisterBtn) {
-                headerRegisterBtn.addEventListener('click', function(e) {e.preventDefault();
+                headerRegisterBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     showAuthModal();
                     setTimeout(() => {
                         const registerTab = document.getElementById('registerTab');
@@ -1874,125 +1880,7 @@
         </div>
     </div>
 
-    <!-- CV Analysis Modal -->
-    <div id="analysisModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-        <div class="bg-slate-800 rounded-lg p-8 max-w-4xl w-full mx-4 border border-slate-700 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-white">CV Skills Analysis</h2>
-                <button id="closeAnalysisModal" class="text-gray-400 hover:text-white">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-
-            <!-- Upload Section -->
-            <div id="uploadSection" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- CV Upload -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-semibold text-white">Upload Your CV</h3>
-                        <div class="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center">
-                            <input type="file" id="cvFileInput" accept=".pdf,.doc,.docx,.txt" class="hidden">
-                            <div id="cvDropZone" class="cursor-pointer">
-                                <i class="fas fa-cloud-upload-alt text-4xl text-accent mb-4"></i>
-                                <p class="text-gray-300 mb-2">Drop your CV here or click to browse</p>
-                                <p class="text-sm text-gray-500">Supports PDF, DOC, DOCX, TXT (Max 5MB)</p>
-                            </div>
-                            <div id="cvFileInfo" class="hidden mt-4 p-3 bg-slate-700 rounded-md">
-                                <div class="flex items-center justify-between">
-                                    <span id="cvFileName" class="text-sm text-gray-300"></span>
-                                    <button id="removeCvFile" class="text-red-400 hover:text-red-300">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Or Text Input -->
-                        <div class="text-center text-gray-400">OR</div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Paste CV Text</label>
-                            <textarea id="cvTextInput" rows="8" placeholder="Paste your CV content here..."
-                                    class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-accent resize-none"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Job Description -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-semibold text-white">Job Description (Optional)</h3>
-                        <div class="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center">
-                            <input type="file" id="jobFileInput" accept=".pdf,.doc,.docx,.txt" class="hidden">
-                            <div id="jobDropZone" class="cursor-pointer">
-                                <i class="fas fa-briefcase text-4xl text-blue-400 mb-4"></i>
-                                <p class="text-gray-300 mb-2">Drop job description here or click to browse</p>
-                                <p class="text-sm text-gray-500">Supports PDF, DOC, DOCX, TXT (Max 2MB)</p>
-                            </div>
-                            <div id="jobFileInfo" class="hidden mt-4 p-3 bg-slate-700 rounded-md">
-                                <div class="flex items-center justify-between">
-                                    <span id="jobFileName" class="text-sm text-gray-300"></span>
-                                    <button id="removeJobFile" class="text-red-400 hover:text-red-300">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Or Text Input -->
-                        <div class="text-center text-gray-400">OR</div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Paste Job Description</label>
-                            <textarea id="jobTextInput" rows="8" placeholder="Paste the job description here..."
-                                    class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-accent resize-none"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Analysis Options -->
-                <div class="border-t border-slate-600 pt-6">
-                    <h3 class="text-lg font-semibold text-white mb-4">Analysis Options</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" id="skillsIntelligenceAnalysis" checked class="text-accent focus:ring-accent">
-                            <span class="text-gray-300">Skills Intelligence Analysis</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" id="careerSuggestions" checked class="text-accent focus:ring-accent">
-                            <span class="text-gray-300">Career Suggestions</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" id="industryTrends" checked class="text-accent focus:ring-accent">
-                            <span class="text-gray-300">Industry Trends</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex justify-end space-x-4 pt-6 border-t border-slate-600">
-                    <button id="cancelAnalysis" class="px-6 py-2 border border-slate-600 text-gray-300 rounded-md hover:bg-slate-700 transition duration-300">
-                        Cancel
-                    </button>
-                    <button id="startAnalysis" class="px-6 py-2 bg-accent hover:bg-teal-600 text-white rounded-md transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i class="fas fa-chart-line mr-2"></i>
-                        Start Analysis
-                    </button>
-                </div>
-            </div>
-
-            <!-- Loading Section -->
-            <div id="loadingSection" class="hidden text-center py-12">
-                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-accent mx-auto mb-4"></div>
-                <h3 class="text-xl font-semibold text-white mb-2">Analyzing Your CV...</h3>
-                <p class="text-gray-400 mb-4">This may take up to 30 seconds</p>
-                <div class="w-full bg-slate-700 rounded-full h-2 mb-4">
-                    <div id="progressBar" class="bg-accent h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-                </div>
-                <p id="loadingStatus" class="text-sm text-gray-500">Initializing analysis...</p>
-            </div>
-
-            <!-- Results Section -->
-            <div id="resultsSection" class="hidden space-y-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl font-semibold text-white">Analysis Results</h3>
-                    <div class="flex space-x-2">
+    <!-- CV Analysis Modal will be created dynamically by JavaScript -->
                         <button id="downloadResults" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition duration-300">
                             <i class="fas fa-download mr-2"></i>Download Report
                         </button>
@@ -2042,7 +1930,8 @@
         // }); // COMMENTED OUT - using simple version above
 
         // Authentication functions
-        function initializeAuth() {const analyzeBtn = document.getElementById('analyzeSkillsBtn');
+        function initializeAuth() {
+            const analyzeBtn = document.getElementById('analyzeSkillsBtn');
             const authModal = document.getElementById('authModal');
             const closeAuthModal = document.getElementById('closeAuthModal');
             const loginTab = document.getElementById('loginTab');
@@ -2055,15 +1944,18 @@
             const headerRegisterBtn = document.getElementById('headerRegisterBtn');
             const logoutBtn = document.getElementById('logoutBtn');// Add direct onclick handlers as backup
             if (analyzeBtn) {
-                analyzeBtn.onclick = function(e) {return false;
+                analyzeBtn.onclick = function(e) {
+                    return false;
                 };
             }
             if (headerLoginBtn) {
-                headerLoginBtn.onclick = function(e) {return false;
+                headerLoginBtn.onclick = function(e) {
+                    return false;
                 };
             }
             if (headerRegisterBtn) {
-                headerRegisterBtn.onclick = function(e) {return false;
+                headerRegisterBtn.onclick = function(e) {
+                    return false;
                 };
             }
             
@@ -2084,9 +1976,12 @@
             } else {}
 
             // Main analyze button
-            if (analyzeBtn) {analyzeBtn.addEventListener('click', function(e) {e.preventDefault();
+            if (analyzeBtn) {
+                analyzeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     e.stopPropagation();
-                    if (currentUser) {showAnalysisModal();
+                    if (currentUser) {
+                        showAnalysisModal();
                     } else {showAuthModal();
                     }
                 });// Test the button immediately} else {
@@ -2094,7 +1989,9 @@
             }
 
             // Header login/register buttons
-            if (headerLoginBtn) {headerLoginBtn.addEventListener('click', function(e) {e.preventDefault();
+            if (headerLoginBtn) {
+                headerLoginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     e.stopPropagation();
                     showAuthModal();
                     showLoginForm();
@@ -2102,7 +1999,9 @@
                 console.error('Header login button not found!');
             }
 
-            if (headerRegisterBtn) {headerRegisterBtn.addEventListener('click', function(e) {e.preventDefault();
+            if (headerRegisterBtn) {
+                headerRegisterBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     e.stopPropagation();
                     showAuthModal();
                     showRegisterForm();
@@ -2246,7 +2145,8 @@
             }
         }
 
-        async function validateToken() {try {
+        async function validateToken() {
+            try {
                 const response = await fetch('/api/v1/users/profile', {
                     credentials: 'include' // Include cookies in request
                 });if (response.ok) {
@@ -2270,7 +2170,8 @@
         }
 
         // UI update functions
-        function updateAuthUI() {const authButtons = document.getElementById('authButtons');
+        function updateAuthUI() {
+            const authButtons = document.getElementById('authButtons');
             const userMenu = document.getElementById('userMenu');
             const userEmail = document.getElementById('userEmail');
             const mobileAuthButtons = document.getElementById('mobileAuthButtons');
@@ -2510,43 +2411,7 @@
             analysisInProgress = false;
         }
 
-        async function performAnalysis() {
-            // Validate inputs
-            const cvText = document.getElementById('cvTextInput').value.trim();
-            const jobText = document.getElementById('jobTextInput').value.trim();
-            
-            if (!window.cvFile && !cvText) {
-                showAnalysisError('Please upload a CV file or enter CV text.');
-                return;
-            }
-
-            // Prepare form data
-            const formData = new FormData();
-            
-            if (window.cvFile) {
-                formData.append('resume', window.cvFile);
-            } else {
-                formData.append('resumeText', cvText);
-            }
-            
-            if (window.jobFile) {
-                formData.append('jobDescription', window.jobFile);
-            } else if (jobText) {
-                formData.append('jobDescriptionText', jobText);
-            }
-
-            // Add analysis options
-            formData.append('includeSkillsGap', document.getElementById('skillsIntelligenceAnalysis').checked);
-            formData.append('includeCareerSuggestions', document.getElementById('careerSuggestions').checked);
-            formData.append('includeIndustryTrends', document.getElementById('industryTrends').checked);
-
-            // Show loading
-            analysisInProgress = true;
-            document.getElementById('uploadSection').classList.add('hidden');
-            document.getElementById('loadingSection').classList.remove('hidden');
-            
-            // Simulate progress
-            simulateProgress();
+        // Removed duplicate performAnalysis function - using the one defined earlier
 
             try {const response = await fetch('/api/v1/analyze/resume', {
                     method: 'POST',
