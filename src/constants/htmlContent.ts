@@ -207,14 +207,19 @@
         let currentUser = null;
         
         // Initialize functionality after DOM is ready
-        setTimeout(function() {
-
+        function initializeApp() {
+            // Initialize global variables
+            window.cvFile = null;
+            window.jobFile = null;
+            window.analysisData = null;
             
             // Get all the buttons
             const analyzeBtn = document.getElementById('analyzeSkillsBtn');
             const headerLoginBtn = document.getElementById('headerLoginBtn');
             const headerRegisterBtn = document.getElementById('headerRegisterBtn');
-            const authModal = document.getElementById('authModal');// Helper functions
+            const authModal = document.getElementById('authModal');
+            
+            // Helper functions
             function showAuthModal() {
                 if (authModal) {
                     authModal.classList.remove('hidden');
@@ -724,9 +729,11 @@
                     e.preventDefault();
                     
                     // Check if user is already authenticated
-                    if (currentUser && currentUser.email) {// User is authenticated, redirect to analysis page or show analysis interface
-                        showAnalysisInterface();
-                    } else {showAuthModal();
+                    if (currentUser && currentUser.email) {
+                    // User is authenticated, redirect to analysis page or show analysis interface
+                    showAnalysisInterface();
+                } else {
+                    showAuthModal();
                     }
                 });}
             
@@ -2062,9 +2069,38 @@
             if (mobileUserMenu) {
                 mobileUserMenu.style.display = 'none';
                 mobileUserMenu.classList.add('hidden');
-            }// Test if basic elements existtry {initializeAuth();initializeFileHandlers();initializeAnalysis();} catch (error) {
+            }
+            
+            // Test if basic elements exist and initialize components
+            try {
+                // Check if required elements exist before initializing
+                const requiredElements = [
+                    'analyzeSkillsBtn', 'authModal', 'authButtons', 'userMenu'
+                ];
+                
+                const missingElements = requiredElements.filter(id => !document.getElementById(id));
+                if (missingElements.length > 0) {
+                    console.warn('Missing DOM elements:', missingElements);
+                }
+                
+                initializeAuth();
+                initializeFileHandlers();
+                initializeAnalysis();
+                
+                console.log('Application initialized successfully');
+            } catch (error) {
                 console.error('Initialization error:', error);
                 console.error('Error stack:', error.stack);
+                
+                // Try to show a user-friendly error message
+                const errorDiv = document.createElement('div');
+                errorDiv.innerHTML = `
+                    <div style="position: fixed; top: 20px; right: 20px; background: #ef4444; color: white; padding: 12px; border-radius: 8px; z-index: 9999;">
+                        <strong>Application Error:</strong> Failed to initialize. Please refresh the page.
+                        <button onclick="this.parentElement.remove()" style="margin-left: 10px; background: none; border: none; color: white; cursor: pointer;">×</button>
+                    </div>
+                `;
+                document.body.appendChild(errorDiv);
             }
         // }); // COMMENTED OUT - using simple version above
 
@@ -2110,9 +2146,19 @@
             
             // Check if there's an auth cookie before making the API call
             const hasAuthCookie = document.cookie.includes('auth_token=');if (hasAuthCookie) {
-                // Only check authentication if we have a cookievalidateToken().then(() => {updateAuthUI();
+                // Only check authentication if we have a cookie
+            try {
+                validateToken().then(() => {
+                    updateAuthUI();
+                }).catch((error) => {
+                    console.warn('Token validation failed:', error);
+                    updateAuthUI(); // Still update UI to show logged out state
                 });
-            } else {}
+            } catch (error) {
+                console.warn('Authentication check failed:', error);
+                // No cookie found, user not authenticated
+                updateAuthUI();
+            }
 
             // Main analyze button
             if (analyzeBtn) {
@@ -2121,7 +2167,8 @@
                     e.stopPropagation();
                     if (currentUser) {
                         showAnalysisModal();
-                    } else {showAuthModal();
+                    } else {
+                        showAuthModal();
                     }
                 });
             } else {
@@ -2293,10 +2340,13 @@
                     credentials: 'include' // Include cookies in request
                 });if (response.ok) {
                     const data = await response.json();
-                    currentUser = data.data.user;} else {
-                    // Token invalid or no auth cookie (expected on first visit)currentUser = null;
+                    currentUser = data.data.user;
+                } else {
+                    // Token invalid or no auth cookie (expected on first visit)
+                    currentUser = null;
                 }
-            } catch (error) {currentUser = null;
+            } catch (error) {
+                currentUser = null;
             }
         }
 
@@ -2931,6 +2981,15 @@
         // Make functions globally available
         window.startAnalysis = startAnalysis;
         window.performAnalysis = performAnalysis;
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            // DOM is already ready
+            setTimeout(initializeApp, 100);
+        }
     </script>
 </body>
 </html>

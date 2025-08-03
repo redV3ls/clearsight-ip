@@ -1,0 +1,1 @@
+{"totalRequests":1,"totalDuration":4,"statusCodes":{"200":1},"endpoints":{"/favicon.ico":{"count":1,"totalDuration":4,"errors":0,"slowRequests":[],"avgDuration":4}},"slowRequests":[],"responseTimes":[4]}
