@@ -2006,7 +2006,8 @@
                         showAnalysisModal();
                     } else {showAuthModal();
                     }
-                });// Test the button immediately} else {
+                });
+            } else {
                 console.error('Analyze button not found!');
             }
 
@@ -2017,7 +2018,8 @@
                     e.stopPropagation();
                     showAuthModal();
                     showLoginForm();
-                });} else {
+                });
+            } else {
                 console.error('Header login button not found!');
             }
 
@@ -2027,7 +2029,8 @@
                     e.stopPropagation();
                     showAuthModal();
                     showRegisterForm();
-                });} else {
+                });
+            } else {
                 console.error('Header register button not found!');
             }
 
@@ -2201,7 +2204,8 @@
             const mobileUserEmail = document.getElementById('mobileUserEmail');
 
             if (currentUser && currentUser.email) {
-                // User is logged inauthButtons?.classList.add('hidden');
+                // User is logged in
+                authButtons?.classList.add('hidden');
                 userMenu?.classList.remove('hidden');
                 userMenu?.style.display = 'flex'; // Force show
                 if (userEmail) userEmail.textContent = currentUser.email;
@@ -2210,14 +2214,16 @@
                 mobileUserMenu?.classList.remove('hidden');
                 if (mobileUserEmail) mobileUserEmail.textContent = currentUser.email;
             } else {
-                // User is not logged in - FORCE HIDE user menuauthButtons?.classList.remove('hidden');
+                // User is not logged in - FORCE HIDE user menu
+                authButtons?.classList.remove('hidden');
                 authButtons?.style.display = 'flex'; // Force show
                 
                 userMenu?.classList.add('hidden');
                 userMenu?.style.display = 'none'; // Force hide
                 
                 mobileAuthButtons?.classList.remove('hidden');
-                mobileUserMenu?.classList.add('hidden');}
+                mobileUserMenu?.classList.add('hidden');
+            }
         }
 
         async function handleLogout() {
@@ -2225,12 +2231,14 @@
                 await fetch('/api/v1/auth/logout', {
                     method: 'POST',
                     credentials: 'include'
-                });} catch (error) {
+                });
+            } catch (error) {
                 console.error('Logout request failed:', error);
             }
             
             currentUser = null;
-            updateAuthUI();}
+            updateAuthUI();
+        }
 
         function toggleMobileMenu() {
             const mobileMenu = document.getElementById('mobileMenu');
