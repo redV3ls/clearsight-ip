@@ -201,497 +201,146 @@
 </head>
 <body class=\"bg-slate-900 text-gray-200\">
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Global state
+            let currentUser = null;
 
-        
-        // Global variables
-        let currentUser = null;
-        
-        // Initialize functionality after DOM is ready
-        function initializeApp() {
-            // Initialize global variables
-            window.cvFile = null;
-            window.jobFile = null;
-            window.analysisData = null;
-            
-            // Get all the buttons
-            const analyzeBtn = document.getElementById('analyzeSkillsBtn');
-            const headerLoginBtn = document.getElementById('headerLoginBtn');
-            const headerRegisterBtn = document.getElementById('headerRegisterBtn');
-            const authModal = document.getElementById('authModal');
-            
-            // Helper functions
+            // Element cache
+            const elements = {
+                analyzeSkillsBtn: document.getElementById('analyzeSkillsBtn'),
+                headerLoginBtn: document.getElementById('headerLoginBtn'),
+                headerRegisterBtn: document.getElementById('headerRegisterBtn'),
+                authModal: document.getElementById('authModal'),
+                authError: document.getElementById('authError'),
+                analysisModal: document.getElementById('analysisModal'),
+                closeAnalysisModal: document.getElementById('closeAnalysisModal'),
+                cancelAnalysisBtn: document.getElementById('cancelAnalysisBtn'),
+                startAnalysisBtn: document.getElementById('startAnalysisBtn'),
+                dropZone: document.getElementById('dropZone'),
+                resumeFile: document.getElementById('resumeFile'),
+                analysisLoading: document.getElementById('analysisLoading'),
+                analysisResults: document.getElementById('analysisResults'),
+                resultsContent: document.getElementById('resultsContent'),
+                authButtons: document.getElementById('authButtons'),
+                userMenu: document.getElementById('userMenu'),
+                userEmail: document.getElementById('userEmail'),
+                mobileAuthButtons: document.getElementById('mobileAuthButtons'),
+                mobileUserMenu: document.getElementById('mobileUserMenu'),
+                mobileUserEmail: document.getElementById('mobileUserEmail'),
+                loginTab: document.getElementById('loginTab'),
+                registerTab: document.getElementById('registerTab'),
+                loginForm: document.getElementById('loginForm'),
+                registerForm: document.getElementById('registerForm'),
+                closeAuthModal: document.getElementById('closeAuthModal'),
+                logoutBtn: document.getElementById('logoutBtn'),
+                mobileLogoutBtn: document.getElementById('mobileLogoutBtn'),
+                mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+                mobileMenu: document.getElementById('mobileMenu'),
+                mobileLoginBtn: document.getElementById('mobileLoginBtn'),
+                mobileRegisterBtn: document.getElementById('mobileRegisterBtn'),
+            };
+
+            // --- Helper Functions ---
             function showAuthModal() {
-                if (authModal) {
-                    authModal.classList.remove('hidden');
+                if (elements.authModal) {
+                    elements.authModal.classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
                     clearAuthError();
+                }
+            }
 
-                }
-            }
-            
             function hideAuthModal() {
-                if (authModal) {
-                    authModal.classList.add('hidden');
+                if (elements.authModal) {
+                    elements.authModal.classList.add('hidden');
                     document.body.style.overflow = 'auto';
                     clearAuthError();
                 }
             }
-            
+
             function clearAuthError() {
-                const errorDiv = document.getElementById('authError');
-                if (errorDiv) {
-                    errorDiv.classList.add('hidden');
+                if (elements.authError) {
+                    elements.authError.classList.add('hidden');
+                    elements.authError.textContent = '';
                 }
             }
-            
+
             function showAuthError(message) {
-                const errorDiv = document.getElementById('authError');
-                if (errorDiv) {
-                    errorDiv.textContent = message;
-                    errorDiv.classList.remove('hidden');
+                if (elements.authError) {
+                    elements.authError.textContent = message;
+                    elements.authError.classList.remove('hidden');
                 }
             }
-            
-            function showAnalysisInterface() {// Create and show the analysis interface
-                const analysisModal = document.getElementById('analysisModal');
-                if (analysisModal) {
-                    analysisModal.classList.remove('hidden');
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    // Create analysis modal if it doesn't exist
-                    createAnalysisModal();
-                }
-            }
-            
-            function createAnalysisModal() {
-                const modalHTML = \`
-                    <div id="analysisModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div class="bg-slate-800 rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-                            <div class="flex justify-between items-center mb-6">
-                                <h2 class="text-2xl font-bold text-accent">AI-Powered Skills Analysis</h2>
-                                <button id="closeAnalysisModal" class="text-gray-400 hover:text-white">
-                                    <i class="fas fa-times text-xl"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="space-y-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">
-                                        Upload Your Resume/CV
-                                    </label>
-                                    <div class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center">
-                                        <input type="file" id="resumeFile" accept=".pdf,.doc,.docx,.txt" class="hidden">
-                                        <div id="dropZone" class="cursor-pointer">
-                                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
-                                            <p class="text-gray-300">Click to upload or drag and drop</p>
-                                            <p class="text-sm text-gray-500 mt-2">PDF, DOC, DOCX, or TXT files only</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">
-                                        Job Description (Optional)
-                                    </label>
-                                    <textarea id="jobDescription" rows="4" 
-                                        class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
-                                        placeholder="Paste the job description you're interested in..."></textarea>
-                                </div>
-                                
-                                <div class="bg-blue-50 bg-blue-900/20 border border-blue-500 rounded-lg p-4 mb-4">
-                                    <div class="flex items-start">
-                                        <i class="fas fa-info-circle text-blue-400 mt-1 mr-3"></i>
-                                        <div>
-                                            <h4 class="font-medium text-blue-300 mb-1">AI-Powered Analysis</h4>
-                                            <p class="text-sm text-blue-200">Industry and experience level will be automatically inferred from your resume and job description using advanced AI analysis.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="bg-slate-700 rounded-lg p-4">
-                                    <h3 class="font-semibold text-accent mb-3">Advanced AI Features</h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="includeIndustrySpecific" class="mr-2 text-accent">
-                                            <span class="text-sm">Industry-specific analysis</span>
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="includePersonalizedCoaching" class="mr-2 text-accent">
-                                            <span class="text-sm">Personalized coaching</span>
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="includeSkillTrends" class="mr-2 text-accent">
-                                            <span class="text-sm">Skill trend predictions</span>
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="includeInterviewPrep" class="mr-2 text-accent">
-                                            <span class="text-sm">Interview preparation</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex space-x-4">
-                                    <button id="startAnalysisBtn" class="flex-1 bg-accent hover:bg-teal-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300">
-                                        <i class="fas fa-brain mr-2"></i>Start AI Analysis
-                                    </button>
-                                    <button id="cancelAnalysisBtn" class="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-slate-700 transition duration-300">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div id="analysisResults" class="hidden mt-8">
-                                <h3 class="text-xl font-bold text-accent mb-4">Analysis Results</h3>
-                                <div id="resultsContent" class="space-y-4">
-                                    <!-- Results will be populated here -->
-                                </div>
-                            </div>
-                            
-                            <div id="analysisLoading" class="hidden text-center py-8">
-                                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
-                                <p class="mt-4 text-gray-300">Analyzing your skills with AI...</p>
-                            </div>
-                        </div>
-                    </div>
-                \`;
-                
-                document.body.insertAdjacentHTML('beforeend', modalHTML);
-                
-                // Add event listeners for the new modal
-                const closeBtn = document.getElementById('closeAnalysisModal');
-                const cancelBtn = document.getElementById('cancelAnalysisBtn');
-                const startBtn = document.getElementById('startAnalysisBtn');
-                const dropZone = document.getElementById('dropZone');
-                const fileInput = document.getElementById('resumeFile');
-                
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', hideAnalysisModal);
-                }
-                
-                if (cancelBtn) {
-                    cancelBtn.addEventListener('click', hideAnalysisModal);
-                }
-                
-                if (startBtn) {
-                    startBtn.addEventListener('click', performAnalysis);
-                }
-                
-                if (dropZone && fileInput) {
-                    dropZone.addEventListener('click', () => fileInput.click());
-                    fileInput.addEventListener('change', handleFileSelect);
-                }
-                
-                // Show the modal
-                const modal = document.getElementById('analysisModal');
-                if (modal) {
-                    modal.classList.remove('hidden');
+
+            function showAnalysisInterface() {
+                if (elements.analysisModal) {
+                    elements.analysisModal.classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
                 }
             }
-            
+
             function hideAnalysisModal() {
-                const modal = document.getElementById('analysisModal');
-                if (modal) {
-                    modal.classList.add('hidden');
+                if (elements.analysisModal) {
+                    elements.analysisModal.classList.add('hidden');
                     document.body.style.overflow = 'auto';
                 }
             }
-            
-            function handleFileSelect(event) {
-                const file = event.target.files[0];
-                const dropZone = document.getElementById('dropZone');
-                
-                if (file && dropZone) {
-                    dropZone.innerHTML = \`
-                        <i class="fas fa-file-alt text-4xl text-accent mb-4"></i>
-                        <p class="text-accent font-medium">\${file.name}</p>
-                        <p class="text-sm text-gray-500 mt-2">File selected successfully</p>
-                    \`;
+
+            function updateAuthUI() {
+                const isUserLoggedIn = currentUser && currentUser.email;
+
+                // Desktop
+                elements.authButtons.classList.toggle('hidden', isUserLoggedIn);
+                elements.userMenu.classList.toggle('hidden', !isUserLoggedIn);
+                if (isUserLoggedIn) {
+                    elements.userEmail.textContent = currentUser.email;
+                }
+
+                // Mobile
+                elements.mobileAuthButtons.classList.toggle('hidden', isUserLoggedIn);
+                elements.mobileUserMenu.classList.toggle('hidden', !isUserLoggedIn);
+                if (isUserLoggedIn) {
+                    elements.mobileUserEmail.textContent = currentUser.email;
                 }
             }
-            
-            async function performAnalysis() {
-                const loadingDiv = document.getElementById('analysisLoading');
-                const resultsDiv = document.getElementById('analysisResults');
-                const startBtn = document.getElementById('startAnalysisBtn');
-                
-                if (loadingDiv) loadingDiv.classList.remove('hidden');
-                if (startBtn) startBtn.disabled = true;
-                
-                try {
-                    const formData = new FormData();
-                    const fileInput = document.getElementById('resumeFile');
-                    const jobDescription = document.getElementById('jobDescription').value;
-                    if (fileInput.files[0]) {
-                        formData.append('resume', fileInput.files[0]);
-                    } else {
-                        throw new Error('Please select a resume file');
-                    }
-                    
-                    if (jobDescription) {
-                        formData.append('jobDescriptionText', jobDescription);
-                    }
-                    
-                    // Test authentication first
-                    console.log('Testing authentication before analysis...');
-                    const authTestResponse = await fetch('/api/v1/analyze/test-auth', {
-                        method: 'GET',
-                        credentials: 'include'
-                    });
-                    
-                    if (!authTestResponse.ok) {
-                        console.error('Authentication test failed:', authTestResponse.status, authTestResponse.statusText);
-                        const authError = await authTestResponse.text();
-                        console.error('Auth error details:', authError);
-                        throw new Error(\`Authentication failed: \${authTestResponse.status} \${authTestResponse.statusText}\`);
-                    }
-                    
-                    const authTestData = await authTestResponse.json();
-                    console.log('Authentication test successful:', authTestData);
-                    
-                    // Add advanced feature flags
-                    formData.append('includeIndustrySpecific', document.getElementById('includeIndustrySpecific').checked);
-                    formData.append('includePersonalizedCoaching', document.getElementById('includePersonalizedCoaching').checked);
-                    formData.append('includeSkillTrendPredictions', document.getElementById('includeSkillTrends').checked);
-                    formData.append('includeInterviewPreparation', document.getElementById('includeInterviewPrep').checked);
-                    
-                    console.log('Starting analysis with authenticated user:', authTestData.user?.email);
-                    const response = await fetch('/api/v1/analyze/advanced', {
-                        method: 'POST',
-                        credentials: 'include',
-                        body: formData
-                    });
-                    
-                    if (!response.ok) {
-                        let errorMessage = \`Analysis failed: \${response.status} \${response.statusText}\`;
-                        try {
-                            const errorData = await response.json();
-                            if (errorData.error && errorData.error.message) {
-                                errorMessage = errorData.error.message;
-                            }
-                        } catch (e) {
-                            // If we can't parse the error response, use the default message
-                        }
-                        throw new Error(errorMessage);
-                    }
-                    
-                    const results = await response.json();
-                    displayAnalysisResults(results);
-                    
-                } catch (error) {
-                    console.error('Analysis error:', error);
-                    
-                    // Check if it's an authentication error
-                    if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-                        // Try to re-authenticate
-                        const authCheck = await checkAuthStatus();
-                        if (!authCheck) {
-                            showAuthError('Authentication expired. Please log in again.');
-                            hideAnalysisModal();
-                            showAuthModal();
-                            return;
-                        }
-                    }
-                    
-                    showAuthError(\`Analysis failed: \${error.message}\`);
-                } finally {
-                    if (loadingDiv) loadingDiv.classList.add('hidden');
-                    if (startBtn) startBtn.disabled = false;
-                }
-            }
-            
-            function displayAnalysisResults(results) {
-                const resultsDiv = document.getElementById('analysisResults');
-                const resultsContent = document.getElementById('resultsContent');
-                
-                if (!resultsDiv || !resultsContent) return;
-                
-                let html = \`
-                    <div class="bg-slate-700 rounded-lg p-6 mb-6">
-                        <h4 class="text-lg font-semibold text-accent mb-4">Skills Analysis Summary</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-accent">\${results.skillsAnalysis?.totalSkills || 0}</div>
-                                <div class="text-sm text-gray-400">Skills Identified</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-accent">\${results.skillsAnalysis?.categories?.length || 0}</div>
-                                <div class="text-sm text-gray-400">Skill Categories</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-accent">\${results.skillsGap?.overallMatch || 0}%</div>
-                                <div class="text-sm text-gray-400">Job Match Score</div>
-                            </div>
-                        </div>
-                    </div>
-                \`;
-                
-                if (results.skillsAnalysis?.skills) {
-                    html += \`
-                        <div class="bg-slate-700 rounded-lg p-6 mb-6">
-                            <h4 class="text-lg font-semibold text-accent mb-4">Top Skills</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    \`;
-                    
-                    results.skillsAnalysis.skills.slice(0, 8).forEach(skill => {
-                        html += \`
-                            <div class="flex justify-between items-center p-3 bg-slate-600 rounded">
-                                <span class="font-medium">\${skill.name}</span>
-                                <span class="text-sm text-accent">\${skill.level}</span>
-                            </div>
-                        \`;
-                    });
-                    
-                    html += \`
-                            </div>
-                        </div>
-                    \`;
-                }
-                
-                if (results.skillsGap?.missingSkills?.length > 0) {
-                    html += \`
-                        <div class="bg-slate-700 rounded-lg p-6 mb-6">
-                            <h4 class="text-lg font-semibold text-red-400 mb-4">Skills to Develop</h4>
-                            <div class="space-y-3">
-                    \`;
-                    
-                    results.skillsGap.missingSkills.slice(0, 5).forEach(skill => {
-                        html += \`
-                            <div class="flex justify-between items-center p-3 bg-red-900/20 rounded border-l-4 border-red-500">
-                                <div>
-                                    <div class="font-medium">\${skill.name}</div>
-                                    <div class="text-sm text-gray-400">\${skill.description}</div>
-                                </div>
-                                <span class="text-sm text-red-400 font-medium">\${skill.priority}/10</span>
-                            </div>
-                        \`;
-                    });
-                    
-                    html += \`
-                            </div>
-                        </div>
-                    \`;
-                }
-                
-                html += \`
-                    <div class="text-center">
-                        <button onclick="window.open('/api/v1/docs', '_blank')" class="bg-accent hover:bg-teal-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-300">
-                            <i class="fas fa-download mr-2"></i>Download Full Report
-                        </button>
-                    </div>
-                \`;
-                
-                resultsContent.innerHTML = html;
-                resultsDiv.classList.remove('hidden');
-            }
-            
-            // Check authentication status on page load
+
             async function checkAuthStatus() {
                 try {
                     const response = await fetch('/api/v1/auth/me', {
                         method: 'GET',
                         credentials: 'include'
                     });
-                    
                     if (response.ok) {
                         const data = await response.json();
                         currentUser = data.data.user;
-                        updateAuthUI();
-                        return true;
                     } else {
                         currentUser = null;
-                        updateAuthUI();
-                        return false;
                     }
                 } catch (error) {
                     console.error('Auth check failed:', error);
                     currentUser = null;
-                    updateAuthUI();
-                    return false;
                 }
+                updateAuthUI();
             }
-            
-            function updateAuthUI() {
-                const authButtons = document.getElementById('authButtons');
-                const userMenu = document.getElementById('userMenu');
-                const userEmail = document.getElementById('userEmail');
-                
-                // Mobile elements
-                const mobileAuthButtons = document.getElementById('mobileAuthButtons');
-                const mobileUserMenu = document.getElementById('mobileUserMenu');
-                const mobileUserEmail = document.getElementById('mobileUserEmail');
-                
-                if (currentUser && currentUser.email) {
-                    // Desktop UI
-                    if (authButtons) {
-                        authButtons.classList.add('hidden');
-                        authButtons.style.display = 'none';
-                    }
-                    if (userMenu) {
-                        userMenu.classList.remove('hidden');
-                        userMenu.style.display = 'flex';
-                    }
-                    if (userEmail) {
-                        userEmail.textContent = currentUser.email;}
-                    
-                    // Mobile UI
-                    if (mobileAuthButtons) {
-                        mobileAuthButtons.classList.add('hidden');
-                    }
-                    if (mobileUserMenu) {
-                        mobileUserMenu.classList.remove('hidden');
-                    }
-                    if (mobileUserEmail) {
-                        mobileUserEmail.textContent = currentUser.email;
-                    }
-                } else {
-                    // Desktop UI
-                    if (authButtons) {
-                        authButtons.classList.remove('hidden');
-                        authButtons.style.display = 'flex';
-                    }
-                    if (userMenu) {
-                        userMenu.classList.add('hidden');
-                        userMenu.style.display = 'none';
-                    }
-                    
-                    // Mobile UI
-                    if (mobileAuthButtons) {
-                        mobileAuthButtons.classList.remove('hidden');
-                    }
-                    if (mobileUserMenu) {
-                        mobileUserMenu.classList.add('hidden');
-                    }
-                }
-            }
-            
-            // Authentication functions
+
+            // --- Event Handlers ---
             async function handleLogin(e) {
                 e.preventDefault();
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                
+                const email = elements.loginForm.loginEmail.value;
+                const password = elements.loginForm.loginPassword.value;
+
                 try {
                     const response = await fetch('/api/v1/auth/login', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
-                        body: JSON.stringify({ email, password })
+                        body: JSON.stringify({ email, password }),
                     });
-
-                    const data = await response.json();if (response.ok) {
-                        currentUser = data.data.user;updateAuthUI();
+                    const data = await response.json();
+                    if (response.ok) {
+                        currentUser = data.data.user;
+                        updateAuthUI();
                         hideAuthModal();
-                        
-                        // Force UI update after a short delay to ensure DOM is ready
-                        setTimeout(() => {updateAuthUI();
-                        }, 200);
-                        
-
                     } else {
-                        console.error('Login failed:', data);
                         showAuthError(data.error?.message || 'Login failed');
                     }
                 } catch (error) {
@@ -702,9 +351,9 @@
 
             async function handleRegister(e) {
                 e.preventDefault();
-                const name = document.getElementById('registerName').value;
-                const email = document.getElementById('registerEmail').value;
-                const password = document.getElementById('registerPassword').value;
+                const name = elements.registerForm.registerName.value;
+                const email = elements.registerForm.registerEmail.value;
+                const password = elements.registerForm.registerPassword.value;
 
                 if (password.length < 8) {
                     showAuthError('Password must be at least 8 characters long');
@@ -714,19 +363,15 @@
                 try {
                     const response = await fetch('/api/v1/auth/register', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
-                        body: JSON.stringify({ name, email, password })
+                        body: JSON.stringify({ name, email, password }),
                     });
-
                     const data = await response.json();
-
                     if (response.ok) {
-                        currentUser = data.data.user;updateAuthUI();
+                        currentUser = data.data.user;
+                        updateAuthUI();
                         hideAuthModal();
-
                     } else {
                         showAuthError(data.error?.message || 'Registration failed');
                     }
@@ -735,114 +380,16 @@
                     showAuthError('Network error. Please try again.');
                 }
             }
-            
-            // Add click handlers
-            if (analyzeBtn) {
-                analyzeBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Check if user is already authenticated
-                    if (currentUser && currentUser.email) {
-                    // User is authenticated, redirect to analysis page or show analysis interface
-                    showAnalysisInterface();
-                } else {
-                    showAuthModal();
-                    }
-                });}
-            
-            if (headerLoginBtn) {
-                headerLoginBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    showAuthModal();
-                    setTimeout(() => {
-                        const loginTab = document.getElementById('loginTab');
-                        if (loginTab) loginTab.click();
-                    }, 100);
-                });}
-            
-            if (headerRegisterBtn) {
-                headerRegisterBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    showAuthModal();
-                    setTimeout(() => {
-                        const registerTab = document.getElementById('registerTab');
-                        if (registerTab) registerTab.click();
-                    }, 100);
-                });}
-            
-            // Tab switching functionality
-            const loginTab = document.getElementById('loginTab');
-            const registerTab = document.getElementById('registerTab');
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            
-            function showLoginForm() {
-                if (loginTab && registerTab && loginForm && registerForm) {
-                    loginTab.classList.add('text-accent', 'border-b-2', 'border-accent');
-                    loginTab.classList.remove('text-gray-400');
-                    registerTab.classList.add('text-gray-400');
-                    registerTab.classList.remove('text-accent', 'border-b-2', 'border-accent');
-                    loginForm.classList.remove('hidden');
-                    registerForm.classList.add('hidden');
-                }
-            }
-            
-            function showRegisterForm() {
-                if (loginTab && registerTab && loginForm && registerForm) {
-                    registerTab.classList.add('text-accent', 'border-b-2', 'border-accent');
-                    registerTab.classList.remove('text-gray-400');
-                    loginTab.classList.add('text-gray-400');
-                    loginTab.classList.remove('text-accent', 'border-b-2', 'border-accent');
-                    registerForm.classList.remove('hidden');
-                    loginForm.classList.add('hidden');
-                }
-            }
-            
-            if (loginTab) {
-                loginTab.addEventListener('click', showLoginForm);
-            }
-            
-            if (registerTab) {
-                registerTab.addEventListener('click', showRegisterForm);
-            }
-            
-            // Modal close functionality
-            const closeAuthModal = document.getElementById('closeAuthModal');
-            if (closeAuthModal) {
-                closeAuthModal.addEventListener('click', hideAuthModal);
-            }
-            
-            // Close modal on outside click
-            if (authModal) {
-                authModal.addEventListener('click', function(e) {
-                    if (e.target === authModal) {
-                        hideAuthModal();
-                    }
-                });
-            }
-            
-            // Form submission handlers
-            if (loginForm) {
-                loginForm.addEventListener('submit', handleLogin);}
-            
-            if (registerForm) {
-                registerForm.addEventListener('submit', handleRegister);}
-            
-            // Logout functionality
-            const logoutBtn = document.getElementById('logoutBtn');
-            const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
-            
+
             async function handleLogout() {
                 try {
                     const response = await fetch('/api/v1/auth/logout', {
                         method: 'POST',
                         credentials: 'include'
                     });
-                    
                     if (response.ok) {
                         currentUser = null;
                         updateAuthUI();
-
                     } else {
                         console.error('Logout failed');
                     }
@@ -850,51 +397,74 @@
                     console.error('Logout error:', error);
                 }
             }
-            
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', handleLogout);
+
+            function showTab(tabToShow) {
+                const isLogin = tabToShow === 'login';
+                elements.loginTab.classList.toggle('text-accent', isLogin);
+                elements.loginTab.classList.toggle('border-accent', isLogin);
+                elements.loginTab.classList.toggle('text-gray-400', !isLogin);
+                elements.registerTab.classList.toggle('text-accent', !isLogin);
+                elements.registerTab.classList.toggle('border-accent', !isLogin);
+                elements.registerTab.classList.toggle('text-gray-400', isLogin);
+                elements.loginForm.classList.toggle('hidden', !isLogin);
+                elements.registerForm.classList.toggle('hidden', isLogin);
             }
-            
-            if (mobileLogoutBtn) {
-                mobileLogoutBtn.addEventListener('click', handleLogout);
-            }
-            
-            // Mobile menu functionality
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const mobileMenu = document.getElementById('mobileMenu');
-            const mobileLoginBtn = document.getElementById('mobileLoginBtn');
-            const mobileRegisterBtn = document.getElementById('mobileRegisterBtn');
-            
-            if (mobileMenuBtn && mobileMenu) {
-                mobileMenuBtn.addEventListener('click', function() {
-                    mobileMenu.classList.toggle('hidden');
-                });
-            }
-            
-            if (mobileLoginBtn) {
-                mobileLoginBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
+
+            // --- Event Listeners ---
+            elements.analyzeSkillsBtn?.addEventListener('click', () => {
+                if (currentUser) {
+                    showAnalysisInterface();
+                } else {
                     showAuthModal();
-                    setTimeout(() => {
-                        const loginTab = document.getElementById('loginTab');
-                        if (loginTab) loginTab.click();
-                    }, 100);
-                });
-            }
+                }
+            });
+
+            elements.headerLoginBtn?.addEventListener('click', () => {
+                showAuthModal();
+                showTab('login');
+            });
             
-            if (mobileRegisterBtn) {
-                mobileRegisterBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    showAuthModal();
-                    setTimeout(() => {
-                        const registerTab = document.getElementById('registerTab');
-                        if (registerTab) registerTab.click();
-                    }, 100);
-                });
-            }
+            elements.mobileLoginBtn?.addEventListener('click', () => {
+                showAuthModal();
+                showTab('login');
+            });
+
+            elements.headerRegisterBtn?.addEventListener('click', () => {
+                showAuthModal();
+                showTab('register');
+            });
             
-            // Check authentication status on page load
-            checkAuthStatus();}, 500);
+            elements.mobileRegisterBtn?.addEventListener('click', () => {
+                showAuthModal();
+                showTab('register');
+            });
+
+            elements.loginTab?.addEventListener('click', () => showTab('login'));
+            elements.registerTab?.addEventListener('click', () => showTab('register'));
+
+            elements.closeAuthModal?.addEventListener('click', hideAuthModal);
+            elements.authModal?.addEventListener('click', (e) => {
+                if (e.target === elements.authModal) {
+                    hideAuthModal();
+                }
+            });
+
+            elements.loginForm?.addEventListener('submit', handleLogin);
+            elements.registerForm?.addEventListener('submit', handleRegister);
+
+            elements.logoutBtn?.addEventListener('click', handleLogout);
+            elements.mobileLogoutBtn?.addEventListener('click', handleLogout);
+
+            elements.mobileMenuBtn?.addEventListener('click', () => {
+                elements.mobileMenu.classList.toggle('hidden');
+            });
+            
+            elements.closeAnalysisModal?.addEventListener('click', hideAnalysisModal);
+            elements.cancelAnalysisBtn?.addEventListener('click', hideAnalysisModal);
+
+            // --- Initial Load ---
+            checkAuthStatus();
+        });
     </script>
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-slate-800 bg-slate-900 shadow-md py-4 px-6">

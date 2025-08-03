@@ -131,7 +131,7 @@ export class DeepSeekAIService {
    */
   async extractSkillsFromCV(cvText: string): Promise<AISkillsAnalysis> {
     const prompt = this.createSkillsExtractionPrompt(cvText);
-    
+
     try {
       const response = await this.callDeepSeekAPI(prompt, 'skills-extraction');
       return this.parseSkillsAnalysisResponse(response);
@@ -146,7 +146,7 @@ export class DeepSeekAIService {
    */
   async analyzeJobDescription(jobText: string): Promise<AIJobAnalysis> {
     const prompt = this.createJobAnalysisPrompt(jobText);
-    
+
     try {
       const response = await this.callDeepSeekAPI(prompt, 'job-analysis');
       return this.parseJobAnalysisResponse(response);
@@ -160,11 +160,11 @@ export class DeepSeekAIService {
    * Perform intelligent gap analysis using DeepSeek AI
    */
   async performGapAnalysis(
-    skillsAnalysis: AISkillsAnalysis, 
+    skillsAnalysis: AISkillsAnalysis,
     jobAnalysis: AIJobAnalysis
   ): Promise<AIGapAnalysis> {
     const prompt = this.createGapAnalysisPrompt(skillsAnalysis, jobAnalysis);
-    
+
     try {
       const response = await this.callDeepSeekAPI(prompt, 'gap-analysis');
       return this.parseGapAnalysisResponse(response);
@@ -182,7 +182,7 @@ export class DeepSeekAIService {
     await this.checkRateLimit(operation);
 
     let lastError: Error | null = null;
-    
+
     for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
       try {
         const response = await fetch(`${this.config.baseUrl}/chat/completions`, {
@@ -216,13 +216,13 @@ export class DeepSeekAIService {
         }
 
         const data = await response.json();
-        
+
         if (!data.choices || !data.choices[0] || !data.choices[0].message) {
           throw new Error('Invalid response format from DeepSeek API');
         }
 
         const content = data.choices[0].message.content;
-        
+
         // Validate JSON response
         try {
           JSON.parse(content);
@@ -232,7 +232,7 @@ export class DeepSeekAIService {
 
         // Update rate limit tracking
         this.updateRateLimit(operation);
-        
+
         logger.info(`DeepSeek AI ${operation} completed successfully`, {
           attempt,
           tokensUsed: data.usage?.total_tokens || 0
@@ -500,7 +500,7 @@ Focus on:
   private parseSkillsAnalysisResponse(response: string): AISkillsAnalysis {
     try {
       const parsed = JSON.parse(response);
-      
+
       // Validate required fields
       if (!parsed.skills || !Array.isArray(parsed.skills)) {
         throw new Error('Invalid skills array in response');
@@ -519,7 +519,7 @@ Focus on:
   private parseJobAnalysisResponse(response: string): AIJobAnalysis {
     try {
       const parsed = JSON.parse(response);
-      
+
       // Validate required fields
       if (!parsed.skillRequirements || !Array.isArray(parsed.skillRequirements)) {
         throw new Error('Invalid skillRequirements array in response');
@@ -538,7 +538,7 @@ Focus on:
   private parseGapAnalysisResponse(response: string): AIGapAnalysis {
     try {
       const parsed = JSON.parse(response);
-      
+
       // Validate required fields
       if (typeof parsed.overallMatch !== 'number' || !parsed.skillGaps || !Array.isArray(parsed.skillGaps)) {
         throw new Error('Invalid gap analysis structure in response');
@@ -588,16 +588,16 @@ Focus on:
       const testPrompt = 'Respond with valid JSON: {"status": "ok", "message": "AI service is working"}';
       const response = await this.callDeepSeekAPI(testPrompt, 'health-check');
       const parsed = JSON.parse(response);
-      
+
       if (parsed.status === 'ok') {
         return { status: 'healthy', details: 'AI service is responding correctly' };
       } else {
         return { status: 'unhealthy', details: 'AI service returned unexpected response' };
       }
     } catch (error) {
-      return { 
-        status: 'unhealthy', 
-        details: `AI service error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      return {
+        status: 'unhealthy',
+        details: `AI service error: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
