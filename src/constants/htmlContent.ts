@@ -204,6 +204,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Global state
             let currentUser = null;
+            window.cvFile = null;
+            window.jobFile = null;
 
             // Element cache
             const elements = {
@@ -216,8 +218,6 @@
                 closeAnalysisModal: document.getElementById('closeAnalysisModal'),
                 cancelAnalysisBtn: document.getElementById('cancelAnalysisBtn'),
                 startAnalysisBtn: document.getElementById('startAnalysisBtn'),
-                dropZone: document.getElementById('dropZone'),
-                resumeFile: document.getElementById('resumeFile'),
                 analysisLoading: document.getElementById('analysisLoading'),
                 analysisResults: document.getElementById('analysisResults'),
                 resultsContent: document.getElementById('resultsContent'),
@@ -238,7 +238,23 @@
                 mobileMenu: document.getElementById('mobileMenu'),
                 mobileLoginBtn: document.getElementById('mobileLoginBtn'),
                 mobileRegisterBtn: document.getElementById('mobileRegisterBtn'),
+                cvDropZone: document.getElementById('cvDropZone'),
+                jobDropZone: document.getElementById('jobDropZone'),
+                cvFileInput: document.getElementById('cvFileInput'),
+                jobFileInput: document.getElementById('jobFileInput'),
+                cvFileInfo: document.getElementById('cvFileInfo'),
+                jobFileInfo: document.getElementById('jobFileInfo'),
+                cvFileName: document.getElementById('cvFileName'),
+                jobFileName: document.getElementById('jobFileName'),
+                removeCvFile: document.getElementById('removeCvFile'),
+                removeJobFile: document.getElementById('removeJobFile'),
+                analysisError: document.getElementById('analysisError'),
             };
+
+            // --- Constants ---
+            const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+            const MAX_JOB_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+            const ALLOWED_FILE_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
 
             // --- Helper Functions ---
             function showAuthModal() {
@@ -285,30 +301,27 @@
                 }
             }
 
+            function showAnalysisError(message) {
+                if (elements.analysisError) {
+                    elements.analysisError.textContent = message;
+                    elements.analysisError.classList.remove('hidden');
+                }
+            }
+
             function updateAuthUI() {
                 const isUserLoggedIn = currentUser && currentUser.email;
-
-                // Desktop
                 elements.authButtons.classList.toggle('hidden', isUserLoggedIn);
                 elements.userMenu.classList.toggle('hidden', !isUserLoggedIn);
-                if (isUserLoggedIn) {
-                    elements.userEmail.textContent = currentUser.email;
-                }
+                if (isUserLoggedIn) elements.userEmail.textContent = currentUser.email;
 
-                // Mobile
                 elements.mobileAuthButtons.classList.toggle('hidden', isUserLoggedIn);
                 elements.mobileUserMenu.classList.toggle('hidden', !isUserLoggedIn);
-                if (isUserLoggedIn) {
-                    elements.mobileUserEmail.textContent = currentUser.email;
-                }
+                if (isUserLoggedIn) elements.mobileUserEmail.textContent = currentUser.email;
             }
 
             async function checkAuthStatus() {
                 try {
-                    const response = await fetch('/api/v1/auth/me', {
-                        method: 'GET',
-                        credentials: 'include'
-                    });
+                    const response = await fetch('/api/v1/auth/me', { method: 'GET', credentials: 'include' });
                     if (response.ok) {
                         const data = await response.json();
                         currentUser = data.data.user;
@@ -322,12 +335,52 @@
                 updateAuthUI();
             }
 
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function handleFileSelect(file, type) {
+                if (!file) return;
+                const MAX_SIZE = type === 'cv' ? MAX_FILE_SIZE : MAX_JOB_FILE_SIZE;
+                if (file.size > MAX_SIZE) {
+                    showAnalysisError(`File is too large. Max size is ${MAX_SIZE / 1024 / 1024}MB.`);
+                    return;
+                }
+                if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+                    showAnalysisError('Invalid file type. Please use PDF, DOC, DOCX, or TXT.');
+                    return;
+                }
+                window[type + 'File'] = file;
+                updateFileInfo(type);
+            }
+
+            function updateFileInfo(type) {
+                const fileInfo = elements[type + 'FileInfo'];
+                const fileName = elements[type + 'FileName'];
+                const dropZone = elements[type + 'DropZone'];
+                const file = window[type + 'File'];
+                if (file) {
+                    fileName.textContent = file.name;
+                    fileInfo.classList.remove('hidden');
+                    dropZone.classList.add('hidden');
+                } else {
+                    fileInfo.classList.add('hidden');
+                    dropZone.classList.remove('hidden');
+                }
+            }
+
+            function clearFile(type) {
+                window[type + 'File'] = null;
+                elements[type + 'FileInput'].value = '';
+                updateFileInfo(type);
+            }
+
             // --- Event Handlers ---
             async function handleLogin(e) {
                 e.preventDefault();
                 const email = elements.loginForm.loginEmail.value;
                 const password = elements.loginForm.loginPassword.value;
-
                 try {
                     const response = await fetch('/api/v1/auth/login', {
                         method: 'POST',
@@ -354,12 +407,10 @@
                 const name = elements.registerForm.registerName.value;
                 const email = elements.registerForm.registerEmail.value;
                 const password = elements.registerForm.registerPassword.value;
-
                 if (password.length < 8) {
                     showAuthError('Password must be at least 8 characters long');
                     return;
                 }
-
                 try {
                     const response = await fetch('/api/v1/auth/register', {
                         method: 'POST',
@@ -383,10 +434,7 @@
 
             async function handleLogout() {
                 try {
-                    const response = await fetch('/api/v1/auth/logout', {
-                        method: 'POST',
-                        credentials: 'include'
-                    });
+                    const response = await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
                     if (response.ok) {
                         currentUser = null;
                         updateAuthUI();
@@ -411,60 +459,50 @@
             }
 
             // --- Event Listeners ---
-            elements.analyzeSkillsBtn?.addEventListener('click', () => {
-                if (currentUser) {
-                    showAnalysisInterface();
-                } else {
-                    showAuthModal();
-                }
-            });
-
-            elements.headerLoginBtn?.addEventListener('click', () => {
-                showAuthModal();
-                showTab('login');
-            });
-            
-            elements.mobileLoginBtn?.addEventListener('click', () => {
-                showAuthModal();
-                showTab('login');
-            });
-
-            elements.headerRegisterBtn?.addEventListener('click', () => {
-                showAuthModal();
-                showTab('register');
-            });
-            
-            elements.mobileRegisterBtn?.addEventListener('click', () => {
-                showAuthModal();
-                showTab('register');
-            });
-
+            elements.analyzeSkillsBtn?.addEventListener('click', () => { currentUser ? showAnalysisInterface() : showAuthModal(); });
+            elements.headerLoginBtn?.addEventListener('click', () => { showAuthModal(); showTab('login'); });
+            elements.mobileLoginBtn?.addEventListener('click', () => { showAuthModal(); showTab('login'); });
+            elements.headerRegisterBtn?.addEventListener('click', () => { showAuthModal(); showTab('register'); });
+            elements.mobileRegisterBtn?.addEventListener('click', () => { showAuthModal(); showTab('register'); });
             elements.loginTab?.addEventListener('click', () => showTab('login'));
             elements.registerTab?.addEventListener('click', () => showTab('register'));
-
             elements.closeAuthModal?.addEventListener('click', hideAuthModal);
-            elements.authModal?.addEventListener('click', (e) => {
-                if (e.target === elements.authModal) {
-                    hideAuthModal();
-                }
-            });
-
+            elements.authModal?.addEventListener('click', (e) => { if (e.target === elements.authModal) hideAuthModal(); });
             elements.loginForm?.addEventListener('submit', handleLogin);
             elements.registerForm?.addEventListener('submit', handleRegister);
-
             elements.logoutBtn?.addEventListener('click', handleLogout);
             elements.mobileLogoutBtn?.addEventListener('click', handleLogout);
-
-            elements.mobileMenuBtn?.addEventListener('click', () => {
-                elements.mobileMenu.classList.toggle('hidden');
-            });
-            
+            elements.mobileMenuBtn?.addEventListener('click', () => { elements.mobileMenu.classList.toggle('hidden'); });
             elements.closeAnalysisModal?.addEventListener('click', hideAnalysisModal);
             elements.cancelAnalysisBtn?.addEventListener('click', hideAnalysisModal);
 
+            // File handling listeners
+            elements.cvDropZone?.addEventListener('click', () => elements.cvFileInput.click());
+            elements.cvFileInput?.addEventListener('change', (e) => handleFileSelect(e.target.files[0], 'cv'));
+            elements.removeCvFile?.addEventListener('click', () => clearFile('cv'));
+            elements.jobDropZone?.addEventListener('click', () => elements.jobFileInput.click());
+            elements.jobFileInput?.addEventListener('change', (e) => handleFileSelect(e.target.files[0], 'job'));
+            elements.removeJobFile?.addEventListener('click', () => clearFile('job'));
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                elements.cvDropZone?.addEventListener(eventName, preventDefaults, false);
+                elements.jobDropZone?.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+            ['dragenter', 'dragover'].forEach(eventName => {
+                elements.cvDropZone?.addEventListener(eventName, () => elements.cvDropZone.classList.add('hover:border-accent'), false);
+                elements.jobDropZone?.addEventListener(eventName, () => elements.jobDropZone.classList.add('hover:border-blue-400'), false);
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                elements.cvDropZone?.addEventListener(eventName, () => elements.cvDropZone.classList.remove('hover:border-accent'), false);
+                elements.jobDropZone?.addEventListener(eventName, () => elements.jobDropZone.classList.remove('hover:border-blue-400'), false);
+            });
+            elements.cvDropZone?.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0], 'cv'), false);
+            elements.jobDropZone?.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0], 'job'), false);
+
             // --- Initial Load ---
             checkAuthStatus();
-        });
+        });;
     </script>
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-slate-800 bg-slate-900 shadow-md py-4 px-6">
