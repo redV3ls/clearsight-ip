@@ -141,15 +141,24 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
     const cookieHeader = c.req.header('Cookie');
     let authToken = null;
     if (cookieHeader) {
+      console.log('Cookie header found:', cookieHeader);
       const cookies = cookieHeader.split(';').map(c => c.trim());
+      console.log('Parsed cookies:', cookies);
       const authCookie = cookies.find(cookie => cookie.startsWith('auth_token='));
+      console.log('Auth cookie found:', authCookie);
       if (authCookie) {
         authToken = authCookie.split('=')[1];
+        console.log('Auth token extracted:', authToken ? 'TOKEN_PRESENT' : 'TOKEN_EMPTY');
       }
+    } else {
+      console.log('No cookie header found');
     }
 
+    console.log('Auth check - API Key:', !!apiKey, 'Auth Header:', !!authHeader, 'Auth Token:', !!authToken);
+
     if (!apiKey && !authHeader && !authToken) {
-      throw new AppError('API key or authorization token required', 401, 'UNAUTHORIZED');
+      console.log('Authentication failed - no valid credentials found');
+      throw new AppError('Authentication required', 401, 'AUTHENTICATION_REQUIRED');
     }
 
     // API key authentication
@@ -201,15 +210,20 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
       token = authHeader.substring(7); // From Authorization header
     }
     
+    console.log('JWT token for verification:', token ? 'TOKEN_PRESENT' : 'NO_TOKEN');
+    
     if (token) {
       
       try {
         // Ensure JWT secret is available
         if (!c.env?.JWT_SECRET) {
+          console.log('JWT secret not available');
           throw new AppError('JWT service unavailable', 500, 'SERVICE_UNAVAILABLE');
         }
         
+        console.log('Attempting JWT verification...');
         const payload = await verify(token, c.env.JWT_SECRET) as JWTPayload;
+        console.log('JWT verification successful, payload:', { id: payload.id, email: payload.email });
         
         // Check token expiration
         const now = Math.floor(Date.now() / 1000);
