@@ -14,8 +14,7 @@ import { CacheService, CacheNamespaces, CacheTTL } from '../services/cache';
 
 const analyze = new Hono<{ Bindings: Env }>();
 
-// Apply authentication to all analyze routes
-analyze.use('*', requireAuth);
+// Authentication is handled at the app level, no need to apply it here
 
 // Security constants for file uploads
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -846,6 +845,29 @@ analyze.get('/trends/skills/emerging', async (c: AuthenticatedContext) => {
  * GET /analyze/test-auth - Test authentication endpoint for debugging
  */
 analyze.get('/test-auth', async (c: AuthenticatedContext) => {
+  try {
+    const user = c.get('user');
+    console.log('Test auth - user context:', user);
+    
+    return c.json({
+      authenticated: !!user,
+      user: user || null,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Test auth error:', error);
+    return c.json({
+      authenticated: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    }, 500);
+  }
+});
+
+/**
+ * GET /analyze/debug-auth - Debug authentication endpoint
+ */
+analyze.get('/debug-auth', async (c: AuthenticatedContext) => {
   try {
     const user = c.get('user');
     return c.json({
