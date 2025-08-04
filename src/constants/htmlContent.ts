@@ -344,7 +344,7 @@
                 if (!file) return;
                 const MAX_SIZE = type === 'cv' ? MAX_FILE_SIZE : MAX_JOB_FILE_SIZE;
                 if (file.size > MAX_SIZE) {
-                    showAnalysisError(`File is too large. Max size is ${MAX_SIZE / 1024 / 1024}MB.`);
+                    showAnalysisError(\`File is too large. Max size is \${MAX_SIZE / 1024 / 1024}MB.\`);
                     return;
                 }
                 if (!ALLOWED_FILE_TYPES.includes(file.type)) {

@@ -215,7 +215,16 @@ export class DeepSeekAIService {
           throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
         }
 
-        const data = await response.json();
+        const data = await response.json() as {
+          choices?: Array<{
+            message?: {
+              content?: string;
+            };
+          }>;
+          usage?: {
+            total_tokens?: number;
+          };
+        };
 
         if (!data.choices || !data.choices[0] || !data.choices[0].message) {
           throw new Error('Invalid response format from DeepSeek API');
