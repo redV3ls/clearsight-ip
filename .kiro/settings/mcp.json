@@ -17,6 +17,10 @@
         "-y",
         "@modelcontextprotocol/server-filesystem",
         "."
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "write_file"
       ]
     }
   }
