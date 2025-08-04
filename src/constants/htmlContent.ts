@@ -2483,6 +2483,25 @@
             return originalPerformAnalysis.call(this);
         };
 
+        // Fun loading messages for AI analysis
+        const loadingMessages = [
+            { text: "🧠 Waking up our AI brain...", icon: "fas fa-brain" },
+            { text: "📄 Reading your resume like a caffeinated HR manager...", icon: "fas fa-file-alt" },
+            { text: "🔍 Hunting for hidden skills in your experience...", icon: "fas fa-search" },
+            { text: "🎯 Matching you with dream jobs...", icon: "fas fa-bullseye" },
+            { text: "🚀 Calculating your career trajectory...", icon: "fas fa-rocket" },
+            { text: "💡 Generating brilliant insights...", icon: "fas fa-lightbulb" },
+            { text: "🎨 Crafting your personalized analysis...", icon: "fas fa-palette" },
+            { text: "🔮 Predicting your future success...", icon: "fas fa-crystal-ball" },
+            { text: "⚡ Supercharging your job search strategy...", icon: "fas fa-bolt" },
+            { text: "🎪 Putting on the final touches...", icon: "fas fa-magic" },
+            { text: "🎉 Almost ready to blow your mind...", icon: "fas fa-party-horn" }
+        ];
+
+        let currentMessageIndex = 0;
+        let progressInterval;
+        let messageInterval;
+
         // Add missing performAnalysis function
         async function performAnalysis() {
             console.log('Starting AI analysis...');
@@ -2492,41 +2511,36 @@
                 return;
             }
 
+            // Clear any previous errors
+            clearAnalysisError();
+
             // Validate inputs
-            const cvText = document.getElementById('cvTextInput')?.value || '';
-            const jobText = document.getElementById('jobTextInput')?.value || '';
             const cvFile = window.cvFile;
             const jobFile = window.jobFile;
 
-            if (!cvText && !cvFile) {
-                showAnalysisError('Please provide your CV/resume content or upload a file.');
+            if (!cvFile) {
+                showAnalysisError('Please upload your CV/resume file to start the analysis.');
                 return;
             }
 
             analysisInProgress = true;
             
-            // Show loading section
+            // Show loading section with fun messages
             document.getElementById('uploadSection').classList.add('hidden');
             document.getElementById('loadingSection').classList.remove('hidden');
             document.getElementById('resultsSection').classList.add('hidden');
             
-            // Start progress simulation
-            simulateProgress();
+            // Start fun progress simulation
+            startFunLoadingExperience();
 
             try {
                 // Prepare form data
                 const formData = new FormData();
                 
-                if (cvFile) {
-                    formData.append('resume', cvFile);
-                } else if (cvText) {
-                    formData.append('resumeText', cvText);
-                }
+                formData.append('resume', cvFile);
                 
                 if (jobFile) {
                     formData.append('jobDescription', jobFile);
-                } else if (jobText) {
-                    formData.append('jobDescriptionText', jobText);
                 }
                 
                 // Add analysis options
@@ -2545,6 +2559,8 @@
 
                 if (response.ok) {
                     console.log('Analysis successful:', data);
+                    // Complete the loading animation before showing results
+                    await completeLoadingAnimation();
                     displayResults(data);
                 } else {
                     console.error('Analysis failed:', data);
@@ -2556,7 +2572,219 @@
                 resetAnalysis();
             } finally {
                 analysisInProgress = false;
+                stopLoadingAnimation();
             }
+        }
+
+        function startFunLoadingExperience() {
+            currentMessageIndex = 0;
+            let progress = 0;
+            
+            // Update initial message
+            updateLoadingMessage();
+            
+            // Progress bar animation
+            progressInterval = setInterval(() => {
+                progress += Math.random() * 15 + 5; // Random progress between 5-20%
+                if (progress > 95) progress = 95; // Don't complete until analysis is done
+                
+                const progressBar = document.getElementById('progressBar');
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                }
+            }, 800);
+            
+            // Cycling through fun messages
+            messageInterval = setInterval(() => {
+                currentMessageIndex = (currentMessageIndex + 1) % loadingMessages.length;
+                updateLoadingMessage();
+            }, 2500); // Change message every 2.5 seconds
+        }
+
+        function updateLoadingMessage() {
+            const message = loadingMessages[currentMessageIndex];
+            const progressText = document.getElementById('progressText');
+            const loadingTitle = document.querySelector('#loadingSection h3');
+            const loadingIcon = document.querySelector('#loadingSection .fas');
+            
+            if (progressText) {
+                progressText.textContent = message.text;
+                progressText.className = 'text-sm text-primary animate-pulse';
+            }
+            
+            if (loadingTitle) {
+                loadingTitle.innerHTML = '<i class="' + message.icon + ' mr-2"></i>AI Analysis in Progress...';
+            }
+        }
+
+        async function completeLoadingAnimation() {
+            return new Promise((resolve) => {
+                // Complete the progress bar
+                const progressBar = document.getElementById('progressBar');
+                const progressText = document.getElementById('progressText');
+                
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                }
+                
+                if (progressText) {
+                    progressText.textContent = '🎉 Analysis complete! Preparing your results...';
+                    progressText.className = 'text-sm text-green-400 font-semibold';
+                }
+                
+                // Wait a moment for the completion animation
+                setTimeout(resolve, 1500);
+            });
+        }
+
+        function stopLoadingAnimation() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+            if (messageInterval) {
+                clearInterval(messageInterval);
+                messageInterval = null;
+            }
+        }
+
+        function resetAnalysis() {
+            analysisInProgress = false;
+            stopLoadingAnimation();
+            
+            // Reset UI to upload section
+            document.getElementById('uploadSection').classList.remove('hidden');
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            
+            // Reset progress bar
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                progressBar.style.width = '0%';
+            }
+        }
+
+        function displayResults(data) {
+            // Store analysis data globally
+            window.analysisData = data;
+            
+            // Hide loading and show results
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+            
+            const resultsContent = document.getElementById('resultsContent');
+            if (!resultsContent) return;
+            
+            // Create results HTML
+            let resultsHtml = '<div class="space-y-8">';
+            
+            // Success header
+            resultsHtml += 
+                '<div class="text-center mb-8">' +
+                    '<div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">' +
+                        '<i class="fas fa-check text-white text-2xl"></i>' +
+                    '</div>' +
+                    '<h2 class="text-3xl font-bold text-green-400 mb-2">Analysis Complete!</h2>' +
+                    '<p class="text-gray-300">Here\\'s your personalized career insights</p>' +
+                '</div>';
+            
+            // Skills Analysis
+            if (data.skillsAnalysis && data.skillsAnalysis.skills) {
+                resultsHtml += 
+                    '<div class="bg-slate-700 rounded-lg p-6">' +
+                        '<h3 class="text-xl font-bold text-primary mb-4">' +
+                            '<i class="fas fa-cogs mr-2"></i>Skills Analysis' +
+                        '</h3>' +
+                        '<div class="grid md:grid-cols-2 gap-4">';
+                
+                data.skillsAnalysis.skills.slice(0, 8).forEach(skill => {
+                    const levelColor = getSkillLevelColor(skill.level);
+                    resultsHtml += 
+                        '<div class="bg-slate-600 rounded-lg p-4">' +
+                            '<div class="flex justify-between items-center mb-2">' +
+                                '<h4 class="font-semibold text-gray-200">' + escapeHtml(skill.name) + '</h4>' +
+                                '<span class="' + levelColor + ' text-sm font-medium">' + escapeHtml(skill.level) + '</span>' +
+                            '</div>' +
+                            '<p class="text-gray-400 text-sm mb-2">' + escapeHtml(skill.category) + '</p>' +
+                            '<div class="flex items-center">' +
+                                '<span class="text-xs text-gray-500 mr-2">Experience:</span>' +
+                                '<span class="text-xs text-gray-300">' + skill.yearsExperience + ' years</span>' +
+                            '</div>' +
+                        '</div>';
+                });
+                
+                resultsHtml += '</div></div>';
+            }
+            
+            // Gap Analysis
+            if (data.gapAnalysis && data.gapAnalysis.skillGaps) {
+                resultsHtml += 
+                    '<div class="bg-slate-700 rounded-lg p-6">' +
+                        '<h3 class="text-xl font-bold text-yellow-400 mb-4">' +
+                            '<i class="fas fa-chart-line mr-2"></i>Skills Gap Analysis' +
+                        '</h3>' +
+                        '<div class="space-y-4">';
+                
+                data.gapAnalysis.skillGaps.slice(0, 5).forEach(gap => {
+                    const severityColor = gap.gapSeverity === 'critical' ? 'text-red-400' : 
+                                         gap.gapSeverity === 'moderate' ? 'text-yellow-400' : 'text-green-400';
+                    resultsHtml += 
+                        '<div class="bg-slate-600 rounded-lg p-4">' +
+                            '<div class="flex justify-between items-center mb-2">' +
+                                '<h4 class="font-semibold text-gray-200">' + escapeHtml(gap.skillName) + '</h4>' +
+                                '<span class="' + severityColor + ' text-sm font-medium">' + escapeHtml(gap.gapSeverity) + '</span>' +
+                            '</div>' +
+                            '<p class="text-gray-400 text-sm mb-2">Required: ' + escapeHtml(gap.requiredLevel) + '</p>' +
+                            '<p class="text-gray-300 text-sm">' + escapeHtml(gap.reasoning) + '</p>' +
+                        '</div>';
+                });
+                
+                resultsHtml += '</div></div>';
+            }
+            
+            // Career Suggestions
+            if (data.gapAnalysis && data.gapAnalysis.careerPaths) {
+                resultsHtml += 
+                    '<div class="bg-slate-700 rounded-lg p-6">' +
+                        '<h3 class="text-xl font-bold text-blue-400 mb-4">' +
+                            '<i class="fas fa-road mr-2"></i>Career Path Suggestions' +
+                        '</h3>' +
+                        '<div class="space-y-4">';
+                
+                data.gapAnalysis.careerPaths.slice(0, 3).forEach(path => {
+                    resultsHtml += 
+                        '<div class="bg-slate-600 rounded-lg p-4">' +
+                            '<div class="flex justify-between items-center mb-2">' +
+                                '<h4 class="font-semibold text-gray-200">' + escapeHtml(path.title) + '</h4>' +
+                                '<span class="text-green-400 text-sm font-medium">' + path.matchScore + '% match</span>' +
+                            '</div>' +
+                            '<p class="text-gray-300 text-sm mb-2">' + escapeHtml(path.description) + '</p>' +
+                            '<div class="flex items-center text-xs text-gray-400">' +
+                                '<span class="mr-4">Transition time: ' + path.timeToTransition + ' months</span>' +
+                                '<span>Salary: $' + path.salaryRange.min + 'k - $' + path.salaryRange.max + 'k</span>' +
+                            '</div>' +
+                        '</div>';
+                });
+                
+                resultsHtml += '</div></div>';
+            }
+            
+            // Action buttons
+            resultsHtml += 
+                '<div class="flex flex-col sm:flex-row gap-4 justify-center pt-6">' +
+                    '<button onclick="downloadAnalysisResults()" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg transition-colors">' +
+                        '<i class="fas fa-download mr-2"></i>Download Results' +
+                    '</button>' +
+                    '<button onclick="resetAnalysis()" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-6 py-3 rounded-lg transition-colors">' +
+                        '<i class="fas fa-redo mr-2"></i>New Analysis' +
+                    '</button>' +
+                    '<button onclick="hideAnalysisInterface()" class="bg-gray-600 hover:bg-gray-500 text-white px-6 py-3 rounded-lg transition-colors">' +
+                        '<i class="fas fa-times mr-2"></i>Close' +
+                    '</button>' +
+                '</div>';
+            
+            resultsHtml += '</div>';
+            resultsContent.innerHTML = resultsHtml;
         }
 
         // Add missing startAnalysis function for backward compatibility
@@ -2932,13 +3160,26 @@
 
                     <!-- Loading Section -->
                     <div id="loadingSection" class="hidden text-center py-12">
-                        <div class="animate-spin w-16 h-16 border-4 border-primary border-t-transparent rounded-full mx-auto mb-6"></div>
-                        <h3 class="text-xl font-semibold text-gray-200 mb-2">Analyzing Your Skills...</h3>
-                        <p class="text-gray-400 mb-4">Our AI is processing your information</p>
-                        <div class="w-full bg-gray-700 rounded-full h-2 mb-4">
-                            <div id="progressBar" class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        <div class="relative mb-8">
+                            <div class="animate-spin w-20 h-20 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fas fa-brain text-primary text-2xl animate-pulse"></i>
+                            </div>
                         </div>
-                        <p id="progressText" class="text-sm text-gray-500">Initializing...</p>
+                        <h3 class="text-2xl font-bold text-gray-200 mb-4">
+                            <i class="fas fa-brain mr-2"></i>AI Analysis in Progress...
+                        </h3>
+                        <div class="bg-slate-700 rounded-lg p-6 mb-6 max-w-md mx-auto">
+                            <p class="text-gray-300 mb-4">Our AI is working its magic on your profile!</p>
+                            <div class="w-full bg-gray-600 rounded-full h-3 mb-4 overflow-hidden">
+                                <div id="progressBar" class="bg-gradient-to-r from-primary to-blue-400 h-3 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                            </div>
+                            <p id="progressText" class="text-sm text-primary animate-pulse font-medium">🧠 Initializing AI brain...</p>
+                        </div>
+                        <div class="text-xs text-gray-500 max-w-sm mx-auto">
+                            <p class="mb-2">💡 <strong>Pro Tip:</strong> While you wait, think about your dream job!</p>
+                            <p>⏱️ This usually takes 30-60 seconds</p>
+                        </div>
                     </div>
 
                     <!-- Results Section -->
