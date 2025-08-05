@@ -11,14 +11,11 @@ import { compressionMiddleware } from './middleware/compression';
 import { performanceTrackingMiddleware } from './middleware/performanceTracking';
 import { environmentValidationMiddleware, getEnvironmentHealthStatus } from './middleware/environmentValidation';
 // Import routes
-import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
 import jobsRoutes from './routes/jobs';
-import analyzeRoutes from './routes/analyze';
 import monitoringRoutes from './routes/monitoring';
 import gdprRoutes from './routes/gdpr';
 import auditRoutes from './routes/audit';
-import trendsRoutes from './routes/trends';
 // Cache imports - re-enabling
 import { cacheMiddleware, userCacheMiddleware } from './middleware/cache';
 import { CacheNamespaces, CacheTTL } from './services/cache';
@@ -172,15 +169,16 @@ app.get('/health/detailed', async (c) => {
   return c.json(healthStatus, statusCode);
 });
 
-// API routes
-app.route('/api/v1/auth', authRoutes);
+// API routes - Use the new centralized router
+import appRouter from './routes';
+app.route('/', appRouter);
+
+// Legacy routes (to be migrated)
 app.route('/api/v1/users', usersRoutes);
 app.route('/api/v1/jobs', jobsRoutes);
-app.route('/api/v1/analyze', analyzeRoutes);
 app.route('/api/v1/monitoring', monitoringRoutes);
 app.route('/api/v1/gdpr', gdprRoutes);
 app.route('/api/v1/audit', auditRoutes);
-app.route('/api/v1/trends', trendsRoutes);
 
 // OpenAPI documentation
 const openAPIApp = createOpenAPIApp();
