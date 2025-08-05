@@ -82,14 +82,30 @@ class UIManager {
     }
 
     static renderMainContent() {
-        return `
-            ${this.renderHeroSection()}
-            ${this.renderFeaturesSection()}
-            ${this.renderHowItWorksSection()}
-            ${this.renderPricingSection()}
-            ${this.renderDemoSection()}
-            ${this.renderFooter()}
-        `;
+        console.log('Rendering main content sections...');
+        
+        try {
+            const hero = this.renderHeroSection();
+            const features = this.renderFeaturesSection();
+            const howItWorks = this.renderHowItWorksSection();
+            const pricing = this.renderPricingSection();
+            const demo = this.renderDemoSection();
+            const footer = this.renderFooter();
+            
+            console.log('All sections rendered successfully');
+            
+            return `
+                ${hero}
+                ${features}
+                ${howItWorks}
+                ${pricing}
+                ${demo}
+                ${footer}
+            `;
+        } catch (error) {
+            console.error('Error rendering main content:', error);
+            return this.renderHeroSection(); // Fallback to just hero section
+        }
     }
 
     static renderHeroSection() {

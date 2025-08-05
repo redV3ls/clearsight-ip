@@ -33,22 +33,35 @@ class App {
     }
 
     renderUI() {
+        console.log('Rendering UI components...');
+        
         // Render navigation
         const navigation = document.getElementById('navigation');
         if (navigation) {
             navigation.innerHTML = UIManager.renderNavigation();
+            console.log('Navigation rendered');
+        } else {
+            console.error('Navigation element not found');
         }
 
         // Render main content
         const mainContent = document.getElementById('main-content');
         if (mainContent) {
-            mainContent.innerHTML = UIManager.renderMainContent();
+            const content = UIManager.renderMainContent();
+            console.log('Main content HTML length:', content.length);
+            mainContent.innerHTML = content;
+            console.log('Main content rendered');
+        } else {
+            console.error('Main content element not found');
         }
 
         // Render modals
         const modals = document.getElementById('modals');
         if (modals) {
             modals.innerHTML = UIManager.renderModals();
+            console.log('Modals rendered');
+        } else {
+            console.error('Modals element not found');
         }
     }
 
