@@ -83,7 +83,7 @@ class UIManager {
 
     static renderMainContent() {
         console.log('Rendering main content sections...');
-        
+
         try {
             const hero = this.renderHeroSection();
             const features = this.renderFeaturesSection();
@@ -91,9 +91,9 @@ class UIManager {
             const pricing = this.renderPricingSection();
             const demo = this.renderDemoSection();
             const footer = this.renderFooter();
-            
+
             console.log('All sections rendered successfully');
-            
+
             return `
                 ${hero}
                 ${features}
