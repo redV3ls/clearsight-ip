@@ -3,7 +3,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { secureHeaders } from 'hono/secure-headers';
-import { HTML_CONTENT } from './constants/htmlContent';
+import { HTML_CONTENT } from './constants/htmlContentComplete';
 import { errorHandler } from './middleware/errorHandler';
 import { authMiddleware } from './middleware/auth';
 import { rateLimiter } from './middleware/rateLimiter';
@@ -255,6 +255,7 @@ app.get('/favicon.ico', (c) => {
 });
 
 // Root endpoint - serve the HTML home page
+// Static file serving for client assets
 app.get('/', (c) => {
   // Set cache header
   c.header('Cache-Control', 'public, max-age=3600');
