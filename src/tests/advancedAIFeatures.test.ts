@@ -135,7 +135,8 @@ describe('AdvancedAIFeaturesService', () => {
       healthCheck: vi.fn(),
     } as any;
 
-    advancedAIService = new AdvancedAIFeaturesService(mockDeepSeekAI);
+    const mockEnv = { DEEPSEEK_API_KEY: 'test-key' } as any;
+    advancedAIService = new AdvancedAIFeaturesService(mockDeepSeekAI, mockEnv);
   });
 
   describe('Multi-language CV Analysis', () => {
@@ -424,9 +425,10 @@ describe('AdvancedAIFeaturesService', () => {
   describe('Error Handling', () => {
     it('should handle API errors gracefully', async () => {
       // Mock a service that throws an error
+      const mockEnv = { DEEPSEEK_API_KEY: 'test-key' } as any;
       const errorService = new AdvancedAIFeaturesService({
         extractSkillsFromCV: vi.fn().mockRejectedValue(new Error('API Error'))
-      } as any);
+      } as any, mockEnv);
 
       await expect(
         errorService.analyzeMultiLanguageCV('test content')

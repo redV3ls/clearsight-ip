@@ -153,7 +153,7 @@ export class AIAnalysisService {
 
       if (validation.isValid) {
         this.deepseekAI = new DeepSeekAIService(aiConfig);
-        this.advancedAIFeatures = new AdvancedAIFeaturesService(this.deepseekAI);
+        this.advancedAIFeatures = new AdvancedAIFeaturesService(this.deepseekAI, this.env);
         this.isAIEnabled = true;
         logger.info('AI service initialized successfully with advanced features');
       } else {
