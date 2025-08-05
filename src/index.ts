@@ -169,19 +169,16 @@ app.get('/health/detailed', async (c) => {
   return c.json(healthStatus, statusCode);
 });
 
-// API routes - Temporarily reverting to original system to fix build
-import authRoutes from './routes/auth';
-import analyzeRoutes from './routes/analyze';
-import trendsRoutes from './routes/trends';
+// API routes - Using new centralized router system
+import appRouter from './routes';
+app.route('/', appRouter);
 
-app.route('/api/v1/auth', authRoutes);
+// Legacy v1 routes (to be migrated)
 app.route('/api/v1/users', usersRoutes);
 app.route('/api/v1/jobs', jobsRoutes);
-app.route('/api/v1/analyze', analyzeRoutes);
 app.route('/api/v1/monitoring', monitoringRoutes);
 app.route('/api/v1/gdpr', gdprRoutes);
 app.route('/api/v1/audit', auditRoutes);
-app.route('/api/v1/trends', trendsRoutes);
 
 // OpenAPI documentation
 const openAPIApp = createOpenAPIApp();

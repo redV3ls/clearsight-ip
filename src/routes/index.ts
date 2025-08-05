@@ -10,11 +10,10 @@ import { logger } from '../utils/logger';
 import { createResponse } from '../middleware/common/responseBuilder';
 import { generateRouteDocumentation } from './common/routeBuilder';
 
-// Import route modules
-// Temporarily using existing routes to avoid build issues
-import authRoutes from '../routes/auth';
-import trendsRoutes from '../routes/trends';
-import analyzeRoutes from '../routes/analyze';
+// Import route modules - Using new standardized routes
+import authRoutes from './auth';
+import trendsRoutes from './trends';
+import analyzeRoutes from './analyze';
 
 /**
  * Main application router
