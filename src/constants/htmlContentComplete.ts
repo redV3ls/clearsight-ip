@@ -97,7 +97,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
                     <a href="/" class="text-xl font-bold text-primary">Clearsight IP</a>
-                    <span class="ml-2 text-xs text-gray-400 hidden lg:inline">Bridge Your Skills Gap with AI-Powered Insights</span>
+                    <span class="ml-2 text-xs text-gray-400 hidden xl:inline">Bridge Your Skills Gap with AI-Powered Insights</span>
                 </div>
 
                 <div class="hidden md:flex items-center space-x-8">
@@ -631,12 +631,13 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
         // API Configuration
         const API_BASE_URL = '/api';
+        const API_V1_BASE_URL = '/api/v1';
         const API_ENDPOINTS = {
             login: \`\${API_BASE_URL}/auth/login\`,
             register: \`\${API_BASE_URL}/auth/register\`,
             logout: \`\${API_BASE_URL}/auth/logout\`,
             me: \`\${API_BASE_URL}/auth/me\`,
-            analyzeResume: \`\${API_BASE_URL}/analyze/resume\`
+            analyzeResume: \`\${API_V1_BASE_URL}/analyze/resume\`
         };
 
         // Initialize application
@@ -1095,6 +1096,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 
                 if (AppState.resumeFile) {
                     // Handle file upload
+                    console.log('Sending file analysis request to:', API_ENDPOINTS.analyzeResume);
+                    console.log('File details:', AppState.resumeFile.name, AppState.resumeFile.type, AppState.resumeFile.size);
+                    
                     const formData = new FormData();
                     formData.append('file', AppState.resumeFile);
                     
@@ -1104,11 +1108,20 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         body: formData
                     });
                     
-                    const data = await response.json();
+                    console.log('File analysis response status:', response.status);
+                    
+                    const data = await response.json().catch(err => {
+                        console.error('Failed to parse response as JSON:', err);
+                        return { success: false, error: { message: 'Invalid server response' } };
+                    });
+                    
+                    console.log('File analysis response data:', data);
                     handleAnalysisResponse(data, response.ok);
                     
                 } else if (AppState.resumeText.trim()) {
                     // Handle text input
+                    console.log('Sending text analysis request to:', API_ENDPOINTS.analyzeResume);
+                    
                     const response = await fetch(API_ENDPOINTS.analyzeResume, {
                         method: 'POST',
                         credentials: 'include',
@@ -1121,7 +1134,14 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         })
                     });
                     
-                    const data = await response.json();
+                    console.log('Analysis response status:', response.status);
+                    
+                    const data = await response.json().catch(err => {
+                        console.error('Failed to parse response as JSON:', err);
+                        return { success: false, error: { message: 'Invalid server response' } };
+                    });
+                    
+                    console.log('Analysis response data:', data);
                     handleAnalysisResponse(data, response.ok);
                 }
                 
@@ -1141,11 +1161,19 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 displayAnalysisResults(data.data);
                 showNotification('Analysis completed successfully!', 'success');
             } else {
-                const errorMessage = data.error?.message || 'Analysis failed. Please try again.';
+                let errorMessage = 'Analysis failed. Please try again.';
+                
+                if (data && data.error) {
+                    errorMessage = data.error.message || errorMessage;
+                } else if (!success) {
+                    errorMessage = 'Server error occurred during analysis. Please try again.';
+                }
+                
+                console.error('Analysis error:', data);
                 showNotification(errorMessage, 'error');
                 
                 // If authentication error, redirect to login
-                if (data.error?.code === 'AUTH_REQUIRED') {
+                if (data && data.error && data.error.code === 'AUTH_REQUIRED') {
                     hideAnalysisInterface();
                     showAuthModal('login');
                 }
