@@ -97,7 +97,6 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
                     <a href="/" class="text-xl font-bold text-primary">Clearsight IP</a>
-                    <span class="ml-2 text-xs text-gray-400 hidden xl:inline">Bridge Your Skills Gap with AI-Powered Insights</span>
                 </div>
 
                 <div class="hidden md:flex items-center space-x-8">
@@ -457,7 +456,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 <div>
                     <h3 class="text-xl font-bold text-primary mb-4">Clearsight IP</h3>
                     <p class="text-gray-300 mb-4">
-                        Bridge your skills gap with AI-powered insights and accelerate your career growth.
+                        AI-powered career insights and skills analysis platform for professional growth.
                     </p>
                     <div class="flex space-x-4">
                         <a href="#" class="text-gray-400 hover:text-primary">
@@ -1100,7 +1099,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     console.log('File details:', AppState.resumeFile.name, AppState.resumeFile.type, AppState.resumeFile.size);
                     
                     const formData = new FormData();
-                    formData.append('file', AppState.resumeFile);
+                    formData.append('resume', AppState.resumeFile); // Backend expects 'resume', not 'file'
                     
                     const response = await fetch(API_ENDPOINTS.analyzeResume, {
                         method: 'POST',
@@ -1119,19 +1118,16 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     handleAnalysisResponse(data, response.ok);
                     
                 } else if (AppState.resumeText.trim()) {
-                    // Handle text input
+                    // Handle text input - backend expects FormData, not JSON
                     console.log('Sending text analysis request to:', API_ENDPOINTS.analyzeResume);
+                    
+                    const formData = new FormData();
+                    formData.append('resumeText', AppState.resumeText.trim()); // Backend expects 'resumeText'
                     
                     const response = await fetch(API_ENDPOINTS.analyzeResume, {
                         method: 'POST',
                         credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            text: AppState.resumeText.trim(),
-                            analysisType: 'comprehensive'
-                        })
+                        body: formData // Send as FormData, not JSON
                     });
                     
                     console.log('Analysis response status:', response.status);
