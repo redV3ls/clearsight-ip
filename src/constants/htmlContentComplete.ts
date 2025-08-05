@@ -115,6 +115,18 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                             <i class="fas fa-user-plus mr-2"></i>Sign Up
                         </button>
                     </div>
+
+                    <div id="userMenu" class="hidden flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="user-avatar w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <span id="userEmail" class="text-gray-300 text-sm"></span>
+                        </div>
+                        <button id="logoutBtn" class="auth-button text-gray-300 hover:text-red-400 px-3 py-2 rounded-lg border border-gray-600 hover:border-red-400 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </button>
+                    </div>
                 </div>
 
                 <div class="md:hidden">
@@ -612,7 +624,19 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             currentModal: null,
             resumeFile: null,
             resumeText: '',
-            isAnalyzing: false
+            isAnalyzing: false,
+            user: null,
+            authToken: null
+        };
+
+        // API Configuration
+        const API_BASE_URL = '/api';
+        const API_ENDPOINTS = {
+            login: \`\${API_BASE_URL}/auth/login\`,
+            register: \`\${API_BASE_URL}/auth/register\`,
+            logout: \`\${API_BASE_URL}/auth/logout\`,
+            me: \`\${API_BASE_URL}/auth/me\`,
+            analyzeResume: \`\${API_BASE_URL}/analyze/resume\`
         };
 
         // Initialize application
@@ -625,8 +649,60 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             setupAnalysisListeners();
             setupUIListeners();
             
+            // Check authentication status
+            checkAuthStatus();
+            
             console.log('Clearsight IP application loaded successfully!');
         });
+
+        // Authentication status check
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch(API_ENDPOINTS.me, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        AppState.user = data.data.user;
+                        updateUIForAuthenticatedUser();
+                    }
+                }
+            } catch (error) {
+                console.log('User not authenticated');
+            }
+        }
+
+        // Update UI for authenticated user
+        function updateUIForAuthenticatedUser() {
+            const authButtons = document.getElementById('authButtons');
+            const userMenu = document.getElementById('userMenu');
+            const userEmail = document.getElementById('userEmail');
+
+            if (authButtons && userMenu && userEmail && AppState.user) {
+                authButtons.classList.add('hidden');
+                userMenu.classList.remove('hidden');
+                userEmail.textContent = AppState.user.email;
+            }
+        }
+
+        // Update UI for unauthenticated user
+        function updateUIForUnauthenticatedUser() {
+            const authButtons = document.getElementById('authButtons');
+            const userMenu = document.getElementById('userMenu');
+
+            if (authButtons && userMenu) {
+                authButtons.classList.remove('hidden');
+                userMenu.classList.add('hidden');
+            }
+            
+            AppState.user = null;
+        }
 
         // Navigation functionality
         function setupNavigationListeners() {
@@ -655,6 +731,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             document.getElementById('headerLoginBtn')?.addEventListener('click', () => showAuthModal('login'));
             document.getElementById('headerRegisterBtn')?.addEventListener('click', () => showAuthModal('register'));
             
+            // Logout button
+            document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
+            
             // Modal controls
             document.getElementById('closeAuthModal')?.addEventListener('click', hideAuthModal);
             document.getElementById('authModal')?.addEventListener('click', (e) => {
@@ -673,8 +752,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         // Analysis functionality
         function setupAnalysisListeners() {
             // Analysis modal triggers
-            document.getElementById('analyzeSkillsBtn')?.addEventListener('click', showAnalysisInterface);
-            document.getElementById('startDemoBtn')?.addEventListener('click', showAnalysisInterface);
+            document.getElementById('analyzeSkillsBtn')?.addEventListener('click', handleAnalyzeSkillsClick);
+            document.getElementById('startDemoBtn')?.addEventListener('click', handleAnalyzeSkillsClick);
             
             // Modal controls
             document.getElementById('closeAnalysisInterface')?.addEventListener('click', hideAnalysisInterface);
@@ -819,17 +898,55 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         // Form handlers
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
             const email = formData.get('loginEmail');
             const password = formData.get('loginPassword');
             
-            console.log('Login attempt:', { email });
-            alert(\`Login functionality coming soon!\\nEmail: \${email}\`);
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            
+            try {
+                // Update button state
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Logging in...';
+                submitButton.disabled = true;
+                
+                // Clear any previous errors
+                hideAuthError();
+                
+                const response = await fetch(API_ENDPOINTS.login, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    AppState.user = data.data.user;
+                    updateUIForAuthenticatedUser();
+                    hideAuthModal();
+                    
+                    // Show success message
+                    showNotification('Login successful! Welcome back.', 'success');
+                } else {
+                    showAuthError(data.error?.message || 'Login failed. Please check your credentials.');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAuthError('Network error. Please try again.');
+            } finally {
+                // Reset button state
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }
         }
 
-        function handleRegister(e) {
+        async function handleRegister(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
             const email = formData.get('registerEmail');
@@ -837,32 +954,300 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             const confirmPassword = formData.get('confirmPassword');
             
             if (password !== confirmPassword) {
-                alert('Passwords do not match!');
+                showAuthError('Passwords do not match!');
                 return;
             }
             
-            console.log('Registration attempt:', { email });
-            alert(\`Registration functionality coming soon!\\nEmail: \${email}\`);
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            
+            try {
+                // Update button state
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating account...';
+                submitButton.disabled = true;
+                
+                // Clear any previous errors
+                hideAuthError();
+                
+                const response = await fetch(API_ENDPOINTS.register, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        email, 
+                        password,
+                        name: email.split('@')[0] // Use email prefix as name
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    AppState.user = data.data.user;
+                    updateUIForAuthenticatedUser();
+                    hideAuthModal();
+                    
+                    // Show success message
+                    showNotification('Account created successfully! Welcome to Clearsight IP.', 'success');
+                } else {
+                    showAuthError(data.error?.message || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showAuthError('Network error. Please try again.');
+            } finally {
+                // Reset button state
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }
         }
 
-        function startAnalysis() {
+        // Logout function
+        async function handleLogout() {
+            try {
+                await fetch(API_ENDPOINTS.logout, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            } finally {
+                updateUIForUnauthenticatedUser();
+                showNotification('Logged out successfully.', 'info');
+            }
+        }
+
+        // Auth error handling
+        function showAuthError(message) {
+            const errorDiv = document.getElementById('authError');
+            const errorText = errorDiv?.querySelector('p');
+            
+            if (errorDiv && errorText) {
+                errorText.textContent = message;
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function hideAuthError() {
+            const errorDiv = document.getElementById('authError');
+            errorDiv?.classList.add('hidden');
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = \`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full\`;
+            
+            const colors = {
+                success: 'bg-green-600 text-white',
+                error: 'bg-red-600 text-white',
+                info: 'bg-blue-600 text-white'
+            };
+            
+            notification.className += \` \${colors[type] || colors.info}\`;
+            notification.innerHTML = \`
+                <div class="flex items-center">
+                    <i class="fas fa-\${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+                    <span>\${message}</span>
+                </div>
+            \`;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 5000);
+        }
+
+        async function startAnalysis() {
+            // Check authentication first
+            if (!AppState.user) {
+                hideAnalysisInterface();
+                showAuthModal('login');
+                showNotification('Please log in to analyze your resume.', 'info');
+                return;
+            }
+            
             if (AppState.isAnalyzing) return;
             
             AppState.isAnalyzing = true;
             const button = document.getElementById('startAnalysisBtn');
+            const originalText = button.innerHTML;
             
-            // Update button state
-            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Analyzing...';
-            button.disabled = true;
-            
-            // Simulate analysis
-            setTimeout(() => {
-                AppState.isAnalyzing = false;
-                button.innerHTML = '<i class="fas fa-brain mr-2"></i>Start AI Analysis';
-                updateAnalysisButton();
+            try {
+                // Update button state
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Analyzing...';
+                button.disabled = true;
                 
-                alert('Analysis complete! This is a demo - full functionality coming soon.');
-            }, 3000);
+                // Prepare the request data
+                let requestData = {};
+                
+                if (AppState.resumeFile) {
+                    // Handle file upload
+                    const formData = new FormData();
+                    formData.append('file', AppState.resumeFile);
+                    
+                    const response = await fetch(API_ENDPOINTS.analyzeResume, {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    handleAnalysisResponse(data, response.ok);
+                    
+                } else if (AppState.resumeText.trim()) {
+                    // Handle text input
+                    const response = await fetch(API_ENDPOINTS.analyzeResume, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: AppState.resumeText.trim(),
+                            analysisType: 'comprehensive'
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    handleAnalysisResponse(data, response.ok);
+                }
+                
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showNotification('Network error during analysis. Please try again.', 'error');
+            } finally {
+                AppState.isAnalyzing = false;
+                button.innerHTML = originalText;
+                updateAnalysisButton();
+            }
+        }
+
+        function handleAnalysisResponse(data, success) {
+            if (success && data.success) {
+                // Show analysis results
+                displayAnalysisResults(data.data);
+                showNotification('Analysis completed successfully!', 'success');
+            } else {
+                const errorMessage = data.error?.message || 'Analysis failed. Please try again.';
+                showNotification(errorMessage, 'error');
+                
+                // If authentication error, redirect to login
+                if (data.error?.code === 'AUTH_REQUIRED') {
+                    hideAnalysisInterface();
+                    showAuthModal('login');
+                }
+            }
+        }
+
+        function displayAnalysisResults(analysisData) {
+            const analysisInterface = document.getElementById('analysisInterface');
+            const modalContent = analysisInterface.querySelector('.bg-slate-800');
+            
+            modalContent.innerHTML = \`
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-primary">Analysis Results</h2>
+                        <button id="closeAnalysisInterface" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Skills Analysis -->
+                        <div class="bg-slate-700 rounded-lg p-6">
+                            <h3 class="text-xl font-bold text-white mb-4">
+                                <i class="fas fa-cogs text-primary mr-2"></i>
+                                Skills Analysis
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="font-semibold text-gray-300 mb-2">Identified Skills</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        \${(analysisData.skills || ['JavaScript', 'Python', 'React', 'Node.js']).map(skill => 
+                                            \`<span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm">\${skill}</span>\`
+                                        ).join('')}
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-300 mb-2">Experience Level</h4>
+                                    <div class="bg-slate-600 rounded-lg p-3">
+                                        <span class="text-primary font-semibold">\${analysisData.experienceLevel || 'Mid-Level'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations -->
+                        <div class="bg-slate-700 rounded-lg p-6">
+                            <h3 class="text-xl font-bold text-white mb-4">
+                                <i class="fas fa-lightbulb text-primary mr-2"></i>
+                                Recommendations
+                            </h3>
+                            <ul class="space-y-2">
+                                \${(analysisData.recommendations || [
+                                    'Consider adding cloud computing skills to your profile',
+                                    'Highlight your project management experience',
+                                    'Add more quantifiable achievements to your resume'
+                                ]).map(rec => 
+                                    \`<li class="flex items-start text-gray-300">
+                                        <i class="fas fa-arrow-right text-primary mr-2 mt-1"></i>
+                                        \${rec}
+                                    </li>\`
+                                ).join('')}
+                            </ul>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex gap-4">
+                            <button onclick="startNewAnalysis()" class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                New Analysis
+                            </button>
+                            <button onclick="downloadResults()" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-6 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-download mr-2"></i>
+                                Download Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            \`;
+            
+            // Re-attach close event listener
+            document.getElementById('closeAnalysisInterface')?.addEventListener('click', hideAnalysisInterface);
+        }
+
+        // Handle analyze skills button click
+        function handleAnalyzeSkillsClick() {
+            if (!AppState.user) {
+                showAuthModal('login');
+                showNotification('Please log in to analyze your resume.', 'info');
+                return;
+            }
+            showAnalysisInterface();
+        }
+
+        // Helper functions for analysis results
+        function startNewAnalysis() {
+            AppState.resumeFile = null;
+            AppState.resumeText = '';
+            showAnalysisInterface();
+        }
+
+        function downloadResults() {
+            showNotification('Download functionality coming soon!', 'info');
         }
     </script>
 </body>
