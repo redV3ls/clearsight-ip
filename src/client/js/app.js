@@ -199,6 +199,14 @@ class App {
             this.toggleMobileMenu();
         });
 
+        // Demo button
+        document.getElementById('startDemoBtn')?.addEventListener('click', () => {
+            this.startDemo();
+        });
+
+        // Smooth scrolling for navigation links
+        this.setupSmoothScrolling();
+
         // Modal outside clicks
         document.getElementById('authModal')?.addEventListener('click', (e) => {
             if (e.target.id === 'authModal') {
@@ -211,6 +219,34 @@ class App {
                 this.analysisManager.hideAnalysisInterface();
             }
         });
+    }
+
+    setupSmoothScrolling() {
+        // Handle navigation link clicks for smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // Close mobile menu if open
+                    const mobileMenu = document.getElementById('mobileMenu');
+                    if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+    }
+
+    startDemo() {
+        // Show the analysis interface with demo data
+        this.analysisManager.showAnalysisInterface();
+        // You could pre-populate with demo data here
+        console.log('Starting interactive demo...');
     }
 
     toggleMobileMenu() {

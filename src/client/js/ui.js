@@ -83,6 +83,17 @@ class UIManager {
 
     static renderMainContent() {
         return `
+            ${this.renderHeroSection()}
+            ${this.renderFeaturesSection()}
+            ${this.renderHowItWorksSection()}
+            ${this.renderPricingSection()}
+            ${this.renderDemoSection()}
+            ${this.renderFooter()}
+        `;
+    }
+
+    static renderHeroSection() {
+        return `
             <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="grid lg:grid-cols-2 gap-12 items-center">
@@ -143,6 +154,319 @@ class UIManager {
                     </div>
                 </div>
             </section>
+        `;
+    }
+
+    static renderFeaturesSection() {
+        return `
+            <section id="features" class="py-20 bg-slate-800">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl font-bold text-white mb-4">Success Stories</h2>
+                        <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                            See how professionals like you have transformed their careers with AI-powered insights
+                        </p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="bg-slate-700 rounded-lg p-6 border border-slate-600">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user-tie text-white"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="font-semibold text-white">Sarah M.</h3>
+                                    <p class="text-gray-400">Software Engineer</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300 mb-4">
+                                "Discovered I was missing cloud architecture skills. Got certified and landed a senior role with 40% salary increase!"
+                            </p>
+                            <div class="flex items-center text-primary">
+                                <i class="fas fa-arrow-up mr-2"></i>
+                                <span class="font-semibold">40% salary increase</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-700 rounded-lg p-6 border border-slate-600">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-white"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="font-semibold text-white">Mike R.</h3>
+                                    <p class="text-gray-400">Marketing Manager</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300 mb-4">
+                                "Identified data analytics gap in my profile. Upskilled and transitioned to Growth Marketing Director."
+                            </p>
+                            <div class="flex items-center text-primary">
+                                <i class="fas fa-rocket mr-2"></i>
+                                <span class="font-semibold">Career transition</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-700 rounded-lg p-6 border border-slate-600">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                                    <i class="fas fa-graduation-cap text-white"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="font-semibold text-white">Lisa K.</h3>
+                                    <p class="text-gray-400">Recent Graduate</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300 mb-4">
+                                "Found out which skills employers actually wanted. Focused learning and got hired in 2 weeks!"
+                            </p>
+                            <div class="flex items-center text-primary">
+                                <i class="fas fa-clock mr-2"></i>
+                                <span class="font-semibold">2 weeks to hire</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    static renderHowItWorksSection() {
+        return `
+            <section id="how-it-works" class="py-20 bg-slate-900">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl font-bold text-white mb-4">How It Works</h2>
+                        <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                            Get personalized career insights in minutes with our AI-powered analysis
+                        </p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-upload text-white text-2xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white mb-4">1. Upload Your Resume</h3>
+                            <p class="text-gray-300">
+                                Simply upload your CV or paste your resume text. Our AI supports multiple formats including PDF, Word, and plain text.
+                            </p>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-brain text-white text-2xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white mb-4">2. AI Analysis</h3>
+                            <p class="text-gray-300">
+                                Our advanced AI analyzes your skills, experience, and career trajectory against current market demands and job requirements.
+                            </p>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-chart-bar text-white text-2xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white mb-4">3. Get Insights</h3>
+                            <p class="text-gray-300">
+                                Receive detailed insights on skill gaps, career recommendations, and actionable steps to advance your professional journey.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    static renderPricingSection() {
+        return `
+            <section id="pricing" class="py-20 bg-slate-800">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl font-bold text-white mb-4">Pricing</h2>
+                        <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                            Choose the plan that fits your career development needs
+                        </p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="bg-slate-700 rounded-lg p-8 border border-slate-600">
+                            <h3 class="text-2xl font-bold text-white mb-4">Free</h3>
+                            <div class="text-4xl font-bold text-primary mb-6">$0<span class="text-lg text-gray-400">/month</span></div>
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    1 resume analysis per month
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    Basic skill gap analysis
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    General career recommendations
+                                </li>
+                            </ul>
+                            <button class="w-full bg-slate-600 hover:bg-slate-500 text-white py-3 px-6 rounded-lg transition-colors">
+                                Get Started
+                            </button>
+                        </div>
+
+                        <div class="bg-slate-700 rounded-lg p-8 border-2 border-primary relative">
+                            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                                <span class="bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">Most Popular</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white mb-4">Pro</h3>
+                            <div class="text-4xl font-bold text-primary mb-6">$29<span class="text-lg text-gray-400">/month</span></div>
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    Unlimited resume analyses
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    Advanced skill gap analysis
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    Personalized career roadmap
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    Industry-specific insights
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    Priority support
+                                </li>
+                            </ul>
+                            <button class="w-full bg-primary hover:bg-primary/80 text-white py-3 px-6 rounded-lg transition-colors">
+                                Start Free Trial
+                            </button>
+                        </div>
+
+                        <div class="bg-slate-700 rounded-lg p-8 border border-slate-600">
+                            <h3 class="text-2xl font-bold text-white mb-4">Enterprise</h3>
+                            <div class="text-4xl font-bold text-primary mb-6">Custom</div>
+                            <ul class="space-y-3 mb-8">
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    Everything in Pro
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    Team analytics dashboard
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    Custom integrations
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    Dedicated account manager
+                                </li>
+                                <li class="flex items-center text-gray-300">
+                                    <i class="fas fa-check text-primary mr-3"></i>
+                                    SLA guarantee
+                                </li>
+                            </ul>
+                            <button class="w-full bg-slate-600 hover:bg-slate-500 text-white py-3 px-6 rounded-lg transition-colors">
+                                Contact Sales
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    static renderDemoSection() {
+        return `
+            <section id="demo" class="py-20 bg-slate-900">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h2 class="text-4xl font-bold text-white mb-4">Try Demo</h2>
+                    <p class="text-xl text-gray-300 mb-8">
+                        Experience the power of AI-driven career insights with our interactive demo
+                    </p>
+                    <div class="bg-slate-800 rounded-lg p-8 border border-slate-700">
+                        <div class="mb-6">
+                            <i class="fas fa-play-circle text-6xl text-primary mb-4"></i>
+                            <h3 class="text-2xl font-bold text-white mb-2">Interactive Demo</h3>
+                            <p class="text-gray-300">
+                                See how our AI analyzes a sample resume and provides actionable career insights
+                            </p>
+                        </div>
+                        <button id="startDemoBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
+                            <i class="fas fa-rocket mr-2"></i>
+                            Start Interactive Demo
+                        </button>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    static renderFooter() {
+        return `
+            <footer class="bg-slate-800 border-t border-slate-700 py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="grid md:grid-cols-4 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-primary mb-4">Clearsight IP</h3>
+                            <p class="text-gray-300 mb-4">
+                                Bridge your skills gap with AI-powered insights and accelerate your career growth.
+                            </p>
+                            <div class="flex space-x-4">
+                                <a href="#" class="text-gray-400 hover:text-primary">
+                                    <i class="fab fa-twitter text-xl"></i>
+                                </a>
+                                <a href="#" class="text-gray-400 hover:text-primary">
+                                    <i class="fab fa-linkedin text-xl"></i>
+                                </a>
+                                <a href="#" class="text-gray-400 hover:text-primary">
+                                    <i class="fab fa-github text-xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-white mb-4">Product</h4>
+                            <ul class="space-y-2">
+                                <li><a href="#features" class="text-gray-300 hover:text-primary">Features</a></li>
+                                <li><a href="#pricing" class="text-gray-300 hover:text-primary">Pricing</a></li>
+                                <li><a href="#demo" class="text-gray-300 hover:text-primary">Demo</a></li>
+                                <li><a href="/docs" class="text-gray-300 hover:text-primary">API Docs</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-white mb-4">Company</h4>
+                            <ul class="space-y-2">
+                                <li><a href="#" class="text-gray-300 hover:text-primary">About</a></li>
+                                <li><a href="#" class="text-gray-300 hover:text-primary">Blog</a></li>
+                                <li><a href="#" class="text-gray-300 hover:text-primary">Careers</a></li>
+                                <li><a href="#" class="text-gray-300 hover:text-primary">Contact</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-white mb-4">Support</h4>
+                            <ul class="space-y-2">
+                                <li><a href="#" class="text-gray-300 hover:text-primary">Help Center</a></li>
+                                <li><a href="#" class="text-gray-300 hover:text-primary">Privacy Policy</a></li>
+                                <li><a href="#" class="text-gray-300 hover:text-primary">Terms of Service</a></li>
+                                <li><a href="#" class="text-gray-300 hover:text-primary">Status</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-slate-700 mt-8 pt-8 text-center">
+                        <p class="text-gray-400">
+                            © 2024 Clearsight IP. All rights reserved. Built with ❤️ for career growth.
+                        </p>
+                    </div>
+                </div>
+            </footer>
         `;
     }
 
