@@ -1154,8 +1154,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         function handleAnalysisResponse(data, success) {
             if (success && data.success) {
                 // Show analysis results
-                displayAnalysisResults(data.data);
+                displayAnalysisResults(data.data || data);
                 showNotification('Analysis completed successfully!', 'success');
+            } else if (success && data.error && data.error.code === 'AI_FALLBACK') {
+                // Handle AI fallback case - still show results but with a warning
+                displayAnalysisResults(data.data || generateFallbackAnalysis());
+                showNotification('Analysis completed with basic analysis (AI service temporarily unavailable)', 'info');
             } else {
                 let errorMessage = 'Analysis failed. Please try again.';
                 
@@ -1173,12 +1177,46 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     hideAnalysisInterface();
                     showAuthModal('login');
                 }
+                
+                // For 500 errors, provide a fallback analysis
+                if (!success && (data === null || data === undefined)) {
+                    console.log('Providing fallback analysis due to server error');
+                    displayAnalysisResults(generateFallbackAnalysis());
+                    showNotification('Analysis completed with basic analysis (server temporarily unavailable)', 'info');
+                }
             }
+        }
+
+        // Generate a fallback analysis when the backend fails
+        function generateFallbackAnalysis() {
+            return {
+                skills: ['Communication', 'Problem Solving', 'Teamwork', 'Leadership', 'Technical Skills'],
+                experienceLevel: 'Mid-Level Professional',
+                recommendations: [
+                    'Consider adding more specific technical skills to your resume',
+                    'Highlight quantifiable achievements and results',
+                    'Include relevant certifications or training',
+                    'Tailor your resume to specific job requirements',
+                    'Add keywords relevant to your target industry'
+                ],
+                summary: 'Basic analysis completed. For detailed AI-powered insights, please try again later.',
+                fallback: true
+            };
         }
 
         function displayAnalysisResults(analysisData) {
             const analysisInterface = document.getElementById('analysisInterface');
             const modalContent = analysisInterface.querySelector('.bg-slate-800');
+            
+            const fallbackNotice = analysisData.fallback ? \`
+                <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
+                    <div class="flex items-center text-yellow-400">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span class="font-semibold">Basic Analysis</span>
+                    </div>
+                    <p class="text-yellow-300 mt-1">This is a basic analysis. For detailed AI-powered insights, please try again later.</p>
+                </div>
+            \` : '';
             
             modalContent.innerHTML = \`
                 <div class="p-6">
@@ -1188,6 +1226,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                             <i class="fas fa-times text-xl"></i>
                         </button>
                     </div>
+
+                    \${fallbackNotice}
 
                     <div class="space-y-6">
                         <!-- Skills Analysis -->
@@ -1200,7 +1240,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                                 <div>
                                     <h4 class="font-semibold text-gray-300 mb-2">Identified Skills</h4>
                                     <div class="flex flex-wrap gap-2">
-                                        \${(analysisData.skills || ['JavaScript', 'Python', 'React', 'Node.js']).map(skill => 
+                                        \${(analysisData.skills || ['Communication', 'Problem Solving', 'Teamwork']).map(skill => 
                                             \`<span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm">\${skill}</span>\`
                                         ).join('')}
                                     </div>
@@ -1208,11 +1248,22 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                                 <div>
                                     <h4 class="font-semibold text-gray-300 mb-2">Experience Level</h4>
                                     <div class="bg-slate-600 rounded-lg p-3">
-                                        <span class="text-primary font-semibold">\${analysisData.experienceLevel || 'Mid-Level'}</span>
+                                        <span class="text-primary font-semibold">\${analysisData.experienceLevel || 'Professional'}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Summary -->
+                        \${analysisData.summary ? \`
+                        <div class="bg-slate-700 rounded-lg p-6">
+                            <h3 class="text-xl font-bold text-white mb-4">
+                                <i class="fas fa-file-alt text-primary mr-2"></i>
+                                Summary
+                            </h3>
+                            <p class="text-gray-300">\${analysisData.summary}</p>
+                        </div>
+                        \` : ''}
 
                         <!-- Recommendations -->
                         <div class="bg-slate-700 rounded-lg p-6">
@@ -1222,9 +1273,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                             </h3>
                             <ul class="space-y-2">
                                 \${(analysisData.recommendations || [
-                                    'Consider adding cloud computing skills to your profile',
-                                    'Highlight your project management experience',
-                                    'Add more quantifiable achievements to your resume'
+                                    'Consider adding more specific skills to your resume',
+                                    'Highlight quantifiable achievements',
+                                    'Tailor your resume to job requirements'
                                 ]).map(rec => 
                                     \`<li class="flex items-start text-gray-300">
                                         <i class="fas fa-arrow-right text-primary mr-2 mt-1"></i>
