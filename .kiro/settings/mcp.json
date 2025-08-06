@@ -1,14 +1,13 @@
 {
   "mcpServers": {
-    "fetch": {
-      "command": "uvx",
+    "curl-mcp": {
+      "command": "npx",
       "args": [
-        "mcp-server-fetch"
+        "@247arjun/mcp-curl"
       ],
-      "env": {},
       "disabled": false,
       "autoApprove": [
-        "fetch"
+        "curl_get"
       ]
     },
     "cipher": {

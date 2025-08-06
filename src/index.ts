@@ -2,12 +2,9 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
-import { secureHeaders } from 'hono/secure-headers';
 import { HTML_CONTENT } from './constants/htmlContentComplete';
 import { errorHandler } from './middleware/errorHandler';
 import { authMiddleware } from './middleware/auth';
-import { rateLimiter } from './middleware/rateLimiter';
-import { compressionMiddleware } from './middleware/compression';
 import { performanceTrackingMiddleware } from './middleware/performanceTracking';
 import { environmentValidationMiddleware, getEnvironmentHealthStatus } from './middleware/environmentValidation';
 // Import routes
@@ -19,7 +16,6 @@ import auditRoutes from './routes/audit';
 // Cache imports - re-enabling
 import { cacheMiddleware, userCacheMiddleware } from './middleware/cache';
 import { CacheNamespaces, CacheTTL } from './services/cache';
-import { readOnlyRateLimiter } from './middleware/rateLimiter';
 import { createOpenAPIApp } from './lib/openapi';
 
 export interface Env {
@@ -100,7 +96,7 @@ app.use('/api/v1/jobs/search', cacheMiddleware({
 }));
 
 app.use('/api/v1/users/profile', userCacheMiddleware({
-  namespace: CacheNamespaces.USER_PROFILES,
+  namespace: CacheNamespaces.USER_PROFILE,
   ttl: CacheTTL.SHORT, // 15 minutes for user profiles
 }));
 
