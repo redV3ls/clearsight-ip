@@ -124,7 +124,9 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       hasDeepSeekKey: !!c.env.DEEPSEEK_API_KEY,
       deepSeekKeyLength: c.env.DEEPSEEK_API_KEY?.length || 0,
       deepSeekBaseUrl: c.env.DEEPSEEK_BASE_URL,
-      deepSeekModel: c.env.DEEPSEEK_MODEL
+      deepSeekModel: c.env.DEEPSEEK_MODEL,
+      deepSeekMaxTokens: c.env.DEEPSEEK_MAX_TOKENS,
+      deepSeekTemperature: c.env.DEEPSEEK_TEMPERATURE
     });
 
     // Initialize AI-powered analysis service
@@ -136,15 +138,23 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     console.log('AI Service Status:', aiStatus);
     
     // Perform AI-powered analysis (will fallback to rule-based if AI unavailable)
-    const response = await aiAnalysisService.analyzeCV(
-      resumeContent,
-      jobContent,
-      {
-        includeSkillsGap,
-        includeCareerSuggestions,
-        includeIndustryTrends,
-      }
-    );
+    let response;
+    try {
+      console.log('Starting AI analysis...');
+      response = await aiAnalysisService.analyzeCV(
+        resumeContent,
+        jobContent,
+        {
+          includeSkillsGap,
+          includeCareerSuggestions,
+          includeIndustryTrends,
+        }
+      );
+      console.log('AI analysis completed successfully');
+    } catch (aiError) {
+      console.error('AI analysis failed with error:', aiError);
+      throw aiError; // Re-throw to trigger the main error handler
+    }
     
     // Set the actual user ID
     response.user_id = userId;
