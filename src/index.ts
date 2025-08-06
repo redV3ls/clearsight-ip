@@ -38,6 +38,14 @@ export interface Env {
   RATE_LIMIT_MAX_REQUESTS?: string;
   ENABLE_RATE_LIMITING?: string;
   LOG_LEVEL?: string;
+  
+  // DeepSeek AI Configuration
+  DEEPSEEK_API_KEY?: string;
+  DEEPSEEK_BASE_URL?: string;
+  DEEPSEEK_MODEL?: string;
+  DEEPSEEK_MAX_TOKENS?: string;
+  DEEPSEEK_TEMPERATURE?: string;
+  DEEPSEEK_TIMEOUT?: string;
 }
 
 const app = new Hono<{ Bindings: Env }>();

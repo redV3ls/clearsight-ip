@@ -119,6 +119,14 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       jobContent = await extractTextFromFile(jobDescriptionFile);
     }
     
+    // Debug: Check environment variables
+    console.log('Environment check:', {
+      hasDeepSeekKey: !!c.env.DEEPSEEK_API_KEY,
+      deepSeekKeyLength: c.env.DEEPSEEK_API_KEY?.length || 0,
+      deepSeekBaseUrl: c.env.DEEPSEEK_BASE_URL,
+      deepSeekModel: c.env.DEEPSEEK_MODEL
+    });
+
     // Initialize AI-powered analysis service
     const { AIAnalysisService } = await import('../services/aiAnalysisService');
     const aiAnalysisService = new AIAnalysisService(c.env);
