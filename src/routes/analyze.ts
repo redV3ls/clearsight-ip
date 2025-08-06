@@ -153,7 +153,38 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       console.log('AI analysis completed successfully');
     } catch (aiError) {
       console.error('AI analysis failed with error:', aiError);
-      throw aiError; // Re-throw to trigger the main error handler
+      console.log('Falling back to rule-based analysis...');
+      
+      // Fallback to rule-based analysis
+      const fallbackAnalysis = await analyzeResumeContent(resumeContent);
+      response = {
+        analysis_id: crypto.randomUUID(),
+        user_id: userId,
+        timestamp: new Date().toISOString(),
+        aiPowered: false,
+        skillsAnalysis: {
+          skills: fallbackAnalysis.skills,
+          totalSkills: fallbackAnalysis.skills.length,
+          categories: fallbackAnalysis.categories,
+          experience: fallbackAnalysis.experience,
+          education: fallbackAnalysis.education,
+          certifications: fallbackAnalysis.certifications,
+          strengths: ['Rule-based analysis completed'],
+          areasForImprovement: ['Consider upgrading to AI-powered analysis for detailed insights'],
+          careerLevel: 'mid',
+        },
+        metadata: {
+          processingTime: Date.now() - startTime,
+          analysisOptions: {
+            includeSkillsGap,
+            includeCareerSuggestions,
+            includeIndustryTrends
+          },
+          fallbackUsed: true,
+          aiError: aiError instanceof Error ? aiError.message : 'Unknown AI error'
+        }
+      };
+      console.log('Fallback analysis completed');
     }
     
     // Set the actual user ID
@@ -214,8 +245,38 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       if (error.message.includes('file')) {
         throw new AppError('File processing failed', 400, 'FILE_PROCESSING_ERROR');
       }
-      if (error.message.includes('AI service') || error.message.includes('DEEPSEEK')) {
-        throw new AppError('AI service temporarily unavailable, using fallback analysis', 200, 'AI_FALLBACK');
+      if (error.message.includes('AI service') || error.message.includes('DEEPSEEK') || error.message.includes('fallback')) {
+        // Return a successful response with fallback analysis
+        const fallbackAnalysis = await analyzeResumeContent(resumeText || resumeContent || 'Sample resume content');
+        const fallbackResponse = {
+          analysis_id: crypto.randomUUID(),
+          user_id: userId,
+          timestamp: new Date().toISOString(),
+          aiPowered: false,
+          skillsAnalysis: {
+            skills: fallbackAnalysis.skills,
+            totalSkills: fallbackAnalysis.skills.length,
+            categories: fallbackAnalysis.categories,
+            experience: fallbackAnalysis.experience,
+            education: fallbackAnalysis.education,
+            certifications: fallbackAnalysis.certifications,
+            strengths: ['Basic analysis completed'],
+            areasForImprovement: ['AI service temporarily unavailable - basic analysis provided'],
+            careerLevel: 'mid',
+          },
+          metadata: {
+            processingTime: Date.now() - startTime,
+            analysisOptions: {
+              includeSkillsGap,
+              includeCareerSuggestions,
+              includeIndustryTrends
+            },
+            fallbackUsed: true,
+            aiError: error.message
+          }
+        };
+        
+        return c.json(fallbackResponse, 200);
       }
     }
     
