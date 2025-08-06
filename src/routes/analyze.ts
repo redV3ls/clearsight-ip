@@ -33,6 +33,7 @@ const MAX_TEXT_LENGTH = 50000; // 50k characters
  */
 analyze.post('/resume', async (c: AuthenticatedContext) => {
   const startTime = Date.now();
+  const userId = c.user!.id;
   
   try {
     // Parse multipart form data
@@ -92,7 +93,6 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     }
     
     // Rate limiting check (30 seconds between requests)
-    const userId = c.user!.id;
     const rateLimitKey = `resume_analysis:${userId}`;
     const lastAnalysis = await c.env.CACHE.get(rateLimitKey);
     
