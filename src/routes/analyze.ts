@@ -32,7 +32,16 @@ const MAX_TEXT_LENGTH = 50000; // 50k characters
  * Analyzes uploaded resume files or text against job descriptions
  */
 analyze.post('/resume', async (c: AuthenticatedContext) => {
-  const userId = c.user?.id || 'anonymous';
+  const userId = c.user?.id;
+  if (!userId) {
+    return c.json({
+      error: {
+        code: 'AUTHENTICATION_REQUIRED',
+        message: 'User authentication required for analysis'
+      }
+    }, 401);
+  }
+  
   const analysisId = crypto.randomUUID();
 
   try {
@@ -212,7 +221,15 @@ async function performAsyncAnalysis(
  * GET /analyze/resume/history - Get user's resume analysis history
  */
 analyze.get('/resume/history', async (c: AuthenticatedContext) => {
-  const userId = c.user?.id || 'anonymous';
+  const userId = c.user?.id;
+  if (!userId) {
+    return c.json({
+      error: {
+        code: 'AUTHENTICATION_REQUIRED',
+        message: 'User authentication required'
+      }
+    }, 401);
+  }
 
   try {
     const page = parseInt(c.req.query('page') || '1');
@@ -273,7 +290,15 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
  */
 analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
   const analysisId = c.req.param('analysisId');
-  const userId = c.user?.id || 'anonymous';
+  const userId = c.user?.id;
+  if (!userId) {
+    return c.json({
+      error: {
+        code: 'AUTHENTICATION_REQUIRED',
+        message: 'User authentication required'
+      }
+    }, 401);
+  }
 
   try {
     const analysis = await c.env.DB
