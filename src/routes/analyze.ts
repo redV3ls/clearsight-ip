@@ -56,77 +56,45 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       }, 400);
     }
     
-    // Perform basic analysis
-    const analysis = await analyzeResumeContent(content);
+    // Initialize AI-powered analysis service
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const aiAnalysisService = new AIAnalysisService(c.env);
     
-    // Build response
-    const response = {
-      analysis_id: crypto.randomUUID(),
-      user_id: userId,
-      timestamp: new Date().toISOString(),
-      aiPowered: false,
-      skillsAnalysis: {
-        skills: analysis.skills,
-        totalSkills: analysis.skills.length,
-        categories: analysis.categories,
-        experience: analysis.experience,
-        education: analysis.education,
-        certifications: analysis.certifications,
-        strengths: ['Analysis completed successfully'],
-        areasForImprovement: ['Consider adding more specific technical skills', 'Highlight quantifiable achievements'],
-        careerLevel: 'mid',
-      },
-      metadata: {
-        processingTime: Date.now() - startTime,
-        analysisOptions: {
-          includeSkillsGap: false,
-          includeCareerSuggestions: false,
-          includeIndustryTrends: false
-        },
-        fallbackUsed: true,
-        note: 'Rule-based analysis - AI service integration in progress'
+    // Get job description if provided
+    const jobDescription = formData.get('jobDescriptionText') as string | null || '';
+    
+    // Perform AI-powered analysis using DeepSeek
+    const response = await aiAnalysisService.analyzeCV(
+      content,
+      jobDescription,
+      {
+        includeSkillsGap: true,
+        includeCareerSuggestions: true,
+        includeIndustryTrends: true,
       }
-    };
+    );
+    
+    // Set the user ID and timestamp
+    response.user_id = userId;
+    response.timestamp = new Date().toISOString();
+    response.analysis_id = crypto.randomUUID();
     
     return c.json(response, 200);
     
   } catch (error) {
     console.error('Analysis error:', error);
     
-    // Return fallback response even on error
-    const fallbackResponse = {
-      analysis_id: crypto.randomUUID(),
-      user_id: userId,
-      timestamp: new Date().toISOString(),
-      aiPowered: false,
-      skillsAnalysis: {
-        skills: [
-          { name: 'Communication', category: 'Soft Skills', level: 'Intermediate', confidence: 0.8, yearsExperience: 2, certifications: [] },
-          { name: 'Problem Solving', category: 'Soft Skills', level: 'Intermediate', confidence: 0.8, yearsExperience: 2, certifications: [] },
-          { name: 'Technical Skills', category: 'Technical', level: 'Intermediate', confidence: 0.7, yearsExperience: 3, certifications: [] }
-        ],
-        totalSkills: 3,
-        categories: ['Soft Skills', 'Technical'],
-        experience: 'Professional experience detected',
-        education: ['Education background'],
-        certifications: [],
-        strengths: ['Basic analysis completed'],
-        areasForImprovement: ['For detailed analysis, please try again later'],
-        careerLevel: 'mid',
+    // Return error response when AI service fails
+    return c.json({
+      error: {
+        code: 'AI_SERVICE_UNAVAILABLE',
+        message: 'AI analysis service is temporarily unavailable. Please try again later.',
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
-      metadata: {
-        processingTime: Date.now() - startTime,
-        analysisOptions: {
-          includeSkillsGap: false,
-          includeCareerSuggestions: false,
-          includeIndustryTrends: false
-        },
-        fallbackUsed: true,
-        error: error instanceof Error ? error.message : 'Analysis error'
-      }
-    };
-    
-    return c.json(fallbackResponse, 200);
+      timestamp: new Date().toISOString(),
+      analysis_id: crypto.randomUUID(),
+      user_id: userId
+    }, 503);
   }
 });
 
