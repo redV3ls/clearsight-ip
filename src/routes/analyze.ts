@@ -41,7 +41,7 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       }
     }, 401);
   }
-  
+
   const analysisId = crypto.randomUUID();
 
   try {
@@ -138,7 +138,7 @@ async function performAsyncAnalysis(
 ) {
   try {
     console.log(`Starting async analysis for ${analysisId}`);
-    
+
     // Initialize AI-powered analysis service
     const { AIAnalysisService } = await import('../services/aiAnalysisService');
     const aiAnalysisService = new AIAnalysisService(env);
@@ -316,7 +316,7 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
     }
 
     const analysisData = JSON.parse(analysis.analysis_data);
-    
+
     // Add retrieval timestamp
     analysisData.retrieved_at = new Date().toISOString();
 
@@ -364,123 +364,7 @@ async function extractTextFromFile(file: File): Promise<string> {
   }
 }
 
-// Helper function to analyze resume content and extract skills
-async function analyzeResumeContent(content: string): Promise<{
-  skills: Array<{
-    name: string;
-    category: string;
-    level: string;
-    confidence: number;
-    yearsExperience: number;
-    certifications: string[];
-  }>;
-  categories: string[];
-  experience: string;
-  education: string[];
-  certifications: string[];
-}> {
-  // This is a simplified implementation
-  // In production, you'd use NLP libraries or AI services for better extraction
 
-  const skillKeywords = {
-    'Programming': ['javascript', 'python', 'java', 'react', 'node.js', 'typescript', 'html', 'css', 'sql'],
-    'Cloud': ['aws', 'azure', 'gcp', 'docker', 'kubernetes', 'terraform'],
-    'Data': ['machine learning', 'data analysis', 'pandas', 'numpy', 'tensorflow', 'pytorch'],
-    'Management': ['project management', 'team leadership', 'agile', 'scrum', 'product management'],
-    'Design': ['ui/ux', 'figma', 'photoshop', 'design thinking', 'user research']
-  };
-
-  const contentLower = content.toLowerCase();
-  const extractedSkills: Array<{
-    name: string;
-    category: string;
-    level: string;
-    confidence: number;
-    yearsExperience: number;
-    certifications: string[];
-  }> = [];
-
-  // Extract skills based on keywords
-  for (const [category, keywords] of Object.entries(skillKeywords)) {
-    for (const keyword of keywords) {
-      if (contentLower.includes(keyword)) {
-        // Estimate experience level based on context
-        const experienceMatch = contentLower.match(new RegExp(`(\\d+)\\s*(?:years?|yrs?).*?${keyword}`, 'i'));
-        const yearsExp = experienceMatch ? parseInt(experienceMatch[1]) : 2;
-
-        let level = 'Beginner';
-        if (yearsExp >= 5) level = 'Expert';
-        else if (yearsExp >= 3) level = 'Advanced';
-        else if (yearsExp >= 1) level = 'Intermediate';
-
-        extractedSkills.push({
-          name: keyword.charAt(0).toUpperCase() + keyword.slice(1),
-          category,
-          level,
-          confidence: 0.8,
-          yearsExperience: yearsExp,
-          certifications: []
-        });
-      }
-    }
-  }
-
-  // Extract education
-  const educationMatch = content.match(/(?:bachelor|master|phd|degree|university|college).*?(?:\n|$)/gi) || [];
-
-  // Extract certifications
-  const certificationMatch = content.match(/(?:certified|certification|certificate).*?(?:\n|$)/gi) || [];
-
-  return {
-    skills: extractedSkills,
-    categories: [...new Set(extractedSkills.map(s => s.category))],
-    experience: 'Extracted from resume content',
-    education: educationMatch.map(e => e.trim()),
-    certifications: certificationMatch.map(c => c.trim())
-  };
-}
-
-// Helper function to generate career suggestions
-async function generateCareerSuggestions(userSkills: UserSkill[], resumeAnalysis: any): Promise<Array<{
-  title: string;
-  description: string;
-  matchScore: number;
-}>> {
-  // Simplified career suggestion logic
-  const suggestions = [];
-
-  const skillCategories = userSkills.reduce((acc, skill) => {
-    acc[skill.skillCategory] = (acc[skill.skillCategory] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Generate suggestions based on skill concentration
-  if (skillCategories['Programming'] >= 3) {
-    suggestions.push({
-      title: 'Senior Software Developer',
-      description: 'Lead development projects and mentor junior developers',
-      matchScore: 85
-    });
-  }
-
-  if (skillCategories['Management'] >= 2) {
-    suggestions.push({
-      title: 'Technical Project Manager',
-      description: 'Combine technical expertise with project management skills',
-      matchScore: 78
-    });
-  }
-
-  if (skillCategories['Cloud'] >= 2) {
-    suggestions.push({
-      title: 'Cloud Solutions Architect',
-      description: 'Design and implement cloud infrastructure solutions',
-      matchScore: 82
-    });
-  }
-
-  return suggestions;
-}
 
 /**
  * POST /analyze/gap - Individual skill gap analysis

@@ -211,36 +211,21 @@ export class AIAnalysisService {
     const analysisId = crypto.randomUUID();
 
     try {
-      // Try AI-powered analysis first
-      if (this.isAIEnabled && this.deepseekAI) {
-        return await this.performAIAnalysis(
-          analysisId,
-          cvContent,
-          jobContent,
-          options,
-          startTime
-        );
-      } else {
-        // Fallback to rule-based analysis
-        return await this.performFallbackAnalysis(
-          analysisId,
-          cvContent,
-          jobContent,
-          options,
-          startTime
-        );
+      // Only use AI-powered analysis - no fallback
+      if (!this.isAIEnabled || !this.deepseekAI) {
+        throw new Error('AI service is not available. Pure LLM analysis required.');
       }
-    } catch (error) {
-      logger.error('AI analysis failed, falling back to rule-based:', error);
-      
-      // Fallback to rule-based analysis on AI failure
-      return await this.performFallbackAnalysis(
+
+      return await this.performAIAnalysis(
         analysisId,
         cvContent,
         jobContent,
         options,
         startTime
       );
+    } catch (error) {
+      logger.error('AI analysis failed:', error);
+      throw error; // Re-throw the error instead of falling back
     }
   }
 
@@ -470,56 +455,7 @@ export class AIAnalysisService {
     return result;
   }
 
-  /**
-   * Fallback to rule-based analysis
-   */
-  private async performFallbackAnalysis(
-    analysisId: string,
-    cvContent: string,
-    jobContent: string | undefined,
-    options: any,
-    startTime: number
-  ): Promise<EnhancedAnalysisResult> {
-    // Perform basic rule-based analysis
-    const resumeAnalysis = await this.performBasicAnalysis(cvContent);
 
-    const result: EnhancedAnalysisResult = {
-      analysis_id: analysisId,
-      user_id: 'current-user',
-      timestamp: new Date().toISOString(),
-      aiPowered: false,
-      skillsAnalysis: {
-        skills: resumeAnalysis.skills.map(skill => ({
-          name: skill.name,
-          category: skill.category,
-          level: skill.level,
-          confidence: skill.confidence,
-          yearsExperience: skill.yearsExperience,
-          certifications: skill.certifications,
-        })),
-        totalSkills: resumeAnalysis.skills.length,
-        categories: resumeAnalysis.categories,
-        experience: resumeAnalysis.experience,
-        education: resumeAnalysis.education,
-        certifications: resumeAnalysis.certifications,
-        strengths: ['Rule-based analysis completed'],
-        areasForImprovement: ['Consider upgrading to AI-powered analysis'],
-        careerLevel: 'mid', // Default assumption
-      },
-      metadata: {
-        processingTime: Date.now() - startTime,
-        analysisOptions: options,
-        fallbackUsed: true,
-      },
-    };
-
-    logger.info('Fallback analysis completed', {
-      analysisId,
-      skillsFound: resumeAnalysis.skills.length,
-    });
-
-    return result;
-  }
 
   /**
    * Check if AI service is available and healthy
@@ -555,79 +491,5 @@ export class AIAnalysisService {
     };
   }
 
-  /**
-   * Perform basic rule-based analysis as fallback
-   */
-  private async performBasicAnalysis(content: string): Promise<{
-    skills: Array<{
-      name: string;
-      category: string;
-      level: string;
-      confidence: number;
-      yearsExperience: number;
-      certifications: string[];
-    }>;
-    categories: string[];
-    experience: string;
-    education: string[];
-    certifications: string[];
-  }> {
-    // Basic skill extraction using keywords
-    const skillKeywords = {
-      'Programming': ['javascript', 'python', 'java', 'react', 'node.js', 'typescript', 'html', 'css', 'sql'],
-      'Cloud': ['aws', 'azure', 'gcp', 'docker', 'kubernetes', 'terraform'],
-      'Data': ['machine learning', 'data analysis', 'pandas', 'numpy', 'tensorflow', 'pytorch'],
-      'Management': ['project management', 'team leadership', 'agile', 'scrum', 'product management'],
-      'Design': ['ui/ux', 'figma', 'photoshop', 'design thinking', 'user research']
-    };
-    
-    const contentLower = content.toLowerCase();
-    const extractedSkills: Array<{
-      name: string;
-      category: string;
-      level: string;
-      confidence: number;
-      yearsExperience: number;
-      certifications: string[];
-    }> = [];
-    
-    // Extract skills based on keywords
-    for (const [category, keywords] of Object.entries(skillKeywords)) {
-      for (const keyword of keywords) {
-        if (contentLower.includes(keyword)) {
-          // Estimate experience level based on context
-          const experienceMatch = contentLower.match(new RegExp(`(\\d+)\\s*(?:years?|yrs?).*?${keyword}`, 'i'));
-          const yearsExp = experienceMatch ? parseInt(experienceMatch[1]) : 2;
-          
-          let level = 'Beginner';
-          if (yearsExp >= 5) level = 'Expert';
-          else if (yearsExp >= 3) level = 'Advanced';
-          else if (yearsExp >= 1) level = 'Intermediate';
-          
-          extractedSkills.push({
-            name: keyword.charAt(0).toUpperCase() + keyword.slice(1),
-            category,
-            level,
-            confidence: 0.8,
-            yearsExperience: yearsExp,
-            certifications: []
-          });
-        }
-      }
-    }
-    
-    // Extract education
-    const educationMatch = content.match(/(?:bachelor|master|phd|degree|university|college).*?(?:\n|$)/gi) || [];
-    
-    // Extract certifications
-    const certificationMatch = content.match(/(?:certified|certification|certificate).*?(?:\n|$)/gi) || [];
-    
-    return {
-      skills: extractedSkills,
-      categories: [...new Set(extractedSkills.map(s => s.category))],
-      experience: 'Extracted from content',
-      education: educationMatch.map(e => e.trim()),
-      certifications: certificationMatch.map(c => c.trim())
-    };
-  }
+
 }
