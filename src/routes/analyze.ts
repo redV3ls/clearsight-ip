@@ -79,6 +79,26 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     response.timestamp = new Date().toISOString();
     response.analysis_id = crypto.randomUUID();
 
+    // Save analysis result to database for later retrieval
+    try {
+      await c.env.DB
+        .prepare(`
+          INSERT INTO resume_analyses (
+            id, user_id, analysis_data, created_at
+          ) VALUES (?, ?, ?, ?)
+        `)
+        .bind(
+          response.analysis_id,
+          userId,
+          JSON.stringify(response),
+          new Date().toISOString()
+        )
+        .run();
+    } catch (dbError) {
+      // Log error but don't fail the request
+      console.warn('Failed to save analysis result:', dbError);
+    }
+
     return c.json(response, 200);
 
   } catch (error) {
@@ -95,6 +115,105 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       analysis_id: crypto.randomUUID(),
       user_id: userId
     }, 503);
+  }
+});
+
+/**
+ * GET /analyze/resume/:analysisId - Retrieve a specific resume analysis
+ */
+analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
+  const analysisId = c.req.param('analysisId');
+  const userId = c.user?.id || 'anonymous';
+
+  try {
+    const analysis = await c.env.DB
+      .prepare('SELECT * FROM resume_analyses WHERE id = ? AND user_id = ?')
+      .bind(analysisId, userId)
+      .first() as any;
+
+    if (!analysis) {
+      return c.json({
+        error: {
+          code: 'ANALYSIS_NOT_FOUND',
+          message: 'Resume analysis not found'
+        }
+      }, 404);
+    }
+
+    const analysisData = JSON.parse(analysis.analysis_data);
+
+    return c.json({
+      ...analysisData,
+      retrieved_at: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Retrieve analysis error:', error);
+    return c.json({
+      error: {
+        code: 'RETRIEVAL_FAILED',
+        message: 'Failed to retrieve resume analysis',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }, 500);
+  }
+});
+
+/**
+ * GET /analyze/resume/history - Get user's resume analysis history
+ */
+analyze.get('/resume/history', async (c: AuthenticatedContext) => {
+  const userId = c.user?.id || 'anonymous';
+
+  try {
+    const page = parseInt(c.req.query('page') || '1');
+    const limit = Math.min(parseInt(c.req.query('limit') || '10'), 50);
+    const offset = (page - 1) * limit;
+
+    const analyses = await c.env.DB
+      .prepare(`
+        SELECT id, created_at, 
+               JSON_EXTRACT(analysis_data, '$.timestamp') as analysis_timestamp,
+               JSON_EXTRACT(analysis_data, '$.aiPowered') as ai_powered,
+               JSON_EXTRACT(analysis_data, '$.skillsAnalysis.totalSkills') as total_skills
+        FROM resume_analyses 
+        WHERE user_id = ? 
+        ORDER BY created_at DESC 
+        LIMIT ? OFFSET ?
+      `)
+      .bind(userId, limit, offset)
+      .all();
+
+    const totalCount = await c.env.DB
+      .prepare('SELECT COUNT(*) as count FROM resume_analyses WHERE user_id = ?')
+      .bind(userId)
+      .first() as any;
+
+    return c.json({
+      analyses: analyses.results?.map((analysis: any) => ({
+        id: analysis.id,
+        created_at: analysis.created_at,
+        analysis_timestamp: analysis.analysis_timestamp,
+        ai_powered: analysis.ai_powered === 1 || analysis.ai_powered === true,
+        total_skills: analysis.total_skills || 0
+      })) || [],
+      pagination: {
+        page,
+        limit,
+        total: totalCount?.count || 0,
+        pages: Math.ceil((totalCount?.count || 0) / limit)
+      }
+    });
+
+  } catch (error) {
+    console.error('Get analysis history error:', error);
+    return c.json({
+      error: {
+        code: 'HISTORY_RETRIEVAL_FAILED',
+        message: 'Failed to retrieve analysis history',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }, 500);
   }
 });
 
