@@ -119,47 +119,6 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
 });
 
 /**
- * GET /analyze/resume/:analysisId - Retrieve a specific resume analysis
- */
-analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
-  const analysisId = c.req.param('analysisId');
-  const userId = c.user?.id || 'anonymous';
-
-  try {
-    const analysis = await c.env.DB
-      .prepare('SELECT * FROM resume_analyses WHERE id = ? AND user_id = ?')
-      .bind(analysisId, userId)
-      .first() as any;
-
-    if (!analysis) {
-      return c.json({
-        error: {
-          code: 'ANALYSIS_NOT_FOUND',
-          message: 'Resume analysis not found'
-        }
-      }, 404);
-    }
-
-    const analysisData = JSON.parse(analysis.analysis_data);
-
-    return c.json({
-      ...analysisData,
-      retrieved_at: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('Retrieve analysis error:', error);
-    return c.json({
-      error: {
-        code: 'RETRIEVAL_FAILED',
-        message: 'Failed to retrieve resume analysis',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }
-    }, 500);
-  }
-});
-
-/**
  * GET /analyze/resume/history - Get user's resume analysis history
  */
 analyze.get('/resume/history', async (c: AuthenticatedContext) => {
@@ -211,6 +170,47 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
       error: {
         code: 'HISTORY_RETRIEVAL_FAILED',
         message: 'Failed to retrieve analysis history',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }, 500);
+  }
+});
+
+/**
+ * GET /analyze/resume/:analysisId - Retrieve a specific resume analysis
+ */
+analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
+  const analysisId = c.req.param('analysisId');
+  const userId = c.user?.id || 'anonymous';
+
+  try {
+    const analysis = await c.env.DB
+      .prepare('SELECT * FROM resume_analyses WHERE id = ? AND user_id = ?')
+      .bind(analysisId, userId)
+      .first() as any;
+
+    if (!analysis) {
+      return c.json({
+        error: {
+          code: 'ANALYSIS_NOT_FOUND',
+          message: 'Resume analysis not found'
+        }
+      }, 404);
+    }
+
+    const analysisData = JSON.parse(analysis.analysis_data);
+
+    return c.json({
+      ...analysisData,
+      retrieved_at: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Retrieve analysis error:', error);
+    return c.json({
+      error: {
+        code: 'RETRIEVAL_FAILED',
+        message: 'Failed to retrieve resume analysis',
         details: error instanceof Error ? error.message : 'Unknown error'
       }
     }, 500);
