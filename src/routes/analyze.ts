@@ -32,8 +32,8 @@ const MAX_TEXT_LENGTH = 50000; // 50k characters
  * Analyzes uploaded resume files or text against job descriptions
  */
 analyze.post('/resume', async (c: AuthenticatedContext) => {
-  const startTime = Date.now();
   const userId = c.user?.id || 'anonymous';
+  const analysisId = crypto.randomUUID();
 
   try {
     // Parse form data
@@ -56,67 +56,157 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       }, 400);
     }
 
-    // Initialize AI-powered analysis service
-    const { AIAnalysisService } = await import('../services/aiAnalysisService');
-    const aiAnalysisService = new AIAnalysisService(c.env);
-
     // Get job description if provided
     const jobDescription = formData.get('jobDescriptionText') as string | null || '';
+
+    // Create initial analysis record with "processing" status
+    const initialRecord = {
+      analysis_id: analysisId,
+      user_id: userId,
+      timestamp: new Date().toISOString(),
+      status: 'processing',
+      aiPowered: true,
+      message: 'Analysis is being processed. Please check back in a few minutes.',
+      metadata: {
+        processingStarted: new Date().toISOString(),
+        hasJobDescription: !!jobDescription
+      }
+    };
+
+    // Save initial record to database
+    await c.env.DB
+      .prepare(`
+        INSERT INTO resume_analyses (
+          id, user_id, analysis_data, created_at
+        ) VALUES (?, ?, ?, ?)
+      `)
+      .bind(
+        analysisId,
+        userId,
+        JSON.stringify(initialRecord),
+        new Date().toISOString()
+      )
+      .run();
+
+    // Start async analysis (fire and forget)
+    c.executionCtx.waitUntil(
+      performAsyncAnalysis(c.env, analysisId, userId, content, jobDescription)
+    );
+
+    // Return immediate response with analysis ID
+    return c.json({
+      analysis_id: analysisId,
+      user_id: userId,
+      status: 'processing',
+      message: 'Analysis started successfully. Use the analysis_id to check status and retrieve results.',
+      timestamp: new Date().toISOString(),
+      estimated_completion: new Date(Date.now() + 3 * 60 * 1000).toISOString(), // 3 minutes estimate
+      check_status_url: `/api/v1/analyze/resume/${analysisId}`,
+      history_url: '/api/v1/analyze/resume/history'
+    }, 202); // 202 Accepted
+
+  } catch (error) {
+    console.error('Analysis submission error:', error);
+
+    return c.json({
+      error: {
+        code: 'SUBMISSION_FAILED',
+        message: 'Failed to submit analysis request. Please try again.',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      timestamp: new Date().toISOString()
+    }, 500);
+  }
+});
+
+// Async function to perform the actual analysis
+async function performAsyncAnalysis(
+  env: any,
+  analysisId: string,
+  userId: string,
+  content: string,
+  jobDescription: string
+) {
+  try {
+    console.log(`Starting async analysis for ${analysisId}`);
+    
+    // Initialize AI-powered analysis service
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const aiAnalysisService = new AIAnalysisService(env);
 
     // Perform AI-powered analysis using DeepSeek
     const response = await aiAnalysisService.analyzeCV(
       content,
       jobDescription,
       {
-        includeSkillsGap: !!jobDescription, // Only if job description provided
-        includeCareerSuggestions: false, // Disable to speed up
-        includeIndustryTrends: false, // Disable to speed up
+        includeSkillsGap: !!jobDescription,
+        includeCareerSuggestions: false,
+        includeIndustryTrends: false,
       }
     );
 
     // Set the user ID and timestamp
     response.user_id = userId;
     response.timestamp = new Date().toISOString();
-    response.analysis_id = crypto.randomUUID();
+    response.analysis_id = analysisId;
+    response.status = 'completed';
 
-    // Save analysis result to database for later retrieval
+    // Update the database record with completed analysis
+    await env.DB
+      .prepare(`
+        UPDATE resume_analyses 
+        SET analysis_data = ?, created_at = ?
+        WHERE id = ? AND user_id = ?
+      `)
+      .bind(
+        JSON.stringify(response),
+        new Date().toISOString(),
+        analysisId,
+        userId
+      )
+      .run();
+
+    console.log(`Completed async analysis for ${analysisId}`);
+
+  } catch (error) {
+    console.error(`Failed async analysis for ${analysisId}:`, error);
+
+    // Update record with error status
+    const errorRecord = {
+      analysis_id: analysisId,
+      user_id: userId,
+      timestamp: new Date().toISOString(),
+      status: 'failed',
+      aiPowered: false,
+      error: {
+        code: 'AI_SERVICE_UNAVAILABLE',
+        message: 'AI analysis failed. Please try submitting again.',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      metadata: {
+        processingFailed: new Date().toISOString()
+      }
+    };
+
     try {
-      await c.env.DB
+      await env.DB
         .prepare(`
-          INSERT INTO resume_analyses (
-            id, user_id, analysis_data, created_at
-          ) VALUES (?, ?, ?, ?)
+          UPDATE resume_analyses 
+          SET analysis_data = ?, created_at = ?
+          WHERE id = ? AND user_id = ?
         `)
         .bind(
-          response.analysis_id,
-          userId,
-          JSON.stringify(response),
-          new Date().toISOString()
+          JSON.stringify(errorRecord),
+          new Date().toISOString(),
+          analysisId,
+          userId
         )
         .run();
     } catch (dbError) {
-      // Log error but don't fail the request
-      console.warn('Failed to save analysis result:', dbError);
+      console.error(`Failed to update error record for ${analysisId}:`, dbError);
     }
-
-    return c.json(response, 200);
-
-  } catch (error) {
-    console.error('Analysis error:', error);
-
-    // Return error response when AI service fails
-    return c.json({
-      error: {
-        code: 'AI_SERVICE_UNAVAILABLE',
-        message: 'AI analysis service is temporarily unavailable. Please try again later.',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      timestamp: new Date().toISOString(),
-      analysis_id: crypto.randomUUID(),
-      user_id: userId
-    }, 503);
   }
-});
+}
 
 /**
  * GET /analyze/resume/history - Get user's resume analysis history
@@ -134,6 +224,7 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
         SELECT id, created_at, 
                JSON_EXTRACT(analysis_data, '$.timestamp') as analysis_timestamp,
                JSON_EXTRACT(analysis_data, '$.aiPowered') as ai_powered,
+               JSON_EXTRACT(analysis_data, '$.status') as status,
                JSON_EXTRACT(analysis_data, '$.skillsAnalysis.totalSkills') as total_skills
         FROM resume_analyses 
         WHERE user_id = ? 
@@ -154,6 +245,7 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
         created_at: analysis.created_at,
         analysis_timestamp: analysis.analysis_timestamp,
         ai_powered: analysis.ai_powered === 1 || analysis.ai_powered === true,
+        status: analysis.status || 'unknown',
         total_skills: analysis.total_skills || 0
       })) || [],
       pagination: {
@@ -199,11 +291,18 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
     }
 
     const analysisData = JSON.parse(analysis.analysis_data);
+    
+    // Add retrieval timestamp
+    analysisData.retrieved_at = new Date().toISOString();
 
-    return c.json({
-      ...analysisData,
-      retrieved_at: new Date().toISOString()
-    });
+    // Return appropriate HTTP status based on analysis status
+    if (analysisData.status === 'processing') {
+      return c.json(analysisData, 202); // Still processing
+    } else if (analysisData.status === 'failed') {
+      return c.json(analysisData, 500); // Analysis failed
+    } else {
+      return c.json(analysisData, 200); // Completed successfully
+    }
 
   } catch (error) {
     console.error('Retrieve analysis error:', error);
