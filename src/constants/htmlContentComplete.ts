@@ -1189,8 +1189,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             
             const fallbackNotice = '';
             
-            modalContent.innerHTML = `
-                <div class="p-6">
+            modalContent.innerHTML = \`
+                \u003cdiv class=\"p-6\"\u003e
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-primary">Analysis Results</h2>
                         <button id="closeAnalysisInterface" class="text-gray-400 hover:text-white">
