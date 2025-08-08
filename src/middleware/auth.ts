@@ -296,12 +296,7 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
     if (token) {
       
       try {
-        // Ensure JWT keys are available (RS256 requires private/public key pair)
-        if (!c.env?.JWT_PRIVATE_KEY && !c.env?.JWT_PUBLIC_KEY && !c.env?.JWT_SECRET) {
-          console.log('JWT keys not available');
-          throw new AppError('JWT service unavailable', 500, 'SERVICE_UNAVAILABLE');
-        }
-        
+        // Attempt JWT verification using keys from env or KV (handled inside verifyJWT/getRSAKeys)
         console.log('Attempting JWT verification...');
         const payload = await verifyJWT(token, c.env);
         console.log('JWT verification successful, payload:', { id: payload.id, email: payload.email });
