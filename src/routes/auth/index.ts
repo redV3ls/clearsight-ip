@@ -379,17 +379,43 @@ class AuthHandlers {
    * GET /auth/me
    * Get current user information (requires authentication)
    */
-  static async getCurrentUser(c: Context): Promise<Response> {
+  static async getCurrentUser(c: Context): PromisecResponsee {
     const response = createResponse(c);
     
     try {
-      const user = c.get('user');
-      
-      if (!user) {
+      // Verify token here to avoid dependency on upstream middleware state
+      const cookieHeader = c.req.header('Cookie');
+      let authToken: string | null = null;
+      if (cookieHeader) {
+        const cookies = cookieHeader.split(';').map((x) => x.trim());
+        const entry = cookies.find((x) => x.startsWith('auth_token='));
+        if (entry) authToken = entry.split('=')[1];
+      }
+      const authHeader = c.req.header('Authorization');
+      if (!authToken && authHeader?.startsWith('Bearer ')) {
+        authToken = authHeader.substring(7);
+      }
+
+      if (!authToken) {
         return response.authenticationError();
       }
 
-      return response.success({ user });
+      const { verifyJWT } = await import('../../middleware/auth');
+      const payload = await verifyJWT(authToken, c.env);
+      const userId = (payload as any).id || (payload as any).userId;
+      if (!userId) {
+        return response.authenticationError();
+      }
+
+      const db = DatabaseManager.initialize(c.env.DB);
+      const user = await db.getUserById(userId);
+      if (!user) {
+        return response.error('USER_NOT_FOUND', 'User not found', 404);
+      }
+
+      return response.success({
+        user: { id: user.id, email: user.email, name: user.name, organization: user.organization, created_at: user.created_at }
+      });
 
     } catch (error) {
       logger.error('Get current user failed', {
