@@ -1115,7 +1115,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     } catch (err) {
                         console.error('Failed to parse response as JSON:', err);
                         console.log('Response status:', response.status, 'Response text preview:', await response.text().catch(() => 'Unable to read'));
-                        data = null; // This will trigger fallback
+                        // Parsing failed – do not fabricate fallback data
+                        throw err;
                     }
                     
                     console.log('File analysis response data:', data);
@@ -1142,7 +1143,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     } catch (err) {
                         console.error('Failed to parse response as JSON:', err);
                         console.log('Response status:', response.status, 'Response text preview:', await response.text().catch(() => 'Unable to read'));
-                        data = null; // This will trigger fallback
+                        throw err;
                     }
                     
                     console.log('Analysis response data:', data);
@@ -1151,11 +1152,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 
             } catch (error) {
                 console.error('Analysis error:', error);
-                
-                // Provide fallback analysis even on network errors
-                console.log('Providing fallback analysis due to network error');
-                displayAnalysisResults(generateFallbackAnalysis());
-                showNotification('Analysis completed with basic analysis (network error occurred)', 'info');
+                // Surface the error to the user; do not produce basic fallback analysis
+                showNotification('Analysis failed. Please try again after a moment.', 'error');
             } finally {
                 AppState.isAnalyzing = false;
                 button.innerHTML = originalText;
@@ -1168,40 +1166,23 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 // Show analysis results
                 displayAnalysisResults(data.data || data);
                 showNotification('Analysis completed successfully!', 'success');
-            } else if (success && data.error && data.error.code === 'AI_FALLBACK') {
-                // Handle AI fallback case - still show results but with a warning
-                displayAnalysisResults(data.data || generateFallbackAnalysis());
-                showNotification('Analysis completed with basic analysis (AI service temporarily unavailable)', 'info');
             } else {
                 let errorMessage = 'Analysis failed. Please try again.';
-                
                 if (data && data.error) {
                     errorMessage = data.error.message || errorMessage;
                 } else if (!success) {
                     errorMessage = 'Server error occurred during analysis. Please try again.';
                 }
-                
                 console.error('Analysis error:', data);
                 showNotification(errorMessage, 'error');
-                
                 // If authentication error, redirect to login
-                if (data && data.error && data.error.code === 'AUTH_REQUIRED') {
+                if (data && data.error && (data.error.code === 'AUTH_REQUIRED' || data.error.code === 'AUTHENTICATION_REQUIRED')) {
                     hideAnalysisInterface();
                     showAuthModal('login');
-                }
-                
-                // For 500 errors or parsing failures, provide a fallback analysis
-                if (!success || data === null || data === undefined) {
-                    console.log('Providing fallback analysis due to server error or parsing failure');
-                    displayAnalysisResults(generateFallbackAnalysis());
-                    showNotification('Analysis completed with basic analysis (server temporarily unavailable)', 'info');
-                    return; // Exit early to prevent further error processing
                 }
             }
         }
 
-        // Generate a fallback analysis when the backend fails
-        function generateFallbackAnalysis() {
             return {
                 skills: ['Communication', 'Problem Solving', 'Teamwork', 'Leadership', 'Technical Skills'],
                 experienceLevel: 'Mid-Level Professional',
@@ -1221,17 +1202,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             const analysisInterface = document.getElementById('analysisInterface');
             const modalContent = analysisInterface.querySelector('.bg-slate-800');
             
-            const fallbackNotice = analysisData.fallback ? \`
-                <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
-                    <div class="flex items-center text-yellow-400">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <span class="font-semibold">Basic Analysis</span>
-                    </div>
-                    <p class="text-yellow-300 mt-1">This is a basic analysis. For detailed AI-powered insights, please try again later.</p>
-                </div>
-            \` : '';
+            const fallbackNotice = '';
             
-            modalContent.innerHTML = \`
+            modalContent.innerHTML = `
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-primary">Analysis Results</h2>

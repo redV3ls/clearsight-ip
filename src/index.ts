@@ -61,18 +61,45 @@ app.use('*', prettyJSON());
 // }));
 
 // CORS configuration
+// Previous configuration was too restrictive for workers.dev and caused browser CORS failures.
+// This version safely reflects the request origin for known patterns and supports workers.dev subdomains.
 app.use('*', cors({
   origin: (origin, c) => {
-    const allowedOrigins = [
-      c.env?.CORS_ORIGIN || 'http://localhost:3000',
+    // Allow when no Origin header (e.g., same-origin, server-to-server)
+    if (!origin) return null;
+
+    // If wildcard configured, reflect the incoming origin
+    if (c.env?.CORS_ORIGIN === '*') return origin;
+
+    // Always allow localhost for development
+    const devOrigins = new Set([
       'http://localhost:3000',
       'http://localhost:3001',
       'https://localhost:3000',
       'https://localhost:3001',
-    ];
-    
-    if (!origin) return null; // No origin header (e.g., same-origin requests)
-    return allowedOrigins.includes(origin) ? origin : null;
+    ]);
+
+    if (devOrigins.has(origin)) return origin;
+
+    // Allow configured primary domain (e.g., clearsight-ip.com)
+    if (c.env?.CORS_ORIGIN && origin === c.env.CORS_ORIGIN) return origin;
+
+    // Allow our Cloudflare workers.dev subdomain dynamically
+    try {
+      const reqUrl = new URL(c.req.url);
+      const sameHost = reqUrl.origin === origin; // Same-origin requests
+      if (sameHost) return origin;
+
+      // Permit any workers.dev subdomain that matches our script name path
+      // Example: https://clearsight-ip.<account>.workers.dev
+      const isWorkers = /\.workers\.dev$/i.test(new URL(origin).hostname);
+      if (isWorkers) return origin;
+    } catch {
+      // If URL parsing fails, fall through to deny
+    }
+
+    // Deny otherwise
+    return null;
   },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With'],
