@@ -1183,21 +1183,6 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             }
         }
 
-            return {
-                skills: ['Communication', 'Problem Solving', 'Teamwork', 'Leadership', 'Technical Skills'],
-                experienceLevel: 'Mid-Level Professional',
-                recommendations: [
-                    'Consider adding more specific technical skills to your resume',
-                    'Highlight quantifiable achievements and results',
-                    'Include relevant certifications or training',
-                    'Tailor your resume to specific job requirements',
-                    'Add keywords relevant to your target industry'
-                ],
-                summary: 'Basic analysis completed. For detailed AI-powered insights, please try again later.',
-                fallback: true
-            };
-        }
-
         function displayAnalysisResults(analysisData) {
             const analysisInterface = document.getElementById('analysisInterface');
             const modalContent = analysisInterface.querySelector('.bg-slate-800');
