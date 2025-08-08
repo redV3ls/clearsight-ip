@@ -45,21 +45,35 @@ export const generateRSAKeyPair = async (): Promise<{ privateKey: string; public
   return { privateKey, publicKey };
 };
 
-// Helper function to get RSA keys from environment or generate new ones
+// Helper function to get RSA keys from environment or KV (persistent), otherwise generate and persist
 export const getRSAKeys = async (env: Env): Promise<{ privateKey: string; publicKey: string }> => {
-  // Check if RSA keys are already set in environment
+  // 1) Prefer explicit keys from environment
   if (env.JWT_PRIVATE_KEY && env.JWT_PUBLIC_KEY) {
     return {
       privateKey: env.JWT_PRIVATE_KEY,
-      publicKey: env.JWT_PUBLIC_KEY
+      publicKey: env.JWT_PUBLIC_KEY,
     };
   }
 
-  // For development, generate keys on the fly (not recommended for production)
-  console.warn('RSA keys not found in environment. Generating temporary keys for development.');
-  console.warn('For production, set JWT_PRIVATE_KEY and JWT_PUBLIC_KEY environment variables.');
-  
-  return await generateRSAKeyPair();
+  // 2) Try to load a persistent keypair from KV so tokens remain verifiable across requests/instances
+  try {
+    const cached = await env.CACHE.get('jwt_keys');
+    if (cached) {
+      const parsed = JSON.parse(cached) as { privateKey: string; publicKey: string };
+      if (parsed?.privateKey && parsed?.publicKey) return parsed;
+    }
+  } catch {
+    // Ignore KV read errors and fall back to generation
+  }
+
+  // 3) Generate a new keypair and persist it to KV for future requests
+  const keys = await generateRSAKeyPair();
+  try {
+    await env.CACHE.put('jwt_keys', JSON.stringify(keys));
+  } catch {
+    // Ignore KV write errors; keys will be ephemeral on this instance only
+  }
+  return keys;
 };
 
 export interface ApiKeyData {
