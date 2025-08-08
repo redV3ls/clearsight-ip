@@ -77,7 +77,8 @@ auth.post('/login',
         path: '/'
       };
 
-      c.header('Set-Cookie', `auth_token=${token}; HttpOnly; Secure=${cookieOptions.secure}; SameSite=${cookieOptions.sameSite}; Max-Age=${cookieOptions.maxAge}; Path=${cookieOptions.path}`);
+      const secureAttr = cookieOptions.secure ? '; Secure' : '';
+      c.header('Set-Cookie', `auth_token=${token}; HttpOnly${secureAttr}; SameSite=${cookieOptions.sameSite}; Max-Age=${cookieOptions.maxAge}; Path=${cookieOptions.path}`);
 
       return c.json({
         success: true,
@@ -125,7 +126,8 @@ auth.post('/register',
         path: '/'
       };
 
-      c.header('Set-Cookie', `auth_token=${token}; HttpOnly; Secure=${cookieOptions.secure}; SameSite=${cookieOptions.sameSite}; Max-Age=${cookieOptions.maxAge}; Path=${cookieOptions.path}`);
+      const secureAttr = cookieOptions.secure ? '; Secure' : '';
+      c.header('Set-Cookie', `auth_token=${token}; HttpOnly${secureAttr}; SameSite=${cookieOptions.sameSite}; Max-Age=${cookieOptions.maxAge}; Path=${cookieOptions.path}`);
 
       return c.json({
         success: true,

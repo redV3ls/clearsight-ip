@@ -129,8 +129,9 @@ class AuthHandlers {
         path: '/'
       };
 
+      const secureAttr = cookieOptions.secure ? '; Secure' : '';
       c.header('Set-Cookie', 
-        `auth_token=${token}; HttpOnly; Secure=${cookieOptions.secure}; SameSite=${cookieOptions.sameSite}; Max-Age=${cookieOptions.maxAge}; Path=${cookieOptions.path}`
+        `auth_token=${token}; HttpOnly${secureAttr}; SameSite=${cookieOptions.sameSite}; Max-Age=${cookieOptions.maxAge}; Path=${cookieOptions.path}`
       );
 
       logger.info('User login successful', {
@@ -193,8 +194,9 @@ class AuthHandlers {
         path: '/'
       };
 
+      const secureAttr = cookieOptions.secure ? '; Secure' : '';
       c.header('Set-Cookie', 
-        `auth_token=${token}; HttpOnly; Secure=${cookieOptions.secure}; SameSite=${cookieOptions.sameSite}; Max-Age=${cookieOptions.maxAge}; Path=${cookieOptions.path}`
+        `auth_token=${token}; HttpOnly${secureAttr}; SameSite=${cookieOptions.sameSite}; Max-Age=${cookieOptions.maxAge}; Path=${cookieOptions.path}`
       );
 
       logger.info('User registration successful', {
