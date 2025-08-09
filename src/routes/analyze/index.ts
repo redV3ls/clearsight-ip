@@ -12,7 +12,7 @@ import { createResponse } from '../../middleware/common/responseBuilder';
 import { logger } from '../../utils/logger';
 
 // Import existing handlers from the analyze route structure
-import { resumeHandler } from './handlers/resume';
+import { resumeHandler, getResumeStatusHandler } from './handlers/resume';
 import { gapHandler } from './handlers/gap';
 import { teamHandler } from './handlers/team';
 import { trendsHandler } from './handlers/trends';
@@ -368,6 +368,11 @@ const analyzeRoutes = createRouteBuilder('/analyze')
   .get('/health', AnalysisHandlers.healthCheck, {
     description: 'Health check for analysis services',
     tags: ['Health', 'Analysis']
+  })
+  // Resume analysis status endpoint for polling
+  .get('/resume/:id', async (c: any) => getResumeStatusHandler(c as any), {
+    description: 'Get resume analysis status/result by ID',
+    tags: ['Analysis', 'Resume']
   });
 
 export default analyzeRoutes.getApp();

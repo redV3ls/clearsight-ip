@@ -17,7 +17,7 @@ export async function resumeHandler(c: AuthenticatedContext): Promise<Response> 
   const userId = c.user!.id;
 
   try {
-    logger.info('Starting resume analysis', { userId });
+    logger.info('Starting resume analysis (async)', { userId });
 
     // Extract data from context (set by middleware)
     const resumeFile = c.get('resumeFile') as File | null;
@@ -48,57 +48,102 @@ export async function resumeHandler(c: AuthenticatedContext): Promise<Response> 
       jobContent = processedFile.content;
     }
 
-    // Initialize AI analysis service
-    const aiAnalysisService = await initializeAIService(c);
-
-    // Perform AI-powered analysis
-    const analysisResult = await aiAnalysisService.analyzeCV(
-      resumeContent,
-      jobContent,
-      {
-        includeSkillsGap,
-        includeCareerSuggestions,
-        includeIndustryTrends,
-      }
-    );
-
-    // Build standardized response
-    const response = buildAnalysisResponse({
-      type: 'resume',
-      data: analysisResult,
-      processingTime: Date.now() - startTime,
-      userId,
-      metadata: {
-        analysisOptions: {
-          includeSkillsGap,
-          includeCareerSuggestions,
-          includeIndustryTrends
-        },
-        fileInfo: {
-          resumeFile: resumeFile ? {
-            name: resumeFile.name,
-            size: resumeFile.size,
-            type: resumeFile.type
-          } : null,
-          jobDescriptionFile: jobDescriptionFile ? {
-            name: jobDescriptionFile.name,
-            size: jobDescriptionFile.size,
-            type: jobDescriptionFile.type
-          } : null
-        }
-      }
-    }) as ResumeAnalysisResponse;
-
-    // Store analysis result for future reference
-    await storeAnalysisResult(c, response);
-
-    logger.info('Resume analysis completed successfully', {
-      userId,
-      analysisId: response.data.analysis_id,
-      processingTime: response.processingTime
+    // Generate analysis id and set initial status in KV
+    const analysisId = crypto.randomUUID();
+    await setResumeStatus(c, analysisId, {
+      status: 'processing',
+      analysis_id: analysisId,
+      user_id: userId,
+      message: 'Analysis is being processed. Please check back in a few minutes.'
     });
 
-    return c.json(response, 200);
+    // Fire-and-forget background processing
+    c.executionCtx.waitUntil((async () => {
+      try {
+        // Initialize AI analysis service
+        const aiAnalysisService = await initializeAIService(c);
+
+        // Perform AI-powered analysis
+        const analysisResult = await aiAnalysisService.analyzeCV(
+          resumeContent,
+          jobContent,
+          {
+            includeSkillsGap,
+            includeCareerSuggestions,
+            includeIndustryTrends,
+          }
+        );
+
+        // Build standardized response
+        const response = buildAnalysisResponse({
+          type: 'resume',
+          data: analysisResult,
+          processingTime: Date.now() - startTime,
+          userId,
+          metadata: {
+            analysisOptions: {
+              includeSkillsGap,
+              includeCareerSuggestions,
+              includeIndustryTrends
+            },
+            fileInfo: {
+              resumeFile: resumeFile ? {
+                name: resumeFile.name,
+                size: resumeFile.size,
+                type: resumeFile.type
+              } : null,
+              jobDescriptionFile: jobDescriptionFile ? {
+                name: jobDescriptionFile.name,
+                size: jobDescriptionFile.size,
+                type: jobDescriptionFile.type
+              } : null
+            }
+          }
+        }) as ResumeAnalysisResponse;
+
+        // Store analysis result in DB
+        await storeAnalysisResult(c, response);
+
+        // Mark as completed in KV (store the full response for the client)
+        await setResumeStatus(c, analysisId, {
+          status: 'completed',
+          analysis_id: analysisId,
+          user_id: userId,
+          data: response.data,
+          success: true,
+          processingTime: response.processingTime,
+          timestamp: response.timestamp
+        });
+
+        logger.info('Resume analysis completed (async)', {
+          userId,
+          analysisId: response.data.analysis_id,
+          processingTime: response.processingTime
+        });
+      } catch (error) {
+        logger.error('Async resume analysis failed', {
+          userId,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        await setResumeStatus(c, analysisId, {
+          status: 'failed',
+          analysis_id: analysisId,
+          user_id: userId,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    })());
+
+    // Immediately return 202 Accepted with status information for polling
+    const checkUrl = `/api/v1/analyze/resume/${analysisId}`;
+    return c.json({
+      analysis_id: analysisId,
+      status: 'processing',
+      message: 'Analysis is being processed. Please check back in a few minutes.',
+      aiPowered: true,
+      check_status_url: checkUrl,
+      retrieved_at: new Date().toISOString(),
+    }, 202);
 
   } catch (error) {
     logger.error('Resume analysis failed', {
@@ -125,6 +170,52 @@ export async function resumeHandler(c: AuthenticatedContext): Promise<Response> 
     }
 
     throw new AppError('Resume analysis failed', 500, 'ANALYSIS_ERROR');
+  }
+}
+
+/**
+ * Helper to set/get resume analysis status in KV
+ */
+async function setResumeStatus(c: AuthenticatedContext, id: string, value: any): Promise<void> {
+  try {
+    await c.env.CACHE.put(`resume:${id}`, JSON.stringify(value), { expirationTtl: 60 * 60 }); // 1 hour
+  } catch (e) {
+    logger.warn('Failed to write resume status to KV', e);
+  }
+}
+
+export async function getResumeStatusHandler(c: AuthenticatedContext): Promise<Response> {
+  const id = c.req.param('id');
+  try {
+    // First check KV status
+    const raw = await c.env.CACHE.get(`resume:${id}`);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data.status === 'completed') {
+        return c.json(data, 200);
+      }
+      if (data.status === 'failed') {
+        return c.json({ status: 'failed', analysis_id: id, error: data.error }, 500);
+      }
+      return c.json({ status: 'processing', analysis_id: id, message: data.message || 'Processing' }, 202);
+    }
+
+    // Fallback: check DB if result already stored
+    try {
+      const row = await c.env.DB.prepare('SELECT analysis_data FROM resume_analyses WHERE id = ? LIMIT 1').bind(id).first<{ analysis_data: string }>();
+      if (row?.analysis_data) {
+        const parsed = JSON.parse(row.analysis_data);
+        return c.json({ status: 'completed', analysis_id: id, data: parsed.data, success: true, timestamp: parsed.timestamp }, 200);
+      }
+    } catch (dbErr) {
+      logger.warn('DB lookup for resume status failed', dbErr);
+    }
+
+    // Unknown job id
+    return c.json({ status: 'processing', analysis_id: id, message: 'Analysis is being prepared.' }, 202);
+  } catch (error) {
+    logger.error('Get resume status failed', error);
+    return c.json({ status: 'failed', analysis_id: id, error: error instanceof Error ? error.message : 'Unknown error' }, 500);
   }
 }
 
