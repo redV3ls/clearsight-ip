@@ -133,14 +133,58 @@ app.use('*', async (c, next) => {
   return productionRateLimiter()(c, next);
 });
 
+// API root endpoint (public - no auth required) - must be before auth middleware
+app.get('/api/v1', (c) => {
+  return c.json({
+    message: 'Clearsight IP API v1',
+    version: '1.0.0',
+    status: 'All endpoints active',
+    endpoints: {
+      health: '/health',
+      root: '/',
+      api: '/api/v1',
+      auth: '/api/v1/auth',
+      users: '/api/v1/users',
+      jobs: '/api/v1/jobs',
+      analyze: '/api/v1/analyze',
+      trends: '/api/v1/trends',
+      monitoring: '/api/v1/monitoring',
+      gdpr: '/api/v1/gdpr',
+      audit: '/api/v1/audit',
+      docs: '/docs'
+    },
+    features: {
+      skill_gap_analysis: 'active',
+      team_analysis: 'active',
+      industry_trends: 'active',
+      job_matching: 'active',
+      user_profiles: 'active',
+      caching: 'active',
+      monitoring: 'active'
+    },
+    authentication: {
+      required: true,
+      methods: ['JWT', 'API_KEY'],
+      endpoints: {
+        login: '/api/v1/auth/login',
+        register: '/api/v1/auth/register'
+      }
+    },
+    timestamp: new Date().toISOString(),
+    cloudflare: {
+      colo: c.req.header('CF-RAY')?.split('-')[1] || 'unknown',
+      country: c.req.header('CF-IPCountry') || 'unknown',
+    },
+  });
+});
+
 // Authentication middleware for protected routes
 app.use('/api/v1/*', async (c, next) => {
   const publicPaths = [
     '/api/v1/auth/login', 
-    '/api/v1/auth/register',
-    '/api/v1' // Make API root endpoint public
+    '/api/v1/auth/register'
   ];
-  if (publicPaths.some(path => c.req.path === path || c.req.path.startsWith(path + '/'))) {
+  if (publicPaths.some(path => c.req.path === path)) {
     return next();
   }
   return authMiddleware(c, next);
@@ -219,51 +263,6 @@ app.route('/', openAPIApp);
 
 // Redirect /docs to the actual documentation location
 app.get('/docs', (c) => c.redirect('/api/v1/docs'));
-
-// API root endpoint (public - no auth required)
-app.get('/api/v1', (c) => {
-  return c.json({
-    message: 'Clearsight IP API v1',
-    version: '1.0.0',
-    status: 'All endpoints active',
-    endpoints: {
-      health: '/health',
-      root: '/',
-      api: '/api/v1',
-      auth: '/api/v1/auth',
-      users: '/api/v1/users',
-      jobs: '/api/v1/jobs',
-      analyze: '/api/v1/analyze',
-      trends: '/api/v1/trends',
-      monitoring: '/api/v1/monitoring',
-      gdpr: '/api/v1/gdpr',
-      audit: '/api/v1/audit',
-      docs: '/docs'
-    },
-    features: {
-      skill_gap_analysis: 'active',
-      team_analysis: 'active',
-      industry_trends: 'active',
-      job_matching: 'active',
-      user_profiles: 'active',
-      caching: 'active',
-      monitoring: 'active'
-    },
-    authentication: {
-      required: true,
-      methods: ['JWT', 'API_KEY'],
-      endpoints: {
-        login: '/api/v1/auth/login',
-        register: '/api/v1/auth/register'
-      }
-    },
-    timestamp: new Date().toISOString(),
-    cloudflare: {
-      colo: c.req.header('CF-RAY')?.split('-')[1] || 'unknown',
-      country: c.req.header('CF-IPCountry') || 'unknown',
-    },
-  });
-});
 
 // Favicon route
 app.get('/favicon.ico', (c) => {
