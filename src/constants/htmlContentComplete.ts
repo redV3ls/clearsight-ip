@@ -712,11 +712,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         const API_BASE_URL = '/api';
         const API_V1_BASE_URL = '/api/v1';
         const API_ENDPOINTS = {
-            login: \`\${API_V1_BASE_URL}/auth/login\`,
-            register: \`\${API_V1_BASE_URL}/auth/register\`,
-            logout: \`\${API_V1_BASE_URL}/auth/logout\`,
-            me: \`\${API_V1_BASE_URL}/auth/me\`,
-            analyzeResume: \`\${API_V1_BASE_URL}/analyze/resume\`
+            login: API_V1_BASE_URL + '/auth/login',
+            register: API_V1_BASE_URL + '/auth/register',
+            logout: API_V1_BASE_URL + '/auth/logout',
+            me: API_V1_BASE_URL + '/auth/me',
+            analyzeResume: API_V1_BASE_URL + '/analyze/resume'
         };
 
         // Initialize application
@@ -1353,7 +1353,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 pollCount++;
                 
                 try {
-                    const response = await fetch(`${API_ENDPOINTS.analyzeResume}/${analysisId}`, {
+                    const response = await fetch(API_ENDPOINTS.analyzeResume + '/' + analysisId, {
                         method: 'GET',
                         credentials: 'include'
                     });
@@ -1419,27 +1419,26 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             const resultsContent = document.getElementById('resultsContent');
             if (resultsContent && analysisData) {
                 // Display the analysis results
-                resultsContent.innerHTML = `
-                    <div class="space-y-6">
-                        <div class="text-center mb-6">
-                            <h4 class="text-xl font-bold text-green-400 mb-2">🎯 Analysis Complete!</h4>
-                            <p class="text-gray-300">Here's what our AI discovered about your profile:</p>
-                        </div>
+                resultsContent.innerHTML = 
+                    '<div class="space-y-6">' +
+                        '<div class="text-center mb-6">' +
+                            '<h4 class="text-xl font-bold text-green-400 mb-2">🎯 Analysis Complete!</h4>' +
+                            '<p class="text-gray-300">Here\\'s what our AI discovered about your profile:</p>' +
+                        '</div>' +
                         
-                        <div class="bg-slate-600 rounded-lg p-4">
-                            <h5 class="font-semibold text-white mb-2">📊 Analysis Summary</h5>
-                            <p class="text-gray-300 text-sm">Analysis ID: ${analysisData.analysis_id || 'N/A'}</p>
-                            <p class="text-gray-300 text-sm">Status: ${analysisData.status || 'Completed'}</p>
-                            <p class="text-gray-300 text-sm">Processed: ${new Date().toLocaleString()}</p>
-                        </div>
+                        '<div class="bg-slate-600 rounded-lg p-4">' +
+                            '<h5 class="font-semibold text-white mb-2">📊 Analysis Summary</h5>' +
+                            '<p class="text-gray-300 text-sm">Analysis ID: ' + (analysisData.analysis_id || 'N/A') + '</p>' +
+                            '<p class="text-gray-300 text-sm">Status: ' + (analysisData.status || 'Completed') + '</p>' +
+                            '<p class="text-gray-300 text-sm">Processed: ' + new Date().toLocaleString() + '</p>' +
+                        '</div>' +
                         
-                        <div class="text-center">
-                            <button onclick="resetToUploadScreen()" class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg transition-colors">
-                                Analyze Another Resume
-                            </button>
-                        </div>
-                    </div>
-                `;
+                        '<div class="text-center">' +
+                            '<button onclick="resetToUploadScreen()" class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg transition-colors">' +
+                                'Analyze Another Resume' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>';
             }
             
             AppState.isAnalyzing = false;
@@ -1452,87 +1451,94 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             
             const fallbackNotice = '';
             
-            modalContent.innerHTML = \`
-                \u003cdiv class=\"p-6\"\u003e
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-primary">Analysis Results</h2>
-                        <button id="closeAnalysisInterface" class="text-gray-400 hover:text-white">
-                            <i class="fas fa-times text-xl"></i>
-                        </button>
-                    </div>
+            // Build the skills HTML
+            const skillsHtml = (analysisData.skills || ['Communication', 'Problem Solving', 'Teamwork'])
+                .map(skill => '<span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm">' + skill + '</span>')
+                .join('');
+            
+            // Build the summary HTML
+            const summaryHtml = analysisData.summary ? 
+                '<div class="bg-slate-700 rounded-lg p-6">' +
+                    '<h3 class="text-xl font-bold text-white mb-4">' +
+                        '<i class="fas fa-file-alt text-primary mr-2"></i>' +
+                        'Summary' +
+                    '</h3>' +
+                    '<p class="text-gray-300">' + analysisData.summary + '</p>' +
+                '</div>' : '';
+            
+            // Build the recommendations HTML
+            const recommendationsHtml = (analysisData.recommendations || [
+                'Consider adding more specific skills to your resume',
+                'Highlight quantifiable achievements',
+                'Tailor your resume to job requirements'
+            ]).map(rec => 
+                '<li class="flex items-start text-gray-300">' +
+                    '<i class="fas fa-arrow-right text-primary mr-2 mt-1"></i>' +
+                    rec +
+                '</li>'
+            ).join('');
 
-                    \${fallbackNotice}
+            modalContent.innerHTML = 
+                '<div class="p-6">' +
+                    '<div class="flex justify-between items-center mb-6">' +
+                        '<h2 class="text-2xl font-bold text-primary">Analysis Results</h2>' +
+                        '<button id="closeAnalysisInterface" class="text-gray-400 hover:text-white">' +
+                            '<i class="fas fa-times text-xl"></i>' +
+                        '</button>' +
+                    '</div>' +
 
-                    <div class="space-y-6">
-                        <!-- Skills Analysis -->
-                        <div class="bg-slate-700 rounded-lg p-6">
-                            <h3 class="text-xl font-bold text-white mb-4">
-                                <i class="fas fa-cogs text-primary mr-2"></i>
-                                Skills Analysis
-                            </h3>
-                            <div class="grid md:grid-cols-2 gap-4">
-                                <div>
-                                    <h4 class="font-semibold text-gray-300 mb-2">Identified Skills</h4>
-                                    <div class="flex flex-wrap gap-2">
-                                        \${(analysisData.skills || ['Communication', 'Problem Solving', 'Teamwork']).map(skill => 
-                                            \`<span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm">\${skill}</span>\`
-                                        ).join('')}
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-300 mb-2">Experience Level</h4>
-                                    <div class="bg-slate-600 rounded-lg p-3">
-                                        <span class="text-primary font-semibold">\${analysisData.experienceLevel || 'Professional'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    fallbackNotice +
 
-                        <!-- Summary -->
-                        \${analysisData.summary ? \`
-                        <div class="bg-slate-700 rounded-lg p-6">
-                            <h3 class="text-xl font-bold text-white mb-4">
-                                <i class="fas fa-file-alt text-primary mr-2"></i>
-                                Summary
-                            </h3>
-                            <p class="text-gray-300">\${analysisData.summary}</p>
-                        </div>
-                        \` : ''}
+                    '<div class="space-y-6">' +
+                        '<!-- Skills Analysis -->' +
+                        '<div class="bg-slate-700 rounded-lg p-6">' +
+                            '<h3 class="text-xl font-bold text-white mb-4">' +
+                                '<i class="fas fa-cogs text-primary mr-2"></i>' +
+                                'Skills Analysis' +
+                            '</h3>' +
+                            '<div class="grid md:grid-cols-2 gap-4">' +
+                                '<div>' +
+                                    '<h4 class="font-semibold text-gray-300 mb-2">Identified Skills</h4>' +
+                                    '<div class="flex flex-wrap gap-2">' +
+                                        skillsHtml +
+                                    '</div>' +
+                                '</div>' +
+                                '<div>' +
+                                    '<h4 class="font-semibold text-gray-300 mb-2">Experience Level</h4>' +
+                                    '<div class="bg-slate-600 rounded-lg p-3">' +
+                                        '<span class="text-primary font-semibold">' + (analysisData.experienceLevel || 'Professional') + '</span>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
 
-                        <!-- Recommendations -->
-                        <div class="bg-slate-700 rounded-lg p-6">
-                            <h3 class="text-xl font-bold text-white mb-4">
-                                <i class="fas fa-lightbulb text-primary mr-2"></i>
-                                Recommendations
-                            </h3>
-                            <ul class="space-y-2">
-                                \${(analysisData.recommendations || [
-                                    'Consider adding more specific skills to your resume',
-                                    'Highlight quantifiable achievements',
-                                    'Tailor your resume to job requirements'
-                                ]).map(rec => 
-                                    \`<li class="flex items-start text-gray-300">
-                                        <i class="fas fa-arrow-right text-primary mr-2 mt-1"></i>
-                                        \${rec}
-                                    </li>\`
-                                ).join('')}
-                            </ul>
-                        </div>
+                        '<!-- Summary -->' +
+                        summaryHtml +
 
-                        <!-- Actions -->
-                        <div class="flex gap-4">
-                            <button onclick="startNewAnalysis()" class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg transition-colors">
-                                <i class="fas fa-plus mr-2"></i>
-                                New Analysis
-                            </button>
-                            <button onclick="downloadResults()" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-6 py-2 rounded-lg transition-colors">
-                                <i class="fas fa-download mr-2"></i>
-                                Download Report
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            \`;
+                        '<!-- Recommendations -->' +
+                        '<div class="bg-slate-700 rounded-lg p-6">' +
+                            '<h3 class="text-xl font-bold text-white mb-4">' +
+                                '<i class="fas fa-lightbulb text-primary mr-2"></i>' +
+                                'Recommendations' +
+                            '</h3>' +
+                            '<ul class="space-y-2">' +
+                                recommendationsHtml +
+                            '</ul>' +
+                        '</div>' +
+
+                        '<!-- Actions -->' +
+                        '<div class="flex gap-4">' +
+                            '<button onclick="startNewAnalysis()" class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg transition-colors">' +
+                                '<i class="fas fa-plus mr-2"></i>' +
+                                'New Analysis' +
+                            '</button>' +
+                            '<button onclick="downloadResults()" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-6 py-2 rounded-lg transition-colors">' +
+                                '<i class="fas fa-download mr-2"></i>' +
+                                'Download Report' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
             
             // Re-attach close event listener
             document.getElementById('closeAnalysisInterface')?.addEventListener('click', hideAnalysisInterface);
