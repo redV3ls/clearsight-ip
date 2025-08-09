@@ -381,27 +381,32 @@ class AuthHandlers {
    */
   static async getCurrentUser(c: Context): PromisecResponsee {
     const response = createResponse(c);
+    const debug = c.req.query('debug') === '1' || c.req.header('X-Debug') === '1' || (c.env?.LOG_LEVEL === 'debug');
     
     try {
+      logger.info('auth/me: start', { requestId: c.get('requestId') });
       // Verify token here to avoid dependency on upstream middleware state
       const cookieHeader = c.req.header('Cookie');
       let authToken: string | null = null;
       if (cookieHeader) {
-        const cookies = cookieHeader.split(';').map((x) => x.trim());
-        const entry = cookies.find((x) => x.startsWith('auth_token='));
+        const cookies = cookieHeader.split(';').map((x) =e x.trim());
+        const entry = cookies.find((x) =e x.startsWith('auth_token='));
         if (entry) authToken = entry.split('=')[1];
       }
+      logger.info('auth/me: cookie parsed', { hasCookie: !!cookieHeader, hasTokenFromCookie: !!authToken });
       const authHeader = c.req.header('Authorization');
       if (!authToken && authHeader?.startsWith('Bearer ')) {
         authToken = authHeader.substring(7);
       }
 
       if (!authToken) {
+        logger.warn('auth/me: no token found');
         return response.authenticationError();
       }
 
       const { verifyJWT } = await import('../../middleware/auth');
       const payload = await verifyJWT(authToken, c.env);
+      logger.info('auth/me: jwt verified');
       const userId = (payload as any).id || (payload as any).userId;
       const email = (payload as any).email;
       const name = (payload as any).name || email?.split('@')[0] || 'User';
@@ -419,10 +424,11 @@ class AuthHandlers {
             .prepare('SELECT id, email, name, organization, created_at FROM users WHERE id = ?')
             .bind(userId)
             .first();
+          logger.info('auth/me: db lookup completed', { found: !!userRecord });
         }
       } catch (e) {
         // Log but continue with JWT data
-        console.warn('auth/me DB lookup failed, returning JWT payload only');
+        logger.warn('auth/me: DB lookup failed, returning JWT payload only', { error: e instanceof Error ? e.message : String(e) });
       }
 
       const user = userRecord || {
@@ -439,10 +445,16 @@ class AuthHandlers {
     } catch (error) {
       logger.error('Get current user failed', {
         requestId: c.get('requestId'),
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
       });
 
-      return response.error('USER_INFO_ERROR', 'Failed to get user information', 500);
+      return response.error(
+        'USER_INFO_ERROR',
+        debug && error instanceof Error ? error.message : 'Failed to get user information',
+        500,
+        debug ? { stack: error instanceof Error ? error.stack : undefined } : undefined
+      );
     }
   }
 }
