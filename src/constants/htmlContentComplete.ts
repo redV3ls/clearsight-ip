@@ -1162,8 +1162,18 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         function handleAnalysisResponse(data, success) {
-            if (success && data.success) {
-                // Show analysis results
+            if (success && data.status === 'processing') {
+                // Handle async processing response
+                showNotification('Analysis started successfully! Processing your resume...', 'info');
+                console.log('Analysis submitted with ID:', data.analysis_id);
+                
+                // Optionally, you could poll for results or redirect to history
+                setTimeout(() => {
+                    showNotification('Analysis is still processing. Check your analysis history for results.', 'info');
+                }, 5000);
+                
+            } else if (success && (data.success || data.status === 'completed')) {
+                // Show completed analysis results
                 displayAnalysisResults(data.data || data);
                 showNotification('Analysis completed successfully!', 'success');
             } else {
