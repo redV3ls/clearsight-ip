@@ -55,7 +55,7 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     const formData = await c.req.formData();
     const resumeText = formData.get('resumeText') as string | null;
     const resumeFile = formData.get('resume') as File | null;
-    
+
     console.log('Form data parsed - resumeText:', resumeText ? 'present' : 'null', 'resumeFile:', resumeFile ? 'present' : 'null');
 
     // Get resume content
@@ -96,10 +96,11 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     };
 
     // Save initial record to database
+    console.log('Saving initial record to database...');
     await c.env.DB
       .prepare(`
         INSERT INTO resume_analyses (
-          id, user_id, analysis_data, created_at
+          id, userId, analysisData, createdAt
         ) VALUES (?, ?, ?, ?)
       `)
       .bind(
@@ -109,6 +110,7 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
         new Date().toISOString()
       )
       .run();
+    console.log('Initial record saved successfully');
 
     // Start async analysis (fire and forget)
     c.executionCtx.waitUntil(
@@ -180,8 +182,8 @@ async function performAsyncAnalysis(
     await env.DB
       .prepare(`
         UPDATE resume_analyses 
-        SET analysis_data = ?, created_at = ?
-        WHERE id = ? AND user_id = ?
+        SET analysisData = ?, createdAt = ?
+        WHERE id = ? AND userId = ?
       `)
       .bind(
         JSON.stringify(response),
@@ -217,8 +219,8 @@ async function performAsyncAnalysis(
       await env.DB
         .prepare(`
           UPDATE resume_analyses 
-          SET analysis_data = ?, created_at = ?
-          WHERE id = ? AND user_id = ?
+          SET analysisData = ?, createdAt = ?
+          WHERE id = ? AND userId = ?
         `)
         .bind(
           JSON.stringify(errorRecord),
@@ -255,28 +257,28 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
 
     const analyses = await c.env.DB
       .prepare(`
-        SELECT id, created_at, 
-               JSON_EXTRACT(analysis_data, '$.timestamp') as analysis_timestamp,
-               JSON_EXTRACT(analysis_data, '$.aiPowered') as ai_powered,
-               JSON_EXTRACT(analysis_data, '$.status') as status,
-               JSON_EXTRACT(analysis_data, '$.skillsAnalysis.totalSkills') as total_skills
+        SELECT id, createdAt, 
+               JSON_EXTRACT(analysisData, '$.timestamp') as analysis_timestamp,
+               JSON_EXTRACT(analysisData, '$.aiPowered') as ai_powered,
+               JSON_EXTRACT(analysisData, '$.status') as status,
+               JSON_EXTRACT(analysisData, '$.skillsAnalysis.totalSkills') as total_skills
         FROM resume_analyses 
-        WHERE user_id = ? 
-        ORDER BY created_at DESC 
+        WHERE userId = ? 
+        ORDER BY createdAt DESC 
         LIMIT ? OFFSET ?
       `)
       .bind(userId, limit, offset)
       .all();
 
     const totalCount = await c.env.DB
-      .prepare('SELECT COUNT(*) as count FROM resume_analyses WHERE user_id = ?')
+      .prepare('SELECT COUNT(*) as count FROM resume_analyses WHERE userId = ?')
       .bind(userId)
       .first() as any;
 
     return c.json({
       analyses: analyses.results?.map((analysis: any) => ({
         id: analysis.id,
-        created_at: analysis.created_at,
+        created_at: analysis.createdAt,
         analysis_timestamp: analysis.analysis_timestamp,
         ai_powered: analysis.ai_powered === 1 || analysis.ai_powered === true,
         status: analysis.status || 'unknown',
@@ -320,7 +322,7 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
 
   try {
     const analysis = await c.env.DB
-      .prepare('SELECT * FROM resume_analyses WHERE id = ? AND user_id = ?')
+      .prepare('SELECT * FROM resume_analyses WHERE id = ? AND userId = ?')
       .bind(analysisId, userId)
       .first() as any;
 
@@ -333,7 +335,7 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
       }, 404);
     }
 
-    const analysisData = JSON.parse(analysis.analysis_data);
+    const analysisData = JSON.parse(analysis.analysisData);
 
     // Add retrieval timestamp
     analysisData.retrieved_at = new Date().toISOString();
