@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { Env } from '../index';
 import { validateBody, validateHeaders } from '../middleware/inputValidation';
 import { UserAuthService } from '../services/userAuthService';
-import { generateJWT } from '../middleware/auth';
+import { generateJWT, verifyJWT } from '../middleware/auth';
 import { DatabaseManager } from '../config/database';
 import { users } from '../db/schema';
 import { AppError } from '../middleware/errorHandler';
@@ -278,15 +278,20 @@ auth.post('/reset-password',
  */
 auth.get('/me', async (c) => {
   try {
+    console.log('Auth /me endpoint called');
+    
     // Check for auth token in cookies
     const cookieHeader = c.req.header('Cookie');
     let authToken = null;
+    
+    console.log('Cookie header:', cookieHeader ? 'present' : 'missing');
     
     if (cookieHeader) {
       const cookies = cookieHeader.split(';').map(c => c.trim());
       const authCookie = cookies.find(cookie => cookie.startsWith('auth_token='));
       if (authCookie) {
         authToken = authCookie.split('=')[1];
+        console.log('Auth token found in cookies');
       }
     }
     
@@ -294,22 +299,27 @@ auth.get('/me', async (c) => {
     const authHeader = c.req.header('Authorization');
     if (!authToken && authHeader?.startsWith('Bearer ')) {
       authToken = authHeader.substring(7);
+      console.log('Auth token found in Authorization header');
     }
     
     if (!authToken) {
+      console.log('No auth token found');
       throw new AppError('Authentication required', 401, 'AUTHENTICATION_REQUIRED');
     }
     
+    console.log('Attempting JWT verification');
     // Verify JWT token with RS256
-    const { verifyJWT } = await import('../middleware/auth');
     const payload = await verifyJWT(authToken, c.env);
+    console.log('JWT verification successful, payload ID:', payload.id);
     
     // Check for both id and userId for compatibility
     const userId = payload.id || payload.userId;
     if (!payload || !userId) {
+      console.log('Invalid payload or missing user ID');
       throw new AppError('Invalid authentication token', 401, 'INVALID_TOKEN');
     }
     
+    console.log('Looking up user in database, ID:', userId);
     // Get user from database using drizzle
     const db = DatabaseManager.initialize(c.env.DB);
     
@@ -319,11 +329,14 @@ auth.get('/me', async (c) => {
       .where(eq(users.id, userId))
       .limit(1);
     
+    console.log('Database query result:', userResult.length > 0 ? 'user found' : 'user not found');
+    
     if (userResult.length === 0) {
       throw new AppError('User not found', 404, 'USER_NOT_FOUND');
     }
     
     const user = userResult[0];
+    console.log('Returning user data for:', user.email);
     
     return c.json({
       success: true,
@@ -338,11 +351,18 @@ auth.get('/me', async (c) => {
       }
     });
   } catch (error) {
+    console.error('Auth /me endpoint error:', error);
+    console.error('Error type:', error.constructor.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
     if (error instanceof AppError) {
+      console.log('Throwing AppError:', error.code, error.message);
       throw error;
     }
-    console.error('Auth check error:', error);
-    throw new AppError('Authentication failed', 401, 'AUTHENTICATION_FAILED');
+    
+    console.log('Throwing generic authentication failed error');
+    throw new AppError('Authentication failed', 500, 'AUTHENTICATION_FAILED');
   }
 });
 
