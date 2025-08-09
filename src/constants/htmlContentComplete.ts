@@ -613,6 +613,66 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         Start AI Analysis
                     </button>
                 </div>
+                
+                <!-- Loading Section -->
+                <div id="loadingSection" class="hidden">
+                    <div class="text-center py-12">
+                        <div class="relative mb-8">
+                            <!-- Animated AI Brain -->
+                            <div class="relative mx-auto w-24 h-24 mb-6">
+                                <div class="absolute inset-0 bg-gradient-to-r from-primary to-blue-400 rounded-full animate-pulse"></div>
+                                <div class="absolute inset-2 bg-slate-800 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-brain text-2xl text-primary animate-bounce"></i>
+                                </div>
+                                <!-- Orbiting dots -->
+                                <div class="absolute inset-0 animate-spin">
+                                    <div class="absolute top-0 left-1/2 w-2 h-2 bg-primary rounded-full transform -translate-x-1/2 -translate-y-1"></div>
+                                    <div class="absolute bottom-0 left-1/2 w-2 h-2 bg-blue-400 rounded-full transform -translate-x-1/2 translate-y-1"></div>
+                                    <div class="absolute left-0 top-1/2 w-2 h-2 bg-green-400 rounded-full transform -translate-y-1/2 -translate-x-1"></div>
+                                    <div class="absolute right-0 top-1/2 w-2 h-2 bg-purple-400 rounded-full transform -translate-y-1/2 translate-x-1"></div>
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-2xl font-bold text-white mb-4">
+                                <i class="fas fa-magic mr-2 text-primary"></i>
+                                AI Analysis in Progress
+                            </h3>
+                            <p class="text-gray-300 mb-6">Our AI is working its magic on your resume!</p>
+                            
+                            <!-- Progress Bar -->
+                            <div class="w-full max-w-md mx-auto bg-gray-600 rounded-full h-4 mb-6 overflow-hidden">
+                                <div id="progressBar" class="bg-gradient-to-r from-primary via-blue-400 to-green-400 h-4 rounded-full transition-all duration-500 ease-out relative" style="width: 0%">
+                                    <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Dynamic Loading Message -->
+                            <p id="progressText" class="text-lg text-primary animate-pulse font-medium mb-4">🧠 Initializing AI brain...</p>
+                            
+                            <!-- Fun Facts -->
+                            <div class="text-xs text-gray-500 max-w-sm mx-auto">
+                                <p class="mb-2">💡 <strong>Did you know?</strong> Our AI analyzes over 50 different skill categories!</p>
+                                <p>⚡ Average analysis time: 2-3 minutes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results Section -->
+                <div id="resultsSection" class="hidden">
+                    <div class="text-center py-12">
+                        <div class="mb-8">
+                            <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-check text-white text-2xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-green-400 mb-4">Analysis Complete!</h3>
+                            <p class="text-gray-300 mb-6">Your personalized career insights are ready.</p>
+                            <div id="resultsContent" class="text-left bg-slate-700 rounded-lg p-6">
+                                <!-- Results will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -625,8 +685,28 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             resumeText: '',
             isAnalyzing: false,
             user: null,
-            authToken: null
+            authToken: null,
+            currentAnalysisId: null,
+            currentMessageIndex: 0,
+            progressInterval: null,
+            messageInterval: null,
+            pollInterval: null
         };
+
+        // Catchy loading messages
+        const LOADING_MESSAGES = [
+            "🧠 Waking up our AI brain...",
+            "📄 Reading your resume like a caffeinated HR manager...",
+            "🔍 Hunting for hidden skills in your experience...",
+            "🎯 Matching you with dream jobs...",
+            "🚀 Calculating your career trajectory...",
+            "💡 Generating brilliant insights...",
+            "🎨 Crafting your personalized analysis...",
+            "🔮 Predicting your future success...",
+            "⚡ Supercharging your job search strategy...",
+            "🎪 Putting on the final touches...",
+            "🎉 Almost ready to blow your mind..."
+        ];
 
         // API Configuration
         const API_BASE_URL = '/api';
@@ -1164,16 +1244,15 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         function handleAnalysisResponse(data, success) {
             if (success && data.status === 'processing') {
                 // Handle async processing response
-                showNotification('Analysis started successfully! Processing your resume...', 'info');
+                AppState.currentAnalysisId = data.analysis_id;
+                showLoadingScreen();
+                startLoadingAnimation();
+                startPollingForResults(data.analysis_id);
                 console.log('Analysis submitted with ID:', data.analysis_id);
-                
-                // Optionally, you could poll for results or redirect to history
-                setTimeout(() => {
-                    showNotification('Analysis is still processing. Check your analysis history for results.', 'info');
-                }, 5000);
                 
             } else if (success && (data.success || data.status === 'completed')) {
                 // Show completed analysis results
+                stopLoadingAnimation();
                 displayAnalysisResults(data.data || data);
                 showNotification('Analysis completed successfully!', 'success');
             } else {
@@ -1185,6 +1264,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 }
                 console.error('Analysis error:', data);
                 showNotification(errorMessage, 'error');
+                resetToUploadScreen();
                 // If authentication error, redirect to login
                 if (data && data.error && (data.error.code === 'AUTH_REQUIRED' || data.error.code === 'AUTHENTICATION_REQUIRED')) {
                     hideAnalysisInterface();
@@ -1193,7 +1273,180 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             }
         }
 
+        // Loading screen functions
+        function showLoadingScreen() {
+            document.getElementById('uploadSection').classList.add('hidden');
+            document.getElementById('loadingSection').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+        }
+
+        window.resetToUploadScreen = function() {
+            stopLoadingAnimation();
+            document.getElementById('uploadSection').classList.remove('hidden');
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            
+            // Reset progress
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                progressBar.style.width = '0%';
+            }
+            
+            AppState.isAnalyzing = false;
+            updateAnalysisButton();
+        }
+
+        function startLoadingAnimation() {
+            let progress = 0;
+            AppState.currentMessageIndex = 0;
+            
+            updateLoadingMessage();
+            
+            // Progress bar animation
+            AppState.progressInterval = setInterval(() => {
+                progress += Math.random() * 8 + 2; // Slower, more realistic progress
+                if (progress > 90) progress = 90; // Don't complete until we get results
+                
+                const progressBar = document.getElementById('progressBar');
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                }
+            }, 1200);
+            
+            // Message cycling
+            AppState.messageInterval = setInterval(() => {
+                AppState.currentMessageIndex = (AppState.currentMessageIndex + 1) % LOADING_MESSAGES.length;
+                updateLoadingMessage();
+            }, 3000); // Change message every 3 seconds
+        }
+
+        function stopLoadingAnimation() {
+            if (AppState.progressInterval) {
+                clearInterval(AppState.progressInterval);
+                AppState.progressInterval = null;
+            }
+            if (AppState.messageInterval) {
+                clearInterval(AppState.messageInterval);
+                AppState.messageInterval = null;
+            }
+            if (AppState.pollInterval) {
+                clearInterval(AppState.pollInterval);
+                AppState.pollInterval = null;
+            }
+        }
+
+        function updateLoadingMessage() {
+            const message = LOADING_MESSAGES[AppState.currentMessageIndex];
+            const progressText = document.getElementById('progressText');
+            
+            if (progressText) {
+                progressText.textContent = message;
+                progressText.className = 'text-lg text-primary animate-pulse font-medium mb-4';
+            }
+        }
+
+        function startPollingForResults(analysisId) {
+            let pollCount = 0;
+            const maxPolls = 60; // Poll for up to 5 minutes (60 * 5 seconds)
+            
+            AppState.pollInterval = setInterval(async () => {
+                pollCount++;
+                
+                try {
+                    const response = await fetch(`${API_ENDPOINTS.analyzeResume}/${analysisId}`, {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data.status === 'completed') {
+                            // Analysis completed!
+                            stopLoadingAnimation();
+                            
+                            // Complete the progress bar
+                            const progressBar = document.getElementById('progressBar');
+                            const progressText = document.getElementById('progressText');
+                            
+                            if (progressBar) progressBar.style.width = '100%';
+                            if (progressText) {
+                                progressText.textContent = '🎉 Analysis complete! Preparing your results...';
+                                progressText.className = 'text-lg text-green-400 font-semibold mb-4';
+                            }
+                            
+                            // Show results after a brief delay
+                            setTimeout(() => {
+                                displayAnalysisResults(data);
+                                showNotification('🎉 Your analysis is ready!', 'success');
+                            }, 2000);
+                            
+                        } else if (data.status === 'failed') {
+                            // Analysis failed
+                            stopLoadingAnimation();
+                            showNotification('Analysis failed. Please try again.', 'error');
+                            resetToUploadScreen();
+                        }
+                        // If still processing, continue polling
+                        
+                    } else if (response.status === 404) {
+                        // Analysis not found - might have been cleaned up
+                        stopLoadingAnimation();
+                        showNotification('Analysis not found. Please try submitting again.', 'error');
+                        resetToUploadScreen();
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                    // Continue polling on network errors
+                }
+                
+                // Stop polling after max attempts
+                if (pollCount >= maxPolls) {
+                    stopLoadingAnimation();
+                    showNotification('Analysis is taking longer than expected. Please check your analysis history.', 'warning');
+                    resetToUploadScreen();
+                }
+                
+            }, 5000); // Poll every 5 seconds
+        }
+
         function displayAnalysisResults(analysisData) {
+            stopLoadingAnimation();
+            
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+            
+            const resultsContent = document.getElementById('resultsContent');
+            if (resultsContent && analysisData) {
+                // Display the analysis results
+                resultsContent.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="text-center mb-6">
+                            <h4 class="text-xl font-bold text-green-400 mb-2">🎯 Analysis Complete!</h4>
+                            <p class="text-gray-300">Here's what our AI discovered about your profile:</p>
+                        </div>
+                        
+                        <div class="bg-slate-600 rounded-lg p-4">
+                            <h5 class="font-semibold text-white mb-2">📊 Analysis Summary</h5>
+                            <p class="text-gray-300 text-sm">Analysis ID: ${analysisData.analysis_id || 'N/A'}</p>
+                            <p class="text-gray-300 text-sm">Status: ${analysisData.status || 'Completed'}</p>
+                            <p class="text-gray-300 text-sm">Processed: ${new Date().toLocaleString()}</p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button onclick="resetToUploadScreen()" class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg transition-colors">
+                                Analyze Another Resume
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            AppState.isAnalyzing = false;
+            updateAnalysisButton();
+        }
+
+        function displayAnalysisResultsOld(analysisData) {
             const analysisInterface = document.getElementById('analysisInterface');
             const modalContent = analysisInterface.querySelector('.bg-slate-800');
             
