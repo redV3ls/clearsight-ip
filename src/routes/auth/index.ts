@@ -407,8 +407,11 @@ class AuthHandlers {
         return response.authenticationError();
       }
 
-      const db = DatabaseManager.initialize(c.env.DB);
-      const user = await db.getUserById(userId);
+      // Load user directly from D1 to avoid ORM coupling here
+      const user = await c.env.DB
+        .prepare('SELECT id, email, name, organization, created_at FROM users WHERE id = ?')
+        .bind(userId)
+        .first();
       if (!user) {
         return response.error('USER_NOT_FOUND', 'User not found', 404);
       }
