@@ -32,7 +32,8 @@ const MAX_TEXT_LENGTH = 50000; // 50k characters
  * Analyzes uploaded resume files or text against job descriptions
  */
 analyze.post('/resume', async (c: AuthenticatedContext) => {
-  const userId = c.user?.id;
+  const user = c.get('user');
+  const userId = user?.id;
   if (!userId) {
     return c.json({
       error: {
@@ -221,7 +222,8 @@ async function performAsyncAnalysis(
  * GET /analyze/resume/history - Get user's resume analysis history
  */
 analyze.get('/resume/history', async (c: AuthenticatedContext) => {
-  const userId = c.user?.id;
+  const user = c.get('user');
+  const userId = user?.id;
   if (!userId) {
     return c.json({
       error: {
@@ -290,7 +292,8 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
  */
 analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
   const analysisId = c.req.param('analysisId');
-  const userId = c.user?.id;
+  const user = c.get('user');
+  const userId = user?.id;
   if (!userId) {
     return c.json({
       error: {
@@ -411,7 +414,7 @@ analyze.post('/gap', validateRequest(gapAnalysisRequestSchema), async (c: Authen
     // Format response according to API design
     const response = {
       analysis_id: crypto.randomUUID(),
-      user_id: c.user!.id,
+      user_id: c.get('user')!.id,
       target_job: {
         title: target_job.title,
         company: target_job.company,
@@ -462,7 +465,7 @@ analyze.post('/gap', validateRequest(gapAnalysisRequestSchema), async (c: Authen
           `)
           .bind(
             response.analysis_id,
-            c.user!.id,
+            c.get('user')!.id,
             target_job.title,
             response.overall_match,
             response.skill_gaps.length,
@@ -508,7 +511,7 @@ analyze.get('/gap/:analysisId', async (c: AuthenticatedContext) => {
   try {
     const analysis = await c.env.DB
       .prepare('SELECT * FROM gap_analyses WHERE id = ? AND user_id = ?')
-      .bind(analysisId, c.user!.id)
+      .bind(analysisId, c.get('user')!.id)
       .first() as any;
 
     if (!analysis) {
@@ -549,12 +552,12 @@ analyze.get('/gap/history', async (c: AuthenticatedContext) => {
         ORDER BY created_at DESC 
         LIMIT ? OFFSET ?
       `)
-      .bind(c.user!.id, limit, offset)
+      .bind(c.get('user')!.id, limit, offset)
       .all();
 
     const totalCount = await c.env.DB
       .prepare('SELECT COUNT(*) as count FROM gap_analyses WHERE user_id = ?')
-      .bind(c.user!.id)
+      .bind(c.get('user')!.id)
       .first() as any;
 
     return c.json({
@@ -626,7 +629,7 @@ analyze.post('/team', validateRequest(teamAnalysisRequestSchema), async (c: Auth
     // Format response according to API design
     const response = {
       analysis_id: teamAnalysisResult.analysis_id,
-      user_id: c.user!.id,
+      user_id: c.get('user')!.id,
       project: teamAnalysisResult.project,
       team_summary: {
         total_members: teamAnalysisResult.team_summary.total_members,
@@ -672,7 +675,7 @@ analyze.post('/team', validateRequest(teamAnalysisRequestSchema), async (c: Auth
           `)
           .bind(
             response.analysis_id,
-            c.user!.id,
+            c.get('user')!.id,
             project_requirements.name,
             response.team_summary.total_members,
             response.team_summary.overall_match,
@@ -719,7 +722,7 @@ analyze.get('/team/:analysisId', async (c: AuthenticatedContext) => {
   try {
     const analysis = await c.env.DB
       .prepare('SELECT * FROM team_analyses WHERE id = ? AND user_id = ?')
-      .bind(analysisId, c.user!.id)
+      .bind(analysisId, c.get('user')!.id)
       .first() as any;
 
     if (!analysis) {
@@ -760,12 +763,12 @@ analyze.get('/team/history', async (c: AuthenticatedContext) => {
         ORDER BY created_at DESC 
         LIMIT ? OFFSET ?
       `)
-      .bind(c.user!.id, limit, offset)
+      .bind(c.get('user')!.id, limit, offset)
       .all();
 
     const totalCount = await c.env.DB
       .prepare('SELECT COUNT(*) as count FROM team_analyses WHERE user_id = ?')
-      .bind(c.user!.id)
+      .bind(c.get('user')!.id)
       .first() as any;
 
     return c.json({
@@ -1071,7 +1074,7 @@ analyze.post('/advanced', async (c: AuthenticatedContext) => {
     }
 
     // Rate limiting check (60 seconds for advanced analysis)
-    const userId = c.user!.id;
+    const userId = c.get('user')!.id;
     const rateLimitKey = `advanced_analysis:${userId}`;
     const lastAnalysis = await c.env.CACHE.get(rateLimitKey);
 
@@ -1229,7 +1232,7 @@ analyze.post('/job', async (c: AuthenticatedContext) => {
     }
 
     // Rate limiting check
-    const userId = c.user!.id;
+    const userId = c.get('user')!.id;
     const rateLimitKey = `job_analysis:${userId}`;
     const lastAnalysis = await c.env.CACHE.get(rateLimitKey);
 
@@ -1396,7 +1399,7 @@ analyze.post('/job/compare', async (c: AuthenticatedContext) => {
     }
 
     // Rate limiting check (stricter for comparison)
-    const userId = c.user!.id;
+    const userId = c.get('user')!.id;
     const rateLimitKey = `job_comparison:${userId}`;
     const lastComparison = await c.env.CACHE.get(rateLimitKey);
 
