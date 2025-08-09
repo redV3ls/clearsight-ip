@@ -160,6 +160,14 @@ async function performAsyncAnalysis(
     // Initialize AI-powered analysis service
     const { AIAnalysisService } = await import('../services/aiAnalysisService');
     const aiAnalysisService = new AIAnalysisService(env);
+    
+    // Check if AI service is healthy
+    const aiStatus = aiAnalysisService.getAIStatus();
+    console.log(`AI service status for ${analysisId}:`, aiStatus);
+    
+    if (!aiStatus.enabled) {
+      throw new Error('AI service is not enabled - check API key configuration');
+    }
 
     // Perform AI-powered analysis using DeepSeek with timeout
     const analysisTimeout = 90000; // 90 seconds timeout
@@ -905,6 +913,33 @@ analyze.get('/trends/skills/emerging', async (c: AuthenticatedContext) => {
   } catch (error) {
     console.error('Error retrieving emerging skills:', error);
     throw new AppError('Failed to retrieve emerging skills', 500, 'EMERGING_SKILLS_RETRIEVAL_FAILED');
+  }
+});
+
+/**
+ * GET /analyze/test-ai - Test AI service status
+ */
+analyze.get('/test-ai', async (c: AuthenticatedContext) => {
+  try {
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const aiAnalysisService = new AIAnalysisService(c.env);
+    
+    const status = aiAnalysisService.getAIStatus();
+    const isHealthy = await aiAnalysisService.isAIHealthy();
+    
+    return c.json({
+      status,
+      healthy: isHealthy,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    return c.json({
+      error: {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: 'Failed to initialize AI service'
+      },
+      timestamp: new Date().toISOString()
+    }, 500);
   }
 });
 
