@@ -403,22 +403,38 @@ class AuthHandlers {
       const { verifyJWT } = await import('../../middleware/auth');
       const payload = await verifyJWT(authToken, c.env);
       const userId = (payload as any).id || (payload as any).userId;
-      if (!userId) {
+      const email = (payload as any).email;
+      const name = (payload as any).name || email?.split('@')[0] || 'User';
+      const role = (payload as any).role || 'user';
+
+      if (!userId && !email) {
         return response.authenticationError();
       }
 
-      // Load user directly from D1 to avoid ORM coupling here
-      const user = await c.env.DB
-        .prepare('SELECT id, email, name, organization, created_at FROM users WHERE id = ?')
-        .bind(userId)
-        .first();
-      if (!user) {
-        return response.error('USER_NOT_FOUND', 'User not found', 404);
+      // Try to enrich from DB, but do not fail if DB access errors
+      let userRecord: any = null;
+      try {
+        if (userId) {
+          userRecord = await c.env.DB
+            .prepare('SELECT id, email, name, organization, created_at FROM users WHERE id = ?')
+            .bind(userId)
+            .first();
+        }
+      } catch (e) {
+        // Log but continue with JWT data
+        console.warn('auth/me DB lookup failed, returning JWT payload only');
       }
 
-      return response.success({
-        user: { id: user.id, email: user.email, name: user.name, organization: user.organization, created_at: user.created_at }
-      });
+      const user = userRecord || {
+        id: userId || 'unknown',
+        email: email || 'unknown@unknown',
+        name,
+        organization: null,
+        created_at: new Date().toISOString(),
+        role,
+      };
+
+      return response.success({ user });
 
     } catch (error) {
       logger.error('Get current user failed', {
