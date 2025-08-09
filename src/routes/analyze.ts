@@ -100,7 +100,7 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     await c.env.DB
       .prepare(`
         INSERT INTO resume_analyses (
-          id, userId, analysisData, createdAt
+          id, user_id, analysis_data, created_at
         ) VALUES (?, ?, ?, ?)
       `)
       .bind(
@@ -182,8 +182,8 @@ async function performAsyncAnalysis(
     await env.DB
       .prepare(`
         UPDATE resume_analyses 
-        SET analysisData = ?, createdAt = ?
-        WHERE id = ? AND userId = ?
+        SET analysis_data = ?, created_at = ?
+        WHERE id = ? AND user_id = ?
       `)
       .bind(
         JSON.stringify(response),
@@ -219,8 +219,8 @@ async function performAsyncAnalysis(
       await env.DB
         .prepare(`
           UPDATE resume_analyses 
-          SET analysisData = ?, createdAt = ?
-          WHERE id = ? AND userId = ?
+          SET analysis_data = ?, created_at = ?
+          WHERE id = ? AND user_id = ?
         `)
         .bind(
           JSON.stringify(errorRecord),
@@ -257,28 +257,28 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
 
     const analyses = await c.env.DB
       .prepare(`
-        SELECT id, createdAt, 
-               JSON_EXTRACT(analysisData, '$.timestamp') as analysis_timestamp,
-               JSON_EXTRACT(analysisData, '$.aiPowered') as ai_powered,
-               JSON_EXTRACT(analysisData, '$.status') as status,
-               JSON_EXTRACT(analysisData, '$.skillsAnalysis.totalSkills') as total_skills
+        SELECT id, created_at, 
+               JSON_EXTRACT(analysis_data, '$.timestamp') as analysis_timestamp,
+               JSON_EXTRACT(analysis_data, '$.aiPowered') as ai_powered,
+               JSON_EXTRACT(analysis_data, '$.status') as status,
+               JSON_EXTRACT(analysis_data, '$.skillsAnalysis.totalSkills') as total_skills
         FROM resume_analyses 
-        WHERE userId = ? 
-        ORDER BY createdAt DESC 
+        WHERE user_id = ? 
+        ORDER BY created_at DESC 
         LIMIT ? OFFSET ?
       `)
       .bind(userId, limit, offset)
       .all();
 
     const totalCount = await c.env.DB
-      .prepare('SELECT COUNT(*) as count FROM resume_analyses WHERE userId = ?')
+      .prepare('SELECT COUNT(*) as count FROM resume_analyses WHERE user_id = ?')
       .bind(userId)
       .first() as any;
 
     return c.json({
       analyses: analyses.results?.map((analysis: any) => ({
         id: analysis.id,
-        created_at: analysis.createdAt,
+        created_at: analysis.created_at,
         analysis_timestamp: analysis.analysis_timestamp,
         ai_powered: analysis.ai_powered === 1 || analysis.ai_powered === true,
         status: analysis.status || 'unknown',
@@ -322,7 +322,7 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
 
   try {
     const analysis = await c.env.DB
-      .prepare('SELECT * FROM resume_analyses WHERE id = ? AND userId = ?')
+      .prepare('SELECT * FROM resume_analyses WHERE id = ? AND user_id = ?')
       .bind(analysisId, userId)
       .first() as any;
 
@@ -335,7 +335,7 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
       }, 404);
     }
 
-    const analysisData = JSON.parse(analysis.analysisData);
+    const analysisData = JSON.parse(analysis.analysis_data);
 
     // Add retrieval timestamp
     analysisData.retrieved_at = new Date().toISOString();
