@@ -1,10 +1,12 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
+import { eq } from 'drizzle-orm';
 import { Env } from '../index';
 import { validateBody, validateHeaders } from '../middleware/inputValidation';
 import { UserAuthService } from '../services/userAuthService';
 import { generateJWT } from '../middleware/auth';
 import { DatabaseManager } from '../config/database';
+import { users } from '../db/schema';
 import { AppError } from '../middleware/errorHandler';
 import { authRateLimiter } from '../middleware/rateLimiter';
 
@@ -308,13 +310,20 @@ auth.get('/me', async (c) => {
       throw new AppError('Invalid authentication token', 401, 'INVALID_TOKEN');
     }
     
-    // Get user from database
-    const db = new DatabaseManager(c.env.DB);
-    const user = await db.getUserById(userId);
+    // Get user from database using drizzle
+    const db = DatabaseManager.initialize(c.env.DB);
     
-    if (!user) {
+    const userResult = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    
+    if (userResult.length === 0) {
       throw new AppError('User not found', 404, 'USER_NOT_FOUND');
     }
+    
+    const user = userResult[0];
     
     return c.json({
       success: true,
@@ -324,7 +333,7 @@ auth.get('/me', async (c) => {
           email: user.email,
           name: user.name,
           organization: user.organization,
-          created_at: user.created_at
+          created_at: user.createdAt
         }
       }
     });
