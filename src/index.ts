@@ -249,7 +249,9 @@ import appRouter from './routes';
 app.route('/', appRouter);
 
 // Legacy v1 routes (to be migrated)
+import authRoutes from './routes/auth';
 import analyzeRoutes from './routes/analyze';
+app.route('/api/v1/auth', authRoutes);
 app.route('/api/v1/users', usersRoutes);
 app.route('/api/v1/jobs', jobsRoutes);
 app.route('/api/v1/analyze', analyzeRoutes);
