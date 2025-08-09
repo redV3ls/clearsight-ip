@@ -124,7 +124,7 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       status: 'processing',
       message: 'Analysis started successfully. Use the analysis_id to check status and retrieve results.',
       timestamp: new Date().toISOString(),
-      estimated_completion: new Date(Date.now() + 3 * 60 * 1000).toISOString(), // 3 minutes estimate
+      estimated_completion: new Date(Date.now() + 90 * 1000).toISOString(), // 90 seconds estimate
       check_status_url: `/api/v1/analyze/resume/${analysisId}`,
       history_url: '/api/v1/analyze/resume/history'
     }, 202); // 202 Accepted
@@ -161,16 +161,22 @@ async function performAsyncAnalysis(
     const { AIAnalysisService } = await import('../services/aiAnalysisService');
     const aiAnalysisService = new AIAnalysisService(env);
 
-    // Perform AI-powered analysis using DeepSeek
-    const response = await aiAnalysisService.analyzeCV(
-      content,
-      jobDescription,
-      {
-        includeSkillsGap: !!jobDescription,
-        includeCareerSuggestions: false,
-        includeIndustryTrends: false,
-      }
-    );
+    // Perform AI-powered analysis using DeepSeek with timeout
+    const analysisTimeout = 90000; // 90 seconds timeout
+    const response = await Promise.race([
+      aiAnalysisService.analyzeCV(
+        content,
+        jobDescription,
+        {
+          includeSkillsGap: !!jobDescription,
+          includeCareerSuggestions: false,
+          includeIndustryTrends: false,
+        }
+      ),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Analysis timeout after 90 seconds')), analysisTimeout)
+      )
+    ]) as any;
 
     // Set the user ID and timestamp
     response.user_id = userId;
@@ -199,6 +205,14 @@ async function performAsyncAnalysis(
     console.error(`Failed async analysis for ${analysisId}:`, error);
 
     // Update record with error status
+    let errorCode = 'AI_SERVICE_UNAVAILABLE';
+    let errorMessage = 'AI analysis failed. Please try submitting again.';
+    
+    if (error instanceof Error && error.message.includes('timeout')) {
+      errorCode = 'ANALYSIS_TIMEOUT';
+      errorMessage = 'Analysis timed out. Please try again with a shorter resume or try again later when server load is lower.';
+    }
+    
     const errorRecord = {
       analysis_id: analysisId,
       user_id: userId,
@@ -206,8 +220,8 @@ async function performAsyncAnalysis(
       status: 'failed',
       aiPowered: false,
       error: {
-        code: 'AI_SERVICE_UNAVAILABLE',
-        message: 'AI analysis failed. Please try submitting again.',
+        code: errorCode,
+        message: errorMessage,
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       metadata: {

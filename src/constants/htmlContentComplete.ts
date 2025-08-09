@@ -1416,7 +1416,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
         function startPollingForResults(analysisId) {
             let pollCount = 0;
-            const maxPolls = 60; // Poll for up to 5 minutes (60 * 5 seconds)
+            const maxPolls = 30; // Poll for up to 2.5 minutes (30 * 5 seconds)
             
             console.log('Starting polling for analysis:', analysisId);
             
@@ -1478,7 +1478,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 // Stop polling after max attempts
                 if (pollCount >= maxPolls) {
                     stopLoadingAnimation();
-                    showNotification('Analysis is taking longer than expected. Please check your analysis history.', 'warning');
+                    showNotification('Analysis timed out after 2.5 minutes. This may be due to high server load. Please try again with a shorter resume or try again later.', 'error');
                     resetToUploadScreen();
                 }
                 
