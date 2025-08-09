@@ -584,7 +584,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     </button>
                 </div>
 
-                <div class="text-center py-12">
+                <!-- Upload Section -->
+                <div id="uploadSection" class="text-center py-12">
                     <div class="mb-8">
                         <i class="fas fa-upload text-6xl text-primary mb-4"></i>
                         <h3 class="text-2xl font-bold text-white mb-4">Upload Your Resume</h3>
@@ -831,28 +832,48 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
         // Analysis functionality
         function setupAnalysisListeners() {
+            console.log('Setting up analysis listeners...');
+            
             // Analysis modal triggers
-            document.getElementById('analyzeSkillsBtn')?.addEventListener('click', handleAnalyzeSkillsClick);
-            document.getElementById('startDemoBtn')?.addEventListener('click', handleAnalyzeSkillsClick);
+            const analyzeSkillsBtn = document.getElementById('analyzeSkillsBtn');
+            const startDemoBtn = document.getElementById('startDemoBtn');
+            console.log('Found analyzeSkillsBtn:', !!analyzeSkillsBtn, 'startDemoBtn:', !!startDemoBtn);
+            
+            analyzeSkillsBtn?.addEventListener('click', handleAnalyzeSkillsClick);
+            startDemoBtn?.addEventListener('click', handleAnalyzeSkillsClick);
             
             // Modal controls
-            document.getElementById('closeAnalysisInterface')?.addEventListener('click', hideAnalysisInterface);
-            document.getElementById('analysisInterface')?.addEventListener('click', (e) => {
+            const closeAnalysisInterface = document.getElementById('closeAnalysisInterface');
+            const analysisInterface = document.getElementById('analysisInterface');
+            console.log('Found closeAnalysisInterface:', !!closeAnalysisInterface, 'analysisInterface:', !!analysisInterface);
+            
+            closeAnalysisInterface?.addEventListener('click', hideAnalysisInterface);
+            analysisInterface?.addEventListener('click', (e) => {
                 if (e.target.id === 'analysisInterface') hideAnalysisInterface();
             });
 
             // File upload
-            document.getElementById('fileUploadArea')?.addEventListener('click', () => {
-                document.getElementById('resumeFileInput')?.click();
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const resumeFileInput = document.getElementById('resumeFileInput');
+            console.log('Found fileUploadArea:', !!fileUploadArea, 'resumeFileInput:', !!resumeFileInput);
+            
+            fileUploadArea?.addEventListener('click', () => {
+                resumeFileInput?.click();
             });
             
-            document.getElementById('resumeFileInput')?.addEventListener('change', handleFileUpload);
+            resumeFileInput?.addEventListener('change', handleFileUpload);
             
             // Text area
-            document.getElementById('resumeTextArea')?.addEventListener('input', handleTextInput);
+            const resumeTextArea = document.getElementById('resumeTextArea');
+            const startAnalysisBtn = document.getElementById('startAnalysisBtn');
+            console.log('Found resumeTextArea:', !!resumeTextArea, 'startAnalysisBtn:', !!startAnalysisBtn);
+            
+            resumeTextArea?.addEventListener('input', handleTextInput);
             
             // Analysis start
-            document.getElementById('startAnalysisBtn')?.addEventListener('click', startAnalysis);
+            startAnalysisBtn?.addEventListener('click', startAnalysis);
+            
+            console.log('Analysis listeners setup complete');
         }
 
         // UI utility functions
@@ -935,16 +956,20 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             if (file) {
                 AppState.resumeFile = file;
                 AppState.resumeText = '';
-                document.getElementById('resumeTextArea').value = '';
+                
+                const resumeTextArea = document.getElementById('resumeTextArea');
+                if (resumeTextArea) resumeTextArea.value = '';
+                
                 updateAnalysisButton();
                 
                 // Show file name
                 const fileArea = document.getElementById('fileUploadArea');
-                fileArea.innerHTML = \`
-                    <i class="fas fa-file-check text-4xl text-primary mb-4"></i>
-                    <p class="text-primary mb-2">\${file.name}</p>
-                    <p class="text-sm text-gray-400">File ready for analysis</p>
-                \`;
+                if (fileArea) {
+                    fileArea.innerHTML = 
+                        '<i class="fas fa-file-check text-4xl text-primary mb-4"></i>' +
+                        '<p class="text-primary mb-2">' + file.name + '</p>' +
+                        '<p class="text-sm text-gray-400">File ready for analysis</p>';
+                }
             }
         }
 
@@ -956,11 +981,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             // Reset file upload area if text is entered
             if (AppState.resumeText.length > 0) {
                 const fileArea = document.getElementById('fileUploadArea');
-                fileArea.innerHTML = \`
-                    <i class="fas fa-file-upload text-4xl text-gray-400 mb-4"></i>
-                    <p class="text-gray-300 mb-2">Drop your resume here</p>
-                    <p class="text-sm text-gray-400">PDF, DOC, DOCX, TXT</p>
-                \`;
+                if (fileArea) {
+                    fileArea.innerHTML = 
+                        '<i class="fas fa-file-upload text-4xl text-gray-400 mb-4"></i>' +
+                        '<p class="text-gray-300 mb-2">Drop your resume here</p>' +
+                        '<p class="text-sm text-gray-400">PDF, DOC, DOCX, TXT</p>';
+                }
             }
         }
 
@@ -1309,16 +1335,25 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
         // Loading screen functions
         function showLoadingScreen() {
-            document.getElementById('uploadSection').classList.add('hidden');
-            document.getElementById('loadingSection').classList.remove('hidden');
-            document.getElementById('resultsSection').classList.add('hidden');
+            const uploadSection = document.getElementById('uploadSection');
+            const loadingSection = document.getElementById('loadingSection');
+            const resultsSection = document.getElementById('resultsSection');
+            
+            if (uploadSection) uploadSection.classList.add('hidden');
+            if (loadingSection) loadingSection.classList.remove('hidden');
+            if (resultsSection) resultsSection.classList.add('hidden');
         }
 
         window.resetToUploadScreen = function() {
             stopLoadingAnimation();
-            document.getElementById('uploadSection').classList.remove('hidden');
-            document.getElementById('loadingSection').classList.add('hidden');
-            document.getElementById('resultsSection').classList.add('hidden');
+            
+            const uploadSection = document.getElementById('uploadSection');
+            const loadingSection = document.getElementById('loadingSection');
+            const resultsSection = document.getElementById('resultsSection');
+            
+            if (uploadSection) uploadSection.classList.remove('hidden');
+            if (loadingSection) loadingSection.classList.add('hidden');
+            if (resultsSection) resultsSection.classList.add('hidden');
             
             // Reset progress
             const progressBar = document.getElementById('progressBar');
@@ -1453,8 +1488,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         function displayAnalysisResults(analysisData) {
             stopLoadingAnimation();
             
-            document.getElementById('loadingSection').classList.add('hidden');
-            document.getElementById('resultsSection').classList.remove('hidden');
+            const loadingSection = document.getElementById('loadingSection');
+            const resultsSection = document.getElementById('resultsSection');
+            
+            if (loadingSection) loadingSection.classList.add('hidden');
+            if (resultsSection) resultsSection.classList.remove('hidden');
             
             const resultsContent = document.getElementById('resultsContent');
             if (resultsContent && analysisData) {
