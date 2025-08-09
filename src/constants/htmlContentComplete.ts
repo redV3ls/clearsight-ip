@@ -1232,8 +1232,25 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 
             } catch (error) {
                 console.error('Analysis error:', error);
-                // Surface the error to the user; do not produce basic fallback analysis
-                showNotification('Analysis failed. Please try again after a moment.', 'error');
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
+                
+                // Provide more specific error messages
+                let errorMessage = 'Analysis failed. Please try again after a moment.';
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Network error: Unable to connect to analysis service. Please check your internet connection.';
+                } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+                    errorMessage = 'Authentication error: Please log in again.';
+                    hideAnalysisInterface();
+                    showAuthModal('login');
+                } else if (error.message.includes('timeout')) {
+                    errorMessage = 'Analysis timed out. Please try again with a shorter resume.';
+                }
+                
+                showNotification(errorMessage, 'error');
             } finally {
                 AppState.isAnalyzing = false;
                 button.innerHTML = originalText;
@@ -1242,6 +1259,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         }
 
         function handleAnalysisResponse(data, success) {
+            console.log('Handling analysis response:', { data, success });
+            
             if (success && data.status === 'processing') {
                 // Handle async processing response
                 AppState.currentAnalysisId = data.analysis_id;
@@ -1257,16 +1276,31 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 showNotification('Analysis completed successfully!', 'success');
             } else {
                 let errorMessage = 'Analysis failed. Please try again.';
+                let shouldShowLogin = false;
+                
                 if (data && data.error) {
                     errorMessage = data.error.message || errorMessage;
+                    console.error('Server error details:', data.error);
+                    
+                    // Check for specific error codes
+                    if (data.error.code === 'AUTH_REQUIRED' || data.error.code === 'AUTHENTICATION_REQUIRED') {
+                        errorMessage = 'Please log in to analyze your resume.';
+                        shouldShowLogin = true;
+                    } else if (data.error.code === 'AI_SERVICE_UNAVAILABLE') {
+                        errorMessage = 'AI analysis service is temporarily unavailable. Please try again later.';
+                    } else if (data.error.code === 'MISSING_CONTENT') {
+                        errorMessage = 'Please provide resume content or upload a file.';
+                    }
                 } else if (!success) {
                     errorMessage = 'Server error occurred during analysis. Please try again.';
                 }
-                console.error('Analysis error:', data);
+                
+                console.error('Analysis failed:', { data, success, errorMessage });
                 showNotification(errorMessage, 'error');
                 resetToUploadScreen();
+                
                 // If authentication error, redirect to login
-                if (data && data.error && (data.error.code === 'AUTH_REQUIRED' || data.error.code === 'AUTHENTICATION_REQUIRED')) {
+                if (shouldShowLogin) {
                     hideAnalysisInterface();
                     showAuthModal('login');
                 }
@@ -1349,8 +1383,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             let pollCount = 0;
             const maxPolls = 60; // Poll for up to 5 minutes (60 * 5 seconds)
             
+            console.log('Starting polling for analysis:', analysisId);
+            
             AppState.pollInterval = setInterval(async () => {
                 pollCount++;
+                console.log('Polling attempt', pollCount, 'for analysis:', analysisId);
                 
                 try {
                     const response = await fetch(API_ENDPOINTS.analyzeResume + '/' + analysisId, {
@@ -1358,8 +1395,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         credentials: 'include'
                     });
                     
+                    console.log('Poll response status:', response.status);
+                    
                     if (response.ok) {
                         const data = await response.json();
+                        console.log('Poll response data:', data);
                         
                         if (data.status === 'completed') {
                             // Analysis completed!
