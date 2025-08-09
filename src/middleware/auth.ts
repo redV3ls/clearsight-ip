@@ -47,31 +47,40 @@ export const generateRSAKeyPair = async (): Promise<{ privateKey: string; public
 
 // Helper function to get RSA keys from environment or KV (persistent), otherwise generate and persist
 export const getRSAKeys = async (env: Env): Promise<{ privateKey: string; publicKey: string }> => {
-  // 1) Prefer explicit keys from environment
+  // 1) Prefer explicit keys from environment (most reliable)
   if (env.JWT_PRIVATE_KEY && env.JWT_PUBLIC_KEY) {
+    console.log('Using RSA keys from environment variables');
     return {
       privateKey: env.JWT_PRIVATE_KEY,
       publicKey: env.JWT_PUBLIC_KEY,
     };
   }
 
+  console.warn('JWT_PRIVATE_KEY and JWT_PUBLIC_KEY not found in environment, falling back to KV storage');
+
   // 2) Try to load a persistent keypair from KV so tokens remain verifiable across requests/instances
   try {
     const cached = await env.CACHE.get('jwt_keys');
     if (cached) {
       const parsed = JSON.parse(cached) as { privateKey: string; publicKey: string };
-      if (parsed?.privateKey && parsed?.publicKey) return parsed;
+      if (parsed?.privateKey && parsed?.publicKey) {
+        console.log('Using RSA keys from KV cache');
+        return parsed;
+      }
     }
-  } catch {
-    // Ignore KV read errors and fall back to generation
+  } catch (error) {
+    console.error('Failed to read RSA keys from KV:', error);
   }
 
   // 3) Generate a new keypair and persist it to KV for future requests
+  console.warn('Generating new RSA keys - this may invalidate existing JWT tokens');
   const keys = await generateRSAKeyPair();
   try {
-    await env.CACHE.put('jwt_keys', JSON.stringify(keys));
-  } catch {
-    // Ignore KV write errors; keys will be ephemeral on this instance only
+    await env.CACHE.put('jwt_keys', JSON.stringify(keys), { expirationTtl: 86400 * 30 }); // 30 days
+    console.log('New RSA keys generated and cached');
+  } catch (error) {
+    console.error('Failed to cache RSA keys to KV:', error);
+    console.warn('RSA keys will be ephemeral - tokens may become invalid across worker instances');
   }
   return keys;
 };
@@ -124,9 +133,28 @@ export const verifyJWT = async (token: string, env: Env): Promise<JWTPayload> =>
     const { publicKey } = await getRSAKeys(env);
     
     // Use RS256 algorithm with public key
-    return await verify(token, publicKey, 'RS256') as JWTPayload;
+    const payload = await verify(token, publicKey, 'RS256') as JWTPayload;
+    
+    // Validate payload structure
+    if (!payload.id || !payload.email) {
+      throw new Error('Invalid JWT payload structure');
+    }
+    
+    return payload;
   } catch (error) {
     console.error('JWT verification error:', error);
+    
+    // Provide more specific error messages for debugging
+    if (error.message?.includes('expired')) {
+      throw new AppError('Authentication token has expired', 401, 'EXPIRED_TOKEN');
+    }
+    if (error.message?.includes('signature')) {
+      throw new AppError('Invalid token signature - please login again', 401, 'INVALID_SIGNATURE');
+    }
+    if (error.message?.includes('payload')) {
+      throw new AppError('Invalid token format', 401, 'INVALID_TOKEN_FORMAT');
+    }
+    
     throw new AppError('Invalid or expired authentication token', 401, 'INVALID_TOKEN');
   }
 };
