@@ -32,9 +32,12 @@ const MAX_TEXT_LENGTH = 50000; // 50k characters
  * Analyzes uploaded resume files or text against job descriptions
  */
 analyze.post('/resume', async (c: AuthenticatedContext) => {
+  console.log('Analyze resume endpoint called');
   const user = c.get('user');
+  console.log('User from context:', user ? { id: user.id, email: user.email } : 'null');
   const userId = user?.id;
   if (!userId) {
+    console.log('No user ID found, returning 401');
     return c.json({
       error: {
         code: 'AUTHENTICATION_REQUIRED',
@@ -42,22 +45,31 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       }
     }, 401);
   }
+  console.log('User authenticated, proceeding with analysis for user:', userId);
 
   const analysisId = crypto.randomUUID();
 
   try {
+    console.log('Parsing form data...');
     // Parse form data
     const formData = await c.req.formData();
     const resumeText = formData.get('resumeText') as string | null;
     const resumeFile = formData.get('resume') as File | null;
+    
+    console.log('Form data parsed - resumeText:', resumeText ? 'present' : 'null', 'resumeFile:', resumeFile ? 'present' : 'null');
 
     // Get resume content
     let content = '';
     if (resumeFile) {
+      console.log('Reading file content...');
       content = await resumeFile.text();
+      console.log('File content length:', content.length);
     } else if (resumeText) {
+      console.log('Using text content...');
       content = resumeText;
+      console.log('Text content length:', content.length);
     } else {
+      console.log('No content provided');
       return c.json({
         error: {
           code: 'MISSING_CONTENT',
@@ -117,6 +129,9 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
 
   } catch (error) {
     console.error('Analysis submission error:', error);
+    console.error('Error type:', error.constructor.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
 
     return c.json({
       error: {
