@@ -1,3 +1,11 @@
+import { i } from "vitest/dist/reporters-w_64AS5f"
+
+import { i } from "vitest/dist/reporters-w_64AS5f"
+
+import { i } from "vitest/dist/reporters-w_64AS5f"
+
+import { i } from "vitest/dist/reporters-w_64AS5f"
+
 // Complete HTML content with inline JavaScript and CSS for Cloudflare Workers
 export const HTML_CONTENT = `<!DOCTYPE html>
 <html lang="en">
