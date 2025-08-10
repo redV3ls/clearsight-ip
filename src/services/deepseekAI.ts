@@ -651,7 +651,7 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
       }
-      
+
       // If no JSON found, create a structured response from the narrative
       return {
         careerNarrative: response,
@@ -1066,7 +1066,7 @@ Make this analysis feel like a conversation with a trusted mentor who believes i
     if (skillsMatch) {
       const skillsText = skillsMatch[1];
       const skillLines = skillsText.split('\n').filter(line => line.trim() && !line.includes('Name |'));
-      
+
       skillLines.forEach(line => {
         const parts = line.split('|').map(p => p.trim());
         if (parts.length >= 4) {
@@ -1223,7 +1223,7 @@ Make this analysis feel like a conversation with a trusted mentor who believes i
       // Simple test call to verify API connectivity
       const testPrompt = "Test connection. Respond with 'OK'.";
       const response = await this.callDeepSeekAPI(testPrompt, 'health-check');
-      
+
       if (response && response.length > 0) {
         return { status: 'healthy' };
       } else {
@@ -1231,9 +1231,9 @@ Make this analysis feel like a conversation with a trusted mentor who believes i
       }
     } catch (error) {
       logger.error('Health check failed:', error);
-      return { 
-        status: 'unhealthy', 
-        message: error instanceof Error ? error.message : 'Unknown error' 
+      return {
+        status: 'unhealthy',
+        message: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
