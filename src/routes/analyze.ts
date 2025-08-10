@@ -162,12 +162,14 @@ async function performAsyncAnalysis(
   content: string,
   jobDescription: string
 ) {
+  // Initialize AI-powered analysis service outside try block so it's available in catch
+  const { AIAnalysisService } = await import('../services/aiAnalysisService');
+  let aiAnalysisService: any;
+  
   try {
     console.log(`Starting async analysis for ${analysisId}`);
-
-    // Initialize AI-powered analysis service
-    const { AIAnalysisService } = await import('../services/aiAnalysisService');
-    const aiAnalysisService = new AIAnalysisService(env);
+    
+    aiAnalysisService = new AIAnalysisService(env);
     
     // Check if AI service is healthy
     const aiStatus = aiAnalysisService.getAIStatus();
@@ -191,7 +193,7 @@ async function performAsyncAnalysis(
     }
 
     // Perform AI-powered analysis using DeepSeek with timeout
-    const analysisTimeout = 160000; // 160 seconds timeout (2.67 minutes) - slightly less than client timeout
+    const analysisTimeout = 150000; // 150 seconds timeout (2.5 minutes) - less than client timeout
     console.log(`Starting AI analysis for ${analysisId}, content length: ${content.length}, job description: ${!!jobDescription}`);
     
     const response = await Promise.race([
@@ -293,6 +295,11 @@ async function performAsyncAnalysis(
     try {
       console.log(`Attempting simplified fallback analysis for ${analysisId}`);
       
+      // Recreate AI service if it wasn't initialized
+      if (!aiAnalysisService) {
+        aiAnalysisService = new AIAnalysisService(env);
+      }
+      
       // Truncate content to a safe size for fallback
       const truncatedContent = content.length > 5000 ? content.substring(0, 5000) + '...' : content;
       
@@ -363,8 +370,43 @@ async function performAsyncAnalysis(
     };
 
     // Ensure we always update the DB record, even if serialization fails
+    await updateDatabaseWithError(env, analysisId, userId, errorRecord);
+  }
+}
+
+/**
+ * Helper function to safely update database with error status
+ */
+async function updateDatabaseWithError(env: any, analysisId: string, userId: string, errorRecord: any) {
+  try {
+    const errorJson = JSON.stringify(errorRecord);
+    await env.DB
+      .prepare(`
+        UPDATE resume_analyses 
+        SET analysis_data = ?, created_at = ?
+        WHERE id = ? AND user_id = ?
+      `)
+      .bind(
+        errorJson,
+        new Date().toISOString(),
+        analysisId,
+        userId
+      )
+      .run();
+    console.log(`Error record updated successfully for ${analysisId}`);
+  } catch (dbError) {
+    console.error(`Failed to update error record for ${analysisId}:`, dbError);
+    
+    // Last resort: update with minimal error record
     try {
-      const errorJson = JSON.stringify(errorRecord);
+      const minimalErrorRecord = {
+        analysis_id: analysisId,
+        user_id: userId,
+        timestamp: new Date().toISOString(),
+        status: 'failed',
+        error: { code: 'PROCESSING_FAILED', message: 'Analysis failed due to system error' }
+      };
+      
       await env.DB
         .prepare(`
           UPDATE resume_analyses 
@@ -372,26 +414,18 @@ async function performAsyncAnalysis(
           WHERE id = ? AND user_id = ?
         `)
         .bind(
-          errorJson,
+          JSON.stringify(minimalErrorRecord),
           new Date().toISOString(),
           analysisId,
           userId
         )
         .run();
-      console.log(`Error record updated successfully for ${analysisId}`);
-    } catch (dbError) {
-      console.error(`Failed to update error record for ${analysisId}:`, dbError);
+      console.log(`Minimal error record updated for ${analysisId}`);
+    } catch (finalError) {
+      console.error(`Critical: Could not update any error record for ${analysisId}:`, finalError);
       
-      // Last resort: update with minimal error record
+      // Absolute last resort: try to update with just status change
       try {
-        const minimalErrorRecord = {
-          analysis_id: analysisId,
-          user_id: userId,
-          timestamp: new Date().toISOString(),
-          status: 'failed',
-          error: { code: 'PROCESSING_FAILED', message: 'Analysis failed due to system error' }
-        };
-        
         await env.DB
           .prepare(`
             UPDATE resume_analyses 
@@ -399,19 +433,18 @@ async function performAsyncAnalysis(
             WHERE id = ? AND user_id = ?
           `)
           .bind(
-            JSON.stringify(minimalErrorRecord),
+            '{"status":"failed","error":{"code":"SYSTEM_ERROR","message":"Processing failed"}}',
             new Date().toISOString(),
             analysisId,
             userId
           )
           .run();
-        console.log(`Minimal error record updated for ${analysisId}`);
-      } catch (finalError) {
-        console.error(`Critical: Could not update any error record for ${analysisId}:`, finalError);
-        // At this point, the record will remain in "processing" state
-        // Consider implementing a cleanup job to handle these cases
+        console.log(`Absolute minimal error record updated for ${analysisId}`);
+      } catch (absoluteFinalError) {
+        console.error(`CRITICAL: Record ${analysisId} will remain in processing state:`, absoluteFinalError);
       }
     }
+  }
   }
 }
 
