@@ -113,8 +113,16 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     console.log('Initial record saved successfully');
 
     // Start async analysis (fire and forget)
+    console.log(`Submitting async analysis for ${analysisId} to executionCtx.waitUntil`);
+    
     c.executionCtx.waitUntil(
       performAsyncAnalysis(c.env, analysisId, userId, content, jobDescription)
+        .then(() => {
+          console.log(`Async analysis completed successfully for ${analysisId}`);
+        })
+        .catch((error) => {
+          console.error(`Async analysis failed for ${analysisId}:`, error);
+        })
     );
 
     // Return immediate response with analysis ID
@@ -1190,6 +1198,58 @@ analyze.get('/debug-recent', async (c: AuthenticatedContext) => {
         details: 'Failed to query recent analyses'
       },
       userId
+    }, 500);
+  }
+});
+
+/**
+ * GET /analyze/test-async - Test async analysis function directly
+ */
+analyze.get('/test-async', async (c: AuthenticatedContext) => {
+  const user = c.get('user');
+  const userId = user?.id;
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required' }, 401);
+  }
+
+  const testAnalysisId = crypto.randomUUID();
+  const testContent = 'John Doe\nSoftware Engineer\nSkills: JavaScript, React, Node.js\nExperience: 3 years';
+
+  try {
+    console.log(`Starting direct async analysis test for ${testAnalysisId}`);
+    
+    // Create initial record
+    const initialRecord = {
+      analysis_id: testAnalysisId,
+      user_id: userId,
+      timestamp: new Date().toISOString(),
+      status: 'processing',
+      message: 'Test analysis in progress'
+    };
+
+    await c.env.DB
+      .prepare(`INSERT INTO resume_analyses (id, user_id, analysis_data, created_at) VALUES (?, ?, ?, ?)`)
+      .bind(testAnalysisId, userId, JSON.stringify(initialRecord), new Date().toISOString())
+      .run();
+
+    // Call async analysis directly (not with waitUntil)
+    await performAsyncAnalysis(c.env, testAnalysisId, userId, testContent, '');
+
+    return c.json({
+      message: 'Direct async analysis completed',
+      analysisId: testAnalysisId,
+      checkUrl: `/api/v1/analyze/debug-db/${testAnalysisId}`
+    });
+
+  } catch (error) {
+    console.error(`Direct async analysis test failed:`, error);
+    return c.json({
+      error: {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: 'Direct async analysis test failed'
+      },
+      analysisId: testAnalysisId
     }, 500);
   }
 });
