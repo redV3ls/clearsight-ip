@@ -193,7 +193,7 @@ async function performAsyncAnalysis(
     }
 
     // Perform AI-powered analysis using DeepSeek with timeout
-    const analysisTimeout = 150000; // 150 seconds timeout (2.5 minutes) - less than client timeout
+    const analysisTimeout = 120000; // 120 seconds timeout (2 minutes) - less than client timeout
     console.log(`Starting AI analysis for ${analysisId}, content length: ${content.length}, job description: ${!!jobDescription}`);
     
     const response = await Promise.race([
@@ -218,8 +218,8 @@ async function performAsyncAnalysis(
       }),
       new Promise((_, reject) => 
         setTimeout(() => {
-          console.error(`Analysis timeout reached for ${analysisId} after 180 seconds`);
-          reject(new Error('Analysis timeout after 180 seconds'));
+          console.error(`Analysis timeout reached for ${analysisId} after ${analysisTimeout/1000} seconds`);
+          reject(new Error(`Analysis timeout after ${analysisTimeout/1000} seconds`));
         }, analysisTimeout)
       )
     ]) as any;
@@ -370,7 +370,13 @@ async function performAsyncAnalysis(
     };
 
     // Ensure we always update the DB record, even if serialization fails
-    await updateDatabaseWithError(env, analysisId, userId, errorRecord);
+    try {
+      await updateDatabaseWithError(env, analysisId, userId, errorRecord);
+      console.log(`Successfully marked analysis ${analysisId} as failed in database`);
+    } catch (dbError) {
+      console.error(`Critical: Failed to update database with error status for ${analysisId}:`, dbError);
+      // This is critical - the record will stay in "processing" state
+    }
   }
 }
 
