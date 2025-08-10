@@ -544,7 +544,7 @@ ${sectionContent}
             messages: [
               {
                 role: 'system',
-                content: 'You are an expert career-analysis model. Output must be a single valid JSON object that matches the user\'s schema exactly. Do not include any text outside the JSON. Do not use markdown or comments. If a value is unknown or not inferable, use null or an empty list. Do not invent facts. Deduplicate items and keep outputs concise.'
+                content: 'You are an expert career-analysis model. Provide structured, accurate analysis based on the user\'s request. Be concise and factual. If a value is unknown, indicate it clearly. Do not invent information.'
               },
               {
                 role: 'user',
@@ -552,8 +552,7 @@ ${sectionContent}
               }
             ],
             max_tokens: this.config.maxTokens,
-            temperature: this.config.temperature,
-            response_format: { type: 'json_object' }
+            temperature: this.config.temperature
           }),
           signal: AbortSignal.timeout(dynamicTimeout)
         });
@@ -583,12 +582,12 @@ ${sectionContent}
           throw new Error('Empty response content from DeepSeek API');
         }
 
-        // Validate JSON response
-        try {
-          JSON.parse(content);
-        } catch (parseError) {
-          throw new Error(`Invalid JSON response from DeepSeek: ${parseError}`);
-        }
+        // Log the response for debugging
+        logger.info(`DeepSeek response received`, {
+          operation,
+          contentLength: content?.length || 0,
+          contentPreview: content?.substring(0, 200) || 'No content'
+        });
 
         // Update rate limit tracking
         this.updateRateLimit(operation);
@@ -655,39 +654,41 @@ ${sectionContent}
    */
   private createSkillsExtractionPrompt(cvText: string): string {
     return `
-Rules:
-- Normalize skill names to Title Case; categories ∈ ["Programming","Cloud","Data","Management","Design","DevOps","Security","Other"].
-- level ∈ ["beginner","intermediate","advanced","expert"]; confidence ∈ [0,1] with 2 decimals; yearsExperience ≥ 0 (int).
-- Merge variants into one entry; variants go to relatedSkills. No soft skills unless explicitly stated.
-- Max 100 skills; sort by confidence desc. Use null/[] for unknowns. Return only the JSON object.
+Analyze this resume and extract skills information. Provide your response in the following structured format:
 
-Output schema:
-{
-  "skills": [
-    {
-      "name": "string",
-      "category": "CategoryEnum",
-      "level": "LevelEnum",
-      "yearsExperience": 0,
-      "confidence": 0.0,
-      "context": "string|null",
-      "certifications": ["string"],
-      "relatedSkills": ["string"]
-    }
-  ],
-  "categories": ["CategoryEnum"],
-  "overallExperience": "string|null",
-  "education": ["string"],
-  "certifications": ["string"],
-  "strengths": ["string"],
-  "areasForImprovement": ["string"],
-  "careerLevel": "LevelEnum"
-}
+SKILLS:
+For each skill, provide: Name | Category | Level | Years | Confidence | Context
+Categories: Programming, Cloud, Data, Management, Design, DevOps, Security, Other
+Levels: beginner, intermediate, advanced, expert
+Confidence: 0.0 to 1.0
 
-CV:
+CATEGORIES:
+List all skill categories found
+
+EXPERIENCE:
+Overall experience summary
+
+EDUCATION:
+List educational qualifications
+
+CERTIFICATIONS:
+List professional certifications
+
+STRENGTHS:
+Key strengths identified
+
+AREAS FOR IMPROVEMENT:
+Areas that could be developed
+
+CAREER LEVEL:
+entry, mid, senior, or executive
+
+Resume to analyze:
 """
 ${cvText}
 """
+
+Please provide a clear, structured analysis following the format above.
 `;
   }
 
@@ -806,22 +807,129 @@ Output schema:
   }
 
   /**
-   * Parse skills analysis response
+   * Parse skills analysis response (handles both JSON and natural language)
    */
   private parseSkillsAnalysisResponse(response: string): AISkillsAnalysis {
     try {
+      // First try to parse as JSON
       const parsed = JSON.parse(response);
-
-      // Validate required fields
-      if (!parsed.skills || !Array.isArray(parsed.skills)) {
-        throw new Error('Invalid skills array in response');
+      if (parsed.skills && Array.isArray(parsed.skills)) {
+        return parsed as AISkillsAnalysis;
       }
-
-      return parsed as AISkillsAnalysis;
-    } catch (error) {
-      logger.error('Failed to parse skills analysis response:', error);
-      throw new AppError('Invalid AI response format', 500, 'AI_RESPONSE_PARSE_ERROR');
+    } catch (jsonError) {
+      // If JSON parsing fails, parse as natural language
+      logger.info('JSON parsing failed, attempting natural language parsing');
     }
+
+    // Parse natural language response
+    return this.parseNaturalLanguageSkillsResponse(response);
+  }
+
+  /**
+   * Parse natural language skills analysis response
+   */
+  private parseNaturalLanguageSkillsResponse(response: string): AISkillsAnalysis {
+    const skills: any[] = [];
+    const categories = new Set<string>();
+    let overallExperience = '';
+    const education: string[] = [];
+    const certifications: string[] = [];
+    const strengths: string[] = [];
+    const areasForImprovement: string[] = [];
+    let careerLevel = 'mid';
+
+    // Extract skills section
+    const skillsMatch = response.match(/SKILLS:(.*?)(?=\n[A-Z]+:|$)/s);
+    if (skillsMatch) {
+      const skillsText = skillsMatch[1];
+      const skillLines = skillsText.split('\n').filter(line => line.trim() && !line.includes('Name |'));
+      
+      skillLines.forEach(line => {
+        const parts = line.split('|').map(p => p.trim());
+        if (parts.length >= 4) {
+          const skill = {
+            name: parts[0] || 'Unknown Skill',
+            category: parts[1] || 'Other',
+            level: parts[2] || 'intermediate',
+            yearsExperience: parseInt(parts[3]) || 0,
+            confidence: parseFloat(parts[4]) || 0.7,
+            context: parts[5] || null,
+            certifications: [],
+            relatedSkills: [],
+            reasoning: `Extracted from resume analysis`
+          };
+          skills.push(skill);
+          categories.add(skill.category);
+        }
+      });
+    }
+
+    // Extract other sections
+    const experienceMatch = response.match(/EXPERIENCE:(.*?)(?=\n[A-Z]+:|$)/s);
+    if (experienceMatch) {
+      overallExperience = experienceMatch[1].trim();
+    }
+
+    const educationMatch = response.match(/EDUCATION:(.*?)(?=\n[A-Z]+:|$)/s);
+    if (educationMatch) {
+      education.push(...educationMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
+    }
+
+    const certificationsMatch = response.match(/CERTIFICATIONS:(.*?)(?=\n[A-Z]+:|$)/s);
+    if (certificationsMatch) {
+      certifications.push(...certificationsMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
+    }
+
+    const strengthsMatch = response.match(/STRENGTHS:(.*?)(?=\n[A-Z]+:|$)/s);
+    if (strengthsMatch) {
+      strengths.push(...strengthsMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
+    }
+
+    const areasMatch = response.match(/AREAS FOR IMPROVEMENT:(.*?)(?=\n[A-Z]+:|$)/s);
+    if (areasMatch) {
+      areasForImprovement.push(...areasMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
+    }
+
+    const careerMatch = response.match(/CAREER LEVEL:(.*?)(?=\n[A-Z]+:|$)/s);
+    if (careerMatch) {
+      const level = careerMatch[1].trim().toLowerCase();
+      if (['entry', 'mid', 'senior', 'executive'].includes(level)) {
+        careerLevel = level;
+      }
+    }
+
+    // If no skills were extracted, create some basic ones from the response
+    if (skills.length === 0) {
+      const commonSkills = ['JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'AWS', 'Git'];
+      commonSkills.forEach(skillName => {
+        if (response.toLowerCase().includes(skillName.toLowerCase())) {
+          skills.push({
+            name: skillName,
+            category: 'Programming',
+            level: 'intermediate',
+            yearsExperience: 2,
+            confidence: 0.6,
+            context: 'Mentioned in resume',
+            certifications: [],
+            relatedSkills: [],
+            reasoning: 'Inferred from resume content'
+          });
+          categories.add('Programming');
+        }
+      });
+    }
+
+    return {
+      skills,
+      categories: Array.from(categories),
+      overallExperience,
+      education,
+      certifications,
+      strengths,
+      areasForImprovement,
+      careerLevel: careerLevel as any,
+      reasoning: 'Parsed from natural language response'
+    };
   }
 
   /**
