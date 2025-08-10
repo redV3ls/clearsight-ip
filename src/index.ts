@@ -54,20 +54,37 @@ app.use('*', environmentValidationMiddleware);
 app.use('*', performanceTrackingMiddleware);
 app.use('*', logger());
 app.use('*', prettyJSON());
-// Re-enable secure headers with a permissive but explicit CSP
-import { secureHeaders } from 'hono/secure-headers';
-app.use('*', secureHeaders({
-  contentSecurityPolicy: (
-    "default-src 'self' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com data: blob:; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; " +
-    "style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
-    "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
-    "img-src 'self' data: https:; " +
-    "connect-src 'self' https: https://static.cloudflareinsights.com; " +
-    "object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
-  ),
-  crossOriginEmbedderPolicy: false,
-}));
+// Content Security Policy middleware (explicit and valid)
+// We set the header directly to avoid any library serialization quirks.
+app.use('*', async (c, next) => {
+  const csp = [
+    "default-src 'self'",
+    // Scripts we actually use: Tailwind CDN, Cloudflare Insights. Inline allowed for our HTML template.
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://static.cloudflareinsights.com",
+    // Styles from Google Fonts/Cdnjs plus inline style attributes in our HTML
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
+    // Fonts loaded from Google Fonts and cdnjs; allow data: for inlined fonts if any
+    "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:",
+    // Images from self or any https origin; allow data URIs for inline icons
+    "img-src 'self' https: data:",
+    // API/network calls to same origin and any https endpoints (e.g., AI providers) + Cloudflare Insights
+    "connect-src 'self' https: https://static.cloudflareinsights.com",
+    // Disallow embedding/objects/frames
+    "object-src 'none'",
+    "frame-src 'none'",
+    "frame-ancestors 'none'",
+    // Restrict form submits and base URI
+    "form-action 'self'",
+    "base-uri 'self'",
+    // Optional: upgrade any http content to https (safe on Workers)
+    'upgrade-insecure-requests'
+  ].join('; ');
+
+  c.header('Content-Security-Policy', csp);
+  // Keep COEP disabled to avoid issues with third-party resources
+  c.header('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  await next();
+});
 
 // CORS configuration
 // Previous configuration was too restrictive for workers.dev and caused browser CORS failures.
