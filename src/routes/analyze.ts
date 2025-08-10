@@ -178,7 +178,7 @@ async function performAsyncAnalysis(
     }
 
     // Perform AI-powered analysis using DeepSeek with timeout
-    const analysisTimeout = 90000; // 90 seconds timeout
+    const analysisTimeout = 150000; // 150 seconds timeout (2.5 minutes)
     const response = await Promise.race([
       aiAnalysisService.analyzeCV(
         content,
@@ -190,7 +190,7 @@ async function performAsyncAnalysis(
         }
       ),
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Analysis timeout after 90 seconds')), analysisTimeout)
+        setTimeout(() => reject(new Error('Analysis timeout after 150 seconds')), analysisTimeout)
       )
     ]) as any;
 
