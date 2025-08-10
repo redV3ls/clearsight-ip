@@ -178,7 +178,9 @@ async function performAsyncAnalysis(
     }
 
     // Perform AI-powered analysis using DeepSeek with timeout
-    const analysisTimeout = 150000; // 150 seconds timeout (2.5 minutes)
+    const analysisTimeout = 180000; // 180 seconds timeout (3 minutes)
+    console.log(`Starting AI analysis for ${analysisId}, content length: ${content.length}, job description: ${!!jobDescription}`);
+    
     const response = await Promise.race([
       aiAnalysisService.analyzeCV(
         content,
@@ -188,9 +190,18 @@ async function performAsyncAnalysis(
           includeCareerSuggestions: false,
           includeIndustryTrends: false,
         }
-      ),
+      ).then(result => {
+        console.log(`AI analysis completed for ${analysisId}, skills found: ${result.skillsAnalysis.skills.length}`);
+        return result;
+      }).catch(error => {
+        console.error(`AI analysis failed for ${analysisId}:`, error);
+        throw error;
+      }),
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Analysis timeout after 150 seconds')), analysisTimeout)
+        setTimeout(() => {
+          console.error(`Analysis timeout reached for ${analysisId} after 180 seconds`);
+          reject(new Error('Analysis timeout after 180 seconds'));
+        }, analysisTimeout)
       )
     ]) as any;
 
@@ -260,6 +271,54 @@ async function performAsyncAnalysis(
 
   } catch (error) {
     console.error(`Failed async analysis for ${analysisId}:`, error);
+
+    // Try a simplified analysis as fallback
+    try {
+      console.log(`Attempting simplified fallback analysis for ${analysisId}`);
+      
+      // Truncate content to a safe size for fallback
+      const truncatedContent = content.length > 5000 ? content.substring(0, 5000) + '...' : content;
+      
+      const fallbackResponse = await aiAnalysisService.analyzeCV(
+        truncatedContent,
+        '', // No job description for fallback
+        {
+          includeSkillsGap: false,
+          includeCareerSuggestions: false,
+          includeIndustryTrends: false,
+        }
+      );
+
+      // Mark as partial analysis
+      fallbackResponse.user_id = userId;
+      fallbackResponse.timestamp = new Date().toISOString();
+      fallbackResponse.analysis_id = analysisId;
+      fallbackResponse.status = 'completed';
+      fallbackResponse.metadata.fallbackUsed = true;
+      fallbackResponse.metadata.note = 'Partial analysis due to processing constraints. Full analysis may be available with shorter content.';
+
+      const fallbackJson = JSON.stringify(fallbackResponse);
+      
+      await env.DB
+        .prepare(`
+          UPDATE resume_analyses 
+          SET analysis_data = ?, created_at = ?
+          WHERE id = ? AND user_id = ?
+        `)
+        .bind(
+          fallbackJson,
+          new Date().toISOString(),
+          analysisId,
+          userId
+        )
+        .run();
+
+      console.log(`Fallback analysis completed successfully for ${analysisId}`);
+      return; // Exit successfully with fallback result
+      
+    } catch (fallbackError) {
+      console.error(`Fallback analysis also failed for ${analysisId}:`, fallbackError);
+    }
 
     // Update record with error status
     let errorCode = 'AI_SERVICE_UNAVAILABLE';
@@ -1360,6 +1419,110 @@ analyze.get('/test-deepseek', async (c: AuthenticatedContext) => {
       error: 'DeepSeek API test failed',
       details: errorDetails,
       timestamp: new Date().toISOString()
+    }, 500);
+  }
+});
+
+/**
+ * GET /analyze/test-chunking - Test the new chunking functionality with a sample resume
+ */
+analyze.get('/test-chunking', async (c: AuthenticatedContext) => {
+  try {
+    console.log('Starting chunking test');
+    
+    const sampleResume = `
+PROFESSIONAL SUMMARY
+Experienced Software Engineer with 8+ years of experience in full-stack development, cloud architecture, and team leadership. Proven track record of delivering scalable web applications using modern technologies including React, Node.js, Python, and AWS. Strong background in agile methodologies and cross-functional collaboration.
+
+TECHNICAL SKILLS
+Programming Languages: JavaScript, TypeScript, Python, Java, C#, SQL
+Frontend Technologies: React, Vue.js, Angular, HTML5, CSS3, SASS, Bootstrap, Tailwind CSS
+Backend Technologies: Node.js, Express.js, Django, Flask, Spring Boot, .NET Core
+Databases: PostgreSQL, MySQL, MongoDB, Redis, DynamoDB
+Cloud Platforms: AWS (EC2, S3, Lambda, RDS, CloudFormation), Azure, Google Cloud Platform
+DevOps Tools: Docker, Kubernetes, Jenkins, GitLab CI/CD, Terraform, Ansible
+Version Control: Git, GitHub, GitLab, Bitbucket
+Testing: Jest, Cypress, Selenium, PyTest, JUnit
+
+PROFESSIONAL EXPERIENCE
+
+Senior Software Engineer | TechCorp Inc. | 2020 - Present
+• Led development of microservices architecture serving 1M+ daily active users
+• Implemented CI/CD pipelines reducing deployment time by 75%
+• Mentored junior developers and conducted code reviews
+• Technologies: React, Node.js, PostgreSQL, AWS, Docker, Kubernetes
+
+Software Engineer | StartupXYZ | 2018 - 2020
+• Built responsive web applications using React and Redux
+• Developed RESTful APIs with Node.js and Express
+• Optimized database queries improving performance by 40%
+• Technologies: React, Node.js, MongoDB, AWS Lambda
+
+Junior Developer | WebSolutions Ltd. | 2016 - 2018
+• Developed and maintained client websites using HTML, CSS, JavaScript
+• Collaborated with design team to implement pixel-perfect UIs
+• Fixed bugs and implemented new features based on client requirements
+• Technologies: HTML5, CSS3, JavaScript, PHP, MySQL
+
+EDUCATION
+Bachelor of Science in Computer Science
+University of Technology | 2012 - 2016
+Relevant Coursework: Data Structures, Algorithms, Database Systems, Software Engineering
+
+CERTIFICATIONS
+• AWS Certified Solutions Architect - Associate (2021)
+• Certified Kubernetes Administrator (2020)
+• Google Cloud Professional Cloud Architect (2019)
+
+PROJECTS
+E-commerce Platform (2021)
+• Built full-stack e-commerce application with React frontend and Node.js backend
+• Implemented payment processing with Stripe API
+• Deployed on AWS with auto-scaling capabilities
+• Technologies: React, Node.js, PostgreSQL, AWS, Docker
+
+Task Management App (2020)
+• Developed real-time collaborative task management application
+• Implemented WebSocket connections for live updates
+• Used Redux for state management and Material-UI for components
+• Technologies: React, Redux, Socket.io, Node.js, MongoDB
+    `.trim();
+
+    // Initialize AI service
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const aiService = new AIAnalysisService(c.env);
+    
+    console.log('AI service initialized, starting analysis...');
+    const startTime = Date.now();
+    
+    // Test the chunking analysis
+    const result = await aiService.analyzeCV(sampleResume, '', {
+      includeSkillsGap: false,
+      includeCareerSuggestions: false,
+      includeIndustryTrends: false,
+    });
+    
+    const processingTime = Date.now() - startTime;
+    console.log(`Chunking test completed in ${processingTime}ms`);
+
+    return c.json({
+      success: true,
+      message: 'Chunking test completed successfully',
+      processingTime,
+      skillsFound: result.skillsAnalysis.skills.length,
+      categoriesFound: result.skillsAnalysis.categories.length,
+      sampleSkills: result.skillsAnalysis.skills.slice(0, 10).map(s => s.name),
+      metadata: result.metadata
+    });
+
+  } catch (error) {
+    console.error('Chunking test failed:', error);
+    return c.json({
+      success: false,
+      error: {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        type: error instanceof Error ? error.constructor.name : 'UnknownError'
+      }
     }, 500);
   }
 });
