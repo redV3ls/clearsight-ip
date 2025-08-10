@@ -267,45 +267,36 @@ export class DeepSeekAIService {
    */
   private createSkillsExtractionPrompt(cvText: string): string {
     return `
-Analyze the following CV/resume text and extract comprehensive skills information. Use your reasoning capabilities to understand context, infer experience levels, and identify both explicit and implicit skills.
-
-CV Text:
-"""
-${cvText}
-"""
-
-Please provide a detailed analysis in the following JSON format:
+Analyze the following resume and extract skills information. Respond with valid JSON in this exact format:
 
 {
   "skills": [
     {
-      "name": "skill name (normalized)",
-      "category": "category (Programming, Cloud, Data, Management, Design, etc.)",
+      "name": "skill name",
+      "category": "Programming|Web Development|Database|Cloud|Management|Design|Other",
       "level": "beginner|intermediate|advanced|expert",
-      "yearsExperience": number,
-      "confidence": 0.0-1.0,
-      "context": "where/how this skill was mentioned",
-      "certifications": ["related certifications"],
-      "relatedSkills": ["complementary skills"],
-      "reasoning": "why you classified it this way"
+      "yearsExperience": 0,
+      "confidence": 0.8,
+      "context": "brief context",
+      "certifications": [],
+      "relatedSkills": [],
+      "reasoning": "brief reason"
     }
   ],
-  "categories": ["unique categories found"],
-  "overallExperience": "summary of overall experience level",
-  "education": ["educational background"],
-  "certifications": ["all certifications found"],
-  "strengths": ["key strengths identified"],
-  "areasForImprovement": ["potential areas to develop"],
+  "categories": ["unique categories"],
+  "overallExperience": "brief summary",
+  "education": ["education items"],
+  "certifications": ["certifications"],
+  "strengths": ["key strengths"],
+  "areasForImprovement": ["areas to improve"],
   "careerLevel": "entry|mid|senior|executive",
-  "reasoning": "overall reasoning for the analysis"
+  "reasoning": "brief analysis"
 }
 
-Focus on:
-1. Extracting both technical and soft skills
-2. Inferring experience levels from context clues
-3. Identifying transferable skills
-4. Understanding industry-specific terminology
-5. Recognizing implicit skills from job descriptions and achievements
+Resume:
+"""
+${cvText}
+"""
 `;
   }
 
@@ -314,54 +305,47 @@ Focus on:
    */
   private createJobAnalysisPrompt(jobText: string): string {
     return `
-Analyze the following job description and extract comprehensive requirements and insights. Use advanced reasoning to understand implicit requirements, industry context, and market positioning.
-
-Job Description:
-"""
-${jobText}
-"""
-
-Please provide a detailed analysis in the following JSON format:
+Analyze the following job description and extract key requirements. Respond with valid JSON:
 
 {
-  "jobTitle": "extracted job title",
-  "company": "company name if mentioned",
-  "industry": "industry/sector (Technology, Healthcare, Finance, etc.)",
+  "jobTitle": "job title",
+  "company": "company name",
+  "industry": "industry",
   "experienceLevel": "entry|mid|senior|executive",
   "skillRequirements": [
     {
-      "skill": "skill name (normalized to industry standards)",
-      "category": "Programming|Cloud|Data|Management|Design|Security|DevOps|etc.",
+      "skill": "skill name",
+      "category": "Programming|Cloud|Data|Management|Design|Other",
       "importance": "critical|important|nice-to-have",
       "minimumLevel": "beginner|intermediate|advanced|expert",
-      "yearsRequired": number or null,
-      "context": "exact context from job description",
-      "reasoning": "detailed reasoning for classification and importance",
-      "confidence": 0.0-1.0,
+      "yearsRequired": 0,
+      "context": "brief context",
+      "reasoning": "brief reason",
+      "confidence": 0.8,
       "marketDemand": "high|medium|low",
       "salaryImpact": "high|medium|low|neutral"
     }
   ],
-  "softSkills": ["communication", "leadership", "problem-solving", etc.],
-  "responsibilities": ["key responsibilities extracted"],
-  "benefits": ["benefits and perks mentioned"],
-  "salaryRange": {"min": number, "max": number, "currency": "USD"} or null,
+  "softSkills": ["communication", "teamwork"],
+  "responsibilities": ["key responsibilities"],
+  "benefits": ["benefits mentioned"],
+  "salaryRange": {"min": 0, "max": 0, "currency": "USD"},
   "workArrangement": "remote|hybrid|onsite|flexible",
-  "companySize": "startup|small|medium|large|enterprise" or null,
-  "teamStructure": "individual|small-team|large-team|cross-functional" or null,
-  "growthOpportunities": ["career advancement opportunities mentioned"],
-  "culturalFit": ["cultural values and work environment indicators"],
+  "companySize": "startup|small|medium|large|enterprise",
+  "teamStructure": "individual|small-team|large-team|cross-functional",
+  "growthOpportunities": ["opportunities"],
+  "culturalFit": ["cultural aspects"],
   "urgencyLevel": "urgent|normal|flexible",
-  "competitiveAdvantages": ["unique selling points of the role"],
-  "redFlags": ["potential concerns or warning signs"],
+  "competitiveAdvantages": ["advantages"],
+  "redFlags": ["concerns"],
   "implicitRequirements": [
     {
-      "skill": "inferred skill name",
-      "reasoning": "why this skill is likely required",
-      "confidence": 0.0-1.0
+      "skill": "skill name",
+      "reasoning": "brief reason",
+      "confidence": 0.8
     }
   ],
-  "reasoning": "comprehensive reasoning for the entire analysis including industry context and market positioning"
+  "reasoning": "brief analysis"
 }
 
 Advanced Analysis Instructions:
@@ -419,7 +403,7 @@ Advanced Analysis Instructions:
    */
   private createGapAnalysisPrompt(skillsAnalysis: AISkillsAnalysis, jobAnalysis: AIJobAnalysis): string {
     return `
-Perform an intelligent gap analysis between the candidate's skills and job requirements. Use reasoning to provide actionable insights and personalized recommendations.
+Compare candidate skills with job requirements. Respond with valid JSON:
 
 Candidate Skills:
 ${JSON.stringify(skillsAnalysis, null, 2)}
@@ -427,7 +411,7 @@ ${JSON.stringify(skillsAnalysis, null, 2)}
 Job Requirements:
 ${JSON.stringify(jobAnalysis, null, 2)}
 
-Please provide a comprehensive gap analysis in the following JSON format:
+Response format:
 
 {
   "overallMatch": 0-100,
@@ -494,12 +478,6 @@ Please provide a comprehensive gap analysis in the following JSON format:
   "reasoning": "overall reasoning for the gap analysis"
 }
 
-Focus on:
-1. Providing actionable, specific recommendations
-2. Considering market demand and trends
-3. Identifying quick wins and long-term goals
-4. Recognizing transferable skills and experience
-5. Providing realistic timelines and difficulty assessments
 `;
   }
 
