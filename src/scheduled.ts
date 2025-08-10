@@ -77,24 +77,24 @@ export default async function scheduled(
       },
     });
 
-    // Store metrics for monitoring
-    await storeScheduledRunMetrics(env, {
-      timestamp: event.scheduledTime,
-      duration,
-      jobsProcessed: stats.totalProcessed,
-      jobsFailed: stats.totalFailed,
-      queueSize: stats.currentQueueSize,
-    });
+    // Store metrics for monitoring (disabled to avoid KV quota)
+    // await storeScheduledRunMetrics(env, {
+    //   timestamp: event.scheduledTime,
+    //   duration,
+    //   jobsProcessed: stats.totalProcessed,
+    //   jobsFailed: stats.totalFailed,
+    //   queueSize: stats.currentQueueSize,
+    // });
 
   } catch (error) {
     logger.error('Scheduled tasks error:', error);
     
-    // Store error metrics
-    await storeScheduledRunMetrics(env, {
-      timestamp: event.scheduledTime,
-      duration: Date.now() - startTime,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    // Store error metrics (disabled to avoid KV quota)
+    // await storeScheduledRunMetrics(env, {
+    //   timestamp: event.scheduledTime,
+    //   duration: Date.now() - startTime,
+    //   error: error instanceof Error ? error.message : 'Unknown error',
+    // });
   }
 }
 

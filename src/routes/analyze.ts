@@ -206,10 +206,10 @@ async function performAsyncAnalysis(
           includeIndustryTrends: false,
         }
       ).then(result => {
-        console.log(`AI analysis completed for ${analysisId}, skills found: ${result.skillsAnalysis?.skills?.length || 0}`);
+        console.log(`✅ CHECKPOINT: AI analysis completed for ${analysisId}, skills found: ${result.skillsAnalysis?.skills?.length || 0}`);
         return result;
       }).catch(error => {
-        console.error(`AI analysis failed for ${analysisId}:`, {
+        console.error(`❌ CHECKPOINT: AI analysis failed for ${analysisId}:`, {
           error: error.message,
           stack: error.stack,
           name: error.name
@@ -258,14 +258,14 @@ async function performAsyncAnalysis(
         )
         .run();
 
-      console.log(`Database update result for ${analysisId}:`, {
+      console.log(`✅ CHECKPOINT: Database update result for ${analysisId}:`, {
         success: updateResult.success,
         changes: updateResult.changes,
         meta: updateResult.meta
       });
 
       if (updateResult.changes === 0) {
-        console.error(`No rows updated for ${analysisId} - record may not exist or user mismatch`);
+        console.error(`❌ CRITICAL: No rows updated for ${analysisId} - record may not exist or user mismatch`);
         throw new Error('Database update failed - no rows affected');
       }
 
@@ -282,7 +282,7 @@ async function performAsyncAnalysis(
         console.error(`Verification failed: Record ${analysisId} not found after update`);
       }
 
-      console.log(`Successfully completed async analysis for ${analysisId}`);
+      console.log(`✅ FINAL CHECKPOINT: Successfully completed async analysis for ${analysisId}`);
     } catch (dbError) {
       console.error(`Database update failed for ${analysisId}:`, dbError);
       throw dbError;
