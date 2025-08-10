@@ -272,68 +272,14 @@ async function performAsyncAnalysis(
   } catch (error) {
     console.error(`Failed async analysis for ${analysisId}:`, error);
 
-    // Try a simplified analysis as fallback
-    try {
-      console.log(`Attempting simplified fallback analysis for ${analysisId}`);
-      
-      // Recreate AI service if it wasn't initialized
-      if (!aiAnalysisService) {
-        aiAnalysisService = new AIAnalysisService(env);
-      }
-      
-      // Truncate content to a safe size for fallback
-      const truncatedContent = content.length > 5000 ? content.substring(0, 5000) + '...' : content;
-      
-      const fallbackResponse = await aiAnalysisService.analyzeCV(
-        truncatedContent,
-        '', // No job description for fallback
-        {
-          includeSkillsGap: false,
-          includeCareerSuggestions: false,
-          includeIndustryTrends: false,
-        }
-      );
-
-      // Mark as partial analysis
-      fallbackResponse.user_id = userId;
-      fallbackResponse.timestamp = new Date().toISOString();
-      fallbackResponse.analysis_id = analysisId;
-      fallbackResponse.status = 'completed';
-      fallbackResponse.metadata.fallbackUsed = true;
-      fallbackResponse.metadata.note = 'Partial analysis due to processing constraints. Full analysis may be available with shorter content.';
-
-      const fallbackJson = JSON.stringify(fallbackResponse);
-      
-      await env.DB
-        .prepare(`
-          UPDATE resume_analyses 
-          SET analysis_data = ?, created_at = ?
-          WHERE id = ? AND user_id = ?
-        `)
-        .bind(
-          fallbackJson,
-          new Date().toISOString(),
-          analysisId,
-          userId
-        )
-        .run();
-
-      console.log(`Fallback analysis completed successfully for ${analysisId}`);
-      return; // Exit successfully with fallback result
-      
-    } catch (fallbackError) {
-      console.error(`Fallback analysis also failed for ${analysisId}:`, fallbackError);
-    }
-
-    // Update record with error status
+    // No fallback: if AI fails, mark as failed immediately
     let errorCode = 'AI_SERVICE_UNAVAILABLE';
     let errorMessage = 'AI analysis failed. Please try submitting again.';
-    
     if (error instanceof Error && error.message.includes('timeout')) {
       errorCode = 'ANALYSIS_TIMEOUT';
-      errorMessage = 'Analysis timed out. Please try again with a shorter resume or try again later when server load is lower.';
+      errorMessage = 'Analysis timed out. Please try again later.';
     }
-    
+
     const errorRecord = {
       analysis_id: analysisId,
       user_id: userId,
@@ -350,10 +296,9 @@ async function performAsyncAnalysis(
       }
     };
 
-    // Ensure we always update the DB record, even if serialization fails
     try {
       await updateDatabaseWithError(env, analysisId, userId, errorRecord);
-      console.log(`Successfully marked analysis ${analysisId} as failed in database`);
+      console.log(`❌ FINAL: Analysis ${analysisId} marked as failed in database`);
     } catch (dbError) {
       console.error(`Critical: Failed to update database with error status for ${analysisId}:`, dbError);
       // This is critical - the record will stay in "processing" state
