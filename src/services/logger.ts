@@ -202,8 +202,8 @@ export class Logger {
       console[consoleMethod](this.formatMessage(entry));
     }
 
-    // Log to KV
-    await this.logToKV(entry);
+    // KV logging disabled to avoid quota issues
+    // await this.logToKV(entry);
   }
 
   debug(message: string, context?: any): void {

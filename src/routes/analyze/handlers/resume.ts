@@ -174,23 +174,61 @@ export async function resumeHandler(c: AuthenticatedContext): Promise<Response> 
 }
 
 /**
- * Helper to set/get resume analysis status in KV
+ * Helper to set resume analysis status - D1 first, KV optional cache
  */
 async function setResumeStatus(c: AuthenticatedContext, id: string, value: any): Promise<void> {
+  // D1 is the source of truth - this should already be handled by the main DB operations
+  // KV is just an optional cache for faster reads
   try {
     await c.env.CACHE.put(`resume:${id}`, JSON.stringify(value), { expirationTtl: 60 * 60 }); // 1 hour
   } catch (e) {
-    logger.warn('Failed to write resume status to KV', e);
+    // KV failures should not break the flow - D1 is authoritative
+    console.warn('KV cache write failed (non-critical):', e.message);
   }
 }
 
 export async function getResumeStatusHandler(c: AuthenticatedContext): Promise<Response> {
   const id = c.req.param('id');
+  const forceDb = c.req.query('source') === 'db'; // Debug param to force D1 read
+  
   try {
-    // First check KV status
-    const raw = await c.env.CACHE.get(`resume:${id}`);
-    if (raw) {
-      const data = JSON.parse(raw);
+    let data = null;
+    
+    // Try KV cache first (unless forced to use DB)
+    if (!forceDb) {
+      try {
+        const raw = await c.env.CACHE.get(`resume:${id}`);
+        if (raw) {
+          data = JSON.parse(raw);
+        }
+      } catch (kvError) {
+        console.warn('KV read failed (non-critical), falling back to D1:', kvError.message);
+      }
+    }
+    
+    // If no KV data or forced DB read, check D1 (authoritative source)
+    if (!data) {
+      try {
+        const row = await c.env.DB.prepare('SELECT analysis_data FROM resume_analyses WHERE id = ? LIMIT 1').bind(id).first<{ analysis_data: string }>();
+        if (row?.analysis_data) {
+          const parsed = JSON.parse(row.analysis_data);
+          data = parsed;
+          
+          // Optionally cache in KV for future reads (ignore failures)
+          try {
+            await c.env.CACHE.put(`resume:${id}`, JSON.stringify(data), { expirationTtl: 60 * 60 });
+          } catch (kvError) {
+            console.warn('KV cache write failed (non-critical):', kvError.message);
+          }
+        }
+      } catch (dbErr) {
+        console.error('D1 lookup failed:', dbErr);
+        return c.json({ status: 'failed', analysis_id: id, error: 'Database error' }, 500);
+      }
+    }
+    
+    // Return appropriate response based on data
+    if (data) {
       if (data.status === 'completed') {
         return c.json(data, 200);
       }
@@ -200,21 +238,11 @@ export async function getResumeStatusHandler(c: AuthenticatedContext): Promise<R
       return c.json({ status: 'processing', analysis_id: id, message: data.message || 'Processing' }, 202);
     }
 
-    // Fallback: check DB if result already stored
-    try {
-      const row = await c.env.DB.prepare('SELECT analysis_data FROM resume_analyses WHERE id = ? LIMIT 1').bind(id).first<{ analysis_data: string }>();
-      if (row?.analysis_data) {
-        const parsed = JSON.parse(row.analysis_data);
-        return c.json({ status: 'completed', analysis_id: id, data: parsed.data, success: true, timestamp: parsed.timestamp }, 200);
-      }
-    } catch (dbErr) {
-      logger.warn('DB lookup for resume status failed', dbErr);
-    }
-
-    // Unknown job id
-    return c.json({ status: 'processing', analysis_id: id, message: 'Analysis is being prepared.' }, 202);
+    // No record found
+    return c.json({ status: 'not_found', analysis_id: id, error: 'Analysis not found' }, 404);
+    
   } catch (error) {
-    logger.error('Get resume status failed', error);
+    console.error('Get resume status failed:', error);
     return c.json({ status: 'failed', analysis_id: id, error: error instanceof Error ? error.message : 'Unknown error' }, 500);
   }
 }

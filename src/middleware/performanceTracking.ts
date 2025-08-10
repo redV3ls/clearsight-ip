@@ -55,8 +55,9 @@ export const performanceTrackingMiddleware = async (c: Context<{ Bindings: Env }
     c.header('X-Response-Time', `${duration}ms`);
     c.header('X-Request-ID', requestId);
 
+    // KV metrics disabled to avoid quota issues
     // Store metrics in KV (aggregated by hour)
-    if (c.env?.CACHE) {
+    if (false && c.env?.CACHE) {
       try {
         const hourKey = new Date(startTime).toISOString().slice(0, 13); // YYYY-MM-DDTHH
         const metricsKey = `metrics:${hourKey}`;
