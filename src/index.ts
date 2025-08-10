@@ -59,11 +59,11 @@ import { secureHeaders } from 'hono/secure-headers';
 app.use('*', secureHeaders({
   contentSecurityPolicy: (
     "default-src 'self' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com data: blob:; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; " +
     "style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
     "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
     "img-src 'self' data: https:; " +
-    "connect-src 'self' https:; " +
+    "connect-src 'self' https: https://static.cloudflareinsights.com; " +
     "object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
   ),
   crossOriginEmbedderPolicy: false,
