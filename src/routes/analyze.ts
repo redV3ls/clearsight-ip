@@ -170,27 +170,8 @@ async function performAsyncAnalysis(
     console.log(`Starting async analysis for ${analysisId}`);
     
     aiAnalysisService = new AIAnalysisService(env);
-    
-    // Check if AI service is healthy
-    const aiStatus = aiAnalysisService.getAIStatus();
-    console.log(`AI service status for ${analysisId}:`, aiStatus);
-    
-    if (!aiStatus.enabled) {
-      console.error(`AI service not enabled for ${analysisId}:`, aiStatus);
-      throw new Error('AI service is not enabled - check API key configuration');
-    }
-
-    // Additional health check to ensure service is working
-    try {
-      const isHealthy = await aiAnalysisService.isAIHealthy();
-      console.log(`AI health check result for ${analysisId}:`, isHealthy);
-      if (!isHealthy) {
-        console.warn(`AI service health check failed for ${analysisId}, proceeding with caution`);
-      }
-    } catch (healthError) {
-      console.error(`AI health check error for ${analysisId}:`, healthError);
-      // Continue anyway, health check might fail but analysis might still work
-    }
+    // Proceed directly to analysis; status/health checks removed to avoid pre-call failures
+    console.log(`AI service initialized for ${analysisId}. Beginning analysis...`);
 
     // Perform AI-powered analysis using DeepSeek with timeout
     const analysisTimeout = 120000; // 120 seconds timeout (2 minutes) - less than client timeout
@@ -458,48 +439,21 @@ async function updateDatabaseWithError(env: any, analysisId: string, userId: str
  */
 analyze.get('/test-ai', async (c: AuthenticatedContext) => {
   try {
-    const { AIAnalysisService } = await import('../services/aiAnalysisService');
-    const aiAnalysisService = new AIAnalysisService(c.env);
-    
-    const status = aiAnalysisService.getAIStatus();
-    console.log('AI Status:', status);
-    
-    // Check environment variables
+    // Lightweight config-based status check without invoking AIAnalysisService internals
     const hasApiKey = !!c.env.DEEPSEEK_API_KEY;
-    const apiKeyLength = c.env.DEEPSEEK_API_KEY ? c.env.DEEPSEEK_API_KEY.length : 0;
-    console.log('Environment check:', {
-      hasApiKey,
-      apiKeyLength,
+    const status = { enabled: hasApiKey };
+
+    const info = {
       baseUrl: c.env.DEEPSEEK_BASE_URL || 'default',
-      model: c.env.DEEPSEEK_MODEL || 'default'
-    });
-    
-    if (!status.enabled) {
-      return c.json({
-        error: 'AI service not enabled',
-        status: status,
-        environment: {
-          hasApiKey,
-          apiKeyLength,
-          baseUrl: c.env.DEEPSEEK_BASE_URL || 'default'
-        }
-      }, 500);
-    }
-    
-    const isHealthy = await aiAnalysisService.isAIHealthy();
-    console.log('AI Health:', isHealthy);
-    
-    return c.json({
-      status: status,
-      healthy: isHealthy,
-      message: 'AI service test completed'
-    });
-    
+      model: c.env.DEEPSEEK_MODEL || 'default',
+      timeout: c.env.DEEPSEEK_TIMEOUT || 'unknown'
+    };
+
+    return c.json({ status, info, message: 'AI config check completed' });
   } catch (error) {
     console.error('AI test error:', error);
     return c.json({
-      error: error.message,
-      stack: error.stack
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, 500);
   }
 });
