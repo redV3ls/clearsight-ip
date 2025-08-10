@@ -68,9 +68,9 @@ preview_id = "1cbf2f6e3d594ddb9214dcc7986c1141"
 # tag = "v1"
 # new_classes = ["RateLimiter"]
 
-# Scheduled triggers for async job processing
-[triggers]
-crons = ["*/5 * * * *"] # Run every 5 minutes
+# Scheduled triggers for async job processing (temporarily disabled)
+# [triggers]
+# crons = ["*/5 * * * *"] # Run every 5 minutes
 
 # For Durable Objects (requires paid plan)
 # [[durable_objects.bindings]]

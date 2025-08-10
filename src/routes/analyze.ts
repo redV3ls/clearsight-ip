@@ -1151,6 +1151,50 @@ analyze.get('/debug-db/:analysisId', async (c: AuthenticatedContext) => {
 });
 
 /**
+ * GET /analyze/debug-recent - Show recent analysis records
+ */
+analyze.get('/debug-recent', async (c: AuthenticatedContext) => {
+  const user = c.get('user');
+  const userId = user?.id;
+
+  try {
+    const records = await c.env.DB
+      .prepare(`
+        SELECT id, user_id, created_at, 
+               JSON_EXTRACT(analysis_data, '$.status') as status,
+               JSON_EXTRACT(analysis_data, '$.timestamp') as analysis_timestamp,
+               LENGTH(analysis_data) as data_size
+        FROM resume_analyses 
+        WHERE user_id = ? 
+        ORDER BY created_at DESC 
+        LIMIT 10
+      `)
+      .bind(userId)
+      .all();
+
+    return c.json({
+      userId,
+      totalRecords: records.results?.length || 0,
+      records: records.results?.map((record: any) => ({
+        id: record.id,
+        status: record.status,
+        created_at: record.created_at,
+        analysis_timestamp: record.analysis_timestamp,
+        data_size: record.data_size
+      })) || []
+    });
+  } catch (error) {
+    return c.json({
+      error: {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: 'Failed to query recent analyses'
+      },
+      userId
+    }, 500);
+  }
+});
+
+/**
  * GET /analyze/test-auth - Test authentication endpoint for debugging
  */
 analyze.get('/test-auth', async (c: AuthenticatedContext) => {
