@@ -133,7 +133,7 @@ export class DeepSeekAIService {
     try {
       // Check if resume is too long and needs chunking
       const MAX_SINGLE_PROMPT_LENGTH = 8000; // Conservative limit for single prompt
-      
+
       if (cvText.length <= MAX_SINGLE_PROMPT_LENGTH) {
         // Process normally for shorter resumes
         const prompt = this.createSkillsExtractionPrompt(cvText);
@@ -160,12 +160,12 @@ export class DeepSeekAIService {
 
     // Process each section
     const sectionResults: AISkillsAnalysis[] = [];
-    
+
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i];
-      logger.info(`Processing section ${i + 1}/${sections.length}`, { 
-        sectionType: section.type, 
-        length: section.content.length 
+      logger.info(`Processing section ${i + 1}/${sections.length}`, {
+        sectionType: section.type,
+        length: section.content.length
       });
 
       try {
@@ -173,7 +173,7 @@ export class DeepSeekAIService {
         const response = await this.callDeepSeekAPI(prompt, `skills-extraction-section-${i}`);
         const sectionResult = this.parseSkillsAnalysisResponse(response);
         sectionResults.push(sectionResult);
-        
+
         // Add small delay between sections to avoid rate limiting
         if (i < sections.length - 1) {
           await this.delay(500);
@@ -208,7 +208,7 @@ export class DeepSeekAIService {
 
     // Find section boundaries
     const boundaries: Array<{ index: number; type: string }> = [];
-    
+
     sectionHeaders.forEach((regex, i) => {
       const sectionTypes = ['summary', 'experience', 'skills', 'education', 'projects', 'certifications', 'other'];
       const matches = [...cvText.matchAll(new RegExp(regex.source, 'gi'))];
@@ -232,7 +232,7 @@ export class DeepSeekAIService {
       const start = boundaries[i].index;
       const end = i < boundaries.length - 1 ? boundaries[i + 1].index : cvText.length;
       const content = cvText.substring(start, end).trim();
-      
+
       if (content.length > MAX_SECTION_LENGTH) {
         // Section is still too long, split it further
         const subSections = this.splitByLength(content, MAX_SECTION_LENGTH);
@@ -263,13 +263,13 @@ export class DeepSeekAIService {
 
     while (currentIndex < text.length) {
       let endIndex = Math.min(currentIndex + maxLength, text.length);
-      
+
       // Try to break at a natural boundary (paragraph, sentence)
       if (endIndex < text.length) {
         const lastParagraph = text.lastIndexOf('\n\n', endIndex);
         const lastSentence = text.lastIndexOf('.', endIndex);
         const lastSpace = text.lastIndexOf(' ', endIndex);
-        
+
         if (lastParagraph > currentIndex + maxLength * 0.7) {
           endIndex = lastParagraph;
         } else if (lastSentence > currentIndex + maxLength * 0.7) {
@@ -287,7 +287,7 @@ export class DeepSeekAIService {
         });
         partNumber++;
       }
-      
+
       currentIndex = endIndex;
     }
 
@@ -299,7 +299,7 @@ export class DeepSeekAIService {
    */
   private createSectionSkillsExtractionPrompt(sectionContent: string, sectionType: string): string {
     const sectionContext = this.getSectionContext(sectionType);
-    
+
     return `
 Rules:
 - This is a ${sectionType} section from a resume. ${sectionContext}
@@ -350,7 +350,7 @@ ${sectionContent}
       'certifications': 'Focus on professional certifications and their associated skills.',
       'other': 'Extract any additional skills mentioned in this section.',
     };
-    
+
     return contexts[sectionType] || contexts['other'];
   }
 
@@ -437,7 +437,7 @@ ${sectionContent}
       // Optimize job text length while preserving key information
       const optimizedJobText = this.optimizeJobText(jobText);
       const prompt = this.createJobAnalysisPrompt(optimizedJobText);
-      
+
       const response = await this.callDeepSeekAPI(prompt, 'job-analysis');
       return this.parseJobAnalysisResponse(response);
     } catch (error) {
@@ -451,7 +451,7 @@ ${sectionContent}
    */
   private optimizeJobText(jobText: string): string {
     const MAX_JOB_LENGTH = 6000; // Conservative limit for job descriptions
-    
+
     if (jobText.length <= MAX_JOB_LENGTH) {
       return jobText;
     }
@@ -493,9 +493,9 @@ ${sectionContent}
       optimizedText = jobText.substring(0, MAX_JOB_LENGTH);
     }
 
-    logger.info('Optimized job text', { 
-      originalLength: jobText.length, 
-      optimizedLength: optimizedText.length 
+    logger.info('Optimized job text', {
+      originalLength: jobText.length,
+      optimizedLength: optimizedText.length
     });
 
     return optimizedText;
@@ -532,7 +532,7 @@ ${sectionContent}
       try {
         // Dynamic timeout based on prompt length and operation type
         const dynamicTimeout = this.calculateTimeout(prompt, operation);
-        
+
         const response = await fetch(`${this.config.baseUrl}/chat/completions`, {
           method: 'POST',
           headers: {
@@ -605,11 +605,11 @@ ${sectionContent}
       } catch (error) {
         lastError = error as Error;
         const isTimeout = error instanceof Error && (
-          error.name === 'TimeoutError' || 
+          error.name === 'TimeoutError' ||
           error.message.includes('timeout') ||
           error.message.includes('aborted')
         );
-        
+
         logger.warn(`DeepSeek API attempt ${attempt} failed:`, {
           error: error instanceof Error ? error.message : 'Unknown error',
           isTimeout,
@@ -634,26 +634,26 @@ ${sectionContent}
   private calculateTimeout(prompt: string, operation: string): number {
     const baseTimeout = 30000; // 30 seconds base
     const lengthMultiplier = Math.min(prompt.length / 1000, 5); // Max 5x multiplier
-    
+
     const operationMultipliers = {
       'skills-extraction': 1.0,
       'job-analysis': 0.8,
       'gap-analysis': 1.5,
       'health-check': 0.3
     };
-    
+
     const operationMultiplier = operationMultipliers[operation as keyof typeof operationMultipliers] || 1.0;
-    
+
     const calculatedTimeout = baseTimeout * lengthMultiplier * operationMultiplier;
     const maxTimeout = 90000; // 90 seconds max
-    
+
     return Math.min(calculatedTimeout, maxTimeout);
   }
 
   /**
    * Create skills extraction prompt
    */
-private createSkillsExtractionPrompt(cvText: string): string {
+  private createSkillsExtractionPrompt(cvText: string): string {
     return `
 Rules:
 - Normalize skill names to Title Case; categories ∈ ["Programming","Cloud","Data","Management","Design","DevOps","Security","Other"].
@@ -694,7 +694,7 @@ ${cvText}
   /**
    * Create job analysis prompt
    */
-private createJobAnalysisPrompt(jobText: string): string {
+  private createJobAnalysisPrompt(jobText: string): string {
     return `
 Rules:
 - Normalize skill names to Title Case; categories ∈ ["Programming","Cloud","Data","Management","Design","DevOps","Security","Other"].
@@ -747,7 +747,7 @@ ${jobText}
   /**
    * Create gap analysis prompt
    */
-private createGapAnalysisPrompt(skillsAnalysis: AISkillsAnalysis, jobAnalysis: AIJobAnalysis): string {
+  private createGapAnalysisPrompt(skillsAnalysis: AISkillsAnalysis, jobAnalysis: AIJobAnalysis): string {
     return `
 Rules:
 - Match skills by normalized name; if not matched, omit.
