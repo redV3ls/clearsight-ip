@@ -10,8 +10,8 @@ import {
   SkillTrendPrediction,
   CompetitiveAnalysis,
   InterviewPreparation,
-  PortfolioOptimization,
-  NetworkingInsights
+  // PortfolioOptimization,
+  // NetworkingInsights
 } from './advancedAIFeatures';
 
 // Legacy interfaces for backward compatibility
@@ -133,8 +133,8 @@ export interface EnhancedAnalysisResult {
   skillTrendPredictions?: SkillTrendPrediction[];
   competitiveAnalysis?: CompetitiveAnalysis;
   interviewPreparation?: InterviewPreparation;
-  portfolioOptimization?: PortfolioOptimization;
-  networkingInsights?: NetworkingInsights;
+  portfolioOptimization?: any; // PortfolioOptimization;
+  networkingInsights?: any; // NetworkingInsights;
   metadata: {
     processingTime: number;
     analysisOptions: {
@@ -413,25 +413,25 @@ export class AIAnalysisService {
         result.multiLanguageAnalysis = multiLanguageAnalysis;
       }
 
-      // Industry-specific analysis
-      if (options.includeIndustrySpecific && jobAnalysis && options.industry) {
-        logger.info('Performing industry-specific analysis');
-        result.industrySpecificAnalysis = await this.advancedAIFeatures.performIndustrySpecificAnalysis(
-          skillsAnalysis,
-          jobAnalysis,
-          options.industry
-        );
-      }
+      // Industry-specific analysis (temporarily disabled)
+      // if (options.includeIndustrySpecific && jobAnalysis && options.industry) {
+      //   logger.info('Performing industry-specific analysis');
+      //   result.industrySpecificAnalysis = await this.advancedAIFeatures.performIndustrySpecificAnalysis(
+      //     skillsAnalysis,
+      //     jobAnalysis,
+      //     options.industry
+      //   );
+      // }
 
-      // Personalized coaching
-      if (options.includePersonalizedCoaching && gapAnalysis) {
-        logger.info('Generating personalized coaching recommendations');
-        result.personalizedCoaching = await this.advancedAIFeatures.generatePersonalizedCoaching(
-          skillsAnalysis,
-          gapAnalysis,
-          options.userPreferences
-        );
-      }
+      // Personalized coaching (temporarily disabled)
+      // if (options.includePersonalizedCoaching && gapAnalysis) {
+      //   logger.info('Generating personalized coaching recommendations');
+      //   result.personalizedCoaching = await this.advancedAIFeatures.generatePersonalizedCoaching(
+      //     skillsAnalysis,
+      //     gapAnalysis,
+      //     options.userPreferences
+      //   );
+      // }
 
       // Skill trend predictions
       if (options.includeSkillTrendPredictions) {
@@ -443,44 +443,44 @@ export class AIAnalysisService {
         );
       }
 
-      // Competitive analysis
-      if (options.includeCompetitiveAnalysis && jobAnalysis && options.industry) {
-        logger.info('Performing competitive analysis');
-        result.competitiveAnalysis = await this.advancedAIFeatures.performCompetitiveAnalysis(
-          skillsAnalysis,
-          jobAnalysis,
-          options.industry
-        );
-      }
+      // Competitive analysis (temporarily disabled)
+      // if (options.includeCompetitiveAnalysis && jobAnalysis && options.industry) {
+      //   logger.info('Performing competitive analysis');
+      //   result.competitiveAnalysis = await this.advancedAIFeatures.performCompetitiveAnalysis(
+      //     skillsAnalysis,
+      //     jobAnalysis,
+      //     options.industry
+      //   );
+      // }
 
-      // Interview preparation
-      if (options.includeInterviewPreparation && jobAnalysis) {
-        logger.info('Generating interview preparation suggestions');
-        result.interviewPreparation = await this.advancedAIFeatures.generateInterviewPreparation(
-          skillsAnalysis,
-          jobAnalysis
-        );
-      }
+      // Interview preparation (temporarily disabled)
+      // if (options.includeInterviewPreparation && jobAnalysis) {
+      //   logger.info('Generating interview preparation suggestions');
+      //   result.interviewPreparation = await this.advancedAIFeatures.generateInterviewPreparation(
+      //     skillsAnalysis,
+      //     jobAnalysis
+      //   );
+      // }
 
-      // Portfolio optimization
-      if (options.includePortfolioOptimization && jobAnalysis) {
-        logger.info('Optimizing portfolio recommendations');
-        result.portfolioOptimization = await this.advancedAIFeatures.optimizePortfolio(
-          skillsAnalysis,
-          jobAnalysis,
-          options.currentPortfolio
-        );
-      }
+      // Portfolio optimization (temporarily disabled)
+      // if (options.includePortfolioOptimization && jobAnalysis) {
+      //   logger.info('Optimizing portfolio recommendations');
+      //   result.portfolioOptimization = await this.advancedAIFeatures.optimizePortfolio(
+      //     skillsAnalysis,
+      //     jobAnalysis,
+      //     options.currentPortfolio
+      //   );
+      // }
 
-      // Networking insights
-      if (options.includeNetworkingInsights && options.industry && options.userPreferences?.careerGoals) {
-        logger.info('Generating networking insights');
-        result.networkingInsights = await this.advancedAIFeatures.generateNetworkingInsights(
-          skillsAnalysis,
-          options.userPreferences.careerGoals,
-          options.industry
-        );
-      }
+      // Networking insights (temporarily disabled)
+      // if (options.includeNetworkingInsights && options.industry && options.userPreferences?.careerGoals) {
+      //   logger.info('Generating networking insights');
+      //   result.networkingInsights = await this.advancedAIFeatures.generateNetworkingInsights(
+      //     skillsAnalysis,
+      //     options.userPreferences.careerGoals,
+      //     options.industry
+      //   );
+      // }
     }
 
     logger.info('AI-powered analysis completed successfully', {

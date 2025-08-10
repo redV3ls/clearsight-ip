@@ -211,7 +211,7 @@ export class DeepSeekAIService {
 
     sectionHeaders.forEach((regex, i) => {
       const sectionTypes = ['summary', 'experience', 'skills', 'education', 'projects', 'certifications', 'other'];
-      const matches = [...cvText.matchAll(new RegExp(regex.source, 'gi'))];
+      const matches = Array.from(cvText.matchAll(new RegExp(regex.source, 'gi')));
       matches.forEach(match => {
         if (match.index !== undefined) {
           boundaries.push({ index: match.index, type: sectionTypes[i] });
@@ -390,8 +390,8 @@ ${sectionContent}
             existing.context = skill.context;
           }
           existing.yearsExperience = Math.max(existing.yearsExperience, skill.yearsExperience);
-          existing.certifications = [...new Set([...existing.certifications, ...skill.certifications])];
-          existing.relatedSkills = [...new Set([...existing.relatedSkills, ...skill.relatedSkills])];
+          existing.certifications = Array.from(new Set([...existing.certifications, ...skill.certifications]));
+          existing.relatedSkills = Array.from(new Set([...existing.relatedSkills, ...skill.relatedSkills]));
         } else {
           skillsMap.set(key, { ...skill });
         }
@@ -1062,7 +1062,7 @@ Make this analysis feel like a conversation with a trusted mentor who believes i
     let careerLevel = 'mid';
 
     // Extract skills section
-    const skillsMatch = response.match(/SKILLS:(.*?)(?=\n[A-Z]+:|$)/s);
+    const skillsMatch = response.match(/SKILLS:([\s\S]*?)(?=\n[A-Z]+:|$)/);
     if (skillsMatch) {
       const skillsText = skillsMatch[1];
       const skillLines = skillsText.split('\n').filter(line => line.trim() && !line.includes('Name |'));
@@ -1088,32 +1088,32 @@ Make this analysis feel like a conversation with a trusted mentor who believes i
     }
 
     // Extract other sections
-    const experienceMatch = response.match(/EXPERIENCE:(.*?)(?=\n[A-Z]+:|$)/s);
+    const experienceMatch = response.match(/EXPERIENCE:([\s\S]*?)(?=\n[A-Z]+:|$)/);
     if (experienceMatch) {
       overallExperience = experienceMatch[1].trim();
     }
 
-    const educationMatch = response.match(/EDUCATION:(.*?)(?=\n[A-Z]+:|$)/s);
+    const educationMatch = response.match(/EDUCATION:([\s\S]*?)(?=\n[A-Z]+:|$)/);
     if (educationMatch) {
       education.push(...educationMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
     }
 
-    const certificationsMatch = response.match(/CERTIFICATIONS:(.*?)(?=\n[A-Z]+:|$)/s);
+    const certificationsMatch = response.match(/CERTIFICATIONS:([\s\S]*?)(?=\n[A-Z]+:|$)/);
     if (certificationsMatch) {
       certifications.push(...certificationsMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
     }
 
-    const strengthsMatch = response.match(/STRENGTHS:(.*?)(?=\n[A-Z]+:|$)/s);
+    const strengthsMatch = response.match(/STRENGTHS:([\s\S]*?)(?=\n[A-Z]+:|$)/);
     if (strengthsMatch) {
       strengths.push(...strengthsMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
     }
 
-    const areasMatch = response.match(/AREAS FOR IMPROVEMENT:(.*?)(?=\n[A-Z]+:|$)/s);
+    const areasMatch = response.match(/AREAS FOR IMPROVEMENT:([\s\S]*?)(?=\n[A-Z]+:|$)/);
     if (areasMatch) {
       areasForImprovement.push(...areasMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
     }
 
-    const careerMatch = response.match(/CAREER LEVEL:(.*?)(?=\n[A-Z]+:|$)/s);
+    const careerMatch = response.match(/CAREER LEVEL:([\s\S]*?)(?=\n[A-Z]+:|$)/);
     if (careerMatch) {
       const level = careerMatch[1].trim().toLowerCase();
       if (['entry', 'mid', 'senior', 'executive'].includes(level)) {
