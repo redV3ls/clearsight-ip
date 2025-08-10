@@ -1515,26 +1515,25 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     // Add retry and check history buttons
                     const analysisContainer = document.getElementById('analysis-container');
                     if (analysisContainer) {
-                        analysisContainer.innerHTML = `
-                            <div class="text-center p-8">
-                                <div class="text-red-500 mb-4">
-                                    <i class="fas fa-clock text-4xl mb-4"></i>
-                                    <h3 class="text-xl font-semibold mb-2">Analysis Timed Out</h3>
-                                    <p class="text-gray-600 mb-6">${timeoutMessage}</p>
-                                </div>
-                                <div class="space-x-4">
-                                    <button onclick="retryAnalysis()" class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg transition-colors">
-                                        <i class="fas fa-redo mr-2"></i>Retry Analysis
-                                    </button>
-                                    <button onclick="checkAnalysisHistory()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
-                                        <i class="fas fa-history mr-2"></i>Check History
-                                    </button>
-                                    <button onclick="resetToUploadScreen()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg transition-colors">
-                                        <i class="fas fa-upload mr-2"></i>New Analysis
-                                    </button>
-                                </div>
-                            </div>
-                        `;
+                        analysisContainer.innerHTML = 
+                            '<div class="text-center p-8">' +
+                                '<div class="text-red-500 mb-4">' +
+                                    '<i class="fas fa-clock text-4xl mb-4"></i>' +
+                                    '<h3 class="text-xl font-semibold mb-2">Analysis Timed Out</h3>' +
+                                    '<p class="text-gray-600 mb-6">' + timeoutMessage + '</p>' +
+                                '</div>' +
+                                '<div class="space-x-4">' +
+                                    '<button onclick="retryAnalysis()" class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg transition-colors">' +
+                                        '<i class="fas fa-redo mr-2"></i>Retry Analysis' +
+                                    '</button>' +
+                                    '<button onclick="checkAnalysisHistory()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">' +
+                                        '<i class="fas fa-history mr-2"></i>Check History' +
+                                    '</button>' +
+                                    '<button onclick="resetToUploadScreen()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg transition-colors">' +
+                                        '<i class="fas fa-upload mr-2"></i>New Analysis' +
+                                    '</button>' +
+                                '</div>' +
+                            '</div>';
                     } else {
                         resetToUploadScreen();
                     }

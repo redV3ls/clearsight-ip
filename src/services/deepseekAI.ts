@@ -1245,25 +1245,4 @@ Make this analysis feel like a conversation with a trusted mentor who believes i
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  /**
-   * Health check for AI service
-   */
-  async healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; details: string }> {
-    try {
-      const testPrompt = 'Respond with valid JSON: {"status": "ok", "message": "AI service is working"}';
-      const response = await this.callDeepSeekAPI(testPrompt, 'health-check');
-      const parsed = JSON.parse(response);
-
-      if (parsed.status === 'ok') {
-        return { status: 'healthy', details: 'AI service is responding correctly' };
-      } else {
-        return { status: 'unhealthy', details: 'AI service returned unexpected response' };
-      }
-    } catch (error) {
-      return {
-        status: 'unhealthy',
-        details: `AI service error: ${error instanceof Error ? error.message : 'Unknown error'}`
-      };
-    }
-  }
 }
