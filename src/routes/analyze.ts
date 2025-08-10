@@ -917,6 +917,115 @@ analyze.get('/trends/skills/emerging', async (c: AuthenticatedContext) => {
 });
 
 /**
+ * GET /analyze/debug - Debug page for AI service testing
+ */
+analyze.get('/debug', async (c: AuthenticatedContext) => {
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug AI Service</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: #fff; }
+        button { padding: 10px 20px; margin: 10px; background: #14b8a6; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0f9488; }
+        #results { margin-top: 20px; padding: 20px; background: #2a2a2a; border-radius: 5px; }
+        pre { background: #1a1a1a; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Debug AI Service</h1>
+    <button onclick="testAI()">Test AI Service Status</button>
+    <button onclick="testAnalysis()">Test Analysis Flow</button>
+    <button onclick="testAuth()">Test Authentication</button>
+    <div id="results"></div>
+
+    <script>
+        async function testAuth() {
+            try {
+                const response = await fetch('/api/v1/auth/me', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = '<h3>Auth Status:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                console.log('Auth test:', data);
+            } catch (error) {
+                console.error('Auth test error:', error);
+                document.getElementById('results').innerHTML = 'Auth test failed: ' + error.message;
+            }
+        }
+
+        async function testAI() {
+            try {
+                const response = await fetch('/api/v1/analyze/test-ai', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = '<h3>AI Service Status:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                console.log('AI service test:', data);
+            } catch (error) {
+                console.error('AI service test error:', error);
+                document.getElementById('results').innerHTML = 'AI service test failed: ' + error.message;
+            }
+        }
+
+        async function testAnalysis() {
+            try {
+                document.getElementById('results').innerHTML = '<h3>Starting Analysis Test...</h3>';
+                
+                const formData = new FormData();
+                formData.append('resumeText', 'John Doe\\nSoftware Engineer\\nSkills: JavaScript, React, Node.js, Python\\nExperience: 3 years at Tech Company');
+                
+                const response = await fetch('/api/v1/analyze/resume', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                document.getElementById('results').innerHTML = '<h3>Analysis Submission:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                console.log('Analysis test:', data);
+                
+                // If we get an analysis ID, poll for results
+                if (data.analysis_id) {
+                    document.getElementById('results').innerHTML += '<h3>Polling for results...</h3>';
+                    setTimeout(() => pollResults(data.analysis_id), 3000);
+                }
+            } catch (error) {
+                console.error('Analysis test error:', error);
+                document.getElementById('results').innerHTML = 'Analysis test failed: ' + error.message;
+            }
+        }
+        
+        async function pollResults(analysisId) {
+            try {
+                const response = await fetch('/api/v1/analyze/resume/' + analysisId, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML += '<h3>Poll Results (Status: ' + response.status + '):</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                console.log('Poll results:', data);
+                
+                // Continue polling if still processing
+                if (data.status === 'processing') {
+                    document.getElementById('results').innerHTML += '<p>Still processing... polling again in 5 seconds</p>';
+                    setTimeout(() => pollResults(analysisId), 5000);
+                }
+            } catch (error) {
+                console.error('Poll error:', error);
+                document.getElementById('results').innerHTML += '<h3>Poll Error:</h3><pre>' + error.message + '</pre>';
+            }
+        }
+    </script>
+</body>
+</html>`;
+  
+  return c.html(html);
+});
+
+/**
  * GET /analyze/test-ai - Test AI service status
  */
 analyze.get('/test-ai', async (c: AuthenticatedContext) => {
@@ -930,6 +1039,12 @@ analyze.get('/test-ai', async (c: AuthenticatedContext) => {
     return c.json({
       status,
       healthy: isHealthy,
+      environment: {
+        hasApiKey: !!c.env.DEEPSEEK_API_KEY,
+        baseUrl: c.env.DEEPSEEK_BASE_URL,
+        model: c.env.DEEPSEEK_MODEL,
+        timeout: c.env.DEEPSEEK_TIMEOUT
+      },
       timestamp: new Date().toISOString()
     });
   } catch (error) {
