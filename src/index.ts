@@ -133,6 +133,32 @@ app.use('*', async (c, next) => {
   return productionRateLimiter()(c, next);
 });
 
+// Simple test endpoint for debugging (public - no auth required)
+app.get('/api/v1/test-ai-config', async (c) => {
+  try {
+    const { createAIConfig, validateAIConfig } = await import('./config/ai');
+    const aiConfig = createAIConfig(c.env);
+    const validation = validateAIConfig(aiConfig);
+    
+    return c.json({
+      success: true,
+      aiConfigValid: validation.isValid,
+      errors: validation.errors,
+      hasApiKey: !!c.env.DEEPSEEK_API_KEY,
+      model: c.env.DEEPSEEK_MODEL,
+      baseUrl: c.env.DEEPSEEK_BASE_URL,
+      timeout: c.env.DEEPSEEK_TIMEOUT,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    return c.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    }, 500);
+  }
+});
+
 // API root endpoint (public - no auth required) - must be before auth middleware
 app.get('/api/v1', (c) => {
   return c.json({
