@@ -159,6 +159,75 @@ app.get('/api/v1/test-ai-config', async (c) => {
   }
 });
 
+// Public chunking test endpoint (no auth required)
+app.get('/api/v1/test-chunking-public', async (c) => {
+  try {
+    console.log('Starting public chunking test');
+    
+    const shortResume = `
+PROFESSIONAL SUMMARY
+Experienced Software Engineer with 5+ years in full-stack development.
+
+TECHNICAL SKILLS
+Programming: JavaScript, Python, React, Node.js
+Cloud: AWS, Docker, Kubernetes
+Databases: PostgreSQL, MongoDB
+
+EXPERIENCE
+Senior Developer | TechCorp | 2020-Present
+• Built scalable web applications
+• Led team of 3 developers
+• Technologies: React, Node.js, AWS
+    `.trim();
+
+    // Initialize AI service
+    const { AIAnalysisService } = await import('./services/aiAnalysisService');
+    const aiService = new AIAnalysisService(c.env);
+    
+    console.log('AI service initialized, starting analysis...');
+    const startTime = Date.now();
+    
+    // Test the chunking analysis
+    const result = await aiService.analyzeCV(shortResume, '', {
+      includeSkillsGap: false,
+      includeCareerSuggestions: false,
+      includeIndustryTrends: false,
+    });
+    
+    const processingTime = Date.now() - startTime;
+    console.log(`Public chunking test completed in ${processingTime}ms`);
+
+    return c.json({
+      success: true,
+      message: 'Public chunking test completed successfully',
+      processingTime,
+      skillsFound: result.skillsAnalysis.skills.length,
+      categoriesFound: result.skillsAnalysis.categories.length,
+      sampleSkills: result.skillsAnalysis.skills.slice(0, 5).map(s => s.name),
+      resumeLength: shortResume.length,
+      chunkingUsed: shortResume.length > 8000,
+      metadata: {
+        fallbackUsed: result.metadata.fallbackUsed,
+        aiProvider: result.metadata.aiProvider,
+        aiModel: result.metadata.aiModel
+      },
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Public chunking test failed:', error);
+    return c.json({
+      success: false,
+      error: {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        type: error instanceof Error ? error.constructor.name : 'UnknownError',
+        stack: error instanceof Error ? error.stack : undefined
+      },
+      timestamp: new Date().toISOString()
+    }, 500);
+  }
+});
+
 // API root endpoint (public - no auth required) - must be before auth middleware
 app.get('/api/v1', (c) => {
   return c.json({

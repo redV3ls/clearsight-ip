@@ -22,6 +22,14 @@
       "autoApprove": [
         "write_file"
       ]
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "env": {},
+      "working_directory": null
     }
   }
 }
