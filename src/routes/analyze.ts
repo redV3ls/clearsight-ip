@@ -445,7 +445,6 @@ async function updateDatabaseWithError(env: any, analysisId: string, userId: str
       }
     }
   }
-  }
 }
 
 /**
