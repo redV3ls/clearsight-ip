@@ -174,13 +174,20 @@ async function performAsyncAnalysis(
     console.log(`AI service status for ${analysisId}:`, aiStatus);
     
     if (!aiStatus.enabled) {
+      console.error(`AI service not enabled for ${analysisId}:`, aiStatus);
       throw new Error('AI service is not enabled - check API key configuration');
     }
 
     // Additional health check to ensure service is working
-    const isHealthy = await aiAnalysisService.isAIHealthy();
-    if (!isHealthy) {
-      console.warn(`AI service health check failed for ${analysisId}, proceeding with caution`);
+    try {
+      const isHealthy = await aiAnalysisService.isAIHealthy();
+      console.log(`AI health check result for ${analysisId}:`, isHealthy);
+      if (!isHealthy) {
+        console.warn(`AI service health check failed for ${analysisId}, proceeding with caution`);
+      }
+    } catch (healthError) {
+      console.error(`AI health check error for ${analysisId}:`, healthError);
+      // Continue anyway, health check might fail but analysis might still work
     }
 
     // Perform AI-powered analysis using DeepSeek with timeout
@@ -197,10 +204,14 @@ async function performAsyncAnalysis(
           includeIndustryTrends: false,
         }
       ).then(result => {
-        console.log(`AI analysis completed for ${analysisId}, skills found: ${result.skillsAnalysis.skills.length}`);
+        console.log(`AI analysis completed for ${analysisId}, skills found: ${result.skillsAnalysis?.skills?.length || 0}`);
         return result;
       }).catch(error => {
-        console.error(`AI analysis failed for ${analysisId}:`, error);
+        console.error(`AI analysis failed for ${analysisId}:`, {
+          error: error.message,
+          stack: error.stack,
+          name: error.name
+        });
         throw error;
       }),
       new Promise((_, reject) => 
@@ -403,6 +414,57 @@ async function performAsyncAnalysis(
     }
   }
 }
+
+/**
+ * GET /analyze/test-ai - Test AI service connectivity
+ */
+analyze.get('/test-ai', async (c: AuthenticatedContext) => {
+  try {
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const aiAnalysisService = new AIAnalysisService(c.env);
+    
+    const status = aiAnalysisService.getAIStatus();
+    console.log('AI Status:', status);
+    
+    // Check environment variables
+    const hasApiKey = !!c.env.DEEPSEEK_API_KEY;
+    const apiKeyLength = c.env.DEEPSEEK_API_KEY ? c.env.DEEPSEEK_API_KEY.length : 0;
+    console.log('Environment check:', {
+      hasApiKey,
+      apiKeyLength,
+      baseUrl: c.env.DEEPSEEK_BASE_URL || 'default',
+      model: c.env.DEEPSEEK_MODEL || 'default'
+    });
+    
+    if (!status.enabled) {
+      return c.json({
+        error: 'AI service not enabled',
+        status: status,
+        environment: {
+          hasApiKey,
+          apiKeyLength,
+          baseUrl: c.env.DEEPSEEK_BASE_URL || 'default'
+        }
+      }, 500);
+    }
+    
+    const isHealthy = await aiAnalysisService.isAIHealthy();
+    console.log('AI Health:', isHealthy);
+    
+    return c.json({
+      status: status,
+      healthy: isHealthy,
+      message: 'AI service test completed'
+    });
+    
+  } catch (error) {
+    console.error('AI test error:', error);
+    return c.json({
+      error: error.message,
+      stack: error.stack
+    }, 500);
+  }
+});
 
 /**
  * GET /analyze/resume/history - Get user's resume analysis history
