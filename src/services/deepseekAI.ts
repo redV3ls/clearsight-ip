@@ -520,6 +520,164 @@ ${sectionContent}
   }
 
   /**
+   * Perform standalone CV analysis without job comparison
+   */
+  async performStandaloneCVAnalysis(skillsAnalysis: AISkillsAnalysis): Promise<any> {
+    const prompt = this.createStandaloneCVAnalysisPrompt(skillsAnalysis);
+
+    try {
+      const response = await this.callDeepSeekAPI(prompt, 'standalone-cv-analysis');
+      return this.parseStandaloneCVAnalysisResponse(response);
+    } catch (error) {
+      logger.error('AI standalone CV analysis failed:', error);
+      throw new AppError('AI standalone CV analysis failed', 500, 'AI_STANDALONE_CV_ANALYSIS_FAILED');
+    }
+  }
+
+  /**
+   * Create standalone CV analysis prompt
+   */
+  private createStandaloneCVAnalysisPrompt(skillsAnalysis: AISkillsAnalysis): string {
+    return `
+You are a senior career coach providing a comprehensive review of a professional's resume. Your goal is to help them understand their current market position and provide actionable guidance for career advancement.
+
+Current Profile:
+${JSON.stringify(skillsAnalysis, null, 2)}
+
+Provide a narrative-driven analysis that tells their career story and guides their next steps:
+
+CAREER STORY ANALYSIS (3-4 paragraphs):
+1. Current Position: Where they stand in their career journey
+2. Strengths Assessment: What makes them valuable in the market
+3. Growth Opportunities: Areas where they can improve their competitiveness
+4. Future Potential: Where their career could go with the right moves
+
+STRUCTURED RECOMMENDATIONS:
+{
+  "careerNarrative": "Your 3-4 paragraph career story analysis",
+  "currentMarketPosition": {
+    "level": "entry|mid|senior|executive",
+    "competitiveness": "low|moderate|high|exceptional", 
+    "marketValue": "assessment of their current market value",
+    "uniqueSellingPoints": ["what makes them stand out"]
+  },
+  "strengthsAnalysis": [
+    {
+      "strength": "specific strength",
+      "marketRelevance": "why this matters in today's market",
+      "howToLeverage": "how to better showcase this strength",
+      "potentialImpact": "what this could lead to"
+    }
+  ],
+  "improvementAreas": [
+    {
+      "area": "specific area needing improvement",
+      "currentImpact": "how this weakness currently affects them",
+      "improvementStrategy": "specific steps to address this",
+      "timeline": "realistic timeframe for improvement",
+      "resources": ["specific learning resources"],
+      "successMetrics": "how to measure progress"
+    }
+  ],
+  "careerPathOptions": [
+    {
+      "path": "potential career direction",
+      "description": "what this path involves",
+      "fitScore": 0,
+      "requiredDevelopment": ["skills/experience needed"],
+      "timeline": "time to transition",
+      "marketOutlook": "demand and growth prospects",
+      "personalizedRoadmap": "step-by-step guidance for THIS person"
+    }
+  ],
+  "skillDevelopmentPlan": {
+    "immediate": [
+      {
+        "skill": "skill to develop",
+        "rationale": "why this skill matters now",
+        "learningApproach": "best way to learn this",
+        "timeframe": "how long it should take",
+        "resources": ["specific resources"],
+        "applicationStrategy": "how to apply/showcase this skill"
+      }
+    ],
+    "shortTerm": [...],
+    "longTerm": [...]
+  },
+  "marketInsights": [
+    {
+      "trend": "relevant market trend",
+      "personalRelevance": "how this affects their career",
+      "actionableResponse": "what they should do about it"
+    }
+  ],
+  "resumeOptimization": [
+    {
+      "section": "resume section to improve",
+      "currentIssue": "what's wrong with it now",
+      "improvement": "specific improvement suggestion",
+      "impact": "how this will help their applications"
+    }
+  ],
+  "networkingStrategy": {
+    "currentNetworkAssessment": "assessment of their likely network strength",
+    "targetConnections": ["types of people they should connect with"],
+    "networkingApproach": "personalized networking strategy",
+    "platforms": ["where they should be active"],
+    "contentStrategy": "what they should share/discuss"
+  },
+  "motivationalMessage": "Encouraging, personalized message about their potential",
+  "nextSteps": [
+    {
+      "action": "specific next step",
+      "priority": "high|medium|low",
+      "timeframe": "when to do this",
+      "expectedOutcome": "what this will achieve"
+    }
+  ]
+}
+
+Make this feel like a comprehensive career consultation with a mentor who sees their potential and wants to help them succeed.
+`;
+  }
+
+  /**
+   * Parse standalone CV analysis response
+   */
+  private parseStandaloneCVAnalysisResponse(response: string): any {
+    try {
+      // Try to extract JSON from the response
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      
+      // If no JSON found, create a structured response from the narrative
+      return {
+        careerNarrative: response,
+        currentMarketPosition: {
+          level: "mid",
+          competitiveness: "moderate",
+          marketValue: "Extracted from narrative analysis",
+          uniqueSellingPoints: ["Analysis provided in narrative format"]
+        },
+        motivationalMessage: "Continue developing your skills and exploring new opportunities.",
+        nextSteps: [
+          {
+            action: "Review the detailed analysis provided",
+            priority: "high",
+            timeframe: "immediately",
+            expectedOutcome: "Better understanding of career position"
+          }
+        ]
+      };
+    } catch (error) {
+      logger.error('Failed to parse standalone CV analysis response:', error);
+      throw new AppError('Failed to parse CV analysis response', 500, 'PARSE_ERROR');
+    }
+  }
+
+  /**
    * Call DeepSeek API with retry logic and rate limiting
    */
   private async callDeepSeekAPI(prompt: string, operation: string): Promise<string> {
@@ -654,41 +812,54 @@ ${sectionContent}
    */
   private createSkillsExtractionPrompt(cvText: string): string {
     return `
-Analyze this resume and extract skills information. Provide your response in the following structured format:
+You are a senior career coach analyzing a professional's resume. Your goal is to provide insightful, narrative feedback that tells their career story while extracting structured data.
+
+Analyze this resume and provide both structured data AND narrative insights. Think of yourself as telling the story of this person's professional journey.
+
+NARRATIVE ANALYSIS:
+Write a compelling 2-3 paragraph narrative that:
+1. Describes their professional journey and career progression
+2. Highlights their unique strengths and what makes them stand out
+3. Identifies areas where they could strengthen their profile
+4. Provides encouraging but honest assessment of their current position
+
+STRUCTURED DATA:
+Then provide the technical extraction in this format:
 
 SKILLS:
-For each skill, provide: Name | Category | Level | Years | Confidence | Context
+For each skill, provide: Name | Category | Level | Years | Confidence | Context | Story
 Categories: Programming, Cloud, Data, Management, Design, DevOps, Security, Other
 Levels: beginner, intermediate, advanced, expert
 Confidence: 0.0 to 1.0
+Story: Brief narrative about how this skill fits into their career journey
 
 CATEGORIES:
 List all skill categories found
 
 EXPERIENCE:
-Overall experience summary
+Overall experience summary with narrative elements
 
 EDUCATION:
-List educational qualifications
+List educational qualifications with context about how they support their career
 
 CERTIFICATIONS:
-List professional certifications
+List professional certifications with relevance to their career path
 
 STRENGTHS:
-Key strengths identified
+Key strengths with explanations of why they matter
 
 AREAS FOR IMPROVEMENT:
-Areas that could be developed
+Areas for development with specific, actionable guidance
 
 CAREER LEVEL:
-entry, mid, senior, or executive
+entry, mid, senior, or executive with reasoning
 
 Resume to analyze:
 """
 ${cvText}
 """
 
-Please provide a clear, structured analysis following the format above.
+Provide both the narrative story and structured analysis. Make it personal, encouraging, and actionable.
 `;
   }
 
@@ -750,59 +921,111 @@ ${jobText}
    */
   private createGapAnalysisPrompt(skillsAnalysis: AISkillsAnalysis, jobAnalysis: AIJobAnalysis): string {
     return `
-Rules:
-- Match skills by normalized name; if not matched, omit.
-- priority ∈ 1..10; gapSeverity ∈ ["critical","moderate","minor"].
-- Cap: skillGaps 50, strengths 25, recommendations/resources per gap 5. Use null/[] for unknowns. Return only JSON.
+You are a senior career coach conducting a personalized gap analysis. Your role is to provide honest, encouraging, and actionable feedback that tells the story of where this candidate stands and how they can bridge the gap to their target role.
 
-Candidate Skills:
+NARRATIVE REQUIREMENTS:
+1. Write a compelling narrative that explains the candidate's fit for this role
+2. Be honest about weaknesses but frame them as growth opportunities
+3. Highlight transferable skills and hidden strengths
+4. Provide a clear roadmap for improvement
+5. Make it personal and motivating
+
+Candidate Profile:
 ${JSON.stringify(skillsAnalysis, null, 2)}
 
-Job Requirements:
+Target Role:
 ${JSON.stringify(jobAnalysis, null, 2)}
 
-Output schema:
+Provide your analysis in this enhanced format:
+
+EXECUTIVE SUMMARY (2-3 paragraphs):
+Write a narrative that:
+- Assesses overall fit and potential
+- Explains the candidate's unique value proposition
+- Identifies the main challenges and opportunities
+- Provides an encouraging but realistic outlook
+
+DETAILED ANALYSIS:
+Then provide structured data with narrative elements:
+
 {
+  "narrativeSummary": "Your executive summary here",
   "overallMatch": 0,
+  "matchStory": "Narrative explanation of the match percentage",
   "skillGaps": [
     {
       "skillName": "string",
-      "category": "string",
+      "category": "string", 
       "currentLevel": "LevelEnum|null",
       "requiredLevel": "LevelEnum",
       "gapSeverity": "critical|moderate|minor",
       "priority": 1,
       "timeToCompetency": 0,
       "learningDifficulty": "easy|moderate|hard|very-hard",
-      "recommendations": ["string"],
-      "resources": ["string"]
+      "personalizedStory": "Why this gap matters for THIS candidate specifically",
+      "recommendations": ["specific, actionable steps"],
+      "resources": ["tailored learning resources"],
+      "motivationalNote": "Encouraging message about overcoming this gap"
     }
   ],
   "strengths": [
-    { "name": "string", "category": "string", "level": "LevelEnum", "yearsExperience": 0, "confidence": 0.0 }
+    { 
+      "name": "string", 
+      "category": "string", 
+      "level": "LevelEnum", 
+      "yearsExperience": 0, 
+      "confidence": 0.0,
+      "whyItMatters": "Why this strength is valuable for the target role",
+      "howToLeverage": "How to highlight this in applications/interviews"
+    }
   ],
   "transferableSkills": [
-    { "from": "string", "to": "string", "reasoning": "string" }
+    { 
+      "from": "string", 
+      "to": "string", 
+      "reasoning": "string",
+      "storyConnection": "How this transfer makes sense in their career narrative"
+    }
   ],
   "careerPaths": [
-    { "title": "string", "description": "string", "matchScore": 0, "requiredSkills": ["string"], "timeToTransition": 0, "salaryRange": {"min": 0, "max": 0, "currency": "USD"} }
+    { 
+      "title": "string", 
+      "description": "string", 
+      "matchScore": 0, 
+      "requiredSkills": ["string"], 
+      "timeToTransition": 0, 
+      "salaryRange": {"min": 0, "max": 0, "currency": "USD"},
+      "personalizedRoadmap": "Step-by-step path for THIS candidate"
+    }
   ],
   "learningPlan": {
+    "immediate": [
       {
         "skill": "skill name",
         "action": "specific action to take",
-        "timeframe": "timeframe",
-        "resources": ["specific resources"]
+        "timeframe": "timeframe", 
+        "resources": ["specific resources"],
+        "whyNow": "Why this should be prioritized immediately"
       }
     ],
     "shortTerm": [...],
     "longTerm": [...]
   },
-  "marketInsights": ["current market trends relevant to this analysis"],
+  "marketInsights": ["current market trends with personal relevance"],
   "competitiveAdvantage": ["unique strengths that set candidate apart"],
-  "reasoning": "overall reasoning for the gap analysis"
+  "weaknessesToAddress": [
+    {
+      "weakness": "specific weakness",
+      "impact": "how it affects their candidacy", 
+      "solution": "concrete steps to address it",
+      "timeline": "realistic timeframe for improvement"
+    }
+  ],
+  "encouragingMessage": "Personalized, motivating closing message",
+  "reasoning": "overall reasoning for the gap analysis with narrative elements"
 }
 
+Make this analysis feel like a conversation with a trusted mentor who believes in their potential.
 `;
   }
 

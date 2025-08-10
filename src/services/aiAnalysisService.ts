@@ -112,6 +112,20 @@ export interface EnhancedAnalysisResult {
   };
   marketInsights?: string[];
   competitiveAdvantage?: string[];
+  // Standalone analysis (when no job description provided)
+  standaloneAnalysis?: {
+    careerNarrative: string;
+    currentMarketPosition: any;
+    strengthsAnalysis: any[];
+    improvementAreas: any[];
+    careerPathOptions: any[];
+    skillDevelopmentPlan: any;
+    marketInsights: any[];
+    resumeOptimization: any[];
+    networkingStrategy: any;
+    motivationalMessage: string;
+    nextSteps: any[];
+  };
   // Advanced AI Features
   multiLanguageAnalysis?: MultiLanguageAnalysis;
   industrySpecificAnalysis?: IndustrySpecificAnalysis;
@@ -267,11 +281,16 @@ export class AIAnalysisService {
       jobAnalysis = await this.deepseekAI.analyzeJobDescription(jobContent);
     }
 
-    // Step 3: Gap analysis if both CV and job are analyzed
+    // Step 3: Gap analysis if both CV and job are analyzed, or standalone analysis if no job
     let gapAnalysis: AIGapAnalysis | undefined;
+    let standaloneAnalysis: any | undefined;
+    
     if (skillsAnalysis && jobAnalysis && options.includeSkillsGap) {
       logger.info('Starting AI-powered gap analysis');
       gapAnalysis = await this.deepseekAI.performGapAnalysis(skillsAnalysis, jobAnalysis);
+    } else if (skillsAnalysis && !jobContent) {
+      logger.info('Starting AI-powered standalone CV analysis');
+      standaloneAnalysis = await this.deepseekAI.performStandaloneCVAnalysis(skillsAnalysis);
     }
 
     // Build enhanced result
@@ -354,6 +373,11 @@ export class AIAnalysisService {
       result.learningPlan = gapAnalysis.learningPlan;
       result.marketInsights = gapAnalysis.marketInsights;
       result.competitiveAdvantage = gapAnalysis.competitiveAdvantage;
+    }
+
+    // Add standalone analysis if no job description provided
+    if (standaloneAnalysis) {
+      result.standaloneAnalysis = standaloneAnalysis;
     }
 
     // Add industry trends (simulated for now)
