@@ -1,5 +1,5 @@
 // Complete HTML content with inline JavaScript and CSS for Cloudflare Workers
-export const HTML_CONTENT = `<!DOCTYPE html`
+export const HTML_CONTENT = `<!DOCTYPE html
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -24,7 +24,7 @@ export const HTML_CONTENT = `<!DOCTYPE html`
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700\u0026display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
