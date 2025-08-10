@@ -1445,7 +1445,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
         function startPollingForResults(analysisId) {
             let pollCount = 0;
-            const maxPolls = 36; // Poll for up to 3 minutes (36 * 5 seconds) - aligned with server timeout
+            const maxPolls = 40; // Poll for up to 3.3 minutes (40 * 5 seconds) - gives server 2min timeout buffer
             
             console.log('Starting polling for analysis:', analysisId);
             
