@@ -1255,6 +1255,274 @@ analyze.get('/test-async', async (c: AuthenticatedContext) => {
 });
 
 /**
+ * GET /analyze/test-deepseek - Test DeepSeek API connectivity with simple request
+ */
+analyze.get('/test-deepseek', async (c: AuthenticatedContext) => {
+  try {
+    console.log('Starting DeepSeek API connectivity test');
+    
+    const apiKey = c.env.DEEPSEEK_API_KEY;
+    const baseUrl = c.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1';
+    const model = c.env.DEEPSEEK_MODEL || 'deepseek-chat';
+    const timeout = parseInt(c.env.DEEPSEEK_TIMEOUT || '120000');
+    
+    if (!apiKey) {
+      return c.json({
+        error: 'DEEPSEEK_API_KEY not configured',
+        timestamp: new Date().toISOString()
+      }, 500);
+    }
+    
+    console.log('DeepSeek config:', { baseUrl, model, timeout, hasApiKey: !!apiKey });
+    
+    // Simple test request
+    const testPrompt = 'Hello! Please respond with a simple JSON object containing: {"status": "success", "message": "DeepSeek API is working"}';
+    
+    const startTime = Date.now();
+    
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a helpful assistant. Always respond with valid JSON.'
+          },
+          {
+            role: 'user',
+            content: testPrompt
+          }
+        ],
+        max_tokens: 100,
+        temperature: 0.1,
+        response_format: { type: 'json_object' }
+      }),
+      signal: AbortSignal.timeout(timeout)
+    });
+    
+    const duration = Date.now() - startTime;
+    console.log(`DeepSeek API response received in ${duration}ms, status: ${response.status}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('DeepSeek API error response:', errorText);
+      return c.json({
+        error: 'DeepSeek API request failed',
+        status: response.status,
+        statusText: response.statusText,
+        response: errorText,
+        duration,
+        timestamp: new Date().toISOString()
+      }, 500);
+    }
+    
+    const data = await response.json();
+    console.log('DeepSeek API response data:', data);
+    
+    const content = data.choices?.[0]?.message?.content;
+    
+    return c.json({
+      success: true,
+      config: {
+        baseUrl,
+        model,
+        timeout,
+        hasApiKey: !!apiKey
+      },
+      request: {
+        prompt: testPrompt,
+        maxTokens: 100
+      },
+      response: {
+        status: response.status,
+        content: content,
+        usage: data.usage,
+        duration
+      },
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('DeepSeek API test failed:', error);
+    
+    let errorDetails = {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    };
+    
+    return c.json({
+      error: 'DeepSeek API test failed',
+      details: errorDetails,
+      timestamp: new Date().toISOString()
+    }, 500);
+  }
+});
+
+/**
+ * GET /analyze/test-resume-prompt - Test DeepSeek API with actual resume analysis prompt
+ */
+analyze.get('/test-resume-prompt', async (c: AuthenticatedContext) => {
+  try {
+    console.log('Starting DeepSeek resume prompt test');
+    
+    const apiKey = c.env.DEEPSEEK_API_KEY;
+    const baseUrl = c.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1';
+    const model = c.env.DEEPSEEK_MODEL || 'deepseek-chat';
+    const timeout = parseInt(c.env.DEEPSEEK_TIMEOUT || '120000');
+    
+    if (!apiKey) {
+      return c.json({
+        error: 'DEEPSEEK_API_KEY not configured',
+        timestamp: new Date().toISOString()
+      }, 500);
+    }
+    
+    // Simple resume for testing
+    const testResume = `John Doe
+Software Engineer
+Email: john@example.com
+
+Experience:
+- 3 years at Tech Company as Frontend Developer
+- Built web applications using React, JavaScript, HTML, CSS
+- Worked with REST APIs and databases
+
+Skills:
+- JavaScript, React, HTML, CSS
+- Node.js, Express
+- Git, GitHub
+- Problem solving, teamwork
+
+Education:
+- Bachelor's in Computer Science, 2020`;
+
+    // Simplified resume analysis prompt
+    const prompt = `Analyze the following resume and extract skills information. Respond with valid JSON in this exact format:
+
+{
+  "skills": [
+    {
+      "name": "skill name",
+      "category": "Programming|Web Development|Database|Other",
+      "level": "beginner|intermediate|advanced|expert",
+      "yearsExperience": 0,
+      "confidence": 0.8
+    }
+  ],
+  "overallExperience": "brief summary",
+  "careerLevel": "entry|mid|senior|executive"
+}
+
+Resume:
+${testResume}`;
+    
+    const startTime = Date.now();
+    console.log('Sending resume analysis request to DeepSeek...');
+    
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert career analyst. Always respond with valid JSON in the exact format requested.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 1000,
+        temperature: 0.3,
+        response_format: { type: 'json_object' }
+      }),
+      signal: AbortSignal.timeout(timeout)
+    });
+    
+    const duration = Date.now() - startTime;
+    console.log(`DeepSeek resume analysis response received in ${duration}ms, status: ${response.status}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('DeepSeek resume analysis error:', errorText);
+      return c.json({
+        error: 'DeepSeek resume analysis failed',
+        status: response.status,
+        statusText: response.statusText,
+        response: errorText,
+        duration,
+        timestamp: new Date().toISOString()
+      }, 500);
+    }
+    
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    
+    // Try to parse the JSON response
+    let parsedContent;
+    try {
+      parsedContent = JSON.parse(content);
+    } catch (parseError) {
+      console.error('Failed to parse DeepSeek response as JSON:', parseError);
+      return c.json({
+        error: 'Invalid JSON response from DeepSeek',
+        rawContent: content,
+        parseError: parseError instanceof Error ? parseError.message : 'Unknown parse error',
+        duration,
+        timestamp: new Date().toISOString()
+      }, 500);
+    }
+    
+    return c.json({
+      success: true,
+      config: {
+        baseUrl,
+        model,
+        timeout,
+        maxTokens: 1000
+      },
+      request: {
+        resumeLength: testResume.length,
+        promptLength: prompt.length
+      },
+      response: {
+        status: response.status,
+        content: parsedContent,
+        usage: data.usage,
+        duration
+      },
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('DeepSeek resume prompt test failed:', error);
+    
+    let errorDetails = {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    };
+    
+    return c.json({
+      error: 'DeepSeek resume prompt test failed',
+      details: errorDetails,
+      timestamp: new Date().toISOString()
+    }, 500);
+  }
+});
+
+/**
  * GET /analyze/test-auth - Test authentication endpoint for debugging
  */
 analyze.get('/test-auth', async (c: AuthenticatedContext) => {
