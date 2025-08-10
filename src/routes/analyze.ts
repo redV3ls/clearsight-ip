@@ -186,28 +186,69 @@ async function performAsyncAnalysis(
       )
     ]) as any;
 
+    console.log(`AI analysis completed successfully for ${analysisId}, preparing database update`);
+    
     // Set the user ID and timestamp
     response.user_id = userId;
     response.timestamp = new Date().toISOString();
     response.analysis_id = analysisId;
     response.status = 'completed';
 
-    // Update the database record with completed analysis
-    await env.DB
-      .prepare(`
-        UPDATE resume_analyses 
-        SET analysis_data = ?, created_at = ?
-        WHERE id = ? AND user_id = ?
-      `)
-      .bind(
-        JSON.stringify(response),
-        new Date().toISOString(),
-        analysisId,
-        userId
-      )
-      .run();
+    // Test JSON serialization before database update
+    let responseJson: string;
+    try {
+      responseJson = JSON.stringify(response);
+      console.log(`Response object prepared for ${analysisId}, size: ${responseJson.length} characters`);
+    } catch (jsonError) {
+      console.error(`JSON serialization failed for ${analysisId}:`, jsonError);
+      throw new Error(`Failed to serialize analysis response: ${jsonError}`);
+    }
 
-    console.log(`Completed async analysis for ${analysisId}`);
+    try {
+      // Update the database record with completed analysis
+      const updateResult = await env.DB
+        .prepare(`
+          UPDATE resume_analyses 
+          SET analysis_data = ?, created_at = ?
+          WHERE id = ? AND user_id = ?
+        `)
+        .bind(
+          responseJson,
+          new Date().toISOString(),
+          analysisId,
+          userId
+        )
+        .run();
+
+      console.log(`Database update result for ${analysisId}:`, {
+        success: updateResult.success,
+        changes: updateResult.changes,
+        meta: updateResult.meta
+      });
+
+      if (updateResult.changes === 0) {
+        console.error(`No rows updated for ${analysisId} - record may not exist or user mismatch`);
+        throw new Error('Database update failed - no rows affected');
+      }
+
+      // Verify the update was successful by reading the record back
+      const verifyRecord = await env.DB
+        .prepare('SELECT analysis_data FROM resume_analyses WHERE id = ? AND user_id = ?')
+        .bind(analysisId, userId)
+        .first() as any;
+
+      if (verifyRecord) {
+        const storedData = JSON.parse(verifyRecord.analysis_data);
+        console.log(`Verification: Record ${analysisId} status is now: ${storedData.status}`);
+      } else {
+        console.error(`Verification failed: Record ${analysisId} not found after update`);
+      }
+
+      console.log(`Successfully completed async analysis for ${analysisId}`);
+    } catch (dbError) {
+      console.error(`Database update failed for ${analysisId}:`, dbError);
+      throw dbError;
+    }
 
   } catch (error) {
     console.error(`Failed async analysis for ${analysisId}:`, error);
@@ -1054,6 +1095,57 @@ analyze.get('/test-ai', async (c: AuthenticatedContext) => {
         details: 'Failed to initialize AI service'
       },
       timestamp: new Date().toISOString()
+    }, 500);
+  }
+});
+
+/**
+ * GET /analyze/debug-db/:analysisId - Debug database record for analysis
+ */
+analyze.get('/debug-db/:analysisId', async (c: AuthenticatedContext) => {
+  const analysisId = c.req.param('analysisId');
+  const user = c.get('user');
+  const userId = user?.id;
+
+  try {
+    const record = await c.env.DB
+      .prepare('SELECT * FROM resume_analyses WHERE id = ? AND user_id = ?')
+      .bind(analysisId, userId)
+      .first() as any;
+
+    if (!record) {
+      return c.json({
+        error: 'Analysis record not found',
+        analysisId,
+        userId
+      }, 404);
+    }
+
+    const analysisData = JSON.parse(record.analysis_data);
+    
+    return c.json({
+      analysisId,
+      userId,
+      record: {
+        id: record.id,
+        user_id: record.user_id,
+        created_at: record.created_at,
+        status: analysisData.status,
+        dataSize: record.analysis_data.length,
+        hasError: !!analysisData.error,
+        errorCode: analysisData.error?.code,
+        timestamp: analysisData.timestamp
+      },
+      fullData: analysisData
+    });
+  } catch (error) {
+    return c.json({
+      error: {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: 'Failed to query database'
+      },
+      analysisId,
+      userId
     }, 500);
   }
 });
