@@ -1216,6 +1216,29 @@ Make this analysis feel like a conversation with a trusted mentor who believes i
   }
 
   /**
+   * Health check for the AI service
+   */
+  async healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; message?: string }> {
+    try {
+      // Simple test call to verify API connectivity
+      const testPrompt = "Test connection. Respond with 'OK'.";
+      const response = await this.callDeepSeekAPI(testPrompt, 'health-check');
+      
+      if (response && response.length > 0) {
+        return { status: 'healthy' };
+      } else {
+        return { status: 'unhealthy', message: 'Empty response from API' };
+      }
+    } catch (error) {
+      logger.error('Health check failed:', error);
+      return { 
+        status: 'unhealthy', 
+        message: error instanceof Error ? error.message : 'Unknown error' 
+      };
+    }
+  }
+
+  /**
    * Delay utility
    */
   private delay(ms: number): Promise<void> {

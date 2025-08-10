@@ -181,6 +181,19 @@ export class AIAnalysisService {
   }
 
   /**
+   * Reinitialize AI service (useful for recovery from failures)
+   */
+  public reinitializeAI(): boolean {
+    try {
+      this.initializeAI();
+      return this.isAIEnabled;
+    } catch (error) {
+      logger.error('Failed to reinitialize AI service:', error);
+      return false;
+    }
+  }
+
+  /**
    * Perform comprehensive AI-powered CV analysis
    */
   async analyzeCV(

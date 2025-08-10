@@ -177,8 +177,14 @@ async function performAsyncAnalysis(
       throw new Error('AI service is not enabled - check API key configuration');
     }
 
+    // Additional health check to ensure service is working
+    const isHealthy = await aiAnalysisService.isAIHealthy();
+    if (!isHealthy) {
+      console.warn(`AI service health check failed for ${analysisId}, proceeding with caution`);
+    }
+
     // Perform AI-powered analysis using DeepSeek with timeout
-    const analysisTimeout = 180000; // 180 seconds timeout (3 minutes)
+    const analysisTimeout = 160000; // 160 seconds timeout (2.67 minutes) - slightly less than client timeout
     console.log(`Starting AI analysis for ${analysisId}, content length: ${content.length}, job description: ${!!jobDescription}`);
     
     const response = await Promise.race([
@@ -345,7 +351,9 @@ async function performAsyncAnalysis(
       }
     };
 
+    // Ensure we always update the DB record, even if serialization fails
     try {
+      const errorJson = JSON.stringify(errorRecord);
       await env.DB
         .prepare(`
           UPDATE resume_analyses 
@@ -353,14 +361,45 @@ async function performAsyncAnalysis(
           WHERE id = ? AND user_id = ?
         `)
         .bind(
-          JSON.stringify(errorRecord),
+          errorJson,
           new Date().toISOString(),
           analysisId,
           userId
         )
         .run();
+      console.log(`Error record updated successfully for ${analysisId}`);
     } catch (dbError) {
       console.error(`Failed to update error record for ${analysisId}:`, dbError);
+      
+      // Last resort: update with minimal error record
+      try {
+        const minimalErrorRecord = {
+          analysis_id: analysisId,
+          user_id: userId,
+          timestamp: new Date().toISOString(),
+          status: 'failed',
+          error: { code: 'PROCESSING_FAILED', message: 'Analysis failed due to system error' }
+        };
+        
+        await env.DB
+          .prepare(`
+            UPDATE resume_analyses 
+            SET analysis_data = ?, created_at = ?
+            WHERE id = ? AND user_id = ?
+          `)
+          .bind(
+            JSON.stringify(minimalErrorRecord),
+            new Date().toISOString(),
+            analysisId,
+            userId
+          )
+          .run();
+        console.log(`Minimal error record updated for ${analysisId}`);
+      } catch (finalError) {
+        console.error(`Critical: Could not update any error record for ${analysisId}:`, finalError);
+        // At this point, the record will remain in "processing" state
+        // Consider implementing a cleanup job to handle these cases
+      }
     }
   }
 }

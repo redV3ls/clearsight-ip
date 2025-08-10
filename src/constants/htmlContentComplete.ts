@@ -1344,6 +1344,27 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             if (resultsSection) resultsSection.classList.add('hidden');
         }
 
+        window.retryAnalysis = function() {
+            // Get the last used form data and retry
+            const resumeTextArea = document.getElementById('resume-text');
+            const jobTextArea = document.getElementById('job-description');
+            
+            if (resumeTextArea && resumeTextArea.value.trim()) {
+                showNotification('Retrying analysis...', 'info');
+                submitAnalysis(); // Reuse the existing submit function
+            } else {
+                showNotification('Please enter your resume content to retry', 'error');
+                resetToUploadScreen();
+            }
+        };
+
+        window.checkAnalysisHistory = function() {
+            // Redirect to history page or show history modal
+            showNotification('Checking your analysis history...', 'info');
+            // You could implement a history modal here or redirect to a history page
+            window.location.href = '/history'; // Assuming you have a history page
+        };
+
         window.resetToUploadScreen = function() {
             stopLoadingAnimation();
             
@@ -1416,7 +1437,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
         function startPollingForResults(analysisId) {
             let pollCount = 0;
-            const maxPolls = 30; // Poll for up to 2.5 minutes (30 * 5 seconds)
+            const maxPolls = 40; // Poll for up to 3.3 minutes (40 * 5 seconds) - aligned with server timeout
             
             console.log('Starting polling for analysis:', analysisId);
             
@@ -1478,8 +1499,37 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 // Stop polling after max attempts
                 if (pollCount >= maxPolls) {
                     stopLoadingAnimation();
-                    showNotification('Analysis timed out after 2.5 minutes. This may be due to high server load. Please try again with a shorter resume or try again later.', 'error');
-                    resetToUploadScreen();
+                    
+                    // Show timeout message with retry option
+                    const timeoutMessage = 'Analysis timed out after 3.3 minutes. This may be due to high server load. Your analysis may still complete - check your history in a few minutes.';
+                    showNotification(timeoutMessage, 'error');
+                    
+                    // Add retry and check history buttons
+                    const analysisContainer = document.getElementById('analysis-container');
+                    if (analysisContainer) {
+                        analysisContainer.innerHTML = `
+                            <div class="text-center p-8">
+                                <div class="text-red-500 mb-4">
+                                    <i class="fas fa-clock text-4xl mb-4"></i>
+                                    <h3 class="text-xl font-semibold mb-2">Analysis Timed Out</h3>
+                                    <p class="text-gray-600 mb-6">${timeoutMessage}</p>
+                                </div>
+                                <div class="space-x-4">
+                                    <button onclick="retryAnalysis()" class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-redo mr-2"></i>Retry Analysis
+                                    </button>
+                                    <button onclick="checkAnalysisHistory()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-history mr-2"></i>Check History
+                                    </button>
+                                    <button onclick="resetToUploadScreen()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-upload mr-2"></i>New Analysis
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        resetToUploadScreen();
+                    }
                 }
                 
             }, 5000); // Poll every 5 seconds
