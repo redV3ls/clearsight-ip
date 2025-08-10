@@ -196,7 +196,7 @@ export class DeepSeekAIService {
             messages: [
               {
                 role: 'system',
-                content: 'You are an expert career analyst and skills assessment specialist. Provide detailed, accurate, and actionable analysis. Always respond with valid JSON in the exact format requested.'
+content: 'You are an expert career-analysis model. Output must be a single valid JSON object that matches the user\'s schema exactly. Do not include any text outside the JSON. Do not use markdown or comments. If a value is unknown or not inferable, use null or an empty list. Do not invent facts. Deduplicate items and keep outputs concise.'
               },
               {
                 role: 'user',
@@ -265,35 +265,38 @@ export class DeepSeekAIService {
   /**
    * Create skills extraction prompt
    */
-  private createSkillsExtractionPrompt(cvText: string): string {
+private createSkillsExtractionPrompt(cvText: string): string {
     return `
-Analyze the following resume and extract skills information. Respond with valid JSON in this exact format:
+Rules:
+- Normalize skill names to Title Case; categories ∈ ["Programming","Cloud","Data","Management","Design","DevOps","Security","Other"].
+- level ∈ ["beginner","intermediate","advanced","expert"]; confidence ∈ [0,1] with 2 decimals; yearsExperience ≥ 0 (int).
+- Merge variants into one entry; variants go to relatedSkills. No soft skills unless explicitly stated.
+- Max 100 skills; sort by confidence desc. Use null/[] for unknowns. Return only the JSON object.
 
+Output schema:
 {
   "skills": [
     {
-      "name": "skill name",
-      "category": "Programming|Web Development|Database|Cloud|Management|Design|Other",
-      "level": "beginner|intermediate|advanced|expert",
+      "name": "string",
+      "category": "CategoryEnum",
+      "level": "LevelEnum",
       "yearsExperience": 0,
-      "confidence": 0.8,
-      "context": "brief context",
-      "certifications": [],
-      "relatedSkills": [],
-      "reasoning": "brief reason"
+      "confidence": 0.0,
+      "context": "string|null",
+      "certifications": ["string"],
+      "relatedSkills": ["string"]
     }
   ],
-  "categories": ["unique categories"],
-  "overallExperience": "brief summary",
-  "education": ["education items"],
-  "certifications": ["certifications"],
-  "strengths": ["key strengths"],
-  "areasForImprovement": ["areas to improve"],
-  "careerLevel": "entry|mid|senior|executive",
-  "reasoning": "brief analysis"
+  "categories": ["CategoryEnum"],
+  "overallExperience": "string|null",
+  "education": ["string"],
+  "certifications": ["string"],
+  "strengths": ["string"],
+  "areasForImprovement": ["string"],
+  "careerLevel": "LevelEnum"
 }
 
-Resume:
+CV:
 """
 ${cvText}
 """
@@ -303,107 +306,65 @@ ${cvText}
   /**
    * Create job analysis prompt
    */
-  private createJobAnalysisPrompt(jobText: string): string {
+private createJobAnalysisPrompt(jobText: string): string {
     return `
-Analyze the following job description and extract key requirements. Respond with valid JSON:
+Rules:
+- Normalize skill names to Title Case; categories ∈ ["Programming","Cloud","Data","Management","Design","DevOps","Security","Other"].
+- importance ∈ ["critical","important","nice-to-have"]. minimumLevel ∈ ["beginner","intermediate","advanced","expert"].
+- Max 100 skillRequirements; de-duplicate by normalized name. Use null/[] for unknowns. Return only JSON.
 
+Output schema:
 {
-  "jobTitle": "job title",
-  "company": "company name",
-  "industry": "industry",
-  "experienceLevel": "entry|mid|senior|executive",
+  "jobTitle": "string|null",
+  "company": "string|null",
+  "industry": "string|null",
+  "experienceLevel": "entry|mid|senior|executive|null",
   "skillRequirements": [
     {
-      "skill": "skill name",
-      "category": "Programming|Cloud|Data|Management|Design|Other",
-      "importance": "critical|important|nice-to-have",
-      "minimumLevel": "beginner|intermediate|advanced|expert",
+      "skill": "string",
+      "category": "CategoryEnum",
+      "importance": "ImportanceEnum",
+      "minimumLevel": "LevelEnum",
       "yearsRequired": 0,
-      "context": "brief context",
-      "reasoning": "brief reason",
-      "confidence": 0.8,
-      "marketDemand": "high|medium|low",
-      "salaryImpact": "high|medium|low|neutral"
+      "context": "string|null",
+      "confidence": 0.0,
+      "marketDemand": "high|medium|low|null",
+      "salaryImpact": "high|medium|low|neutral|null"
     }
   ],
-  "softSkills": ["communication", "teamwork"],
-  "responsibilities": ["key responsibilities"],
-  "benefits": ["benefits mentioned"],
+  "softSkills": ["string"],
+  "responsibilities": ["string"],
+  "benefits": ["string"],
   "salaryRange": {"min": 0, "max": 0, "currency": "USD"},
-  "workArrangement": "remote|hybrid|onsite|flexible",
-  "companySize": "startup|small|medium|large|enterprise",
-  "teamStructure": "individual|small-team|large-team|cross-functional",
-  "growthOpportunities": ["opportunities"],
-  "culturalFit": ["cultural aspects"],
-  "urgencyLevel": "urgent|normal|flexible",
-  "competitiveAdvantages": ["advantages"],
-  "redFlags": ["concerns"],
+  "workArrangement": "remote|hybrid|onsite|flexible|null",
+  "companySize": "startup|small|medium|large|enterprise|null",
+  "teamStructure": "individual|small-team|large-team|cross-functional|null",
+  "growthOpportunities": ["string"],
+  "culturalFit": ["string"],
+  "urgencyLevel": "urgent|normal|flexible|null",
+  "competitiveAdvantages": ["string"],
+  "redFlags": ["string"],
   "implicitRequirements": [
-    {
-      "skill": "skill name",
-      "reasoning": "brief reason",
-      "confidence": 0.8
-    }
-  ],
-  "reasoning": "brief analysis"
+    { "skill": "string", "reasoning": "string", "confidence": 0.0 }
+  ]
 }
 
-Advanced Analysis Instructions:
-1. SKILL EXTRACTION: Identify both explicit and implicit skill requirements
-   - Look for technical skills mentioned directly
-   - Infer skills from job responsibilities and context
-   - Consider industry-standard skill combinations
-   - Normalize skill names to industry standards (e.g., "JS" → "JavaScript")
-
-2. IMPORTANCE CLASSIFICATION: Use contextual reasoning
-   - "critical": Must-have skills, deal-breakers, explicitly required
-   - "important": Strongly preferred, mentioned multiple times, core to role
-   - "nice-to-have": Bonus skills, "preferred", "plus if you have"
-
-3. EXPERIENCE LEVEL INFERENCE: Look for multiple indicators
-   - Years of experience mentioned
-   - Job title seniority (Junior, Senior, Lead, Principal)
-   - Responsibility level (mentoring, architecture, leadership)
-   - Decision-making authority described
-
-4. INDUSTRY CONTEXT: Consider sector-specific requirements
-   - Healthcare: HIPAA, HL7, medical device regulations
-   - Finance: SOX compliance, financial regulations, security
-   - E-commerce: scalability, payment processing, fraud detection
-   - Startups: versatility, rapid development, resource constraints
-
-5. IMPLICIT REQUIREMENTS: Infer likely skills from context
-   - If React is mentioned, likely need JavaScript, HTML, CSS
-   - If AWS is mentioned, likely need cloud architecture knowledge
-   - If "full-stack" is mentioned, need both frontend and backend skills
-   - If "senior" role, likely need mentoring and architectural skills
-
-6. MARKET ANALYSIS: Consider current market trends
-   - Assess skill demand in current job market
-   - Evaluate salary impact of specific skills
-   - Consider emerging vs. declining technologies
-
-7. CULTURAL AND SOFT SKILLS: Extract work environment clues
-   - Team collaboration requirements
-   - Communication style preferences
-   - Work pace and pressure indicators
-   - Learning and growth mindset requirements
-
-8. RED FLAGS DETECTION: Identify potential concerns
-   - Unrealistic skill combinations for experience level
-   - Extremely long requirement lists
-   - Vague job descriptions
-   - Concerning language about work-life balance
-   - Unrealistic timeline expectations
+Job Description:
+"""
+${jobText}
+"""
 `;
   }
 
   /**
    * Create gap analysis prompt
    */
-  private createGapAnalysisPrompt(skillsAnalysis: AISkillsAnalysis, jobAnalysis: AIJobAnalysis): string {
+private createGapAnalysisPrompt(skillsAnalysis: AISkillsAnalysis, jobAnalysis: AIJobAnalysis): string {
     return `
-Compare candidate skills with job requirements. Respond with valid JSON:
+Rules:
+- Match skills by normalized name; if not matched, omit.
+- priority ∈ 1..10; gapSeverity ∈ ["critical","moderate","minor"].
+- Cap: skillGaps 50, strengths 25, recommendations/resources per gap 5. Use null/[] for unknowns. Return only JSON.
 
 Candidate Skills:
 ${JSON.stringify(skillsAnalysis, null, 2)}
@@ -411,58 +372,33 @@ ${JSON.stringify(skillsAnalysis, null, 2)}
 Job Requirements:
 ${JSON.stringify(jobAnalysis, null, 2)}
 
-Response format:
-
+Output schema:
 {
-  "overallMatch": 0-100,
+  "overallMatch": 0,
   "skillGaps": [
     {
-      "skillName": "skill name",
-      "category": "category",
-      "currentLevel": "current level or null if missing",
-      "requiredLevel": "required level",
+      "skillName": "string",
+      "category": "string",
+      "currentLevel": "LevelEnum|null",
+      "requiredLevel": "LevelEnum",
       "gapSeverity": "critical|moderate|minor",
-      "priority": 1-10,
-      "timeToCompetency": number (months),
+      "priority": 1,
+      "timeToCompetency": 0,
       "learningDifficulty": "easy|moderate|hard|very-hard",
-      "recommendations": ["specific learning recommendations"],
-      "resources": ["suggested resources"],
-      "reasoning": "why this gap is important"
+      "recommendations": ["string"],
+      "resources": ["string"]
     }
   ],
   "strengths": [
-    {
-      "name": "skill name",
-      "category": "category", 
-      "level": "level",
-      "yearsExperience": number,
-      "confidence": 0.0-1.0,
-      "context": "context",
-      "certifications": [],
-      "relatedSkills": [],
-      "reasoning": "why this is a strength"
-    }
+    { "name": "string", "category": "string", "level": "LevelEnum", "yearsExperience": 0, "confidence": 0.0 }
   ],
   "transferableSkills": [
-    {
-      "from": "existing skill",
-      "to": "required skill",
-      "reasoning": "how they relate"
-    }
+    { "from": "string", "to": "string", "reasoning": "string" }
   ],
   "careerPaths": [
-    {
-      "title": "career path title",
-      "description": "description",
-      "matchScore": 0-100,
-      "requiredSkills": ["skills needed"],
-      "timeToTransition": number (months),
-      "salaryRange": {"min": number, "max": number, "currency": "USD"},
-      "reasoning": "why this path makes sense"
-    }
+    { "title": "string", "description": "string", "matchScore": 0, "requiredSkills": ["string"], "timeToTransition": 0, "salaryRange": {"min": 0, "max": 0, "currency": "USD"} }
   ],
   "learningPlan": {
-    "immediate": [
       {
         "skill": "skill name",
         "action": "specific action to take",
