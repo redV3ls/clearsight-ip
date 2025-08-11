@@ -74,7 +74,8 @@ export class EnvironmentValidator {
     // Check CORS_ORIGIN
     if (!env.CORS_ORIGIN) {
       warnings.push('CORS_ORIGIN not set, using default localhost');
-    } else {
+    } else if (env.CORS_ORIGIN !== '*') {
+      // Only validate as URL if it's not the wildcard
       try {
         new URL(env.CORS_ORIGIN);
       } catch {
