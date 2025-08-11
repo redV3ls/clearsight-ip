@@ -54,83 +54,87 @@ app.use('*', environmentValidationMiddleware);
 app.use('*', performanceTrackingMiddleware);
 app.use('*', logger());
 app.use('*', prettyJSON());
-// Content Security Policy middleware (explicit and valid)
-// We set the header directly to avoid any library serialization quirks.
+// Security headers middleware
 app.use('*', async (c, next) => {
+  // Content Security Policy - relaxed for third-party resources
   const csp = [
-    "default-src 'self'",
-    // Scripts we actually use: Tailwind CDN and cdnjs. Inline allowed for our HTML template.
-    // Include static.cloudflareinsights.com to allow Cloudflare's analytics script
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://static.cloudflareinsights.com",
-    // Styles from Google Fonts/Cdnjs plus inline style attributes in our HTML
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
-    // Fonts loaded from Google Fonts and cdnjs; allow data: for inlined fonts if any
-    "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:",
-    // Images from self or any https origin; allow data URIs for inline icons
+    "default-src 'self' https:",
+    // Scripts: Allow inline, eval, and all HTTPS sources (needed for CDNs)
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+    // Styles: Allow inline and all HTTPS sources
+    "style-src 'self' 'unsafe-inline' https:",
+    // Fonts: Allow all HTTPS sources and data URIs
+    "font-src 'self' https: data:",
+    // Images: Allow all HTTPS sources and data URIs
     "img-src 'self' https: data:",
-    // API/network calls to same origin and any https endpoints (e.g., AI providers)
-    // Include cloudflareinsights.com for analytics
-    "connect-src 'self' https: https://cloudflareinsights.com",
-    // Disallow embedding/objects/frames
+    // Connections: Allow all HTTPS sources
+    "connect-src 'self' https:",
+    // Objects and frames
     "object-src 'none'",
     "frame-src 'none'",
     "frame-ancestors 'none'",
-    // Restrict form submits and base URI
+    // Forms and base
     "form-action 'self'",
     "base-uri 'self'",
-    // Optional: upgrade any http content to https (safe on Workers)
+    // Upgrade insecure requests
     'upgrade-insecure-requests'
   ].join('; ');
 
   c.header('Content-Security-Policy', csp);
-  // Keep COEP disabled to avoid issues with third-party resources
-  c.header('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  
+  // Remove COEP header entirely to avoid cross-origin resource blocking
+  // Don't set Cross-Origin-Embedder-Policy at all
+  
+  // Add CORP header to allow resources to be loaded cross-origin
+  c.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  
+  // Add other security headers
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('X-Frame-Options', 'DENY');
+  c.header('X-XSS-Protection', '1; mode=block');
+  c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
   await next();
 });
 
-// CORS configuration
-// Previous configuration was too restrictive for workers.dev and caused browser CORS failures.
-// This version safely reflects the request origin for known patterns and supports workers.dev subdomains.
+// CORS configuration for production
 app.use('*', cors({
   origin: (origin, c) => {
-    // Allow when no Origin header (e.g., same-origin, server-to-server)
+    // Allow when no Origin header (same-origin requests)
     if (!origin) return null;
 
-    // If wildcard configured, reflect the incoming origin
-    if (c.env?.CORS_ORIGIN === '*') return origin;
-
-    // Always allow localhost for development
-    const devOrigins = new Set([
+    // Allow production domain
+    const allowedOrigins = [
+      'https://clearsight-ip.com',
+      'https://www.clearsight-ip.com',
       'http://localhost:3000',
       'http://localhost:3001',
       'https://localhost:3000',
       'https://localhost:3001',
-    ]);
+    ];
 
-    if (devOrigins.has(origin)) return origin;
+    if (allowedOrigins.includes(origin)) return origin;
 
-    // Allow configured primary domain (e.g., clearsight-ip.com)
+    // Allow configured origin from environment
     if (c.env?.CORS_ORIGIN && origin === c.env.CORS_ORIGIN) return origin;
 
-    // Allow our Cloudflare workers.dev subdomain dynamically
+    // Allow Cloudflare Workers subdomains
     try {
-      const reqUrl = new URL(c.req.url);
-      const sameHost = reqUrl.origin === origin; // Same-origin requests
-      if (sameHost) return origin;
-
-      // Permit any workers.dev subdomain that matches our script name path
-      // Example: https://clearsight-ip.<account>.workers.dev
-      const isWorkers = /\.workers\.dev$/i.test(new URL(origin).hostname);
-      if (isWorkers) return origin;
+      const url = new URL(origin);
+      // Allow any *.workers.dev subdomain
+      if (url.hostname.endsWith('.workers.dev')) return origin;
+      // Allow clearsight-ip.com subdomains
+      if (url.hostname.endsWith('clearsight-ip.com')) return origin;
     } catch {
-      // If URL parsing fails, fall through to deny
+      // Invalid URL, deny
     }
 
     // Deny otherwise
     return null;
   },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With', 'Accept'],
+  exposeHeaders: ['Content-Length', 'X-Request-Id'],
   credentials: true,
   maxAge: 86400, // 24 hours
 }));
