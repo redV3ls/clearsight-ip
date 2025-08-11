@@ -60,8 +60,12 @@ export async function resumeHandler(c: AuthenticatedContext): Promise<Response> 
     // Fire-and-forget background processing
     c.executionCtx.waitUntil((async () => {
       try {
+        logger.info('Starting async analysis processing', { analysisId, userId });
+        
         // Initialize AI analysis service
         const aiAnalysisService = await initializeAIService(c);
+
+        logger.info('AI service initialized, starting analysis', { analysisId });
 
         // Perform AI-powered analysis
         const analysisResult = await aiAnalysisService.analyzeCV(
@@ -73,6 +77,8 @@ export async function resumeHandler(c: AuthenticatedContext): Promise<Response> 
             includeIndustryTrends,
           }
         );
+
+        logger.info('AI analysis completed', { analysisId, hasResult: !!analysisResult });
 
         // Build standardized response
         const response = buildAnalysisResponse({
@@ -123,7 +129,9 @@ export async function resumeHandler(c: AuthenticatedContext): Promise<Response> 
       } catch (error) {
         logger.error('Async resume analysis failed', {
           userId,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          analysisId,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined
         });
         await setResumeStatus(c, analysisId, {
           status: 'failed',
@@ -191,6 +199,8 @@ export async function getResumeStatusHandler(c: AuthenticatedContext): Promise<R
   const id = c.req.param('id');
   const forceDb = c.req.query('source') === 'db'; // Debug param to force D1 read
   
+  logger.info('Getting resume status', { analysisId: id, forceDb });
+  
   try {
     let data = null;
     
@@ -200,9 +210,13 @@ export async function getResumeStatusHandler(c: AuthenticatedContext): Promise<R
         const raw = await c.env.CACHE.get(`resume:${id}`);
         if (raw) {
           data = JSON.parse(raw);
+          logger.info('Found status in KV cache', { analysisId: id, status: data.status });
         }
       } catch (kvError) {
-        console.warn('KV read failed (non-critical), falling back to D1:', kvError.message);
+        logger.warn('KV read failed (non-critical), falling back to D1:', { 
+          analysisId: id, 
+          error: kvError instanceof Error ? kvError.message : 'Unknown error' 
+        });
       }
     }
     
@@ -213,37 +227,68 @@ export async function getResumeStatusHandler(c: AuthenticatedContext): Promise<R
         if (row?.analysis_data) {
           const parsed = JSON.parse(row.analysis_data);
           data = parsed;
+          logger.info('Found status in D1', { analysisId: id, status: data.status });
           
           // Optionally cache in KV for future reads (ignore failures)
           try {
             await c.env.CACHE.put(`resume:${id}`, JSON.stringify(data), { expirationTtl: 60 * 60 });
           } catch (kvError) {
-            console.warn('KV cache write failed (non-critical):', kvError.message);
+            logger.warn('KV cache write failed (non-critical):', { 
+              analysisId: id, 
+              error: kvError instanceof Error ? kvError.message : 'Unknown error' 
+            });
           }
+        } else {
+          logger.info('No analysis found in D1', { analysisId: id });
         }
       } catch (dbErr) {
-        console.error('D1 lookup failed:', dbErr);
-        return c.json({ status: 'failed', analysis_id: id, error: 'Database error' }, 500);
+        logger.error('D1 lookup failed:', { 
+          analysisId: id, 
+          error: dbErr instanceof Error ? dbErr.message : 'Unknown error',
+          stack: dbErr instanceof Error ? dbErr.stack : undefined
+        });
+        return c.json({ 
+          status: 'failed', 
+          analysis_id: id, 
+          error: 'Database error',
+          details: dbErr instanceof Error ? dbErr.message : 'Unknown error'
+        }, 500);
       }
     }
     
     // Return appropriate response based on data
     if (data) {
       if (data.status === 'completed') {
+        logger.info('Returning completed analysis', { analysisId: id });
         return c.json(data, 200);
       }
       if (data.status === 'failed') {
+        logger.warn('Returning failed analysis', { analysisId: id, error: data.error });
         return c.json({ status: 'failed', analysis_id: id, error: data.error }, 500);
       }
+      logger.info('Analysis still processing', { analysisId: id });
       return c.json({ status: 'processing', analysis_id: id, message: data.message || 'Processing' }, 202);
     }
 
-    // No record found
-    return c.json({ status: 'not_found', analysis_id: id, error: 'Analysis not found' }, 404);
+    // No record found - this is normal during the initial processing phase
+    logger.info('Analysis not found yet (may still be initializing)', { analysisId: id });
+    return c.json({ 
+      status: 'processing', 
+      analysis_id: id, 
+      message: 'Analysis is being initialized. Please continue waiting...' 
+    }, 202);
     
   } catch (error) {
-    console.error('Get resume status failed:', error);
-    return c.json({ status: 'failed', analysis_id: id, error: error instanceof Error ? error.message : 'Unknown error' }, 500);
+    logger.error('Get resume status failed:', { 
+      analysisId: id, 
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    return c.json({ 
+      status: 'failed', 
+      analysis_id: id, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    }, 500);
   }
 }
 
