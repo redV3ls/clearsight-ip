@@ -41,7 +41,7 @@ const AuthSchemas = {
       password: CommonSchemas.password,
       name: {
         type: 'string' as const,
-        required: true,
+        required: false,  // Make name optional
         minLength: 1,
         maxLength: 255
       },
@@ -168,6 +168,10 @@ class AuthHandlers {
     
     try {
       const userData = c.get('validatedBody');
+      // If name is not provided, derive it from email
+      if (!userData.name) {
+        userData.name = userData.email.split('@')[0];
+      }
       const db = DatabaseManager.initialize(c.env.DB);
       const authService = new UserAuthService(db);
 
@@ -379,7 +383,7 @@ class AuthHandlers {
    * GET /auth/me
    * Get current user information (requires authentication)
    */
-  static async getCurrentUser(c: Context): PromisecResponsee {
+  static async getCurrentUser(c: Context): Promise<Response> {
     const response = createResponse(c);
     const debug = c.req.query('debug') === '1' || c.req.header('X-Debug') === '1' || (c.env?.LOG_LEVEL === 'debug');
     
@@ -389,8 +393,8 @@ class AuthHandlers {
       const cookieHeader = c.req.header('Cookie');
       let authToken: string | null = null;
       if (cookieHeader) {
-        const cookies = cookieHeader.split(';').map((x) =e x.trim());
-        const entry = cookies.find((x) =e x.startsWith('auth_token='));
+        const cookies = cookieHeader.split(';').map((x) => x.trim());
+        const entry = cookies.find((x) => x.startsWith('auth_token='));
         if (entry) authToken = entry.split('=')[1];
       }
       logger.info('auth/me: cookie parsed', { hasCookie: !!cookieHeader, hasTokenFromCookie: !!authToken });
@@ -401,19 +405,48 @@ class AuthHandlers {
 
       if (!authToken) {
         logger.warn('auth/me: no token found');
-        return response.authenticationError();
+        // Return 401 with proper error structure for unauthenticated requests
+        return c.json({
+          success: false,
+          error: {
+            code: 'AUTHENTICATION_REQUIRED',
+            message: 'Authentication required'
+          }
+        }, 401);
       }
 
       const { verifyJWT } = await import('../../middleware/auth');
-      const payload = await verifyJWT(authToken, c.env);
+      let payload: any;
+      try {
+        payload = await verifyJWT(authToken, c.env);
+      } catch (verifyError) {
+        logger.warn('auth/me: JWT verification failed', { 
+          error: verifyError instanceof Error ? verifyError.message : 'Unknown error' 
+        });
+        // Return 401 for invalid tokens
+        return c.json({
+          success: false,
+          error: {
+            code: 'INVALID_TOKEN',
+            message: 'Invalid or expired token'
+          }
+        }, 401);
+      }
+      
       logger.info('auth/me: jwt verified');
-      const userId = (payload as any).id || (payload as any).userId;
-      const email = (payload as any).email;
-      const name = (payload as any).name || email?.split('@')[0] || 'User';
-      const role = (payload as any).role || 'user';
+      const userId = payload.id || payload.userId;
+      const email = payload.email;
+      const name = payload.name || email?.split('@')[0] || 'User';
+      const role = payload.role || 'user';
 
       if (!userId && !email) {
-        return response.authenticationError();
+        return c.json({
+          success: false,
+          error: {
+            code: 'INVALID_TOKEN_PAYLOAD',
+            message: 'Invalid token payload'
+          }
+        }, 401);
       }
 
       // Try to enrich from DB, but do not fail if DB access errors
@@ -497,8 +530,8 @@ const authRoutes = createRouteBuilder('/auth')
     tags: ['Authentication']
   })
   .get('/me', AuthHandlers.getCurrentUser, {
-    auth: { required: true },
-    description: 'Get current user information (requires authentication)',
+    auth: { required: false }, // Make this endpoint public since we handle auth internally
+    description: 'Get current user information (checks authentication status)',
     tags: ['Authentication']
   });
 

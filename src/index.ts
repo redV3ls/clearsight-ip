@@ -60,8 +60,8 @@ app.use('*', async (c, next) => {
   const csp = [
     "default-src 'self'",
     // Scripts we actually use: Tailwind CDN and cdnjs. Inline allowed for our HTML template.
-    // Intentionally exclude static.cloudflareinsights.com to prevent its injection and avoid CORS/SRI errors.
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com",
+    // Include static.cloudflareinsights.com to allow Cloudflare's analytics script
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://static.cloudflareinsights.com",
     // Styles from Google Fonts/Cdnjs plus inline style attributes in our HTML
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
     // Fonts loaded from Google Fonts and cdnjs; allow data: for inlined fonts if any
@@ -69,7 +69,8 @@ app.use('*', async (c, next) => {
     // Images from self or any https origin; allow data URIs for inline icons
     "img-src 'self' https: data:",
     // API/network calls to same origin and any https endpoints (e.g., AI providers)
-    "connect-src 'self' https:",
+    // Include cloudflareinsights.com for analytics
+    "connect-src 'self' https: https://cloudflareinsights.com",
     // Disallow embedding/objects/frames
     "object-src 'none'",
     "frame-src 'none'",
@@ -304,7 +305,8 @@ app.get('/api/v1', (c) => {
 app.use('/api/v1/*', async (c, next) => {
   const publicPaths = [
     '/api/v1/auth/login', 
-    '/api/v1/auth/register'
+    '/api/v1/auth/register',
+    '/api/v1/auth/me'  // Make /auth/me public to check auth status
   ];
   if (publicPaths.some(path => c.req.path === path)) {
     return next();
