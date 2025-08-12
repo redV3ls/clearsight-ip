@@ -11,6 +11,8 @@ import { TrendsAnalysisService } from '../services/trendsAnalysis';
 import { TeamAnalysisService, TeamMember, ProjectRequirements } from '../services/teamAnalysis';
 import { createDatabase } from '../config/database';
 import { CacheService, CacheNamespaces, CacheTTL } from '../services/cache';
+import { enhancedLogger } from '../utils/enhancedLogger';
+import { kvStorage } from '../utils/kvStorage';
 
 const analyze = new Hono<{ Bindings: Env }>();
 
@@ -32,12 +34,25 @@ const MAX_TEXT_LENGTH = 50000; // 50k characters
  * Analyzes uploaded resume files or text against job descriptions
  */
 analyze.post('/resume', async (c: AuthenticatedContext) => {
-  console.log('Analyze resume endpoint called');
+  // Initialize enhanced logging and KV storage with environment
+  enhancedLogger.setEnv(c.env);
+  kvStorage.setEnv(c.env);
+  
+  enhancedLogger.info('📍 Resume analysis endpoint called', {
+    path: '/analyze/resume',
+    method: 'POST',
+    timestamp: Date.now()
+  });
+  
   const user = c.get('user');
-  console.log('User from context:', user ? { id: user.id, email: user.email } : 'null');
+  enhancedLogger.debug('User context retrieved', user ? { id: user.id, email: user.email } : { user: 'null' });
+  
   const userId = user?.id;
   if (!userId) {
-    console.log('No user ID found, returning 401');
+    enhancedLogger.warn('❌ No user ID found, returning 401', {
+      hasUser: !!user,
+      userKeys: user ? Object.keys(user) : []
+    });
     return c.json({
       error: {
         code: 'AUTHENTICATION_REQUIRED',
@@ -45,31 +60,60 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       }
     }, 401);
   }
-  console.log('User authenticated, proceeding with analysis for user:', userId);
+  
+  enhancedLogger.info('✅ User authenticated successfully', { userId });
 
   const analysisId = crypto.randomUUID();
+  enhancedLogger.logAnalysisStart(analysisId, userId, {
+    source: 'web',
+    hasFile: false,
+    hasText: false
+  });
 
   try {
-    console.log('Parsing form data...');
+    enhancedLogger.logAnalysisCheckpoint(analysisId, 'PARSING_FORM_DATA');
+    
     // Parse form data
     const formData = await c.req.formData();
     const resumeText = formData.get('resumeText') as string | null;
     const resumeFile = formData.get('resume') as File | null;
 
-    console.log('Form data parsed - resumeText:', resumeText ? 'present' : 'null', 'resumeFile:', resumeFile ? 'present' : 'null');
+    enhancedLogger.info('📝 Form data parsed', {
+      analysisId,
+      hasResumeText: !!resumeText,
+      hasResumeFile: !!resumeFile,
+      fileSize: resumeFile?.size || 0,
+      textLength: resumeText?.length || 0
+    });
 
     // Get resume content
     let content = '';
     if (resumeFile) {
-      console.log('Reading file content...');
+      enhancedLogger.logAnalysisCheckpoint(analysisId, 'READING_FILE', {
+        fileName: resumeFile.name,
+        fileType: resumeFile.type,
+        fileSize: resumeFile.size
+      });
       content = await resumeFile.text();
-      console.log('File content length:', content.length);
+      enhancedLogger.info('📄 File content read successfully', {
+        analysisId,
+        contentLength: content.length,
+        fileName: resumeFile.name
+      });
     } else if (resumeText) {
-      console.log('Using text content...');
+      enhancedLogger.logAnalysisCheckpoint(analysisId, 'USING_TEXT_INPUT');
       content = resumeText;
-      console.log('Text content length:', content.length);
+      enhancedLogger.info('📝 Using text input', {
+        analysisId,
+        contentLength: content.length
+      });
     } else {
-      console.log('No content provided');
+      enhancedLogger.error('❌ No content provided for analysis', {
+        analysisId,
+        hasFile: false,
+        hasText: false
+      });
+      enhancedLogger.logAnalysisComplete(analysisId, false, { reason: 'NO_CONTENT' });
       return c.json({
         error: {
           code: 'MISSING_CONTENT',
@@ -96,32 +140,68 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     };
 
     // Save initial record to database
-    console.log('Saving initial record to database...');
-    await c.env.DB
-      .prepare(`
-        INSERT INTO resume_analyses (
-          id, user_id, analysis_data, created_at
-        ) VALUES (?, ?, ?, ?)
-      `)
-      .bind(
+    enhancedLogger.logAnalysisCheckpoint(analysisId, 'SAVING_TO_DB', {
+      status: 'processing',
+      hasJobDescription: !!jobDescription
+    });
+    
+    try {
+      await c.env.DB
+        .prepare(`
+          INSERT INTO resume_analyses (
+            id, user_id, analysis_data, created_at
+          ) VALUES (?, ?, ?, ?)
+        `)
+        .bind(
+          analysisId,
+          userId,
+          JSON.stringify(initialRecord),
+          new Date().toISOString()
+        )
+        .run();
+      
+      enhancedLogger.info('💾 Initial record saved to D1 database', {
         analysisId,
         userId,
-        JSON.stringify(initialRecord),
-        new Date().toISOString()
-      )
-      .run();
-    console.log('Initial record saved successfully');
+        recordSize: JSON.stringify(initialRecord).length
+      });
+    } catch (dbError) {
+      enhancedLogger.error('❌ Failed to save initial record to database', dbError, {
+        analysisId,
+        userId
+      });
+      throw dbError;
+    }
 
+    // Store initial status in KV for fast retrieval
+    const kvStored = await kvStorage.putAnalysisStatus(analysisId, initialRecord);
+    if (!kvStored) {
+      enhancedLogger.warn('⚠️ Failed to store initial status in KV cache', { analysisId });
+    } else {
+      enhancedLogger.info('✅ Initial status stored in KV cache', { analysisId });
+    }
+    
     // Start async analysis (fire and forget)
-    console.log(`Submitting async analysis for ${analysisId} to executionCtx.waitUntil`);
+    enhancedLogger.logAnalysisCheckpoint(analysisId, 'SUBMITTING_ASYNC_TASK');
+    enhancedLogger.info(`🚀 Submitting async analysis for ${analysisId} to executionCtx.waitUntil`, {
+      analysisId,
+      contentLength: content.length,
+      hasJobDescription: !!jobDescription
+    });
     
     c.executionCtx.waitUntil(
       performAsyncAnalysis(c.env, analysisId, userId, content, jobDescription)
         .then(() => {
-          console.log(`Async analysis completed successfully for ${analysisId}`);
+          enhancedLogger.info(`✨ Async analysis completed successfully for ${analysisId}`, {
+            analysisId,
+            stage: 'ASYNC_COMPLETE'
+          });
         })
         .catch((error) => {
-          console.error(`Async analysis failed for ${analysisId}:`, error);
+          enhancedLogger.error(`❌ Async analysis failed for ${analysisId}`, error, {
+            analysisId,
+            stage: 'ASYNC_FAILED'
+          });
         })
     );
 
@@ -138,10 +218,17 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     }, 202); // 202 Accepted
 
   } catch (error) {
-    console.error('Analysis submission error:', error);
-    console.error('Error type:', error.constructor.name);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
+    enhancedLogger.error('🔥 Analysis submission error', error, {
+      analysisId,
+      userId,
+      errorType: error?.constructor?.name,
+      stage: 'SUBMISSION'
+    });
+    
+    enhancedLogger.logAnalysisComplete(analysisId, false, {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stage: 'SUBMISSION_FAILED'
+    });
 
     return c.json({
       error: {
@@ -162,20 +249,37 @@ async function performAsyncAnalysis(
   content: string,
   jobDescription: string
 ) {
+  // Initialize enhanced logging and KV storage
+  enhancedLogger.setEnv(env);
+  kvStorage.setEnv(env);
+  
+  enhancedLogger.info(`🎯 Starting async analysis for ${analysisId}`, {
+    analysisId,
+    userId,
+    contentLength: content.length,
+    hasJobDescription: !!jobDescription,
+    stage: 'ASYNC_START'
+  });
+  
   // Initialize AI-powered analysis service outside try block so it's available in catch
   const { AIAnalysisService } = await import('../services/aiAnalysisService');
   let aiAnalysisService: any;
   
   try {
-    console.log(`Starting async analysis for ${analysisId}`);
+    enhancedLogger.logAnalysisCheckpoint(analysisId, 'AI_SERVICE_INIT');
     
     aiAnalysisService = new AIAnalysisService(env);
-    // Proceed directly to analysis; status/health checks removed to avoid pre-call failures
-    console.log(`AI service initialized for ${analysisId}. Beginning analysis...`);
+    enhancedLogger.info(`🤖 AI service initialized for ${analysisId}`, {
+      analysisId,
+      stage: 'AI_READY'
+    });
 
     // Perform AI-powered analysis using DeepSeek with timeout
-    const analysisTimeout = 120000; // 120 seconds timeout (2 minutes) - less than client timeout
-    console.log(`Starting AI analysis for ${analysisId}, content length: ${content.length}, job description: ${!!jobDescription}`);
+    const analysisTimeout = 120000; // 120 seconds timeout (2 minutes) - keeping as requested
+    enhancedLogger.logAnalysisCheckpoint(analysisId, 'AI_ANALYSIS_START', {
+      timeout: analysisTimeout,
+      contentLength: content.length
+    });
     
     const response = await Promise.race([
       aiAnalysisService.analyzeCV(
@@ -187,25 +291,38 @@ async function performAsyncAnalysis(
           includeIndustryTrends: false,
         }
       ).then(result => {
-        console.log(`✅ CHECKPOINT: AI analysis completed for ${analysisId}, skills found: ${result.skillsAnalysis?.skills?.length || 0}`);
+        enhancedLogger.logAnalysisCheckpoint(analysisId, 'AI_ANALYSIS_SUCCESS', {
+          skillsFound: result.skillsAnalysis?.skills?.length || 0,
+          categoriesFound: result.skillsAnalysis?.categories?.length || 0,
+          hasGapAnalysis: !!result.skillGaps
+        });
+        enhancedLogger.info(`✅ AI analysis completed for ${analysisId}`, {
+          analysisId,
+          skillsCount: result.skillsAnalysis?.skills?.length || 0,
+          stage: 'AI_COMPLETE'
+        });
         return result;
       }).catch(error => {
-        console.error(`❌ CHECKPOINT: AI analysis failed for ${analysisId}:`, {
-          error: error.message,
-          stack: error.stack,
-          name: error.name
+        enhancedLogger.error(`❌ AI analysis failed for ${analysisId}`, error, {
+          analysisId,
+          stage: 'AI_ERROR',
+          errorType: error?.name
         });
         throw error;
       }),
       new Promise((_, reject) => 
         setTimeout(() => {
-          console.error(`Analysis timeout reached for ${analysisId} after ${analysisTimeout/1000} seconds`);
+          enhancedLogger.critical(`⏰ Analysis timeout for ${analysisId} after ${analysisTimeout/1000}s`, {
+            analysisId,
+            timeout: analysisTimeout,
+            stage: 'TIMEOUT'
+          });
           reject(new Error(`Analysis timeout after ${analysisTimeout/1000} seconds`));
         }, analysisTimeout)
       )
     ]) as any;
 
-    console.log(`AI analysis completed successfully for ${analysisId}, preparing database update`);
+    enhancedLogger.logAnalysisCheckpoint(analysisId, 'PREPARING_RESPONSE');
     
     // Set the user ID and timestamp
     response.user_id = userId;
@@ -217,13 +334,22 @@ async function performAsyncAnalysis(
     let responseJson: string;
     try {
       responseJson = JSON.stringify(response);
-      console.log(`Response object prepared for ${analysisId}, size: ${responseJson.length} characters`);
+      enhancedLogger.info(`📦 Response prepared for ${analysisId}`, {
+        analysisId,
+        responseSize: responseJson.length,
+        stage: 'SERIALIZATION_SUCCESS'
+      });
     } catch (jsonError) {
-      console.error(`JSON serialization failed for ${analysisId}:`, jsonError);
+      enhancedLogger.error(`❌ JSON serialization failed for ${analysisId}`, jsonError, {
+        analysisId,
+        stage: 'SERIALIZATION_ERROR'
+      });
       throw new Error(`Failed to serialize analysis response: ${jsonError}`);
     }
 
     try {
+      enhancedLogger.logAnalysisCheckpoint(analysisId, 'DB_UPDATE_START');
+      
       // Update the database record with completed analysis
       const updateResult = await env.DB
         .prepare(`
@@ -239,17 +365,31 @@ async function performAsyncAnalysis(
         )
         .run();
 
-      console.log(`✅ CHECKPOINT: Database update result for ${analysisId}:`, {
+      enhancedLogger.info(`💾 Database updated for ${analysisId}`, {
+        analysisId,
         success: updateResult.success,
         changes: updateResult.changes,
-        meta: updateResult.meta
+        stage: 'DB_UPDATE_SUCCESS'
       });
 
       if (updateResult.changes === 0) {
-        console.error(`❌ CRITICAL: No rows updated for ${analysisId} - record may not exist or user mismatch`);
+        enhancedLogger.critical(`🔥 No rows updated for ${analysisId}`, {
+          analysisId,
+          userId,
+          stage: 'DB_UPDATE_FAILED'
+        });
         throw new Error('Database update failed - no rows affected');
       }
 
+      // Update KV cache with completed status
+      enhancedLogger.logAnalysisCheckpoint(analysisId, 'KV_UPDATE_START');
+      const kvSuccess = await kvStorage.putAnalysisStatus(analysisId, response);
+      if (kvSuccess) {
+        enhancedLogger.info(`✅ KV cache updated for ${analysisId}`, { analysisId });
+      } else {
+        enhancedLogger.warn(`⚠️ KV cache update failed for ${analysisId}`, { analysisId });
+      }
+      
       // Verify the update was successful by reading the record back
       const verifyRecord = await env.DB
         .prepare('SELECT analysis_data FROM resume_analyses WHERE id = ? AND user_id = ?')
@@ -258,19 +398,41 @@ async function performAsyncAnalysis(
 
       if (verifyRecord) {
         const storedData = JSON.parse(verifyRecord.analysis_data);
-        console.log(`Verification: Record ${analysisId} status is now: ${storedData.status}`);
+        enhancedLogger.info(`✔️ Verification: Record ${analysisId} status is ${storedData.status}`, {
+          analysisId,
+          status: storedData.status,
+          stage: 'VERIFICATION_SUCCESS'
+        });
       } else {
-        console.error(`Verification failed: Record ${analysisId} not found after update`);
+        enhancedLogger.error(`❌ Verification failed: Record ${analysisId} not found`, {
+          analysisId,
+          stage: 'VERIFICATION_FAILED'
+        });
       }
 
-      console.log(`✅ FINAL CHECKPOINT: Successfully completed async analysis for ${analysisId}`);
+      enhancedLogger.logAnalysisComplete(analysisId, true, {
+        skillsFound: response.skillsAnalysis?.skills?.length || 0,
+        processingStage: 'ASYNC_COMPLETE'
+      });
+      enhancedLogger.info(`✨ FINAL: Successfully completed async analysis for ${analysisId}`, {
+        analysisId,
+        stage: 'FINAL_SUCCESS'
+      });
     } catch (dbError) {
-      console.error(`Database update failed for ${analysisId}:`, dbError);
+      enhancedLogger.error(`🔥 Database operation failed for ${analysisId}`, dbError, {
+        analysisId,
+        stage: 'DB_ERROR'
+      });
       throw dbError;
     }
 
   } catch (error) {
-    console.error(`Failed async analysis for ${analysisId}:`, error);
+    enhancedLogger.error(`🔥 Failed async analysis for ${analysisId}`, error, {
+      analysisId,
+      userId,
+      stage: 'ASYNC_ERROR',
+      errorType: error?.constructor?.name
+    });
 
     // No fallback: if AI fails, mark as failed immediately
     let errorCode = 'AI_SERVICE_UNAVAILABLE';
@@ -278,6 +440,7 @@ async function performAsyncAnalysis(
     if (error instanceof Error && error.message.includes('timeout')) {
       errorCode = 'ANALYSIS_TIMEOUT';
       errorMessage = 'Analysis timed out. Please try again later.';
+      enhancedLogger.warn(`⏰ Analysis timed out for ${analysisId}`, { analysisId });
     }
 
     const errorRecord = {
@@ -298,9 +461,27 @@ async function performAsyncAnalysis(
 
     try {
       await updateDatabaseWithError(env, analysisId, userId, errorRecord);
-      console.log(`❌ FINAL: Analysis ${analysisId} marked as failed in database`);
+      
+      // Also update KV cache with error status
+      await kvStorage.putAnalysisStatus(analysisId, errorRecord);
+      
+      enhancedLogger.logAnalysisComplete(analysisId, false, {
+        errorCode,
+        errorMessage,
+        stage: 'ASYNC_FAILED'
+      });
+      
+      enhancedLogger.error(`❌ FINAL: Analysis ${analysisId} marked as failed`, {
+        analysisId,
+        errorCode,
+        stage: 'FINAL_FAILED'
+      });
     } catch (dbError) {
-      console.error(`Critical: Failed to update database with error status for ${analysisId}:`, dbError);
+      enhancedLogger.critical(`🔥 CRITICAL: Failed to update error status for ${analysisId}`, {
+        analysisId,
+        dbError: dbError instanceof Error ? dbError.message : 'Unknown',
+        stage: 'CRITICAL_ERROR'
+      });
       // This is critical - the record will stay in "processing" state
     }
   }
