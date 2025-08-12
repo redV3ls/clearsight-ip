@@ -383,6 +383,11 @@ app.route('/api/v1/auth', authRoutes);
 app.route('/api/v1/users', usersRoutes);
 app.route('/api/v1/jobs', jobsRoutes);
 app.route('/api/v1/analyze', analyzeRoutes);
+
+// Test routes for debugging async analysis
+import testAnalysisRoutes from './routes/test-analysis';
+app.route('/api/v1/test-analysis', testAnalysisRoutes);
+
 app.route('/api/v1/monitoring', monitoringRoutes);
 app.route('/api/v1/gdpr', gdprRoutes);
 app.route('/api/v1/audit', auditRoutes);

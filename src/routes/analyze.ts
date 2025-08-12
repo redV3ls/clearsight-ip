@@ -242,7 +242,7 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
 });
 
 // Async function to perform the actual analysis
-async function performAsyncAnalysis(
+export async function performAsyncAnalysis(
   env: any,
   analysisId: string,
   userId: string,
