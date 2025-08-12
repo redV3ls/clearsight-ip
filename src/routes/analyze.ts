@@ -249,9 +249,15 @@ async function performAsyncAnalysis(
   content: string,
   jobDescription: string
 ) {
+  // CRITICAL: Add console.log for immediate visibility in wrangler tail
+  console.log(`[ASYNC-START] ${analysisId} - Starting async analysis`);
+  
   // Initialize enhanced logging and KV storage
   enhancedLogger.setEnv(env);
   kvStorage.setEnv(env);
+  
+  // Track CPU time from the start
+  const startCpuTime = Date.now();
   
   enhancedLogger.info(`🎯 Starting async analysis for ${analysisId}`, {
     analysisId,
@@ -261,25 +267,37 @@ async function performAsyncAnalysis(
     stage: 'ASYNC_START'
   });
   
+  console.log(`[ASYNC-LOG] ${analysisId} - Content length: ${content.length}, Has job desc: ${!!jobDescription}`);
+  
   // Initialize AI-powered analysis service outside try block so it's available in catch
   const { AIAnalysisService } = await import('../services/aiAnalysisService');
   let aiAnalysisService: any;
   
   try {
+    console.log(`[ASYNC-TRY] ${analysisId} - Entered try block, CPU time: ${Date.now() - startCpuTime}ms`);
     enhancedLogger.logAnalysisCheckpoint(analysisId, 'AI_SERVICE_INIT');
     
+    console.log(`[ASYNC-AI-INIT] ${analysisId} - About to initialize AI service`);
     aiAnalysisService = new AIAnalysisService(env);
+    console.log(`[ASYNC-AI-READY] ${analysisId} - AI service initialized, CPU time: ${Date.now() - startCpuTime}ms`);
+    
     enhancedLogger.info(`🤖 AI service initialized for ${analysisId}`, {
       analysisId,
-      stage: 'AI_READY'
+      stage: 'AI_READY',
+      cpuTime: Date.now() - startCpuTime
     });
 
     // Perform AI-powered analysis using DeepSeek with timeout
     const analysisTimeout = 120000; // 120 seconds timeout (2 minutes) - keeping as requested
+    console.log(`[ASYNC-DEEPSEEK-START] ${analysisId} - Starting DeepSeek call with ${analysisTimeout}ms timeout, CPU time: ${Date.now() - startCpuTime}ms`);
+    
     enhancedLogger.logAnalysisCheckpoint(analysisId, 'AI_ANALYSIS_START', {
       timeout: analysisTimeout,
-      contentLength: content.length
+      contentLength: content.length,
+      cpuTime: Date.now() - startCpuTime
     });
+    
+    console.log(`[ASYNC-PROMISE-RACE] ${analysisId} - Setting up Promise.race`);
     
     const response = await Promise.race([
       aiAnalysisService.analyzeCV(
@@ -291,36 +309,45 @@ async function performAsyncAnalysis(
           includeIndustryTrends: false,
         }
       ).then(result => {
+        console.log(`[ASYNC-DEEPSEEK-SUCCESS] ${analysisId} - DeepSeek returned, CPU time: ${Date.now() - startCpuTime}ms`);
         enhancedLogger.logAnalysisCheckpoint(analysisId, 'AI_ANALYSIS_SUCCESS', {
           skillsFound: result.skillsAnalysis?.skills?.length || 0,
           categoriesFound: result.skillsAnalysis?.categories?.length || 0,
-          hasGapAnalysis: !!result.skillGaps
+          hasGapAnalysis: !!result.skillGaps,
+          cpuTime: Date.now() - startCpuTime
         });
         enhancedLogger.info(`✅ AI analysis completed for ${analysisId}`, {
           analysisId,
           skillsCount: result.skillsAnalysis?.skills?.length || 0,
-          stage: 'AI_COMPLETE'
+          stage: 'AI_COMPLETE',
+          cpuTime: Date.now() - startCpuTime
         });
         return result;
       }).catch(error => {
+        console.log(`[ASYNC-DEEPSEEK-ERROR] ${analysisId} - DeepSeek failed: ${error.message}, CPU time: ${Date.now() - startCpuTime}ms`);
         enhancedLogger.error(`❌ AI analysis failed for ${analysisId}`, error, {
           analysisId,
           stage: 'AI_ERROR',
-          errorType: error?.name
+          errorType: error?.name,
+          cpuTime: Date.now() - startCpuTime
         });
         throw error;
       }),
       new Promise((_, reject) => 
         setTimeout(() => {
+          console.log(`[ASYNC-TIMEOUT] ${analysisId} - Timeout reached after ${analysisTimeout}ms`);
           enhancedLogger.critical(`⏰ Analysis timeout for ${analysisId} after ${analysisTimeout/1000}s`, {
             analysisId,
             timeout: analysisTimeout,
-            stage: 'TIMEOUT'
+            stage: 'TIMEOUT',
+            cpuTime: Date.now() - startCpuTime
           });
           reject(new Error(`Analysis timeout after ${analysisTimeout/1000} seconds`));
         }, analysisTimeout)
       )
     ]) as any;
+    
+    console.log(`[ASYNC-RESPONSE] ${analysisId} - Got response from Promise.race, CPU time: ${Date.now() - startCpuTime}ms`);
 
     enhancedLogger.logAnalysisCheckpoint(analysisId, 'PREPARING_RESPONSE');
     
@@ -348,22 +375,29 @@ async function performAsyncAnalysis(
     }
 
     try {
+      console.log(`[ASYNC-DB-UPDATE-START] ${analysisId} - About to update DB, CPU time: ${Date.now() - startCpuTime}ms`);
       enhancedLogger.logAnalysisCheckpoint(analysisId, 'DB_UPDATE_START');
       
       // Update the database record with completed analysis
-      const updateResult = await env.DB
+      console.log(`[ASYNC-DB-PREPARE] ${analysisId} - Preparing UPDATE statement`);
+      const updateStatement = env.DB
         .prepare(`
           UPDATE resume_analyses 
           SET analysis_data = ?, created_at = ?
           WHERE id = ? AND user_id = ?
-        `)
-        .bind(
-          responseJson,
-          new Date().toISOString(),
-          analysisId,
-          userId
-        )
-        .run();
+        `);
+      
+      console.log(`[ASYNC-DB-BIND] ${analysisId} - Binding parameters: data_size=${responseJson.length}, userId=${userId}`);
+      const boundStatement = updateStatement.bind(
+        responseJson,
+        new Date().toISOString(),
+        analysisId,
+        userId
+      );
+      
+      console.log(`[ASYNC-DB-RUN] ${analysisId} - Executing UPDATE, CPU time: ${Date.now() - startCpuTime}ms`);
+      const updateResult = await boundStatement.run();
+      console.log(`[ASYNC-DB-RESULT] ${analysisId} - Update result: success=${updateResult.success}, changes=${updateResult.changes}, CPU time: ${Date.now() - startCpuTime}ms`);
 
       enhancedLogger.info(`💾 Database updated for ${analysisId}`, {
         analysisId,
@@ -382,8 +416,12 @@ async function performAsyncAnalysis(
       }
 
       // Update KV cache with completed status
+      console.log(`[ASYNC-KV-START] ${analysisId} - Starting KV cache update, CPU time: ${Date.now() - startCpuTime}ms`);
       enhancedLogger.logAnalysisCheckpoint(analysisId, 'KV_UPDATE_START');
+      
       const kvSuccess = await kvStorage.putAnalysisStatus(analysisId, response);
+      console.log(`[ASYNC-KV-RESULT] ${analysisId} - KV update result: ${kvSuccess ? 'SUCCESS' : 'FAILED'}, CPU time: ${Date.now() - startCpuTime}ms`);
+      
       if (kvSuccess) {
         enhancedLogger.info(`✅ KV cache updated for ${analysisId}`, { analysisId });
       } else {
@@ -391,10 +429,12 @@ async function performAsyncAnalysis(
       }
       
       // Verify the update was successful by reading the record back
+      console.log(`[ASYNC-VERIFY-START] ${analysisId} - Starting verification read, CPU time: ${Date.now() - startCpuTime}ms`);
       const verifyRecord = await env.DB
         .prepare('SELECT analysis_data FROM resume_analyses WHERE id = ? AND user_id = ?')
         .bind(analysisId, userId)
         .first() as any;
+      console.log(`[ASYNC-VERIFY-RESULT] ${analysisId} - Verification read complete: found=${!!verifyRecord}, CPU time: ${Date.now() - startCpuTime}ms`);
 
       if (verifyRecord) {
         const storedData = JSON.parse(verifyRecord.analysis_data);
@@ -412,26 +452,39 @@ async function performAsyncAnalysis(
 
       enhancedLogger.logAnalysisComplete(analysisId, true, {
         skillsFound: response.skillsAnalysis?.skills?.length || 0,
-        processingStage: 'ASYNC_COMPLETE'
+        processingStage: 'ASYNC_COMPLETE',
+        totalCpuTime: Date.now() - startCpuTime
       });
+      
+      console.log(`[ASYNC-COMPLETE] ${analysisId} - Analysis fully complete! Total CPU time: ${Date.now() - startCpuTime}ms`);
+      
       enhancedLogger.info(`✨ FINAL: Successfully completed async analysis for ${analysisId}`, {
         analysisId,
-        stage: 'FINAL_SUCCESS'
+        stage: 'FINAL_SUCCESS',
+        totalCpuTime: Date.now() - startCpuTime
       });
     } catch (dbError) {
+      console.log(`[ASYNC-DB-ERROR] ${analysisId} - Database error: ${dbError instanceof Error ? dbError.message : 'Unknown'}, CPU time: ${Date.now() - startCpuTime}ms`);
+      
       enhancedLogger.error(`🔥 Database operation failed for ${analysisId}`, dbError, {
         analysisId,
-        stage: 'DB_ERROR'
+        stage: 'DB_ERROR',
+        cpuTime: Date.now() - startCpuTime,
+        errorMessage: dbError instanceof Error ? dbError.message : 'Unknown'
       });
       throw dbError;
     }
 
   } catch (error) {
+    console.log(`[ASYNC-CATCH] ${analysisId} - Caught error: ${error instanceof Error ? error.message : 'Unknown'}, CPU time: ${Date.now() - startCpuTime}ms`);
+    
     enhancedLogger.error(`🔥 Failed async analysis for ${analysisId}`, error, {
       analysisId,
       userId,
       stage: 'ASYNC_ERROR',
-      errorType: error?.constructor?.name
+      errorType: error?.constructor?.name,
+      cpuTime: Date.now() - startCpuTime,
+      errorMessage: error instanceof Error ? error.message : 'Unknown'
     });
 
     // No fallback: if AI fails, mark as failed immediately
