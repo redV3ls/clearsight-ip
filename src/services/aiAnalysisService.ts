@@ -194,7 +194,87 @@ export class AIAnalysisService {
   }
 
   /**
-   * Perform comprehensive AI-powered CV analysis
+   * Perform narrative-based AI-powered CV analysis
+   */
+  async analyzeNarrativeCV(
+    cvContent: string,
+    jobContent?: string,
+    options: {
+      includeMetadata?: boolean;
+    } = {}
+  ): Promise<{
+    analysis_id: string;
+    user_id: string;
+    timestamp: string;
+    status: string;
+    narrative: string;
+    analysis_type: 'standalone' | 'job-comparison';
+    word_count: number;
+    metadata?: any;
+    aiPowered: boolean;
+  }> {
+    const startTime = Date.now();
+    const analysisId = crypto.randomUUID();
+
+    try {
+      if (!this.isAIEnabled || !this.deepseekAI) {
+        throw new Error('AI service is not available. Narrative analysis requires AI service.');
+      }
+
+      logger.info('Starting narrative CV analysis', {
+        analysisId,
+        contentLength: cvContent.length,
+        hasJobDescription: !!jobContent
+      });
+
+      // Use the new narrative analysis method
+      const narrativeResult = options.includeMetadata 
+        ? await this.deepseekAI.extractNarrativeWithMetadata(cvContent, jobContent)
+        : { 
+            analysis: await this.deepseekAI.extractNarrativeFromCV(cvContent, jobContent),
+            metadata: null
+          };
+
+      const processingTime = Date.now() - startTime;
+
+      // Build narrative response
+      const result = {
+        analysis_id: analysisId,
+        user_id: 'current-user', // Will be set by calling code
+        timestamp: new Date().toISOString(),
+        status: 'completed',
+        narrative: narrativeResult.analysis.narrative,
+        analysis_type: narrativeResult.analysis.analysisType,
+        word_count: narrativeResult.analysis.wordCount,
+        aiPowered: true,
+        metadata: narrativeResult.metadata ? {
+          ...narrativeResult.metadata,
+          processingTime,
+          aiProvider: 'deepseek',
+          aiModel: 'deepseek-reasoner'
+        } : {
+          processingTime,
+          aiProvider: 'deepseek',
+          aiModel: 'deepseek-reasoner'
+        }
+      };
+
+      logger.info('Narrative CV analysis completed', {
+        analysisId,
+        wordCount: result.word_count,
+        analysisType: result.analysis_type,
+        processingTime
+      });
+
+      return result;
+    } catch (error) {
+      logger.error('Narrative AI analysis failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Perform comprehensive AI-powered CV analysis (legacy method)
    */
   async analyzeCV(
     cvContent: string,

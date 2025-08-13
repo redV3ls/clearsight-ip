@@ -10,13 +10,19 @@
   - Remove `parseNaturalLanguageSkillsResponse()` and related complex parsing methods
   - _Requirements: 1.1, 1.2, 2.1, 2.2_
 
-- [ ] 2. Create New Narrative Response Interface
+- [x] 2. Create New Narrative Response Interface
+
+
+
   - Define `NarrativeAnalysis` interface with narrative, analysisType, wordCount fields
   - Remove dependency on complex `AISkillsAnalysis` interface for CV analysis
   - Create utility functions for word counting and response metadata
   - _Requirements: 3.1, 3.2, 4.1_
 
-- [ ] 3. Update Analysis Route Handler
+- [x] 3. Update Analysis Route Handler
+
+
+
   - Modify `/analyze/resume` endpoint to return narrative format
   - Update response structure to include narrative field instead of structured data
   - Ensure analysis metadata (ID, timestamp, status) is preserved

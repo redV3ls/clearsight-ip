@@ -212,7 +212,7 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       status: 'processing',
       message: 'Analysis started successfully. Use the analysis_id to check status and retrieve results.',
       timestamp: new Date().toISOString(),
-      estimated_completion: new Date(Date.now() + 90 * 1000).toISOString(), // 90 seconds estimate
+      estimated_completion: new Date(Date.now() + 45 * 1000).toISOString(), // 45 seconds estimate (improved with narrative analysis)
       check_status_url: `/api/v1/analyze/resume/${analysisId}`,
       history_url: '/api/v1/analyze/resume/history'
     }, 202); // 202 Accepted
@@ -287,8 +287,8 @@ export async function performAsyncAnalysis(
       cpuTime: Date.now() - startCpuTime
     });
 
-    // Perform AI-powered analysis using DeepSeek with timeout
-    const analysisTimeout = 120000; // 120 seconds timeout (2 minutes) - keeping as requested
+    // Perform AI-powered narrative analysis using DeepSeek with timeout
+    const analysisTimeout = 60000; // 60 seconds timeout (1 minute) - reduced due to narrative simplification
     console.log(`[ASYNC-DEEPSEEK-START] ${analysisId} - Starting DeepSeek call with ${analysisTimeout}ms timeout, CPU time: ${Date.now() - startCpuTime}ms`);
     
     enhancedLogger.logAnalysisCheckpoint(analysisId, 'AI_ANALYSIS_START', {
@@ -300,32 +300,31 @@ export async function performAsyncAnalysis(
     console.log(`[ASYNC-PROMISE-RACE] ${analysisId} - Setting up Promise.race`);
     
     const response = await Promise.race([
-      aiAnalysisService.analyzeCV(
+      aiAnalysisService.analyzeNarrativeCV(
         content,
         jobDescription,
         {
-          includeSkillsGap: !!jobDescription,
-          includeCareerSuggestions: false,
-          includeIndustryTrends: false,
+          includeMetadata: true
         }
       ).then(result => {
-        console.log(`[ASYNC-DEEPSEEK-SUCCESS] ${analysisId} - DeepSeek returned, CPU time: ${Date.now() - startCpuTime}ms`);
+        console.log(`[ASYNC-DEEPSEEK-SUCCESS] ${analysisId} - DeepSeek returned narrative, CPU time: ${Date.now() - startCpuTime}ms`);
         enhancedLogger.logAnalysisCheckpoint(analysisId, 'AI_ANALYSIS_SUCCESS', {
-          skillsFound: result.skillsAnalysis?.skills?.length || 0,
-          categoriesFound: result.skillsAnalysis?.categories?.length || 0,
-          hasGapAnalysis: !!result.skillGaps,
+          wordCount: result.word_count,
+          analysisType: result.analysis_type,
+          narrativeLength: result.narrative.length,
           cpuTime: Date.now() - startCpuTime
         });
-        enhancedLogger.info(`✅ AI analysis completed for ${analysisId}`, {
+        enhancedLogger.info(`✅ Narrative AI analysis completed for ${analysisId}`, {
           analysisId,
-          skillsCount: result.skillsAnalysis?.skills?.length || 0,
+          wordCount: result.word_count,
+          analysisType: result.analysis_type,
           stage: 'AI_COMPLETE',
           cpuTime: Date.now() - startCpuTime
         });
         return result;
       }).catch(error => {
-        console.log(`[ASYNC-DEEPSEEK-ERROR] ${analysisId} - DeepSeek failed: ${error.message}, CPU time: ${Date.now() - startCpuTime}ms`);
-        enhancedLogger.error(`❌ AI analysis failed for ${analysisId}`, error, {
+        console.log(`[ASYNC-DEEPSEEK-ERROR] ${analysisId} - DeepSeek narrative analysis failed: ${error.message}, CPU time: ${Date.now() - startCpuTime}ms`);
+        enhancedLogger.error(`❌ Narrative AI analysis failed for ${analysisId}`, error, {
           analysisId,
           stage: 'AI_ERROR',
           errorType: error?.name,

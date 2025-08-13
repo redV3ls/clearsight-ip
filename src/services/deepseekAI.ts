@@ -85,6 +85,15 @@ export interface NarrativeAnalysis {
   generatedAt: string;
 }
 
+export interface NarrativeMetadata {
+  wordCount: number;
+  characterCount: number;
+  estimatedReadingTime: number; // in minutes
+  analysisType: 'standalone' | 'job-comparison';
+  generatedAt: string;
+  processingTime?: number; // in milliseconds
+}
+
 export interface AIJobAnalysis {
   jobTitle: string;
   company?: string;
@@ -121,6 +130,94 @@ export interface AIGapAnalysis {
   marketInsights: string[];
   competitiveAdvantage: string[];
   reasoning: string;
+}
+
+/**
+ * Utility functions for narrative analysis
+ */
+export class NarrativeUtils {
+  /**
+   * Calculate word count from text
+   */
+  static calculateWordCount(text: string): number {
+    if (!text || typeof text !== 'string') return 0;
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  }
+
+  /**
+   * Calculate character count (excluding whitespace)
+   */
+  static calculateCharacterCount(text: string): number {
+    if (!text || typeof text !== 'string') return 0;
+    return text.replace(/\s/g, '').length;
+  }
+
+  /**
+   * Estimate reading time in minutes (average 200 words per minute)
+   */
+  static estimateReadingTime(wordCount: number): number {
+    const wordsPerMinute = 200;
+    return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+  }
+
+  /**
+   * Generate comprehensive metadata for narrative analysis
+   */
+  static generateMetadata(
+    narrative: string, 
+    analysisType: 'standalone' | 'job-comparison',
+    processingTime?: number
+  ): NarrativeMetadata {
+    const wordCount = this.calculateWordCount(narrative);
+    const characterCount = this.calculateCharacterCount(narrative);
+    const estimatedReadingTime = this.estimateReadingTime(wordCount);
+
+    return {
+      wordCount,
+      characterCount,
+      estimatedReadingTime,
+      analysisType,
+      generatedAt: new Date().toISOString(),
+      processingTime
+    };
+  }
+
+  /**
+   * Validate narrative content
+   */
+  static validateNarrative(narrative: string): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (!narrative || typeof narrative !== 'string') {
+      errors.push('Narrative must be a non-empty string');
+    } else {
+      if (narrative.trim().length < 50) {
+        errors.push('Narrative is too short (minimum 50 characters)');
+      }
+      if (narrative.trim().length > 10000) {
+        errors.push('Narrative is too long (maximum 10,000 characters)');
+      }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
+   * Clean and format narrative text
+   */
+  static cleanNarrative(narrative: string): string {
+    if (!narrative || typeof narrative !== 'string') return '';
+    
+    return narrative
+      .trim()
+      .replace(/\n{3,}/g, '\n\n') // Replace multiple newlines with double newlines
+      .replace(/\s{2,}/g, ' ') // Replace multiple spaces with single space
+      .replace(/^\s*[\r\n]/gm, '') // Remove empty lines
+      .trim();
+  }
 }
 
 export class DeepSeekAIService {
@@ -162,9 +259,12 @@ export class DeepSeekAIService {
    */
   async extractNarrativeFromCV(cvText: string, jobDescription?: string): Promise<NarrativeAnalysis> {
     try {
+      const startTime = Date.now();
       const prompt = this.createNarrativeAnalysisPrompt(cvText, jobDescription);
       const response = await this.callDeepSeekAPI(prompt, 'narrative-analysis');
-      return this.processNarrativeResponse(response, jobDescription ? 'job-comparison' : 'standalone');
+      const processingTime = Date.now() - startTime;
+      
+      return this.processNarrativeResponse(response, jobDescription ? 'job-comparison' : 'standalone', processingTime);
     } catch (error) {
       logger.error('AI narrative analysis failed:', error);
       throw new AppError('AI narrative analysis failed', 500, 'AI_NARRATIVE_ANALYSIS_FAILED');
@@ -172,14 +272,52 @@ export class DeepSeekAIService {
   }
 
   /**
+   * Process CV text and return comprehensive narrative analysis with metadata
+   */
+  async extractNarrativeWithMetadata(cvText: string, jobDescription?: string): Promise<{ analysis: NarrativeAnalysis; metadata: NarrativeMetadata }> {
+    try {
+      const startTime = Date.now();
+      const prompt = this.createNarrativeAnalysisPrompt(cvText, jobDescription);
+      const response = await this.callDeepSeekAPI(prompt, 'narrative-analysis');
+      const processingTime = Date.now() - startTime;
+      
+      const analysisType = jobDescription ? 'job-comparison' : 'standalone';
+      const cleanedNarrative = NarrativeUtils.cleanNarrative(response);
+      
+      // Generate comprehensive metadata
+      const metadata = NarrativeUtils.generateMetadata(cleanedNarrative, analysisType, processingTime);
+      
+      // Create analysis object
+      const analysis: NarrativeAnalysis = {
+        narrative: cleanedNarrative,
+        analysisType,
+        wordCount: metadata.wordCount,
+        generatedAt: metadata.generatedAt
+      };
+      
+      return { analysis, metadata };
+    } catch (error) {
+      logger.error('AI narrative analysis with metadata failed:', error);
+      throw new AppError('AI narrative analysis failed', 500, 'AI_NARRATIVE_ANALYSIS_FAILED');
+    }
+  }
+
+  /**
    * Process narrative response directly without parsing
    */
-  private processNarrativeResponse(response: string, analysisType: 'standalone' | 'job-comparison'): NarrativeAnalysis {
-    // Clean up the response text
-    const cleanedNarrative = response.trim();
+  private processNarrativeResponse(response: string, analysisType: 'standalone' | 'job-comparison', processingTime?: number): NarrativeAnalysis {
+    // Clean up the response text using utility function
+    const cleanedNarrative = NarrativeUtils.cleanNarrative(response);
     
-    // Calculate word count
-    const wordCount = cleanedNarrative.split(/\s+/).filter(word => word.length > 0).length;
+    // Validate the narrative
+    const validation = NarrativeUtils.validateNarrative(cleanedNarrative);
+    if (!validation.isValid) {
+      logger.warn('Narrative validation failed:', validation.errors);
+      // Continue processing but log the issues
+    }
+    
+    // Calculate word count using utility function
+    const wordCount = NarrativeUtils.calculateWordCount(cleanedNarrative);
     
     return {
       narrative: cleanedNarrative,
