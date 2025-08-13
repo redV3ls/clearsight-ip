@@ -15,6 +15,7 @@ import { enhancedLogger } from '../utils/enhancedLogger';
 import { kvStorage } from '../utils/kvStorage';
 import { NarrativeAnalysisService } from '../services/narrativeAnalysisService';
 import { createDatabase } from '../config/database';
+import { NarrativeKVCache } from '../services/narrativeKVCache';
 
 const analyze = new Hono<{ Bindings: Env }>();
 
@@ -175,12 +176,21 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       throw dbError;
     }
 
-    // Store initial status in KV for fast retrieval
+    // Store initial processing status in optimized narrative KV cache
+    const narrativeCache = new NarrativeKVCache(c.env);
+    const processingStored = await narrativeCache.storeProcessingStatus(analysisId, userId);
+    
+    // Also store in legacy KV for backward compatibility
     const kvStored = await kvStorage.putAnalysisStatus(analysisId, initialRecord);
-    if (!kvStored) {
-      enhancedLogger.warn('⚠️ Failed to store initial status in KV cache', { analysisId });
+    
+    if (!processingStored && !kvStored) {
+      enhancedLogger.warn('⚠️ Failed to store initial status in both KV caches', { analysisId });
     } else {
-      enhancedLogger.info('✅ Initial status stored in KV cache', { analysisId });
+      enhancedLogger.info('✅ Initial status stored in KV cache', { 
+        analysisId,
+        narrativeCache: processingStored,
+        legacyCache: kvStored
+      });
     }
     
     // Start async analysis (fire and forget)
@@ -433,17 +443,39 @@ export async function performAsyncAnalysis(
         });
       }
 
-      // Update KV cache with completed status
-      console.log(`[ASYNC-KV-START] ${analysisId} - Starting KV cache update, CPU time: ${Date.now() - startCpuTime}ms`);
-      enhancedLogger.logAnalysisCheckpoint(analysisId, 'KV_UPDATE_START');
+      // Update optimized narrative KV cache
+      console.log(`[ASYNC-KV-START] ${analysisId} - Starting narrative KV cache update, CPU time: ${Date.now() - startCpuTime}ms`);
+      enhancedLogger.logAnalysisCheckpoint(analysisId, 'NARRATIVE_KV_UPDATE_START');
       
-      const kvSuccess = await kvStorage.putAnalysisStatus(analysisId, response);
-      console.log(`[ASYNC-KV-RESULT] ${analysisId} - KV update result: ${kvSuccess ? 'SUCCESS' : 'FAILED'}, CPU time: ${Date.now() - startCpuTime}ms`);
+      const narrativeCache = new NarrativeKVCache(env);
+      const cacheEntry = {
+        analysisId,
+        userId,
+        narrative: response.narrative,
+        analysisType: response.analysis_type,
+        wordCount: response.word_count,
+        status: 'completed' as const,
+        timestamp: response.timestamp,
+        processingTime: response.metadata?.processingTime
+      };
+      
+      const kvSuccess = await narrativeCache.storeAnalysis(cacheEntry);
+      console.log(`[ASYNC-KV-RESULT] ${analysisId} - Narrative KV cache result: ${kvSuccess ? 'SUCCESS' : 'FAILED'}, CPU time: ${Date.now() - startCpuTime}ms`);
       
       if (kvSuccess) {
-        enhancedLogger.info(`✅ KV cache updated for ${analysisId}`, { analysisId });
+        enhancedLogger.info(`✅ Narrative KV cache updated for ${analysisId}`, { 
+          analysisId, 
+          wordCount: response.word_count,
+          analysisType: response.analysis_type 
+        });
       } else {
-        enhancedLogger.warn(`⚠️ KV cache update failed for ${analysisId}`, { analysisId });
+        enhancedLogger.warn(`⚠️ Narrative KV cache update failed for ${analysisId}`, { analysisId });
+      }
+      
+      // Also update legacy KV for backward compatibility
+      const legacyKvSuccess = await kvStorage.putAnalysisStatus(analysisId, response);
+      if (!legacyKvSuccess) {
+        enhancedLogger.warn(`⚠️ Legacy KV cache update failed for ${analysisId}`, { analysisId });
       }
       
       // Verify the narrative analysis was saved successfully
@@ -656,6 +688,28 @@ analyze.get('/test-ai', async (c: AuthenticatedContext) => {
 });
 
 /**
+ * GET /analyze/cache-health - Check narrative KV cache health
+ */
+analyze.get('/cache-health', async (c: AuthenticatedContext) => {
+  try {
+    const narrativeCache = new NarrativeKVCache(c.env);
+    const health = await narrativeCache.healthCheck();
+    const stats = await narrativeCache.getStats();
+
+    return c.json({
+      cache_health: health,
+      cache_stats: stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Cache health check error:', error);
+    return c.json({
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
+/**
  * GET /analyze/resume/history - Get user's resume analysis history
  */
 analyze.get('/resume/history', async (c: AuthenticatedContext) => {
@@ -781,13 +835,58 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
   }
 
   try {
-    // Try to get from the new narrative analysis table first
+    // Try to get from narrative KV cache first (fastest)
+    const narrativeCache = new NarrativeKVCache(c.env);
+    const cachedAnalysis = await narrativeCache.getAnalysis(analysisId);
+    
+    if (cachedAnalysis && cachedAnalysis.userId === userId) {
+      enhancedLogger.info('Serving analysis from narrative KV cache', { analysisId });
+      
+      const response = {
+        analysis_id: cachedAnalysis.analysisId,
+        user_id: cachedAnalysis.userId,
+        timestamp: cachedAnalysis.timestamp,
+        status: cachedAnalysis.status,
+        narrative: cachedAnalysis.narrative,
+        analysis_type: cachedAnalysis.analysisType,
+        word_count: cachedAnalysis.wordCount,
+        aiPowered: true,
+        metadata: {
+          processingTime: cachedAnalysis.processingTime,
+          source: 'narrative_cache'
+        },
+        retrieved_at: new Date().toISOString()
+      };
+      
+      return c.json(response, cachedAnalysis.status === 'completed' ? 200 : 202);
+    }
+
+    // Try to get from the narrative analysis database table
     const database = createDatabase(c.env.DB);
     const narrativeService = new NarrativeAnalysisService(database);
     
     const narrativeAnalysis = await narrativeService.getById(analysisId, userId);
     
     if (narrativeAnalysis) {
+      enhancedLogger.info('Serving analysis from narrative database', { analysisId });
+      
+      // Cache the result for future requests
+      const cacheEntry = {
+        analysisId: narrativeAnalysis.id,
+        userId: narrativeAnalysis.userId,
+        narrative: narrativeAnalysis.narrative,
+        analysisType: narrativeAnalysis.analysisType,
+        wordCount: narrativeAnalysis.wordCount,
+        status: 'completed' as const,
+        timestamp: narrativeAnalysis.createdAt,
+        processingTime: narrativeAnalysis.processingTimeMs
+      };
+      
+      // Store in cache asynchronously (don't wait)
+      narrativeCache.storeAnalysis(cacheEntry).catch(error => {
+        enhancedLogger.warn('Failed to cache analysis after database retrieval', { error, analysisId });
+      });
+      
       // Return narrative format
       const response = {
         analysis_id: narrativeAnalysis.id,
@@ -802,7 +901,8 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
           processingTime: narrativeAnalysis.processingTimeMs,
           aiProvider: narrativeAnalysis.aiProvider,
           aiModel: narrativeAnalysis.aiModel,
-          hasJobDescription: narrativeAnalysis.hasJobDescription
+          hasJobDescription: narrativeAnalysis.hasJobDescription,
+          source: 'narrative_database'
         },
         retrieved_at: new Date().toISOString()
       };

@@ -37,14 +37,16 @@
   - Implement database operations for storing and retrieving narrative analyses
   - _Requirements: 4.1, 4.3_
 
-- [-] 5. Implement Narrative Storage and Retrieval
+- [x] 5. Implement Narrative Storage and Retrieval
+
 
   - Create database service methods for narrative analysis CRUD operations
   - Update analysis status checking to work with narrative format
   - Implement efficient querying for user analysis history
   - _Requirements: 4.1, 4.2_
 
-- [ ] 6. Update KV Caching for Cloudflare Free Plan
+- [-] 6. Update KV Caching for Cloudflare Free Plan
+
   - Implement cache operations that respect 100K operations/day limit
   - Create cache key strategy for narrative analyses
   - Add manual cleanup logic for old cached analyses (no TTL on free plan)
