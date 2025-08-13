@@ -267,3 +267,18 @@ export const jobComparisons = sqliteTable('job_comparisons', {
   analysisData: text('analysis_data').notNull(), // JSON data of the complete comparison
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });
+
+// Narrative analysis table (optimized for D1 free plan)
+export const narrativeAnalysis = sqliteTable('narrative_analysis', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  narrative: text('narrative').notNull(),
+  analysisType: text('analysis_type').notNull(), // 'standalone' | 'job-comparison'
+  wordCount: integer('word_count').notNull().default(0),
+  hasJobDescription: integer('has_job_description').default(0), // D1 uses INTEGER for boolean
+  processingTimeMs: integer('processing_time_ms'),
+  aiProvider: text('ai_provider').default('deepseek'),
+  aiModel: text('ai_model').default('deepseek-reasoner'),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+});

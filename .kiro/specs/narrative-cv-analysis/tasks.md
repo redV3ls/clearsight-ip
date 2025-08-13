@@ -29,7 +29,8 @@
   - Remove structured data transformation logic
   - _Requirements: 1.1, 3.1, 4.1, 4.2_
 
-- [ ] 4. Optimize Database Schema for D1
+- [-] 4. Optimize Database Schema for D1
+
   - Create migration to add `narrative_analysis` table with D1-optimized schema
   - Update data types for D1 compatibility (TEXT for UUIDs, INTEGER for booleans)
   - Implement database operations for storing and retrieving narrative analyses
