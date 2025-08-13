@@ -78,6 +78,13 @@ export interface AISkillsAnalysis {
   reasoning: string;
 }
 
+export interface NarrativeAnalysis {
+  narrative: string;
+  analysisType: 'standalone' | 'job-comparison';
+  wordCount: number;
+  generatedAt: string;
+}
+
 export interface AIJobAnalysis {
   jobTitle: string;
   company?: string;
@@ -148,6 +155,38 @@ export class DeepSeekAIService {
       logger.error('AI skills extraction failed:', error);
       throw new AppError('AI skills extraction failed', 500, 'AI_SKILLS_EXTRACTION_FAILED');
     }
+  }
+
+  /**
+   * Process CV text and return narrative analysis directly
+   */
+  async extractNarrativeFromCV(cvText: string, jobDescription?: string): Promise<NarrativeAnalysis> {
+    try {
+      const prompt = this.createNarrativeAnalysisPrompt(cvText, jobDescription);
+      const response = await this.callDeepSeekAPI(prompt, 'narrative-analysis');
+      return this.processNarrativeResponse(response, jobDescription ? 'job-comparison' : 'standalone');
+    } catch (error) {
+      logger.error('AI narrative analysis failed:', error);
+      throw new AppError('AI narrative analysis failed', 500, 'AI_NARRATIVE_ANALYSIS_FAILED');
+    }
+  }
+
+  /**
+   * Process narrative response directly without parsing
+   */
+  private processNarrativeResponse(response: string, analysisType: 'standalone' | 'job-comparison'): NarrativeAnalysis {
+    // Clean up the response text
+    const cleanedNarrative = response.trim();
+    
+    // Calculate word count
+    const wordCount = cleanedNarrative.split(/\s+/).filter(word => word.length > 0).length;
+    
+    return {
+      narrative: cleanedNarrative,
+      analysisType,
+      wordCount,
+      generatedAt: new Date().toISOString()
+    };
   }
 
   /**
@@ -808,58 +847,61 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
   }
 
   /**
-   * Create skills extraction prompt
+   * Create narrative-focused analysis prompt
+   */
+  private createNarrativeAnalysisPrompt(cvText: string, jobDescription?: string): string {
+    const basePrompt = `
+You are a senior career coach providing personalized feedback on a professional's resume. 
+Write a comprehensive, engaging analysis that tells their career story.
+
+Your analysis should:
+1. Describe their professional journey and career progression
+2. Highlight unique strengths and standout qualities  
+3. Identify areas for growth with specific guidance
+4. Provide encouraging but honest assessment
+5. Include actionable next steps for career advancement
+
+${jobDescription ? `
+6. Compare their background to the target role below
+7. Explain fit and identify any gaps
+8. Suggest strategies to strengthen their candidacy
+
+TARGET JOB DESCRIPTION:
+${jobDescription}
+` : ''}
+
+Write in a warm, professional tone as if speaking directly to the candidate.
+Focus on storytelling and career guidance rather than technical lists.
+Aim for 300-500 words that provide genuine value and insight.
+
+RESUME TO ANALYZE:
+${cvText}
+`;
+
+    return basePrompt;
+  }
+
+  /**
+   * Create skills extraction prompt (updated for narrative output)
    */
   private createSkillsExtractionPrompt(cvText: string): string {
     return `
-You are a senior career coach analyzing a professional's resume. Your goal is to provide insightful, narrative feedback that tells their career story while extracting structured data.
+You are a senior career coach providing personalized feedback on a professional's resume. 
+Write a comprehensive, engaging analysis that tells their career story.
 
-Analyze this resume and provide both structured data AND narrative insights. Think of yourself as telling the story of this person's professional journey.
+Your analysis should:
+1. Describe their professional journey and career progression
+2. Highlight unique strengths and standout qualities  
+3. Identify areas for growth with specific guidance
+4. Provide encouraging but honest assessment
+5. Include actionable next steps for career advancement
 
-NARRATIVE ANALYSIS:
-Write a compelling 2-3 paragraph narrative that:
-1. Describes their professional journey and career progression
-2. Highlights their unique strengths and what makes them stand out
-3. Identifies areas where they could strengthen their profile
-4. Provides encouraging but honest assessment of their current position
+Write in a warm, professional tone as if speaking directly to the candidate.
+Focus on storytelling and career guidance rather than technical lists.
+Aim for 300-500 words that provide genuine value and insight.
 
-STRUCTURED DATA:
-Then provide the technical extraction in this format:
-
-SKILLS:
-For each skill, provide: Name | Category | Level | Years | Confidence | Context | Story
-Categories: Programming, Cloud, Data, Management, Design, DevOps, Security, Other
-Levels: beginner, intermediate, advanced, expert
-Confidence: 0.0 to 1.0
-Story: Brief narrative about how this skill fits into their career journey
-
-CATEGORIES:
-List all skill categories found
-
-EXPERIENCE:
-Overall experience summary with narrative elements
-
-EDUCATION:
-List educational qualifications with context about how they support their career
-
-CERTIFICATIONS:
-List professional certifications with relevance to their career path
-
-STRENGTHS:
-Key strengths with explanations of why they matter
-
-AREAS FOR IMPROVEMENT:
-Areas for development with specific, actionable guidance
-
-CAREER LEVEL:
-entry, mid, senior, or executive with reasoning
-
-Resume to analyze:
-"""
+RESUME TO ANALYZE:
 ${cvText}
-"""
-
-Provide both the narrative story and structured analysis. Make it personal, encouraging, and actionable.
 `;
   }
 
@@ -1029,129 +1071,34 @@ Make this analysis feel like a conversation with a trusted mentor who believes i
 `;
   }
 
+
+
   /**
-   * Parse skills analysis response (handles both JSON and natural language)
+   * Parse skills analysis response (simplified for backward compatibility)
    */
   private parseSkillsAnalysisResponse(response: string): AISkillsAnalysis {
     try {
-      // First try to parse as JSON
+      // Try to parse as JSON first
       const parsed = JSON.parse(response);
       if (parsed.skills && Array.isArray(parsed.skills)) {
         return parsed as AISkillsAnalysis;
       }
     } catch (jsonError) {
-      // If JSON parsing fails, parse as natural language
-      logger.info('JSON parsing failed, attempting natural language parsing');
+      // If JSON parsing fails, return a basic structure
+      logger.info('JSON parsing failed, returning basic structure');
     }
 
-    // Parse natural language response
-    return this.parseNaturalLanguageSkillsResponse(response);
-  }
-
-  /**
-   * Parse natural language skills analysis response
-   */
-  private parseNaturalLanguageSkillsResponse(response: string): AISkillsAnalysis {
-    const skills: any[] = [];
-    const categories = new Set<string>();
-    let overallExperience = '';
-    const education: string[] = [];
-    const certifications: string[] = [];
-    const strengths: string[] = [];
-    const areasForImprovement: string[] = [];
-    let careerLevel = 'mid';
-
-    // Extract skills section
-    const skillsMatch = response.match(/SKILLS:([\s\S]*?)(?=\n[A-Z]+:|$)/);
-    if (skillsMatch) {
-      const skillsText = skillsMatch[1];
-      const skillLines = skillsText.split('\n').filter(line => line.trim() && !line.includes('Name |'));
-
-      skillLines.forEach(line => {
-        const parts = line.split('|').map(p => p.trim());
-        if (parts.length >= 4) {
-          const skill = {
-            name: parts[0] || 'Unknown Skill',
-            category: parts[1] || 'Other',
-            level: parts[2] || 'intermediate',
-            yearsExperience: parseInt(parts[3]) || 0,
-            confidence: parseFloat(parts[4]) || 0.7,
-            context: parts[5] || null,
-            certifications: [],
-            relatedSkills: [],
-            reasoning: `Extracted from resume analysis`
-          };
-          skills.push(skill);
-          categories.add(skill.category);
-        }
-      });
-    }
-
-    // Extract other sections
-    const experienceMatch = response.match(/EXPERIENCE:([\s\S]*?)(?=\n[A-Z]+:|$)/);
-    if (experienceMatch) {
-      overallExperience = experienceMatch[1].trim();
-    }
-
-    const educationMatch = response.match(/EDUCATION:([\s\S]*?)(?=\n[A-Z]+:|$)/);
-    if (educationMatch) {
-      education.push(...educationMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
-    }
-
-    const certificationsMatch = response.match(/CERTIFICATIONS:([\s\S]*?)(?=\n[A-Z]+:|$)/);
-    if (certificationsMatch) {
-      certifications.push(...certificationsMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
-    }
-
-    const strengthsMatch = response.match(/STRENGTHS:([\s\S]*?)(?=\n[A-Z]+:|$)/);
-    if (strengthsMatch) {
-      strengths.push(...strengthsMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
-    }
-
-    const areasMatch = response.match(/AREAS FOR IMPROVEMENT:([\s\S]*?)(?=\n[A-Z]+:|$)/);
-    if (areasMatch) {
-      areasForImprovement.push(...areasMatch[1].split('\n').filter(line => line.trim()).map(line => line.trim()));
-    }
-
-    const careerMatch = response.match(/CAREER LEVEL:([\s\S]*?)(?=\n[A-Z]+:|$)/);
-    if (careerMatch) {
-      const level = careerMatch[1].trim().toLowerCase();
-      if (['entry', 'mid', 'senior', 'executive'].includes(level)) {
-        careerLevel = level;
-      }
-    }
-
-    // If no skills were extracted, create some basic ones from the response
-    if (skills.length === 0) {
-      const commonSkills = ['JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'AWS', 'Git'];
-      commonSkills.forEach(skillName => {
-        if (response.toLowerCase().includes(skillName.toLowerCase())) {
-          skills.push({
-            name: skillName,
-            category: 'Programming',
-            level: 'intermediate',
-            yearsExperience: 2,
-            confidence: 0.6,
-            context: 'Mentioned in resume',
-            certifications: [],
-            relatedSkills: [],
-            reasoning: 'Inferred from resume content'
-          });
-          categories.add('Programming');
-        }
-      });
-    }
-
+    // Return a basic structure for backward compatibility
     return {
-      skills,
-      categories: Array.from(categories),
-      overallExperience,
-      education,
-      certifications,
-      strengths,
-      areasForImprovement,
-      careerLevel: careerLevel as any,
-      reasoning: 'Parsed from natural language response'
+      skills: [],
+      categories: [],
+      overallExperience: response.substring(0, 500), // Use first part of response
+      education: [],
+      certifications: [],
+      strengths: [],
+      areasForImprovement: [],
+      careerLevel: 'mid',
+      reasoning: 'Simplified parsing for narrative response'
     };
   }
 

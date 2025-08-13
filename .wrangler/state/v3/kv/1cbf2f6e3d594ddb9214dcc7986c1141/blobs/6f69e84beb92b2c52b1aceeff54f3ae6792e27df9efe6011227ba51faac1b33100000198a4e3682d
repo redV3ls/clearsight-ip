@@ -1,0 +1,1 @@
+{"analysis_id":"065e91af-8448-4fde-826f-f53380e8dc48","user_id":"d336922b-081f-42a7-880a-8ed3745c9c0a","timestamp":"2025-08-13T19:23:43.467Z","status":"failed","aiPowered":false,"error":{"code":"ANALYSIS_TIMEOUT","message":"Analysis timed out. Please try again later.","details":"Analysis timeout after 120 seconds"},"metadata":{"processingFailed":"2025-08-13T19:23:43.468Z"}}

@@ -1,0 +1,1 @@
+{"id":"61dcaa7c-1f0d-4ba9-87e2-b81d2a060a8a","timestamp":"2025-08-13T19:20:21.409Z","level":"info","message":"GET http://127.0.0.1:8787/health - 200 (10ms)","request":{"method":"GET","url":"http://127.0.0.1:8787/health","path":"/health","headers":{"accept":"*/*","user-agent":"curl/8.13.0"},"userAgent":"curl/8.13.0","duration":10,"statusCode":200},"environment":"production"}

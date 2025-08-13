@@ -1,0 +1,31 @@
+name = "clearsight-ip-local"
+main = "src/index.ts"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+# Local development configuration
+[vars]
+NODE_ENV = "development"
+CORS_ORIGIN = "*"
+RATE_LIMIT_WINDOW_MS = "900000"
+RATE_LIMIT_MAX_REQUESTS = "1000"
+LOG_LEVEL = "debug"
+ENABLE_RATE_LIMITING = "false"
+# DeepSeek AI Configuration
+DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
+DEEPSEEK_MODEL = "deepseek-chat"
+DEEPSEEK_MAX_TOKENS = "3000"
+DEEPSEEK_TEMPERATURE = "0.2"
+DEEPSEEK_TIMEOUT = "60000"
+
+# Use local SQLite for D1 in development
+[[d1_databases]]
+binding = "DB"
+database_name = "clearsight-ip-local"
+database_id = "local"
+
+# Use local KV for development
+[[kv_namespaces]]
+binding = "CACHE"
+id = "local"
+preview_id = "local"

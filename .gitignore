@@ -96,3 +96,9 @@ Thumbs.db
 
 # Prisma
 prisma/migrations/
+
+# Wrangler local development secrets
+.dev.vars
+
+# API Keys (should be in .dev.vars or environment secrets)
+*.key

@@ -1,0 +1,1 @@
+{"timestamp":"2025-08-13T19:21:43.393Z","level":"info","message":"✅ CHECKPOINT [SAVING_TO_DB]: 065e91af-8448-4fde-826f-f53380e8dc48 (23ms elapsed)","analysisId":"065e91af-8448-4fde-826f-f53380e8dc48","checkpoint":"SAVING_TO_DB","elapsed":23,"stage":"CHECKPOINT","status":"processing","hasJobDescription":false}

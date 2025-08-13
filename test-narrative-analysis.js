@@ -1,88 +1,64 @@
-/**
- * Test script for narrative CV analysis
- */
-
-const testCVContent = `
-John Smith
-Senior Software Engineer
-
-EXPERIENCE:
-- 5 years at TechCorp as Full Stack Developer
-- Built microservices using Node.js and React
-- Led team of 3 developers on e-commerce platform
-- Implemented CI/CD pipelines using Docker and AWS
-
-SKILLS:
-- JavaScript, TypeScript, Python
-- React, Node.js, Express
-- AWS, Docker, Kubernetes
-- PostgreSQL, MongoDB
-
-EDUCATION:
-- BS Computer Science, State University (2018)
-`;
-
-const testJobDescription = `
-Senior Full Stack Engineer
-TechStartup Inc.
-
-We're looking for a Senior Full Stack Engineer to join our growing team. 
-
-Requirements:
-- 5+ years of experience in full stack development
-- Strong proficiency in React, Node.js, and TypeScript
-- Experience with cloud platforms (AWS preferred)
-- Knowledge of microservices architecture
-- Experience with containerization (Docker, Kubernetes)
-- Strong problem-solving skills and ability to work in a fast-paced environment
-
-Nice to have:
-- Experience with GraphQL
-- Knowledge of DevOps practices
-- Previous startup experience
-`;
+// Simple test for the new narrative analysis functionality
+const { DeepSeekAIService } = require('./src/services/deepseekAI.ts');
 
 async function testNarrativeAnalysis() {
+  const config = {
+    provider: 'deepseek',
+    model: 'deepseek-reasoner',
+    apiKey: process.env.DEEPSEEK_API_KEY || 'test-key',
+    baseUrl: 'https://api.deepseek.com/v1',
+    maxTokens: 4000,
+    temperature: 0.7,
+    timeout: 60000
+  };
+
+  const service = new DeepSeekAIService(config);
+
+  const testCV = `
+John Doe
+Software Engineer
+
+Experience:
+- 5 years of JavaScript development
+- 3 years of React experience
+- 2 years of Node.js backend development
+- Experience with AWS cloud services
+
+Education:
+- Bachelor's in Computer Science
+
+Skills:
+- JavaScript, React, Node.js
+- AWS, Docker
+- Git, Agile methodologies
+`;
+
   try {
-    console.log('Testing narrative CV analysis...');
+    console.log('Testing narrative analysis...');
+    const result = await service.extractNarrativeFromCV(testCV);
     
-    // Test with job description (gap analysis)
-    console.log('\n=== Testing with Job Description ===');
-    const gapAnalysisResponse = await fetch('http://localhost:8787/api/v1/analyze/resume', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer your-test-token-here',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        resumeText: testCVContent,
-        jobDescriptionText: testJobDescription
-      })
-    });
+    console.log('Narrative Analysis Result:');
+    console.log('Analysis Type:', result.analysisType);
+    console.log('Word Count:', result.wordCount);
+    console.log('Generated At:', result.generatedAt);
+    console.log('Narrative:');
+    console.log(result.narrative);
     
-    const gapResult = await gapAnalysisResponse.json();
-    console.log('Gap Analysis Result:', JSON.stringify(gapResult, null, 2));
-    
-    // Test without job description (standalone analysis)
-    console.log('\n=== Testing without Job Description ===');
-    const standaloneResponse = await fetch('http://localhost:8787/api/v1/analyze/resume', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer your-test-token-here',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        resumeText: testCVContent
-      })
-    });
-    
-    const standaloneResult = await standaloneResponse.json();
-    console.log('Standalone Analysis Result:', JSON.stringify(standaloneResult, null, 2));
-    
+    return result;
   } catch (error) {
     console.error('Test failed:', error);
+    throw error;
   }
 }
 
-// Run the test
-testNarrativeAnalysis();
+// Only run if this file is executed directly
+if (require.main === module) {
+  testNarrativeAnalysis()
+    .then(() => console.log('Test completed successfully'))
+    .catch(error => {
+      console.error('Test failed:', error);
+      process.exit(1);
+    });
+}
+
+module.exports = { testNarrativeAnalysis };
