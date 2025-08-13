@@ -13,6 +13,8 @@ import { createDatabase } from '../config/database';
 import { CacheService, CacheNamespaces, CacheTTL } from '../services/cache';
 import { enhancedLogger } from '../utils/enhancedLogger';
 import { kvStorage } from '../utils/kvStorage';
+import { NarrativeAnalysisService } from '../services/narrativeAnalysisService';
+import { createDatabase } from '../config/database';
 
 const analyze = new Hono<{ Bindings: Env }>();
 
@@ -374,11 +376,38 @@ export async function performAsyncAnalysis(
     }
 
     try {
-      console.log(`[ASYNC-DB-UPDATE-START] ${analysisId} - About to update DB, CPU time: ${Date.now() - startCpuTime}ms`);
-      enhancedLogger.logAnalysisCheckpoint(analysisId, 'DB_UPDATE_START');
+      console.log(`[ASYNC-DB-UPDATE-START] ${analysisId} - About to save narrative to DB, CPU time: ${Date.now() - startCpuTime}ms`);
+      enhancedLogger.logAnalysisCheckpoint(analysisId, 'NARRATIVE_DB_SAVE_START');
       
-      // Update the database record with completed analysis
-      console.log(`[ASYNC-DB-PREPARE] ${analysisId} - Preparing UPDATE statement`);
+      // Initialize database and narrative service
+      const database = createDatabase(env.DB);
+      const narrativeService = new NarrativeAnalysisService(database);
+      
+      // Save narrative analysis to the new optimized table
+      console.log(`[ASYNC-NARRATIVE-SAVE] ${analysisId} - Saving narrative analysis`);
+      await narrativeService.create({
+        id: analysisId,
+        userId: userId,
+        narrative: response.narrative,
+        analysisType: response.analysis_type,
+        wordCount: response.word_count,
+        hasJobDescription: response.analysis_type === 'job-comparison',
+        processingTimeMs: response.metadata?.processingTime,
+        aiProvider: response.metadata?.aiProvider || 'deepseek',
+        aiModel: response.metadata?.aiModel || 'deepseek-reasoner'
+      });
+
+      console.log(`[ASYNC-NARRATIVE-SAVED] ${analysisId} - Narrative analysis saved successfully, CPU time: ${Date.now() - startCpuTime}ms`);
+
+      enhancedLogger.info(`💾 Narrative analysis saved for ${analysisId}`, {
+        analysisId,
+        wordCount: response.word_count,
+        analysisType: response.analysis_type,
+        stage: 'NARRATIVE_DB_SAVE_SUCCESS'
+      });
+
+      // Also update the legacy table for backward compatibility
+      console.log(`[ASYNC-LEGACY-UPDATE] ${analysisId} - Updating legacy table for compatibility`);
       const updateStatement = env.DB
         .prepare(`
           UPDATE resume_analyses 
@@ -386,7 +415,6 @@ export async function performAsyncAnalysis(
           WHERE id = ? AND user_id = ?
         `);
       
-      console.log(`[ASYNC-DB-BIND] ${analysisId} - Binding parameters: data_size=${responseJson.length}, userId=${userId}`);
       const boundStatement = updateStatement.bind(
         responseJson,
         new Date().toISOString(),
@@ -394,24 +422,15 @@ export async function performAsyncAnalysis(
         userId
       );
       
-      console.log(`[ASYNC-DB-RUN] ${analysisId} - Executing UPDATE, CPU time: ${Date.now() - startCpuTime}ms`);
       const updateResult = await boundStatement.run();
-      console.log(`[ASYNC-DB-RESULT] ${analysisId} - Update result: success=${updateResult.success}, changes=${updateResult.changes}, CPU time: ${Date.now() - startCpuTime}ms`);
-
-      enhancedLogger.info(`💾 Database updated for ${analysisId}`, {
-        analysisId,
-        success: updateResult.success,
-        changes: updateResult.changes,
-        stage: 'DB_UPDATE_SUCCESS'
-      });
+      console.log(`[ASYNC-LEGACY-RESULT] ${analysisId} - Legacy update result: success=${updateResult.success}, changes=${updateResult.changes}`);
 
       if (updateResult.changes === 0) {
-        enhancedLogger.critical(`🔥 No rows updated for ${analysisId}`, {
+        enhancedLogger.warn(`⚠️ Legacy table update failed for ${analysisId} - continuing with narrative storage`, {
           analysisId,
           userId,
-          stage: 'DB_UPDATE_FAILED'
+          stage: 'LEGACY_UPDATE_FAILED'
         });
-        throw new Error('Database update failed - no rows affected');
       }
 
       // Update KV cache with completed status
@@ -427,25 +446,25 @@ export async function performAsyncAnalysis(
         enhancedLogger.warn(`⚠️ KV cache update failed for ${analysisId}`, { analysisId });
       }
       
-      // Verify the update was successful by reading the record back
-      console.log(`[ASYNC-VERIFY-START] ${analysisId} - Starting verification read, CPU time: ${Date.now() - startCpuTime}ms`);
-      const verifyRecord = await env.DB
-        .prepare('SELECT analysis_data FROM resume_analyses WHERE id = ? AND user_id = ?')
-        .bind(analysisId, userId)
-        .first() as any;
-      console.log(`[ASYNC-VERIFY-RESULT] ${analysisId} - Verification read complete: found=${!!verifyRecord}, CPU time: ${Date.now() - startCpuTime}ms`);
+      // Verify the narrative analysis was saved successfully
+      console.log(`[ASYNC-VERIFY-START] ${analysisId} - Starting narrative verification read, CPU time: ${Date.now() - startCpuTime}ms`);
+      const database = createDatabase(env.DB);
+      const narrativeService = new NarrativeAnalysisService(database);
+      
+      const verifyRecord = await narrativeService.getById(analysisId, userId);
+      console.log(`[ASYNC-VERIFY-RESULT] ${analysisId} - Narrative verification complete: found=${!!verifyRecord}, CPU time: ${Date.now() - startCpuTime}ms`);
 
       if (verifyRecord) {
-        const storedData = JSON.parse(verifyRecord.analysis_data);
-        enhancedLogger.info(`✔️ Verification: Record ${analysisId} status is ${storedData.status}`, {
+        enhancedLogger.info(`✔️ Verification: Narrative analysis ${analysisId} saved successfully`, {
           analysisId,
-          status: storedData.status,
-          stage: 'VERIFICATION_SUCCESS'
+          wordCount: verifyRecord.wordCount,
+          analysisType: verifyRecord.analysisType,
+          stage: 'NARRATIVE_VERIFICATION_SUCCESS'
         });
       } else {
-        enhancedLogger.error(`❌ Verification failed: Record ${analysisId} not found`, {
+        enhancedLogger.error(`❌ Verification failed: Narrative analysis ${analysisId} not found`, {
           analysisId,
-          stage: 'VERIFICATION_FAILED'
+          stage: 'NARRATIVE_VERIFICATION_FAILED'
         });
       }
 
@@ -655,8 +674,20 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
     const page = parseInt(c.req.query('page') || '1');
     const limit = Math.min(parseInt(c.req.query('limit') || '10'), 50);
     const offset = (page - 1) * limit;
+    const analysisType = c.req.query('type') as 'standalone' | 'job-comparison' | undefined;
 
-    const analyses = await c.env.DB
+    // Use narrative service for new analyses
+    const database = createDatabase(c.env.DB);
+    const narrativeService = new NarrativeAnalysisService(database);
+    
+    const narrativeAnalyses = await narrativeService.getUserHistory(userId, {
+      limit,
+      offset,
+      analysisType
+    });
+
+    // Get legacy analyses for backward compatibility
+    const legacyAnalyses = await c.env.DB
       .prepare(`
         SELECT id, created_at, 
                JSON_EXTRACT(analysis_data, '$.timestamp') as analysis_timestamp,
@@ -671,25 +702,53 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
       .bind(userId, limit, offset)
       .all();
 
-    const totalCount = await c.env.DB
+    // Combine and format results
+    const narrativeResults = narrativeAnalyses.map(analysis => ({
+      id: analysis.id,
+      created_at: analysis.createdAt,
+      analysis_timestamp: analysis.createdAt,
+      ai_powered: true,
+      status: 'completed',
+      analysis_type: analysis.analysisType,
+      word_count: analysis.wordCount,
+      has_job_description: analysis.hasJobDescription,
+      format: 'narrative'
+    }));
+
+    const legacyResults = legacyAnalyses.results?.map((analysis: any) => ({
+      id: analysis.id,
+      created_at: analysis.created_at,
+      analysis_timestamp: analysis.analysis_timestamp,
+      ai_powered: analysis.ai_powered === 1 || analysis.ai_powered === true,
+      status: analysis.status || 'unknown',
+      total_skills: analysis.total_skills || 0,
+      format: 'legacy'
+    })) || [];
+
+    // Get total counts
+    const narrativeStats = await narrativeService.getUserStats(userId);
+    const legacyCount = await c.env.DB
       .prepare('SELECT COUNT(*) as count FROM resume_analyses WHERE user_id = ?')
       .bind(userId)
       .first() as any;
 
+    const totalCount = narrativeStats.totalAnalyses + (legacyCount?.count || 0);
+
     return c.json({
-      analyses: analyses.results?.map((analysis: any) => ({
-        id: analysis.id,
-        created_at: analysis.created_at,
-        analysis_timestamp: analysis.analysis_timestamp,
-        ai_powered: analysis.ai_powered === 1 || analysis.ai_powered === true,
-        status: analysis.status || 'unknown',
-        total_skills: analysis.total_skills || 0
-      })) || [],
+      analyses: [...narrativeResults, ...legacyResults].slice(0, limit),
       pagination: {
         page,
         limit,
-        total: totalCount?.count || 0,
-        pages: Math.ceil((totalCount?.count || 0) / limit)
+        total: totalCount,
+        pages: Math.ceil(totalCount / limit)
+      },
+      stats: {
+        narrative_analyses: narrativeStats.totalAnalyses,
+        legacy_analyses: legacyCount?.count || 0,
+        standalone_count: narrativeStats.standaloneCount,
+        job_comparison_count: narrativeStats.jobComparisonCount,
+        average_word_count: narrativeStats.averageWordCount,
+        average_processing_time: narrativeStats.averageProcessingTime
       }
     });
 
@@ -722,6 +781,36 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
   }
 
   try {
+    // Try to get from the new narrative analysis table first
+    const database = createDatabase(c.env.DB);
+    const narrativeService = new NarrativeAnalysisService(database);
+    
+    const narrativeAnalysis = await narrativeService.getById(analysisId, userId);
+    
+    if (narrativeAnalysis) {
+      // Return narrative format
+      const response = {
+        analysis_id: narrativeAnalysis.id,
+        user_id: narrativeAnalysis.userId,
+        timestamp: narrativeAnalysis.createdAt,
+        status: 'completed',
+        narrative: narrativeAnalysis.narrative,
+        analysis_type: narrativeAnalysis.analysisType,
+        word_count: narrativeAnalysis.wordCount,
+        aiPowered: true,
+        metadata: {
+          processingTime: narrativeAnalysis.processingTimeMs,
+          aiProvider: narrativeAnalysis.aiProvider,
+          aiModel: narrativeAnalysis.aiModel,
+          hasJobDescription: narrativeAnalysis.hasJobDescription
+        },
+        retrieved_at: new Date().toISOString()
+      };
+      
+      return c.json(response, 200);
+    }
+
+    // Fallback to legacy table for backward compatibility
     const analysis = await c.env.DB
       .prepare('SELECT * FROM resume_analyses WHERE id = ? AND user_id = ?')
       .bind(analysisId, userId)
