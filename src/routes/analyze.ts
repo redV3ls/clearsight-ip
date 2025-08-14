@@ -244,7 +244,7 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
         baseUrl: c.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1',
         maxTokens: parseInt(c.env.DEEPSEEK_MAX_TOKENS || '3000'),
         temperature: parseFloat(c.env.DEEPSEEK_TEMPERATURE || '0.2'),
-        timeout: parseInt(c.env.DEEPSEEK_TIMEOUT || '30000') // Reduced timeout for direct processing
+        timeout: parseInt(c.env.DEEPSEEK_TIMEOUT || '90000') // Increased timeout for narrative processing
       };
       
       const deepseekService = new DeepSeekAIService(aiConfig);
@@ -324,17 +324,52 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
     } catch (error) {
       enhancedLogger.error(`❌ Direct narrative analysis failed for ${analysisId}`, error);
       
-      // Return error response
+      // Check if this is a timeout or Cloudflare Workers specific error
+      const isTimeoutError = error instanceof Error && (
+        error.message.includes('timeout') ||
+        error.message.includes('aborted') ||
+        error.message.includes('The operation was aborted')
+      );
+      
+      if (isTimeoutError) {
+        enhancedLogger.warn(`⏰ Direct processing timed out for ${analysisId}, falling back to async processing`);
+        
+        // Fall back to async processing for timeout errors
+        try {
+          // Schedule async processing using waitUntil
+          c.executionCtx.waitUntil(
+            performAsyncAnalysis(c.env, analysisId, userId, content, jobDescription)
+          );
+          
+          // Return 202 with processing status
+          return c.json({
+            analysis_id: analysisId,
+            user_id: userId,
+            status: 'processing',
+            message: 'Analysis is being processed. Please check back in a few minutes.',
+            aiPowered: true,
+            timestamp: new Date().toISOString(),
+            processingMode: 'async_fallback'
+          }, 202);
+          
+        } catch (asyncError) {
+          enhancedLogger.error(`❌ Async fallback also failed for ${analysisId}`, asyncError);
+        }
+      }
+      
+      // Return error response for non-timeout errors or if async fallback fails
       const errorResponse = NarrativeResponseFormatter.formatFailedAnalysis({
         analysisId,
         userId,
-        errorCode: 'ANALYSIS_FAILED',
+        errorCode: isTimeoutError ? 'PROCESSING_TIMEOUT' : 'ANALYSIS_FAILED',
         errorMessage: error instanceof Error ? error.message : 'Analysis failed',
-        userMessage: 'Analysis failed. Please try again with a different CV or contact support.',
+        userMessage: isTimeoutError 
+          ? 'Analysis is taking longer than expected. We\'ve queued it for processing - please check back in a few minutes.'
+          : 'Analysis failed. Please try again with a different CV or contact support.',
         retryable: true
       });
       
-      return c.json(errorResponse, 500);
+      return c.json(errorResponse, isTimeoutError ? 202 : 500);
     }
 
   } catch (error) {

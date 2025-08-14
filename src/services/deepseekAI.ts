@@ -869,11 +869,16 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
         // Dynamic timeout based on prompt length and operation type
         const dynamicTimeout = this.calculateTimeout(prompt, operation);
 
+        // Create AbortController for better timeout handling in Cloudflare Workers
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), dynamicTimeout);
+
         const response = await fetch(`${this.config.baseUrl}/chat/completions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.config.apiKey}`,
+            'User-Agent': 'ClearSight-AI/1.0', // Add user agent for better API compatibility
           },
           body: JSON.stringify({
             model: this.config.model,
@@ -888,10 +893,13 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
               }
             ],
             max_tokens: Math.min(this.config.maxTokens, 600), // Limit tokens for faster processing
-            temperature: Math.min(this.config.temperature, 0.1) // Lower temperature for faster, more focused responses
+            temperature: Math.min(this.config.temperature, 0.1), // Lower temperature for faster, more focused responses
+            stream: false // Ensure non-streaming response for Cloudflare Workers
           }),
-          signal: AbortSignal.timeout(dynamicTimeout)
+          signal: controller.signal
         });
+
+        clearTimeout(timeoutId); // Clear timeout if request completes
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -941,20 +949,35 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
         lastError = error as Error;
         const isTimeout = error instanceof Error && (
           error.name === 'TimeoutError' ||
+          error.name === 'AbortError' ||
           error.message.includes('timeout') ||
-          error.message.includes('aborted')
+          error.message.includes('aborted') ||
+          error.message.includes('The operation was aborted')
+        );
+
+        const isNetworkError = error instanceof Error && (
+          error.message.includes('fetch') ||
+          error.message.includes('network') ||
+          error.message.includes('ECONNRESET') ||
+          error.message.includes('ETIMEDOUT')
         );
 
         logger.warn(`DeepSeek API attempt ${attempt} failed:`, {
           error: error instanceof Error ? error.message : 'Unknown error',
+          errorName: error instanceof Error ? error.name : 'Unknown',
           isTimeout,
+          isNetworkError,
           operation,
-          promptLength: prompt.length
+          promptLength: prompt.length,
+          attempt,
+          dynamicTimeout
         });
 
-        // For timeout errors, increase delay more aggressively
+        // For timeout or network errors, increase delay more aggressively
         if (attempt < this.MAX_RETRIES) {
-          const delay = isTimeout ? this.RETRY_DELAY * attempt * 2 : this.RETRY_DELAY * attempt;
+          const baseDelay = this.RETRY_DELAY * attempt;
+          const delay = (isTimeout || isNetworkError) ? baseDelay * 3 : baseDelay;
+          logger.info(`Retrying in ${delay}ms...`, { attempt, delay, operation });
           await this.delay(delay);
         }
       }
@@ -967,21 +990,21 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
    * Calculate dynamic timeout based on prompt complexity
    */
   private calculateTimeout(prompt: string, operation: string): number {
-    const baseTimeout = 60000; // 60 seconds base (increased for narrative analysis)
-    const lengthMultiplier = Math.min(prompt.length / 1000, 3); // Max 3x multiplier (reduced)
+    const baseTimeout = 45000; // 45 seconds base (optimized for Cloudflare Workers)
+    const lengthMultiplier = Math.min(prompt.length / 1000, 2); // Max 2x multiplier (reduced for CF limits)
 
     const operationMultipliers = {
       'skills-extraction': 1.0,
       'job-analysis': 0.8,
       'gap-analysis': 1.5,
-      'narrative-analysis': 1.2, // Added specific multiplier for narrative analysis
+      'narrative-analysis': 1.1, // Reduced multiplier for CF Workers
       'health-check': 0.3
     };
 
     const operationMultiplier = operationMultipliers[operation as keyof typeof operationMultipliers] || 1.0;
 
     const calculatedTimeout = baseTimeout * lengthMultiplier * operationMultiplier;
-    const maxTimeout = 120000; // 120 seconds max (increased)
+    const maxTimeout = 90000; // 90 seconds max (Cloudflare Workers limit is 100s)
 
     return Math.min(calculatedTimeout, maxTimeout);
   }
