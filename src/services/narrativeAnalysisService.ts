@@ -3,6 +3,7 @@ import { narrativeAnalysis } from '../db/schema';
 import { Database } from '../config/database';
 import { logger } from '../utils/logger';
 import { AppError } from '../middleware/errorHandler';
+import { CloudflareOptimizer } from '../utils/cloudflareOptimizer';
 
 export interface NarrativeAnalysisRecord {
   id: string;
@@ -38,6 +39,10 @@ export class NarrativeAnalysisService {
    */
   async create(input: CreateNarrativeAnalysisInput): Promise<NarrativeAnalysisRecord> {
     try {
+      // Track D1 write operation
+      const optimizer = CloudflareOptimizer.getInstance();
+      optimizer.trackD1Write(1);
+      
       const now = new Date().toISOString();
       
       const record = {
@@ -79,6 +84,10 @@ export class NarrativeAnalysisService {
    */
   async getById(id: string, userId: string): Promise<NarrativeAnalysisRecord | null> {
     try {
+      // Track D1 read operation
+      const optimizer = CloudflareOptimizer.getInstance();
+      optimizer.trackD1Read(1);
+      
       const result = await this.db
         .select()
         .from(narrativeAnalysis)
@@ -114,6 +123,10 @@ export class NarrativeAnalysisService {
     } = {}
   ): Promise<NarrativeAnalysisRecord[]> {
     try {
+      // Track D1 read operation
+      const optimizer = CloudflareOptimizer.getInstance();
+      optimizer.trackD1Read(1);
+      
       const { limit = 10, offset = 0, analysisType, sortBy = 'created_at', sortOrder = 'desc' } = options;
 
       let query = this.db

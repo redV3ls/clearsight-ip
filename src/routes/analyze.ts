@@ -17,6 +17,7 @@ import { NarrativeAnalysisService } from '../services/narrativeAnalysisService';
 import { createDatabase } from '../config/database';
 import { NarrativeKVCache } from '../services/narrativeKVCache';
 import { NarrativeResponseFormatter } from '../services/narrativeResponseFormatter';
+import { CloudflareOptimizer, trackWorkerRequest, checkResourceLimits, getOptimizedQueryParams } from '../utils/cloudflareOptimizer';
 
 const analyze = new Hono<{ Bindings: Env }>();
 
@@ -920,6 +921,9 @@ analyze.post('/test-prompt', async (c: AuthenticatedContext) => {
  * GET /analyze/resume/history - Get user's resume analysis history
  */
 analyze.get('/resume/history', async (c: AuthenticatedContext) => {
+  // Track Worker request for optimization
+  trackWorkerRequest();
+  
   const user = c.get('user');
   const userId = user?.id;
   if (!userId) {
@@ -932,16 +936,36 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
   }
 
   try {
+    // Check resource limits before proceeding
+    const resourceCheck = checkResourceLimits();
+    if (!resourceCheck.canProceed) {
+      return c.json({
+        error: {
+          code: 'RESOURCE_LIMIT_EXCEEDED',
+          message: resourceCheck.reason || 'Resource limits exceeded',
+          suggestions: resourceCheck.suggestions
+        }
+      }, 429);
+    }
+
     const page = parseInt(c.req.query('page') || '1');
-    const limit = Math.min(parseInt(c.req.query('limit') || '10'), 50);
-    const offset = (page - 1) * limit;
+    const baseLimit = Math.min(parseInt(c.req.query('limit') || '10'), 50);
     const analysisType = c.req.query('type') as 'standalone' | 'job-comparison' | undefined;
     const sortBy = c.req.query('sort') as 'created_at' | 'word_count' | undefined;
     const sortOrder = c.req.query('order') as 'asc' | 'desc' | undefined;
 
+    // Optimize query parameters based on current resource usage
+    const optimizedParams = getOptimizedQueryParams({ limit: baseLimit });
+    const limit = optimizedParams.limit;
+    const offset = (page - 1) * limit;
+
     // Use narrative service for new analyses
     const database = createDatabase(c.env.DB);
     const narrativeService = new NarrativeAnalysisService(database);
+    
+    // Track D1 read operations
+    const optimizer = CloudflareOptimizer.getInstance();
+    optimizer.trackD1Read(2); // One for narrative, one for legacy
     
     const narrativeAnalyses = await narrativeService.getUserHistory(userId, {
       limit,
@@ -1035,6 +1059,9 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
  * GET /analyze/resume/:analysisId - Retrieve a specific resume analysis
  */
 analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
+  // Track Worker request for optimization
+  trackWorkerRequest();
+  
   const analysisId = c.req.param('analysisId');
   const user = c.get('user');
   const userId = user?.id;
@@ -1048,9 +1075,28 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
   }
 
   try {
+    // Check resource limits before proceeding
+    const resourceCheck = checkResourceLimits();
+    if (!resourceCheck.canProceed) {
+      return c.json({
+        error: {
+          code: 'RESOURCE_LIMIT_EXCEEDED',
+          message: resourceCheck.reason || 'Resource limits exceeded',
+          suggestions: resourceCheck.suggestions
+        }
+      }, 429);
+    }
     // Try to get from narrative KV cache first (fastest)
+    const optimizer = CloudflareOptimizer.getInstance();
+    const optimizedParams = getOptimizedQueryParams({ useCache: true });
+    
     const narrativeCache = new NarrativeKVCache(c.env);
-    const cachedAnalysis = await narrativeCache.getAnalysis(analysisId);
+    let cachedAnalysis = null;
+    
+    if (optimizedParams.useCache) {
+      optimizer.trackKVOperation(1);
+      cachedAnalysis = await narrativeCache.getAnalysis(analysisId);
+    }
     
     if (cachedAnalysis && cachedAnalysis.userId === userId) {
       enhancedLogger.info('Serving analysis from narrative KV cache', { analysisId });
@@ -1094,6 +1140,8 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
     const database = createDatabase(c.env.DB);
     const narrativeService = new NarrativeAnalysisService(database);
     
+    // Track D1 read operation
+    optimizer.trackD1Read(1);
     const narrativeAnalysis = await narrativeService.getById(analysisId, userId);
     
     if (narrativeAnalysis) {
@@ -1111,10 +1159,12 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
         processingTime: narrativeAnalysis.processingTimeMs
       };
       
-      // Store in cache asynchronously (don't wait)
-      narrativeCache.storeAnalysis(cacheEntry).catch(error => {
-        enhancedLogger.warn('Failed to cache analysis after database retrieval', { error, analysisId });
-      });
+      // Store in cache asynchronously (don't wait) if caching is enabled
+      if (optimizedParams.useCache) {
+        narrativeCache.storeAnalysis(cacheEntry).catch(error => {
+          enhancedLogger.warn('Failed to cache analysis after database retrieval', { error, analysisId });
+        });
+      }
       
       // Return formatted narrative response
       const response = NarrativeResponseFormatter.formatCompletedAnalysis({
@@ -1136,6 +1186,7 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
     }
 
     // Fallback to legacy table for backward compatibility
+    optimizer.trackD1Read(1);
     const analysis = await c.env.DB
       .prepare('SELECT * FROM resume_analyses WHERE id = ? AND user_id = ?')
       .bind(analysisId, userId)

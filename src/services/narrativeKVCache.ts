@@ -4,6 +4,7 @@
  */
 
 import { enhancedLogger } from '../utils/enhancedLogger';
+import { CloudflareOptimizer } from '../utils/cloudflareOptimizer';
 
 export interface NarrativeCacheEntry {
   analysisId: string;
@@ -117,6 +118,15 @@ export class NarrativeKVCache {
         return false;
       }
 
+      // Check Cloudflare optimizer limits
+      const optimizer = CloudflareOptimizer.getInstance();
+      if (!optimizer.canPerformKVOperation(1)) {
+        enhancedLogger.warn('KV operation limit reached via optimizer, skipping cache', {
+          analysisId: entry.analysisId
+        });
+        return false;
+      }
+
       if (!await this.checkOperationLimit()) {
         enhancedLogger.warn('Daily KV operation limit reached, skipping cache', {
           analysisId: entry.analysisId
@@ -200,6 +210,12 @@ export class NarrativeKVCache {
    */
   async getAnalysis(analysisId: string): Promise<NarrativeCacheEntry | null> {
     try {
+      // Check Cloudflare optimizer limits
+      const optimizer = CloudflareOptimizer.getInstance();
+      if (!optimizer.canPerformKVOperation(1)) {
+        return null;
+      }
+
       if (!await this.checkOperationLimit()) {
         return null;
       }
@@ -209,6 +225,8 @@ export class NarrativeKVCache {
       const key = this.getCacheKey(analysisId);
       const value = await this.env.CACHE.get(key);
 
+      // Track KV operation in optimizer
+      optimizer.trackKVOperation(1);
       await this.incrementOperationCount();
 
       if (!value) {
