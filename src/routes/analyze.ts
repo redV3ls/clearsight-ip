@@ -509,8 +509,6 @@ export async function performAsyncAnalysis(
       
       // Verify the narrative analysis was saved successfully
       console.log(`[ASYNC-VERIFY-START] ${analysisId} - Starting narrative verification read, CPU time: ${Date.now() - startCpuTime}ms`);
-      const database = createDatabase(env.DB);
-      const narrativeService = new NarrativeAnalysisService(database);
       
       const verifyRecord = await narrativeService.getById(analysisId, userId);
       console.log(`[ASYNC-VERIFY-RESULT] ${analysisId} - Narrative verification complete: found=${!!verifyRecord}, CPU time: ${Date.now() - startCpuTime}ms`);
