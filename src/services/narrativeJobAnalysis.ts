@@ -117,14 +117,14 @@ export class NarrativeJobAnalysisService {
   ): string {
     return `You are a professional career coach analyzing this CV against a specific job to provide actionable improvement guidance.
 
-IMPORTANT: Format your response using proper markdown with clear sections. Use ## for main headers and ### for subheaders. Do NOT add emojis or decorative elements.
+IMPORTANT: Format your response using proper markdown with clear sections. Use ## for main headers and ### for subheaders. Do NOT add emojis or decorative elements. Do NOT use legacy titles like "Your Career Story". Do NOT include any sections other than those specified below.
 
-Provide your analysis in the following structure:
+Provide your analysis in the following structure and only these sections:
 
 ## Job Match Analysis
 
 ### Overall Fit Assessment
-[Evaluate how well this candidate matches the ${jobInsights.experienceLevel}-level role - be specific about percentage match and reasons]
+[Evaluate how well this candidate matches the ${jobInsights.experienceLevel}-level role — include a percentage fit estimate with 1-2 sentences on why]
 
 ### Strengths for This Role
 [List 3-4 specific strengths that align with the job requirements:]
@@ -160,21 +160,21 @@ Provide your analysis in the following structure:
 ### Application Strategy
 [How to position themselves as the best candidate, including cover letter points and networking approaches]
 
-KEY ROLE REQUIREMENTS TO ADDRESS:
+Key role requirements to address (context for you — do not echo this label in the output):
 ${jobInsights.keyRequirements.slice(0, 5).join('\n')}
 
-CRITICAL SKILLS TO EVALUATE:
+Critical skills to evaluate (context for you — do not echo this label in the output):
 ${jobInsights.criticalSkills.slice(0, 5).join(', ')}
 
-${jobInsights.workArrangement ? `WORK ARRANGEMENT: ${jobInsights.workArrangement}` : ''}
+${jobInsights.workArrangement ? `Work arrangement (context): ${jobInsights.workArrangement}` : ''}
 
-TARGET ROLE:
+Target role (context):
 ${jobDescription}
 
-CANDIDATE RESUME:
+Candidate resume (context):
 ${cvText}
 
-Write a cohesive narrative that flows naturally and provides specific, actionable insights for this job opportunity. Be encouraging yet honest about fit and areas for development.`;
+Write a cohesive narrative that flows naturally and provides specific, actionable insights tailored to this job opportunity. Be encouraging yet honest about fit and areas for development. Keep the total length around 450–700 words.`;
   }
 
   /**

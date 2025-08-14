@@ -1630,6 +1630,28 @@ Responsibilities:
             console.log('🎨 Displaying analysis results:', analysisData);
             stopLoadingAnimation();
             
+            // Simple markdown to HTML converter
+            function mdToHtml(text) {
+                if (!text) return '';
+                // headers
+                text = text.replace(/^###\s+(.*)$/gm, '<h3 class="text-lg font-bold text-primary mt-6 mb-3">$1</h3>');
+                text = text.replace(/^##\s+(.*)$/gm, '<h2 class="text-xl font-bold text-white mt-6 mb-3 border-b border-slate-600 pb-2">$1</h2>');
+                text = text.replace(/^#\s+(.*)$/gm, '<h1 class="text-2xl font-bold text-white mt-6 mb-4">$1</h1>');
+                // bold/italic
+                text = text.replace(/\*\*([^\*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+                text = text.replace(/(?<!\*)\*([^\*]+)\*(?!\*)/g, '<em>$1</em>');
+                // lists
+                text = text.replace(/^(\d+)\.\s+(.*)$/gm, '<li class="ml-6 mb-2 list-decimal">$2</li>');
+                text = text.replace(/^[-*]\s+(.*)$/gm, '<li class="ml-6 mb-2 list-disc">$1</li>');
+                text = text.replace(/(<li[^>]*>.*<\/li>\s*)+/g, function(m){
+                    const isOrdered = m.includes('list-decimal');
+                    return (isOrdered ? '<ol class="space-y-2 my-4 list-decimal list-inside text-gray-300">' : '<ul class="space-y-2 my-4 list-disc list-inside text-gray-300">') + m + (isOrdered ? '</ol>' : '</ul>');
+                });
+                // paragraphs
+                const parts = text.split(/\n\n+/).map(p => p.trim()).filter(Boolean);
+                return parts.map(p => p.startsWith('<') ? p : `<p class="mb-4 text-gray-300 leading-relaxed">${p}</p>`).join('\n');
+            }
+            
             const loadingSection = document.getElementById('loadingSection');
             const resultsSection = document.getElementById('resultsSection');
             
@@ -1640,7 +1662,7 @@ Responsibilities:
             if (resultsContent && analysisData) {
                 // Determine analysis type
                 const hasJobDescription = analysisData.hasJobDescription || analysisData.analysisType === 'job-comparison';
-                const analysisTypeLabel = hasJobDescription ? 'Job Fit Analysis' : 'Standalone Career Analysis';
+                const headerTitle = hasJobDescription ? 'Job Match Analysis' : 'CV Analysis and Recommendations';
                 
                 let html = '<div class="space-y-6">';
                 
@@ -1649,26 +1671,20 @@ Responsibilities:
                     '<div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">' +
                         '<i class="fas fa-check text-white text-2xl"></i>' +
                     '</div>' +
-                    '<h4 class="text-2xl font-bold text-green-400 mb-2">✅ ' + analysisTypeLabel + ' Complete!</h4>' +
-                    '<p class="text-gray-300">Your personalized career insights are ready.</p>' +
-                    (hasJobDescription ? '<p class="text-sm text-green-400 mt-2">📋 Job description was analyzed for fit assessment</p>' : '') +
+                    '<h4 class="text-2xl font-bold text-green-400 mb-2">✅ Analysis Complete!</h4>' +
+                    '<p class="text-gray-300">Your personalized insights are ready.</p>' +
                 '</div>';
                 
-                // Main narrative content - THIS IS THE KEY FIX
+                // Main narrative content rendered as markdown
                 if (analysisData.narrative) {
                     html += '<div class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border border-primary/30 rounded-lg p-6 mb-6">' +
                         '<h5 class="text-xl font-bold text-white mb-4 flex items-center">' +
                             '<i class="fas fa-' + (hasJobDescription ? 'bullseye' : 'user-tie') + ' text-primary mr-3"></i>' +
-                            (hasJobDescription ? 'Your Job Fit Analysis' : 'Your Career Story') +
+                            headerTitle +
                         '</h5>' +
-                        '<div class="prose prose-invert max-w-none">' +
-                            '<div class="text-gray-200 leading-relaxed text-base">' +
-                                analysisData.narrative.replace(/\\n\\n/g, '</p><p class="mt-4">').replace(/\\n/g, '<br>') +
-                            '</div>' +
-                        '</div>' +
+                        '<div class="prose prose-invert max-w-none">' + mdToHtml(analysisData.narrative) + '</div>' +
                     '</div>';
                 } else {
-                    // Fallback if no narrative (shouldn't happen with new system)
                     html += '<div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-6">' +
                         '<div class="flex items-center text-yellow-400 mb-2">' +
                             '<i class="fas fa-exclamation-triangle mr-2"></i>' +
@@ -1678,23 +1694,7 @@ Responsibilities:
                     '</div>';
                 }
                 
-                // Analysis metadata
-                html += '<div class="bg-slate-700 rounded-lg p-4 text-sm">' +
-                    '<h6 class="font-semibold text-white mb-3 flex items-center">' +
-                        '<i class="fas fa-info-circle text-primary mr-2"></i>' +
-                        'Analysis Details' +
-                    '</h6>' +
-                    '<div class="grid grid-cols-2 gap-4 text-gray-300">' +
-                        '<div><strong>Analysis ID:</strong> ' + (analysisData.analysisId || analysisData.analysis_id || 'N/A') + '</div>' +
-                        '<div><strong>Type:</strong> ' + (analysisData.analysisType || (hasJobDescription ? 'job-comparison' : 'standalone')) + '</div>' +
-                        '<div><strong>Word Count:</strong> ' + (analysisData.wordCount || 'N/A') + '</div>' +
-                        '<div><strong>Processing Time:</strong> ' + (analysisData.processingTime ? Math.round(analysisData.processingTime/1000) + 's' : 'N/A') + '</div>' +
-                        '<div><strong>AI Provider:</strong> ' + (analysisData.aiProvider || 'DeepSeek') + '</div>' +
-                        '<div><strong>Timestamp:</strong> ' + (analysisData.timestamp ? new Date(analysisData.timestamp).toLocaleString() : new Date().toLocaleString()) + '</div>' +
-                    '</div>' +
-                '</div>';
-                
-                // Action buttons
+                // Action buttons (no analysis details for end users)
                 html += '<div class="flex gap-4 justify-center">' +
                     '<button onclick="resetToUploadScreen()" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg transition-colors flex items-center">' +
                         '<i class="fas fa-plus mr-2"></i>' +
@@ -1710,7 +1710,6 @@ Responsibilities:
                 
                 resultsContent.innerHTML = html;
                 
-                // Log success
                 console.log('✅ Results displayed successfully with narrative:', !!analysisData.narrative);
             } else {
                 console.error('❌ No results content element or analysis data found');
