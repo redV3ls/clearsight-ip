@@ -117,11 +117,11 @@ export class PromptTester {
   static calculateQualityScore(result: PromptTestResult): number {
     const structureWeight = 0.4;
     const engagementWeight = 0.4;
-    const issuesPenalty = 0.2;
+    const issuesPenaltyRate = 0.2;
 
     const structurePoints = (result.structureScore / 10) * structureWeight * 100;
     const engagementPoints = (result.engagementScore / 10) * engagementWeight * 100;
-    const issuesPenalty = Math.min(result.issues.length * 10, issuesPenalty * 100);
+    const issuesPenalty = Math.min(result.issues.length * 10, issuesPenaltyRate * 100);
 
     return Math.max(0, Math.round(structurePoints + engagementPoints - issuesPenalty));
   }
