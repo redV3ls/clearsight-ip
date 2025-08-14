@@ -69,6 +69,8 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
   enhancedLogger.info('✅ User authenticated successfully', { userId });
 
   const analysisId = crypto.randomUUID();
+  const startTime = Date.now(); // Track processing time for direct analysis
+  
   enhancedLogger.logAnalysisStart(analysisId, userId, {
     source: 'web',
     hasFile: false,
@@ -224,39 +226,116 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       });
     }
     
-    // Start async analysis (fire and forget)
-    enhancedLogger.logAnalysisCheckpoint(analysisId, 'SUBMITTING_ASYNC_TASK');
-    enhancedLogger.info(`🚀 Submitting async analysis for ${analysisId} to executionCtx.waitUntil`, {
+    // NARRATIVE IMPLEMENTATION: Direct processing instead of async
+    enhancedLogger.logAnalysisCheckpoint(analysisId, 'STARTING_DIRECT_NARRATIVE_ANALYSIS');
+    enhancedLogger.info(`🚀 Starting direct narrative analysis for ${analysisId}`, {
       analysisId,
       contentLength: content.length,
       hasJobDescription: !!jobDescription
     });
     
-    c.executionCtx.waitUntil(
-      performAsyncAnalysis(c.env, analysisId, userId, content, jobDescription)
-        .then(() => {
-          enhancedLogger.info(`✨ Async analysis completed successfully for ${analysisId}`, {
-            analysisId,
-            stage: 'ASYNC_COMPLETE'
-          });
-        })
-        .catch((error) => {
-          enhancedLogger.error(`❌ Async analysis failed for ${analysisId}`, error, {
-            analysisId,
-            stage: 'ASYNC_FAILED'
-          });
-        })
-    );
-
-    // Return immediate response with analysis ID using consistent formatter
-    const processingResponse = NarrativeResponseFormatter.formatProcessingResponse({
-      analysisId,
-      userId,
-      message: 'Analysis started successfully. Use the analysis_id to check status and retrieve results.',
-      estimatedCompletion: new Date(Date.now() + 45 * 1000).toISOString() // 45 seconds estimate
-    });
-
-    return c.json(processingResponse, 202); // 202 Accepted
+    try {
+      // Import and initialize DeepSeek AI service for direct narrative processing
+      const { DeepSeekAIService } = await import('../services/deepseekAI');
+      const aiConfig = {
+        provider: 'deepseek' as const,
+        model: c.env.DEEPSEEK_MODEL || 'deepseek-chat',
+        apiKey: c.env.DEEPSEEK_API_KEY,
+        baseUrl: c.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1',
+        maxTokens: parseInt(c.env.DEEPSEEK_MAX_TOKENS || '3000'),
+        temperature: parseFloat(c.env.DEEPSEEK_TEMPERATURE || '0.2'),
+        timeout: parseInt(c.env.DEEPSEEK_TIMEOUT || '30000') // Reduced timeout for direct processing
+      };
+      
+      const deepseekService = new DeepSeekAIService(aiConfig);
+      
+      // Determine analysis type
+      const analysisType = jobDescription ? 'job-comparison' : 'standalone';
+      
+      enhancedLogger.info(`🤖 Performing direct ${analysisType} narrative analysis`, {
+        analysisId,
+        analysisType,
+        hasJobDescription: !!jobDescription
+      });
+      
+      // Perform direct narrative analysis
+      const narrativeResult = await deepseekService.extractNarrativeFromCV(content, jobDescription);
+      
+      enhancedLogger.info(`✅ Direct narrative analysis completed`, {
+        analysisId,
+        wordCount: narrativeResult.wordCount,
+        analysisType: narrativeResult.analysisType
+      });
+      
+      // Save to narrative database
+      const database = createDatabase(c.env.DB);
+      const narrativeService = new NarrativeAnalysisService(database);
+      
+      await narrativeService.create({
+        id: analysisId,
+        userId: userId,
+        narrative: narrativeResult.narrative,
+        analysisType: narrativeResult.analysisType,
+        wordCount: narrativeResult.wordCount,
+        hasJobDescription: !!jobDescription,
+        processingTimeMs: Date.now() - startTime,
+        aiProvider: 'deepseek',
+        aiModel: aiConfig.model
+      });
+      
+      // Store in narrative KV cache
+      const narrativeCache = new NarrativeKVCache(c.env);
+      const cacheEntry = {
+        analysisId,
+        userId,
+        narrative: narrativeResult.narrative,
+        analysisType: narrativeResult.analysisType,
+        wordCount: narrativeResult.wordCount,
+        status: 'completed' as const,
+        timestamp: new Date().toISOString(),
+        processingTime: Date.now() - startTime
+      };
+      
+      await narrativeCache.storeAnalysis(cacheEntry);
+      
+      // Return direct response with narrative content
+      const completedResponse = NarrativeResponseFormatter.formatCompletedAnalysis({
+        analysisId,
+        userId,
+        narrative: narrativeResult.narrative,
+        analysisType: narrativeResult.analysisType,
+        wordCount: narrativeResult.wordCount,
+        timestamp: new Date().toISOString(),
+        processingTime: Date.now() - startTime,
+        aiProvider: 'deepseek',
+        aiModel: aiConfig.model,
+        hasJobDescription: !!jobDescription,
+        source: 'processing'
+      });
+      
+      enhancedLogger.info(`🎉 Direct narrative analysis complete for ${analysisId}`, {
+        analysisId,
+        wordCount: narrativeResult.wordCount,
+        processingTime: Date.now() - startTime
+      });
+      
+      return c.json(completedResponse, 200); // 200 OK with direct response
+      
+    } catch (error) {
+      enhancedLogger.error(`❌ Direct narrative analysis failed for ${analysisId}`, error);
+      
+      // Return error response
+      const errorResponse = NarrativeResponseFormatter.formatFailedAnalysis({
+        analysisId,
+        userId,
+        errorCode: 'ANALYSIS_FAILED',
+        errorMessage: error instanceof Error ? error.message : 'Analysis failed',
+        userMessage: 'Analysis failed. Please try again with a different CV or contact support.',
+        retryable: true
+      });
+      
+      return c.json(errorResponse, 500);
+    }
 
   } catch (error) {
     enhancedLogger.error('🔥 Analysis submission error', error, {

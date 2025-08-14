@@ -1,0 +1,1 @@
+{"errorId":"aad333af-0295-403d-bdd5-7ae7f78d46c6","timestamp":"2025-08-14T06:01:10.720Z","code":"INVALID_CREDENTIALS","message":"Invalid email or password","path":"/api/v1/auth/login","severity":"high","frequency":{"codeFrequency":4,"pathFrequency":4,"recentOccurrences":2},"context":{"userAgent":"node","statusCode":401}}

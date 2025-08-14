@@ -1,0 +1,1 @@
+{"timestamp":"2025-08-14T06:27:47.064Z","level":"info","message":"✅ CHECKPOINT [PARSING_FORM_DATA]: de485290-b4cb-48f8-980e-f722f842c215 (1ms elapsed)","analysisId":"de485290-b4cb-48f8-980e-f722f842c215","checkpoint":"PARSING_FORM_DATA","elapsed":1,"stage":"CHECKPOINT"}
