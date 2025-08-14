@@ -880,15 +880,15 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
             messages: [
               {
                 role: 'system',
-                content: 'You are a senior career coach specializing in narrative career analysis. Provide engaging, story-driven feedback that helps professionals understand their career journey and next steps. Be encouraging, insightful, and actionable. Focus on storytelling rather than lists or technical details.'
+                content: 'You are a career coach providing narrative career analysis. Write engaging, story-driven feedback in exactly 350-450 words. Be encouraging and actionable. Focus on storytelling, not lists.'
               },
               {
                 role: 'user',
                 content: prompt
               }
             ],
-            max_tokens: this.config.maxTokens,
-            temperature: this.config.temperature
+            max_tokens: Math.min(this.config.maxTokens, 600), // Limit tokens for faster processing
+            temperature: Math.min(this.config.temperature, 0.1) // Lower temperature for faster, more focused responses
           }),
           signal: AbortSignal.timeout(dynamicTimeout)
         });
@@ -967,20 +967,21 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
    * Calculate dynamic timeout based on prompt complexity
    */
   private calculateTimeout(prompt: string, operation: string): number {
-    const baseTimeout = 30000; // 30 seconds base
-    const lengthMultiplier = Math.min(prompt.length / 1000, 5); // Max 5x multiplier
+    const baseTimeout = 60000; // 60 seconds base (increased for narrative analysis)
+    const lengthMultiplier = Math.min(prompt.length / 1000, 3); // Max 3x multiplier (reduced)
 
     const operationMultipliers = {
       'skills-extraction': 1.0,
       'job-analysis': 0.8,
       'gap-analysis': 1.5,
+      'narrative-analysis': 1.2, // Added specific multiplier for narrative analysis
       'health-check': 0.3
     };
 
     const operationMultiplier = operationMultipliers[operation as keyof typeof operationMultipliers] || 1.0;
 
     const calculatedTimeout = baseTimeout * lengthMultiplier * operationMultiplier;
-    const maxTimeout = 90000; // 90 seconds max
+    const maxTimeout = 120000; // 120 seconds max (increased)
 
     return Math.min(calculatedTimeout, maxTimeout);
   }
@@ -996,36 +997,20 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
     }
 
     // Standalone analysis prompt
-    const basePrompt = `You are an experienced career coach providing personalized resume feedback. Write a compelling narrative analysis that tells this professional's career story.
+    const basePrompt = `You are a career coach providing personalized resume feedback. Write a compelling 400-word narrative that tells this professional's career story.
 
-ANALYSIS STRUCTURE:
+Structure your response as a flowing narrative covering:
+1. **Career Journey**: Their progression and key achievements
+2. **Core Strengths**: What makes them valuable and unique
+3. **Market Position**: Current competitiveness and level
+4. **Growth Path**: Specific development areas and next steps
 
-**Professional Journey**
-Tell the story of their career progression, highlighting key achievements and growth patterns.
-
-**Core Strengths**
-Identify their unique value proposition and what makes them stand out in their field.
-
-**Market Position**
-Assess their current competitiveness and career level.
-
-**Growth Opportunities**
-Suggest specific areas for development with actionable guidance.
-
-**Career Advancement Strategy**
-Provide 2-3 concrete next steps for their professional growth.
-
-TONE & STYLE:
-- Write as if speaking directly to the candidate
-- Be encouraging yet honest and constructive
-- Focus on storytelling over technical lists
-- Aim for 350-450 words of genuine insight
-- Use specific examples from their experience
+Write directly to the candidate in an encouraging, constructive tone. Focus on storytelling over lists. Use specific examples from their experience.
 
 RESUME:
 ${cvText}
 
-Write a cohesive narrative that flows naturally from one section to the next.`;
+Provide genuine insight in exactly 350-450 words.`;
 
     return basePrompt;
   }

@@ -1,0 +1,1 @@
+{"errorId":"35a7a1f0-d08d-4b4d-b0ab-b5725bdd76a1","timestamp":"2025-08-14T06:48:07.748Z","originalError":{"code":"INVALID_CREDENTIALS","path":"/api/v1/auth/login","message":"Invalid email or password"},"escalationReasons":["Error code INVALID_CREDENTIALS occurred 11 times"],"severity":"ESCALATED"}
