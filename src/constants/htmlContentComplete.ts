@@ -88,6 +88,25 @@ export const HTML_CONTENT = `<!DOCTYPE html
             outline: 2px solid #14b8a6;
             outline-offset: 2px;
         }
+        
+        /* Narrative display styles */
+        .narrative-content {
+            line-height: 1.7;
+            font-size: 16px;
+        }
+        
+        .narrative-content p {
+            margin-bottom: 1rem;
+        }
+        
+        .narrative-content strong {
+            color: #14b8a6;
+            font-weight: 600;
+        }
+        
+        .analysis-type-indicator {
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-gray-200">
@@ -609,6 +628,50 @@ export const HTML_CONTENT = `<!DOCTYPE html
                         </div>
                     </div>
                     
+                    <!-- Job Description Section -->
+                    <div class="mb-8 p-6 bg-slate-700 rounded-lg border-2 border-dashed border-primary/50">
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-briefcase text-2xl text-primary mr-3"></i>
+                            <h4 class="text-xl font-bold text-white">🎯 Job Description (Optional - for Job Fit Analysis)</h4>
+                        </div>
+                        <p class="text-gray-300 mb-4">
+                            <strong>💡 Pro Tip:</strong> Paste a job description here to get personalized analysis on how well your CV matches the role, 
+                            including specific gap analysis and recommendations for improvement.
+                        </p>
+                        <textarea id="jobDescriptionTextArea" class="w-full h-40 bg-slate-600 border border-slate-500 rounded-lg p-3 text-white resize-none focus:outline-none focus:border-primary" placeholder="Paste the complete job description here for detailed job fit analysis...
+
+Example:
+Senior Software Engineer - Frontend Focus
+Company: TechCorp Inc.
+
+Requirements:
+- 5+ years of React development experience
+- Strong TypeScript skills
+- Experience with modern CI/CD pipelines
+- Bachelor's degree in Computer Science or equivalent
+
+Responsibilities:
+- Lead frontend development initiatives
+- Mentor junior developers
+- Collaborate with design and product teams
+..."></textarea>
+                        
+                        <!-- Analysis Type Indicator -->
+                        <div id="analysisTypeIndicator" class="mt-4 p-3 bg-slate-600 rounded-lg border-l-4 border-yellow-500">
+                            <div class="flex items-center">
+                                <i class="fas fa-info-circle text-yellow-500 mr-2"></i>
+                                <span class="font-semibold text-white">Analysis Type:</span>
+                                <span id="analysisTypeText" class="ml-2 text-gray-300">📖 Standalone Career Analysis - General career guidance and improvement suggestions</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 flex gap-3">
+                            <button id="clearJobDescriptionBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-eraser mr-2"></i>Clear Job Description
+                            </button>
+                        </div>
+                    </div>
+                    
                     <button id="startAnalysisBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         <i class="fas fa-brain mr-2"></i>
                         Start AI Analysis
@@ -870,8 +933,19 @@ export const HTML_CONTENT = `<!DOCTYPE html
             
             resumeTextArea?.addEventListener('input', handleTextInput);
             
+            // Job description functionality
+            const jobDescriptionTextArea = document.getElementById('jobDescriptionTextArea');
+            const clearJobDescriptionBtn = document.getElementById('clearJobDescriptionBtn');
+            console.log('Found jobDescriptionTextArea:', !!jobDescriptionTextArea, 'clearJobDescriptionBtn:', !!clearJobDescriptionBtn);
+            
+            jobDescriptionTextArea?.addEventListener('input', updateAnalysisTypeIndicator);
+            clearJobDescriptionBtn?.addEventListener('click', clearJobDescription);
+            
             // Analysis start
             startAnalysisBtn?.addEventListener('click', startAnalysis);
+            
+            // Initialize analysis type indicator
+            updateAnalysisTypeIndicator();
             
             console.log('Analysis listeners setup complete');
         }
@@ -1199,6 +1273,12 @@ export const HTML_CONTENT = `<!DOCTYPE html
                 // Prepare the request data
                 let requestData = {};
                 
+                // Get job description if provided
+                const jobDescriptionTextArea = document.getElementById('jobDescriptionTextArea');
+                const jobDescription = jobDescriptionTextArea ? jobDescriptionTextArea.value.trim() : '';
+                
+                console.log('Job description provided:', !!jobDescription, 'Length:', jobDescription.length);
+                
                 if (AppState.resumeFile) {
                     // Handle file upload
                     console.log('Sending file analysis request to:', API_ENDPOINTS.analyzeResume);
@@ -1206,6 +1286,12 @@ export const HTML_CONTENT = `<!DOCTYPE html
                     
                     const formData = new FormData();
                     formData.append('resume', AppState.resumeFile); // Backend expects 'resume', not 'file'
+                    
+                    // Add job description if provided
+                    if (jobDescription) {
+                        formData.append('jobDescriptionText', jobDescription);
+                        console.log('Added job description to file upload request');
+                    }
                     
                     const response = await fetch(API_ENDPOINTS.analyzeResume, {
                         method: 'POST',
@@ -1234,6 +1320,12 @@ export const HTML_CONTENT = `<!DOCTYPE html
                     
                     const formData = new FormData();
                     formData.append('resumeText', AppState.resumeText.trim()); // Backend expects 'resumeText'
+                    
+                    // Add job description if provided
+                    if (jobDescription) {
+                        formData.append('jobDescriptionText', jobDescription);
+                        console.log('Added job description to text analysis request');
+                    }
                     
                     const response = await fetch(API_ENDPOINTS.analyzeResume, {
                         method: 'POST',
@@ -1535,6 +1627,7 @@ export const HTML_CONTENT = `<!DOCTYPE html
         }
 
         function displayAnalysisResults(analysisData) {
+            console.log('🎨 Displaying analysis results:', analysisData);
             stopLoadingAnimation();
             
             const loadingSection = document.getElementById('loadingSection');
@@ -1545,27 +1638,82 @@ export const HTML_CONTENT = `<!DOCTYPE html
             
             const resultsContent = document.getElementById('resultsContent');
             if (resultsContent && analysisData) {
-                // Display the analysis results
-                resultsContent.innerHTML = 
-                    '<div class="space-y-6">' +
-                        '<div class="text-center mb-6">' +
-                            '<h4 class="text-xl font-bold text-green-400 mb-2">🎯 Analysis Complete!</h4>' +
-                            '<p class="text-gray-300">Here\\'s what our AI discovered about your profile:</p>' +
-                        '</div>' +
-                        
-                        '<div class="bg-slate-600 rounded-lg p-4">' +
-                            '<h5 class="font-semibold text-white mb-2">📊 Analysis Summary</h5>' +
-                            '<p class="text-gray-300 text-sm">Analysis ID: ' + (analysisData.analysis_id || 'N/A') + '</p>' +
-                            '<p class="text-gray-300 text-sm">Status: ' + (analysisData.status || 'Completed') + '</p>' +
-                            '<p class="text-gray-300 text-sm">Processed: ' + new Date().toLocaleString() + '</p>' +
-                        '</div>' +
-                        
-                        '<div class="text-center">' +
-                            '<button onclick="resetToUploadScreen()" class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg transition-colors">' +
-                                'Analyze Another Resume' +
-                            '</button>' +
+                // Determine analysis type
+                const hasJobDescription = analysisData.hasJobDescription || analysisData.analysisType === 'job-comparison';
+                const analysisTypeLabel = hasJobDescription ? 'Job Fit Analysis' : 'Standalone Career Analysis';
+                
+                let html = '<div class="space-y-6">';
+                
+                // Success header
+                html += '<div class="text-center mb-6">' +
+                    '<div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">' +
+                        '<i class="fas fa-check text-white text-2xl"></i>' +
+                    '</div>' +
+                    '<h4 class="text-2xl font-bold text-green-400 mb-2">✅ ' + analysisTypeLabel + ' Complete!</h4>' +
+                    '<p class="text-gray-300">Your personalized career insights are ready.</p>' +
+                    (hasJobDescription ? '<p class="text-sm text-green-400 mt-2">📋 Job description was analyzed for fit assessment</p>' : '') +
+                '</div>';
+                
+                // Main narrative content - THIS IS THE KEY FIX
+                if (analysisData.narrative) {
+                    html += '<div class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border border-primary/30 rounded-lg p-6 mb-6">' +
+                        '<h5 class="text-xl font-bold text-white mb-4 flex items-center">' +
+                            '<i class="fas fa-' + (hasJobDescription ? 'bullseye' : 'user-tie') + ' text-primary mr-3"></i>' +
+                            (hasJobDescription ? 'Your Job Fit Analysis' : 'Your Career Story') +
+                        '</h5>' +
+                        '<div class="prose prose-invert max-w-none">' +
+                            '<div class="text-gray-200 leading-relaxed text-base">' +
+                                analysisData.narrative.replace(/\\n\\n/g, '</p><p class="mt-4">').replace(/\\n/g, '<br>') +
+                            '</div>' +
                         '</div>' +
                     '</div>';
+                } else {
+                    // Fallback if no narrative (shouldn't happen with new system)
+                    html += '<div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-6">' +
+                        '<div class="flex items-center text-yellow-400 mb-2">' +
+                            '<i class="fas fa-exclamation-triangle mr-2"></i>' +
+                            '<span class="font-semibold">Analysis Completed</span>' +
+                        '</div>' +
+                        '<p class="text-yellow-300">Your analysis has been processed, but the detailed narrative is not available in this view.</p>' +
+                    '</div>';
+                }
+                
+                // Analysis metadata
+                html += '<div class="bg-slate-700 rounded-lg p-4 text-sm">' +
+                    '<h6 class="font-semibold text-white mb-3 flex items-center">' +
+                        '<i class="fas fa-info-circle text-primary mr-2"></i>' +
+                        'Analysis Details' +
+                    '</h6>' +
+                    '<div class="grid grid-cols-2 gap-4 text-gray-300">' +
+                        '<div><strong>Analysis ID:</strong> ' + (analysisData.analysisId || analysisData.analysis_id || 'N/A') + '</div>' +
+                        '<div><strong>Type:</strong> ' + (analysisData.analysisType || (hasJobDescription ? 'job-comparison' : 'standalone')) + '</div>' +
+                        '<div><strong>Word Count:</strong> ' + (analysisData.wordCount || 'N/A') + '</div>' +
+                        '<div><strong>Processing Time:</strong> ' + (analysisData.processingTime ? Math.round(analysisData.processingTime/1000) + 's' : 'N/A') + '</div>' +
+                        '<div><strong>AI Provider:</strong> ' + (analysisData.aiProvider || 'DeepSeek') + '</div>' +
+                        '<div><strong>Timestamp:</strong> ' + (analysisData.timestamp ? new Date(analysisData.timestamp).toLocaleString() : new Date().toLocaleString()) + '</div>' +
+                    '</div>' +
+                '</div>';
+                
+                // Action buttons
+                html += '<div class="flex gap-4 justify-center">' +
+                    '<button onclick="resetToUploadScreen()" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg transition-colors flex items-center">' +
+                        '<i class="fas fa-plus mr-2"></i>' +
+                        'Analyze Another Resume' +
+                    '</button>' +
+                    '<button onclick="downloadResults()" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-6 py-3 rounded-lg transition-colors flex items-center">' +
+                        '<i class="fas fa-download mr-2"></i>' +
+                        'Download Report' +
+                    '</button>' +
+                '</div>';
+                
+                html += '</div>';
+                
+                resultsContent.innerHTML = html;
+                
+                // Log success
+                console.log('✅ Results displayed successfully with narrative:', !!analysisData.narrative);
+            } else {
+                console.error('❌ No results content element or analysis data found');
             }
             
             AppState.isAnalyzing = false;
@@ -1690,6 +1838,36 @@ export const HTML_CONTENT = `<!DOCTYPE html
 
         function downloadResults() {
             showNotification('Download functionality coming soon!', 'info');
+        }
+
+        // Job Description Helper Functions
+        function updateAnalysisTypeIndicator() {
+            const jobDescriptionTextArea = document.getElementById('jobDescriptionTextArea');
+            const indicator = document.getElementById('analysisTypeIndicator');
+            const typeText = document.getElementById('analysisTypeText');
+            
+            if (!jobDescriptionTextArea || !indicator || !typeText) return;
+            
+            const jobDescription = jobDescriptionTextArea.value.trim();
+            
+            if (jobDescription) {
+                typeText.textContent = '🎯 Job Fit Analysis - Your CV will be analyzed against the specific job requirements';
+                indicator.className = 'mt-4 p-3 bg-green-600/20 rounded-lg border-l-4 border-green-500';
+                indicator.querySelector('i').className = 'fas fa-bullseye text-green-500 mr-2';
+            } else {
+                typeText.textContent = '📖 Standalone Career Analysis - General career guidance and improvement suggestions';
+                indicator.className = 'mt-4 p-3 bg-slate-600 rounded-lg border-l-4 border-yellow-500';
+                indicator.querySelector('i').className = 'fas fa-info-circle text-yellow-500 mr-2';
+            }
+        }
+        
+        function clearJobDescription() {
+            const jobDescriptionTextArea = document.getElementById('jobDescriptionTextArea');
+            if (jobDescriptionTextArea) {
+                jobDescriptionTextArea.value = '';
+                updateAnalysisTypeIndicator();
+                showNotification('Job description cleared. Analysis will be standalone.', 'info');
+            }
         }
     </script>
 </body>
