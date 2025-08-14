@@ -1723,7 +1723,7 @@ Responsibilities:
                 });
                 // paragraphs
                 const parts = text.split(/\\n\\n+/).map(function(p){ return p.trim(); }).filter(Boolean);
-                return parts.map(function(p){ return p.startsWith('<') ? p : '<p class="mb-4 text-gray-300 leading-relaxed">' + p + '</p>'; }).join('\n');
+                return parts.map(function(p){ return p.startsWith('<') ? p : '<p class="mb-4 text-gray-300 leading-relaxed">' + p + '</p>'; }).join('\\n');
             }
             
             const loadingSection = document.getElementById('loadingSection');
