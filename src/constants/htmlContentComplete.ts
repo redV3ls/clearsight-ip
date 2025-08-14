@@ -713,10 +713,9 @@ Responsibilities:
                             <!-- Dynamic Loading Message -->
                             <p id="progressText" class="text-lg text-primary animate-pulse font-medium mb-4">🧠 Initializing AI brain...</p>
                             
-                            <!-- Fun Facts -->
+                            <!-- Fun Tips (rotating) -->
                             <div class="text-xs text-gray-500 max-w-sm mx-auto">
-                                <p class="mb-2">💡 <strong>Did you know?</strong> Our AI analyzes over 50 different skill categories!</p>
-                                <p>⚡ Average analysis time: 2-3 minutes</p>
+                                <p id="funFactText" class="mb-2">💡 Tip: Quantified results (numbers!) are recruiter magnets.</p>
                             </div>
                         </div>
                     </div>
@@ -759,17 +758,28 @@ Responsibilities:
 
         // Catchy loading messages
         const LOADING_MESSAGES = [
-            "🧠 Waking up our AI brain...",
-            "📄 Reading your resume like a caffeinated HR manager...",
-            "🔍 Hunting for hidden skills in your experience...",
-            "🎯 Matching you with dream jobs...",
-            "🚀 Calculating your career trajectory...",
-            "💡 Generating brilliant insights...",
-            "🎨 Crafting your personalized analysis...",
-            "🔮 Predicting your future success...",
-            "⚡ Supercharging your job search strategy...",
-            "🎪 Putting on the final touches...",
-            "🎉 Almost ready to blow your mind..."
+            "🧠 Spinning up the AI engines...",
+            "📄 Skimming your resume like a seasoned recruiter...",
+            "🔍 Spotting achievements worth bragging about...",
+            "🎯 Mapping your strengths to real job requirements...",
+            "🧩 Piecing together your standout story...",
+            "📈 Estimating your role fit with evidence...",
+            "✨ Polishing actionable CV improvements...",
+            "🧪 Pressure-testing examples for interviews...",
+            "🚀 Drafting your personalized action plan...",
+            "🎉 Wrapping up with next steps you can use today..."
+        ];
+
+        // Rotating fun tips/facts displayed under the progress
+        const FUN_FACTS = [
+            "Tip: Quantified results (numbers!) are recruiter magnets.",
+            "Pro: Mirror the job's top keywords in your resume summary.",
+            "Did you know? Tailored CVs get up to 3x more interviews.",
+            "Tip: Replace responsibilities with outcomes to stand out.",
+            "Pro: Keep bullets crisp—1 line wins more attention than 3.",
+            "Tip: Align your skills section with the job's requirements.",
+            "Pro: Lead with impact verbs—built, led, launched, improved.",
+            "Did you know? Most scans happen in under 10 seconds.",
         ];
 
         // API Configuration
@@ -1520,10 +1530,15 @@ Responsibilities:
         function updateLoadingMessage() {
             const message = LOADING_MESSAGES[AppState.currentMessageIndex];
             const progressText = document.getElementById('progressText');
+            const funFactEl = document.getElementById('funFactText');
             
             if (progressText) {
                 progressText.textContent = message;
                 progressText.className = 'text-lg text-primary animate-pulse font-medium mb-4';
+            }
+            if (funFactEl) {
+                const idx = Math.floor(Math.random() * FUN_FACTS.length);
+                funFactEl.textContent = '💡 ' + FUN_FACTS[idx];
             }
         }
 
@@ -1648,8 +1663,8 @@ Responsibilities:
                     return (isOrdered ? '<ol class="space-y-2 my-4 list-decimal list-inside text-gray-300">' : '<ul class="space-y-2 my-4 list-disc list-inside text-gray-300">') + m + (isOrdered ? '</ol>' : '</ul>');
                 });
                 // paragraphs
-                const parts = text.split(/\n\n+/).map(p => p.trim()).filter(Boolean);
-                return parts.map(p => p.startsWith('<') ? p : `<p class="mb-4 text-gray-300 leading-relaxed">${p}</p>`).join('\n');
+                const parts = text.split(/\n\n+/).map(function(p){ return p.trim(); }).filter(Boolean);
+                return parts.map(function(p){ return p.startsWith('<') ? p : '<p class="mb-4 text-gray-300 leading-relaxed">' + p + '</p>'; }).join('\n');
             }
             
             const loadingSection = document.getElementById('loadingSection');
