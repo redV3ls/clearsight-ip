@@ -2,6 +2,9 @@
 
 ## Summary of Changes
 
+### CRITICAL FIX DEPLOYED
+⚠️ **Fixed markdown rendering issue**: The `cleanNarrative` function was destroying markdown formatting by replacing multiple spaces with single spaces. This has been fixed and deployed.
+
 ### 1. **Backend AI Prompt Updates** (`src/services/deepseekAI.ts`)
 
 #### Standalone CV Analysis Prompt

@@ -207,7 +207,7 @@ export class NarrativeUtils {
   }
 
   /**
-   * Clean and format narrative text
+   * Clean and format narrative text while preserving markdown formatting
    */
   static cleanNarrative(narrative: string): string {
     if (!narrative || typeof narrative !== 'string') return '';
@@ -215,8 +215,9 @@ export class NarrativeUtils {
     return narrative
       .trim()
       .replace(/\n{3,}/g, '\n\n') // Replace multiple newlines with double newlines
-      .replace(/\s{2,}/g, ' ') // Replace multiple spaces with single space
-      .replace(/^\s*[\r\n]/gm, '') // Remove empty lines
+      // Remove the line that was destroying markdown formatting
+      // .replace(/\s{2,}/g, ' ') // This was breaking markdown!
+      .replace(/^[\s\r]*$/gm, '') // Remove lines that are only whitespace
       .trim();
   }
 }
