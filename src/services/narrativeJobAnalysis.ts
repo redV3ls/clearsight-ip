@@ -115,24 +115,50 @@ export class NarrativeJobAnalysisService {
     jobDescription: string,
     jobInsights: JobAnalysisInsights
   ): string {
-    return `You are an experienced career coach providing personalized resume feedback with job fit analysis. Write a compelling narrative that assesses this candidate's fit for the specific role.
+    return `You are a professional career coach analyzing this CV against a specific job to provide actionable improvement guidance.
 
-ANALYSIS STRUCTURE:
+IMPORTANT: Format your response using proper markdown with clear sections. Use ## for main headers and ### for subheaders. Do NOT add emojis or decorative elements.
 
-**Job Fit Assessment**
-Evaluate how well this candidate matches the ${jobInsights.experienceLevel}-level role. Consider their alignment with the key requirements and company culture.
+Provide your analysis in the following structure:
 
-**Professional Journey & Relevance**
-Tell their career story, emphasizing experiences most relevant to this role. Highlight achievements that demonstrate the required capabilities.
+## Job Match Analysis
 
-**Competitive Strengths**
-Identify what makes them a strong candidate for this specific position. Focus on unique qualifications that set them apart.
+### Overall Fit Assessment
+[Evaluate how well this candidate matches the ${jobInsights.experienceLevel}-level role - be specific about percentage match and reasons]
 
-**Gap Analysis & Development**
-Honestly assess any gaps between their background and the role requirements. Provide specific, actionable guidance for addressing these gaps.
+### Strengths for This Role
+[List 3-4 specific strengths that align with the job requirements:]
+- Relevant experience with specific examples
+- Skills that directly match job needs
+- Achievements that demonstrate required capabilities
 
-**Strategic Positioning**
-Recommend 2-3 concrete steps to strengthen their candidacy and position themselves as the ideal candidate.
+### Critical Gaps to Address
+[List 4-5 specific gaps between CV and job requirements:]
+- Missing skills or certifications
+- Lack of specific experience areas
+- Technologies not demonstrated
+- Industry knowledge gaps
+
+### CV Improvements for This Application
+[Specific changes to make their CV more competitive:]
+- Keywords to add from the job description
+- Achievements to highlight more prominently
+- Skills to emphasize based on requirements
+- Sections to reorganize or add
+
+### Action Plan
+
+#### Before Applying (Immediate)
+[2-3 things to update on CV right now]
+
+#### Interview Preparation
+[2-3 areas to prepare stories/examples for]
+
+#### Skill Development Priority
+[2-3 skills to develop to become ideal candidate]
+
+### Application Strategy
+[How to position themselves as the best candidate, including cover letter points and networking approaches]
 
 KEY ROLE REQUIREMENTS TO ADDRESS:
 ${jobInsights.keyRequirements.slice(0, 5).join('\n')}
