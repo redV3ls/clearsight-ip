@@ -678,7 +678,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 return;
             }
             
-            if (file.name.includes('../') || file.name.includes('..\\\\')) {
+            if (file.name.includes('../') || file.name.includes('..\\\\\\\\')) {
                 showAnalysisError('Invalid file name.');
                 return;
             }

@@ -94,6 +94,11 @@ app.use('*', async (c, next) => {
   c.header('X-XSS-Protection', '1; mode=block');
   c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
   
+  // Ensure proper content type for HTML responses
+  if (c.req.path === '/' || c.req.path.endsWith('.html')) {
+    c.header('Content-Type', 'text/html; charset=utf-8');
+  }
+  
   await next();
 });
 
