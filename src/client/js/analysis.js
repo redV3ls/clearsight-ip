@@ -258,8 +258,9 @@ class AnalysisManager {
     }
 
     generateResultsHTML(data) {
-        // This would contain the HTML generation logic
-        // For brevity, I'll just show the structure
+        // Convert markdown to HTML
+        const narrativeHtml = this.convertMarkdownToHtml(data.narrative || data.careerNarrative || '');
+        
         return `
             <div class="space-y-8">
                 <div class="text-center mb-8">
@@ -267,11 +268,22 @@ class AnalysisManager {
                         <i class="fas fa-check text-white text-2xl"></i>
                     </div>
                     <h2 class="text-3xl font-bold text-green-400 mb-2">Analysis Complete!</h2>
-                    <p class="text-gray-300">Here's your personalized career insights</p>
+                    <p class="text-gray-300">Your personalized CV analysis and improvement guide</p>
                 </div>
-                ${this.generateSkillsSection(data)}
-                ${this.generateGapAnalysisSection(data)}
-                ${this.generateCareerPathsSection(data)}
+                
+                <div class="bg-slate-700 rounded-lg p-6 border border-slate-600">
+                    <div class="prose prose-invert max-w-none">
+                        ${narrativeHtml}
+                    </div>
+                </div>
+                
+                ${data.word_count ? `
+                    <div class="text-center text-sm text-gray-400">
+                        <i class="fas fa-clock mr-2"></i>
+                        ${Math.ceil(data.word_count / 200)} min read • ${data.word_count} words
+                    </div>
+                ` : ''}
+                
                 ${this.generateActionButtons()}
             </div>
         `;
@@ -306,6 +318,38 @@ class AnalysisManager {
                 </button>
             </div>
         `;
+    }
+
+    convertMarkdownToHtml(text) {
+        if (!text) return '';
+        
+        // Convert markdown headers
+        text = text.replace(/^### (.*?)$/gm, '<h3 class="text-xl font-bold text-primary mt-6 mb-3">$1</h3>');
+        text = text.replace(/^## (.*?)$/gm, '<h2 class="text-2xl font-bold text-white mt-8 mb-4">$1</h2>');
+        text = text.replace(/^# (.*?)$/gm, '<h1 class="text-3xl font-bold text-white mt-8 mb-4">$1</h1>');
+        
+        // Convert bold and italic
+        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-primary font-semibold">$1</strong>');
+        text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        
+        // Convert bullet points
+        text = text.replace(/^- (.*?)$/gm, '<li class="ml-4 mb-2">• $1</li>');
+        text = text.replace(/^\d+\. (.*?)$/gm, '<li class="ml-4 mb-2">$1</li>');
+        
+        // Wrap consecutive list items in ul tags
+        text = text.replace(/(<li[^>]*>.*?<\/li>\s*)+/g, function(match) {
+            return '<ul class="space-y-2 my-4">' + match + '</ul>';
+        });
+        
+        // Convert line breaks to paragraphs
+        const paragraphs = text.split('\n\n').filter(p => p.trim());
+        text = paragraphs.map(p => {
+            // Don't wrap if it's already an HTML element
+            if (p.trim().startsWith('<')) return p;
+            return `<p class="mb-4 text-gray-300 leading-relaxed">${p}</p>`;
+        }).join('\n');
+        
+        return text;
     }
 
     downloadResults() {

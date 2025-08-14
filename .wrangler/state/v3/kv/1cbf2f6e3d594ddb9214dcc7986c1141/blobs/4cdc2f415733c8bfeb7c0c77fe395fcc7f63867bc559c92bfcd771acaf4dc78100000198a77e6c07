@@ -1,0 +1,1 @@
+{"id":"ed69c65c-4714-4943-8762-9b9d5e34e2e2","timestamp":"2025-08-14T07:32:17.030Z","level":"info","message":"GET http://localhost:8787/ - 200 (12ms)","request":{"method":"GET","url":"http://localhost:8787/","path":"/","headers":{"accept":"*/*","user-agent":"node"},"userAgent":"node","duration":12,"statusCode":200},"environment":"production"}

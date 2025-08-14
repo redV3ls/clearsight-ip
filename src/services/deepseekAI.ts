@@ -885,14 +885,14 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
             messages: [
               {
                 role: 'system',
-                content: 'You are a career coach providing narrative career analysis. Write engaging, story-driven feedback in exactly 350-450 words. Be encouraging and actionable. Focus on storytelling, not lists.'
+                content: 'You are an expert career coach providing CV analysis and improvement guidance. Format your response using markdown for better readability. Focus on actionable CV improvements and career development advice.'
               },
               {
                 role: 'user',
                 content: prompt
               }
             ],
-            max_tokens: Math.min(this.config.maxTokens, 600), // Limit tokens for faster processing
+            max_tokens: Math.min(this.config.maxTokens, 1500), // Increased for complete responses
             temperature: Math.min(this.config.temperature, 0.1), // Lower temperature for faster, more focused responses
             stream: false // Ensure non-streaming response for Cloudflare Workers
           }),
@@ -1019,21 +1019,43 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
       return NarrativeJobAnalysisService.createEnhancedJobComparisonPrompt(cvText, jobDescription, jobInsights);
     }
 
-    // Standalone analysis prompt
-    const basePrompt = `You are a career coach providing personalized resume feedback. Write a compelling 400-word narrative that tells this professional's career story.
+    // Improved standalone analysis prompt with CV improvement focus
+    const basePrompt = `You are a professional career coach analyzing this CV to provide actionable improvement guidance.
 
-Structure your response as a flowing narrative covering:
-1. **Career Journey**: Their progression and key achievements
-2. **Core Strengths**: What makes them valuable and unique
-3. **Market Position**: Current competitiveness and level
-4. **Growth Path**: Specific development areas and next steps
+## Your Career Analysis
 
-Write directly to the candidate in an encouraging, constructive tone. Focus on storytelling over lists. Use specific examples from their experience.
+Based on your CV, provide a comprehensive analysis with specific recommendations for improvement.
+
+### Career Strengths
+Highlight 3-4 key strengths from their CV with specific examples.
+
+### CV Improvement Areas
+Identify 4-5 specific ways to improve their CV:
+- Missing sections or information
+- Better ways to present achievements (use numbers/metrics)
+- Skills that should be highlighted more prominently
+- Format and structure improvements
+
+### Skills Gap Analysis
+Based on current market demands:
+- Skills they have that are in high demand
+- Critical skills they're missing for their career level
+- Emerging skills they should consider learning
+
+### Actionable Steps
+1. **Immediate CV improvements** (can do today)
+2. **Short-term skill development** (1-3 months)
+3. **Long-term career positioning** (6-12 months)
+
+### Career Positioning Advice
+How to better position themselves in the job market based on their experience.
+
+Provide specific, actionable advice. Reference actual content from their CV. Focus on practical improvements they can implement immediately.
 
 RESUME:
 ${cvText}
 
-Provide genuine insight in exactly 350-450 words.`;
+Write 400-500 words of detailed, practical guidance focused on CV improvement and career development.`;
 
     return basePrompt;
   }
