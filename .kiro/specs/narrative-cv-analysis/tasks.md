@@ -73,7 +73,8 @@
   - Ensure proper status transitions for narrative analyses
   - _Requirements: 2.2, 4.2_
 
-- [-] 9. Create Job Description Integration for Narrative
+- [x] 9. Create Job Description Integration for Narrative
+
 
   - Update job comparison logic to work with narrative output
   - Ensure job description analysis produces narrative gap analysis
@@ -81,7 +82,8 @@
   - Test both standalone and job-comparison analysis types
   - _Requirements: 5.1, 5.2, 5.3_
 
-- [ ] 10. Implement Response Format Consistency
+- [-] 10. Implement Response Format Consistency
+
   - Ensure all analysis endpoints return consistent narrative format
   - Update response serialization to handle narrative content properly
   - Preserve original AI formatting and structure in narrative field

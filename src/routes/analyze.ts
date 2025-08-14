@@ -16,6 +16,7 @@ import { kvStorage } from '../utils/kvStorage';
 import { NarrativeAnalysisService } from '../services/narrativeAnalysisService';
 import { createDatabase } from '../config/database';
 import { NarrativeKVCache } from '../services/narrativeKVCache';
+import { NarrativeResponseFormatter } from '../services/narrativeResponseFormatter';
 
 const analyze = new Hono<{ Bindings: Env }>();
 
@@ -139,14 +140,14 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
           issues: validation.issues
         });
         
-        return c.json({
-          error: {
-            code: 'INVALID_JOB_DESCRIPTION',
-            message: 'Job description quality issues detected',
-            issues: validation.issues,
-            suggestions: validation.suggestions
-          }
-        }, 400);
+        const validationError = NarrativeResponseFormatter.formatValidationError({
+          code: 'INVALID_JOB_DESCRIPTION',
+          message: 'Job description quality issues detected',
+          issues: validation.issues,
+          suggestions: validation.suggestions
+        });
+        
+        return c.json(validationError, 400);
       }
       
       if (validation.suggestions.length > 0) {
@@ -246,17 +247,15 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
         })
     );
 
-    // Return immediate response with analysis ID
-    return c.json({
-      analysis_id: analysisId,
-      user_id: userId,
-      status: 'processing',
+    // Return immediate response with analysis ID using consistent formatter
+    const processingResponse = NarrativeResponseFormatter.formatProcessingResponse({
+      analysisId,
+      userId,
       message: 'Analysis started successfully. Use the analysis_id to check status and retrieve results.',
-      timestamp: new Date().toISOString(),
-      estimated_completion: new Date(Date.now() + 45 * 1000).toISOString(), // 45 seconds estimate (improved with narrative analysis)
-      check_status_url: `/api/v1/analyze/resume/${analysisId}`,
-      history_url: '/api/v1/analyze/resume/history'
-    }, 202); // 202 Accepted
+      estimatedCompletion: new Date(Date.now() + 45 * 1000).toISOString() // 45 seconds estimate
+    });
+
+    return c.json(processingResponse, 202); // 202 Accepted
 
   } catch (error) {
     enhancedLogger.error('🔥 Analysis submission error', error, {
@@ -763,6 +762,34 @@ analyze.get('/test-ai', async (c: AuthenticatedContext) => {
 });
 
 /**
+ * POST /analyze/validate-response - Validate narrative response format
+ */
+analyze.post('/validate-response', async (c: AuthenticatedContext) => {
+  try {
+    const response = await c.req.json();
+    
+    const validation = NarrativeResponseFormatter.validateResponse(response);
+    const size = validation.isValid ? NarrativeResponseFormatter.calculateResponseSize(response) : null;
+
+    return c.json({
+      validation,
+      response_size: size,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Response validation error:', error);
+    return c.json({
+      error: {
+        code: 'VALIDATION_FAILED',
+        message: 'Failed to validate response format',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }, 500);
+  }
+});
+
+/**
  * GET /analyze/cache-health - Check narrative KV cache health
  */
 analyze.get('/cache-health', async (c: AuthenticatedContext) => {
@@ -968,7 +995,7 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
 
     const totalCount = narrativeStats.totalAnalyses + (legacyCount?.count || 0);
 
-    return c.json({
+    const formattedHistory = NarrativeResponseFormatter.formatAnalysisHistory({
       analyses: [...narrativeResults, ...legacyResults].slice(0, limit),
       pagination: {
         page,
@@ -977,14 +1004,16 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
         pages: Math.ceil(totalCount / limit)
       },
       stats: {
-        narrative_analyses: narrativeStats.totalAnalyses,
-        legacy_analyses: legacyCount?.count || 0,
-        standalone_count: narrativeStats.standaloneCount,
-        job_comparison_count: narrativeStats.jobComparisonCount,
-        average_word_count: narrativeStats.averageWordCount,
-        average_processing_time: narrativeStats.averageProcessingTime
+        narrativeAnalyses: narrativeStats.totalAnalyses,
+        legacyAnalyses: legacyCount?.count || 0,
+        standaloneCount: narrativeStats.standaloneCount,
+        jobComparisonCount: narrativeStats.jobComparisonCount,
+        averageWordCount: narrativeStats.averageWordCount,
+        averageProcessingTime: narrativeStats.averageProcessingTime
       }
     });
+
+    return c.json(formattedHistory);
 
   } catch (error) {
     console.error('Get analysis history error:', error);
@@ -1022,23 +1051,39 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
     if (cachedAnalysis && cachedAnalysis.userId === userId) {
       enhancedLogger.info('Serving analysis from narrative KV cache', { analysisId });
       
-      const response = {
-        analysis_id: cachedAnalysis.analysisId,
-        user_id: cachedAnalysis.userId,
-        timestamp: cachedAnalysis.timestamp,
-        status: cachedAnalysis.status,
-        narrative: cachedAnalysis.narrative,
-        analysis_type: cachedAnalysis.analysisType,
-        word_count: cachedAnalysis.wordCount,
-        aiPowered: true,
-        metadata: {
+      if (cachedAnalysis.status === 'completed') {
+        const response = NarrativeResponseFormatter.formatCompletedAnalysis({
+          analysisId: cachedAnalysis.analysisId,
+          userId: cachedAnalysis.userId,
+          narrative: cachedAnalysis.narrative,
+          analysisType: cachedAnalysis.analysisType,
+          wordCount: cachedAnalysis.wordCount,
+          timestamp: cachedAnalysis.timestamp,
           processingTime: cachedAnalysis.processingTime,
-          source: 'narrative_cache'
-        },
-        retrieved_at: new Date().toISOString()
-      };
-      
-      return c.json(response, cachedAnalysis.status === 'completed' ? 200 : 202);
+          source: 'cache'
+        });
+        
+        NarrativeResponseFormatter.logResponseMetrics(response);
+        return c.json(response, 200);
+      } else if (cachedAnalysis.status === 'failed') {
+        const response = NarrativeResponseFormatter.formatFailedAnalysis({
+          analysisId: cachedAnalysis.analysisId,
+          userId: cachedAnalysis.userId,
+          errorCode: 'CACHED_ERROR',
+          errorMessage: cachedAnalysis.error || 'Analysis failed',
+          userMessage: cachedAnalysis.error || 'Analysis failed. Please try again.',
+          timestamp: cachedAnalysis.timestamp
+        });
+        
+        return c.json(response, 500);
+      } else {
+        const processingResponse = NarrativeResponseFormatter.formatProcessingResponse({
+          analysisId: cachedAnalysis.analysisId,
+          userId: cachedAnalysis.userId
+        });
+        
+        return c.json(processingResponse, 202);
+      }
     }
 
     // Try to get from the narrative analysis database table
@@ -1067,26 +1112,22 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
         enhancedLogger.warn('Failed to cache analysis after database retrieval', { error, analysisId });
       });
       
-      // Return narrative format
-      const response = {
-        analysis_id: narrativeAnalysis.id,
-        user_id: narrativeAnalysis.userId,
-        timestamp: narrativeAnalysis.createdAt,
-        status: 'completed',
+      // Return formatted narrative response
+      const response = NarrativeResponseFormatter.formatCompletedAnalysis({
+        analysisId: narrativeAnalysis.id,
+        userId: narrativeAnalysis.userId,
         narrative: narrativeAnalysis.narrative,
-        analysis_type: narrativeAnalysis.analysisType,
-        word_count: narrativeAnalysis.wordCount,
-        aiPowered: true,
-        metadata: {
-          processingTime: narrativeAnalysis.processingTimeMs,
-          aiProvider: narrativeAnalysis.aiProvider,
-          aiModel: narrativeAnalysis.aiModel,
-          hasJobDescription: narrativeAnalysis.hasJobDescription,
-          source: 'narrative_database'
-        },
-        retrieved_at: new Date().toISOString()
-      };
+        analysisType: narrativeAnalysis.analysisType,
+        wordCount: narrativeAnalysis.wordCount,
+        timestamp: narrativeAnalysis.createdAt,
+        processingTime: narrativeAnalysis.processingTimeMs,
+        aiProvider: narrativeAnalysis.aiProvider,
+        aiModel: narrativeAnalysis.aiModel,
+        hasJobDescription: narrativeAnalysis.hasJobDescription,
+        source: 'database'
+      });
       
+      NarrativeResponseFormatter.logResponseMetrics(response);
       return c.json(response, 200);
     }
 
