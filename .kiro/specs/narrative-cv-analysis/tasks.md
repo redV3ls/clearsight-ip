@@ -64,7 +64,8 @@
   - Test prompts to ensure consistent narrative responses
   - _Requirements: 1.1, 1.3, 5.1, 5.2_
 
-- [-] 8. Update Analysis Status and Error Handling
+- [x] 8. Update Analysis Status and Error Handling
+
 
   - Remove parsing-related error handling and timeout logic
   - Simplify error cases to focus on API failures and network issues
@@ -72,7 +73,8 @@
   - Ensure proper status transitions for narrative analyses
   - _Requirements: 2.2, 4.2_
 
-- [ ] 9. Create Job Description Integration for Narrative
+- [-] 9. Create Job Description Integration for Narrative
+
   - Update job comparison logic to work with narrative output
   - Ensure job description analysis produces narrative gap analysis
   - Maintain job description integration while keeping narrative format

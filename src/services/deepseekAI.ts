@@ -1,5 +1,6 @@
 import { logger } from '../utils/logger';
 import { AppError } from '../middleware/errorHandler';
+import { NarrativeJobAnalysisService } from './narrativeJobAnalysis';
 
 export interface AIConfig {
   provider: 'deepseek';
@@ -988,28 +989,17 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
    * Create optimized narrative-focused analysis prompt
    */
   private createNarrativeAnalysisPrompt(cvText: string, jobDescription?: string): string {
+    if (jobDescription) {
+      // Use enhanced job analysis for job comparison
+      const jobInsights = NarrativeJobAnalysisService.extractJobInsights(jobDescription);
+      return NarrativeJobAnalysisService.createEnhancedJobComparisonPrompt(cvText, jobDescription, jobInsights);
+    }
+
+    // Standalone analysis prompt
     const basePrompt = `You are an experienced career coach providing personalized resume feedback. Write a compelling narrative analysis that tells this professional's career story.
 
 ANALYSIS STRUCTURE:
-${jobDescription ? `
-**Career Fit Analysis**
-Start by assessing how well this candidate matches the target role. Explain their strengths as a fit and identify any gaps.
 
-**Professional Journey**
-Tell the story of their career progression, highlighting key achievements and growth.
-
-**Unique Value Proposition** 
-Identify what makes them stand out and their competitive advantages.
-
-**Growth Opportunities**
-Suggest specific areas for development with actionable guidance.
-
-**Strategic Recommendations**
-Provide 2-3 concrete next steps to strengthen their candidacy for this role.
-
-TARGET ROLE:
-${jobDescription}
-` : `
 **Professional Journey**
 Tell the story of their career progression, highlighting key achievements and growth patterns.
 
@@ -1024,7 +1014,6 @@ Suggest specific areas for development with actionable guidance.
 
 **Career Advancement Strategy**
 Provide 2-3 concrete next steps for their professional growth.
-`}
 
 TONE & STYLE:
 - Write as if speaking directly to the candidate

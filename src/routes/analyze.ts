@@ -127,6 +127,35 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
 
     // Get job description if provided
     const jobDescription = formData.get('jobDescriptionText') as string | null || '';
+    
+    // Validate job description if provided
+    if (jobDescription) {
+      const { NarrativeJobAnalysisService } = await import('../services/narrativeJobAnalysis');
+      const validation = NarrativeJobAnalysisService.validateJobDescription(jobDescription);
+      
+      if (!validation.isValid) {
+        enhancedLogger.warn('Job description validation failed', {
+          analysisId,
+          issues: validation.issues
+        });
+        
+        return c.json({
+          error: {
+            code: 'INVALID_JOB_DESCRIPTION',
+            message: 'Job description quality issues detected',
+            issues: validation.issues,
+            suggestions: validation.suggestions
+          }
+        }, 400);
+      }
+      
+      if (validation.suggestions.length > 0) {
+        enhancedLogger.info('Job description suggestions provided', {
+          analysisId,
+          suggestions: validation.suggestions
+        });
+      }
+    }
 
     // Create initial analysis record with "processing" status
     const initialRecord = {
@@ -751,6 +780,53 @@ analyze.get('/cache-health', async (c: AuthenticatedContext) => {
     console.error('Cache health check error:', error);
     return c.json({
       error: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
+/**
+ * POST /analyze/test-job - Test job description analysis
+ */
+analyze.post('/test-job', async (c: AuthenticatedContext) => {
+  try {
+    const { jobDescription } = await c.req.json();
+    
+    if (!jobDescription) {
+      return c.json({
+        error: {
+          code: 'MISSING_JOB_DESCRIPTION',
+          message: 'Job description is required for analysis'
+        }
+      }, 400);
+    }
+
+    const { NarrativeJobAnalysisService } = await import('../services/narrativeJobAnalysis');
+    
+    // Validate job description
+    const validation = NarrativeJobAnalysisService.validateJobDescription(jobDescription);
+    
+    // Extract insights
+    const insights = NarrativeJobAnalysisService.extractJobInsights(jobDescription);
+    
+    // Generate narrative guidance
+    const narrativeGuidance = NarrativeJobAnalysisService.generateNarrativeGuidance(insights, '');
+
+    return c.json({
+      validation,
+      insights,
+      narrative_guidance: narrativeGuidance,
+      analysis_ready: validation.isValid,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Job analysis test error:', error);
+    return c.json({
+      error: {
+        code: 'JOB_ANALYSIS_FAILED',
+        message: 'Failed to analyze job description',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }
     }, 500);
   }
 });
