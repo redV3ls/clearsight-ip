@@ -885,7 +885,7 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
             messages: [
               {
                 role: 'system',
-                content: 'You are an expert career coach providing CV analysis and improvement guidance. Format your response using markdown for better readability. Focus on actionable CV improvements and career development advice.'
+                content: 'You are an expert career coach and CV specialist analyzing resumes to provide actionable improvement recommendations. Always format your responses using proper markdown syntax with clear headers (##), subheaders (###), bold text (**text**), and bullet points (-). Focus on specific, practical CV improvements and career development advice that candidates can implement immediately. Avoid generic advice - reference specific content from their CV and provide tailored recommendations.'
               },
               {
                 role: 'user',
@@ -1022,40 +1022,48 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
     // Improved standalone analysis prompt with CV improvement focus
     const basePrompt = `You are a professional career coach analyzing this CV to provide actionable improvement guidance.
 
-## Your Career Analysis
+IMPORTANT: Format your response using proper markdown with clear sections. Use ## for main headers and ### for subheaders.
 
-Based on your CV, provide a comprehensive analysis with specific recommendations for improvement.
+Provide your analysis in the following structure:
 
-### Career Strengths
-Highlight 3-4 key strengths from their CV with specific examples.
+## CV Analysis and Recommendations
 
-### CV Improvement Areas
-Identify 4-5 specific ways to improve their CV:
-- Missing sections or information
-- Better ways to present achievements (use numbers/metrics)
-- Skills that should be highlighted more prominently
-- Format and structure improvements
+### Current Strengths
+[List 3-4 key strengths from their CV with specific examples]
 
-### Skills Gap Analysis
-Based on current market demands:
-- Skills they have that are in high demand
-- Critical skills they're missing for their career level
-- Emerging skills they should consider learning
+### Critical CV Improvements Needed
+[List 4-5 specific improvements:]
+- Missing information that employers expect
+- Achievements that need quantification
+- Skills that should be more prominent
+- Format/structure issues
 
-### Actionable Steps
-1. **Immediate CV improvements** (can do today)
-2. **Short-term skill development** (1-3 months)
-3. **Long-term career positioning** (6-12 months)
+### Skills Gap Assessment
+[Analyze their skills versus market demands:]
+- In-demand skills they have
+- Critical skills missing for their level
+- Emerging skills to consider
 
-### Career Positioning Advice
-How to better position themselves in the job market based on their experience.
+### Action Plan
 
-Provide specific, actionable advice. Reference actual content from their CV. Focus on practical improvements they can implement immediately.
+#### Immediate Actions (Today)
+[List 2-3 things they can fix right now]
+
+#### Short-term Development (1-3 months)
+[List 2-3 skill development priorities]
+
+#### Long-term Positioning (6-12 months)
+[List 2-3 strategic career moves]
+
+### Market Positioning Strategy
+[How to better position themselves based on their experience]
+
+Be specific and reference their actual CV content. Focus on practical, implementable improvements.
 
 RESUME:
 ${cvText}
 
-Write 400-500 words of detailed, practical guidance focused on CV improvement and career development.`;
+Provide 400-500 words of detailed, actionable guidance.`;
 
     return basePrompt;
   }

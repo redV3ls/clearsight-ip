@@ -323,33 +323,79 @@ class AnalysisManager {
     convertMarkdownToHtml(text) {
         if (!text) return '';
         
-        // Convert markdown headers
-        text = text.replace(/^### (.*?)$/gm, '<h3 class="text-xl font-bold text-primary mt-6 mb-3">$1</h3>');
-        text = text.replace(/^## (.*?)$/gm, '<h2 class="text-2xl font-bold text-white mt-8 mb-4">$1</h2>');
-        text = text.replace(/^# (.*?)$/gm, '<h1 class="text-3xl font-bold text-white mt-8 mb-4">$1</h1>');
+        // First, escape any HTML entities to prevent issues
+        text = text.replace(/&/g, '&amp;')
+                   .replace(/</g, '&lt;')
+                   .replace(/>/g, '&gt;');
         
-        // Convert bold and italic
-        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-primary font-semibold">$1</strong>');
-        text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        // Convert markdown headers (must be at start of line)
+        text = text.replace(/^###\s+(.*?)$/gm, '<h3 class="text-lg font-bold text-primary mt-6 mb-3">$1</h3>');
+        text = text.replace(/^##\s+(.*?)$/gm, '<h2 class="text-xl font-bold text-white mt-6 mb-3 border-b border-slate-600 pb-2">$1</h2>');
+        text = text.replace(/^#\s+(.*?)$/gm, '<h1 class="text-2xl font-bold text-white mt-6 mb-4">$1</h1>');
+        
+        // Convert bold text (must handle **text**)
+        text = text.replace(/\*\*([^\*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+        
+        // Convert italic text (must handle *text*)
+        text = text.replace(/(?<!\*)\*([^\*]+)\*(?!\*)/g, '<em class="italic">$1</em>');
+        
+        // Convert numbered lists
+        text = text.replace(/^(\d+)\.\s+(.*?)$/gm, '<li class="ml-6 mb-2 list-decimal">$2</li>');
         
         // Convert bullet points
-        text = text.replace(/^- (.*?)$/gm, '<li class="ml-4 mb-2">• $1</li>');
-        text = text.replace(/^\d+\. (.*?)$/gm, '<li class="ml-4 mb-2">$1</li>');
+        text = text.replace(/^-\s+(.*?)$/gm, '<li class="ml-6 mb-2 list-disc">$1</li>');
+        text = text.replace(/^\*\s+(.*?)$/gm, '<li class="ml-6 mb-2 list-disc">$1</li>');
         
-        // Wrap consecutive list items in ul tags
-        text = text.replace(/(<li[^>]*>.*?<\/li>\s*)+/g, function(match) {
-            return '<ul class="space-y-2 my-4">' + match + '</ul>';
+        // Wrap consecutive list items in appropriate list tags
+        text = text.replace(/(<li class="[^"]*list-disc[^"]*">.*?<\/li>\s*)+/g, function(match) {
+            return '<ul class="space-y-2 my-4 list-disc list-inside text-gray-300">' + match + '</ul>';
+        });
+        
+        text = text.replace(/(<li class="[^"]*list-decimal[^"]*">.*?<\/li>\s*)+/g, function(match) {
+            return '<ol class="space-y-2 my-4 list-decimal list-inside text-gray-300">' + match + '</ol>';
         });
         
         // Convert line breaks to paragraphs
-        const paragraphs = text.split('\n\n').filter(p => p.trim());
-        text = paragraphs.map(p => {
-            // Don't wrap if it's already an HTML element
-            if (p.trim().startsWith('<')) return p;
-            return `<p class="mb-4 text-gray-300 leading-relaxed">${p}</p>`;
-        }).join('\n');
+        const lines = text.split('\n');
+        let result = [];
+        let currentParagraph = [];
         
-        return text;
+        for (let line of lines) {
+            line = line.trim();
+            if (line === '') {
+                if (currentParagraph.length > 0) {
+                    const content = currentParagraph.join(' ');
+                    if (!content.startsWith('<')) {
+                        result.push(`<p class="mb-4 text-gray-300 leading-relaxed">${content}</p>`);
+                    } else {
+                        result.push(content);
+                    }
+                    currentParagraph = [];
+                }
+            } else {
+                if (line.startsWith('<')) {
+                    if (currentParagraph.length > 0) {
+                        const content = currentParagraph.join(' ');
+                        result.push(`<p class="mb-4 text-gray-300 leading-relaxed">${content}</p>`);
+                        currentParagraph = [];
+                    }
+                    result.push(line);
+                } else {
+                    currentParagraph.push(line);
+                }
+            }
+        }
+        
+        if (currentParagraph.length > 0) {
+            const content = currentParagraph.join(' ');
+            if (!content.startsWith('<')) {
+                result.push(`<p class="mb-4 text-gray-300 leading-relaxed">${content}</p>`);
+            } else {
+                result.push(content);
+            }
+        }
+        
+        return result.join('\n');
     }
 
     downloadResults() {
