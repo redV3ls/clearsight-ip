@@ -501,16 +501,19 @@ export async function performAsyncAnalysis(
       }
 
       enhancedLogger.logAnalysisComplete(analysisId, true, {
-        skillsFound: response.skillsAnalysis?.skills?.length || 0,
-        processingStage: 'ASYNC_COMPLETE',
+        wordCount: response.word_count,
+        analysisType: response.analysis_type,
+        processingStage: 'NARRATIVE_ASYNC_COMPLETE',
         totalCpuTime: Date.now() - startCpuTime
       });
       
-      console.log(`[ASYNC-COMPLETE] ${analysisId} - Analysis fully complete! Total CPU time: ${Date.now() - startCpuTime}ms`);
+      console.log(`[ASYNC-COMPLETE] ${analysisId} - Narrative analysis fully complete! Word count: ${response.word_count}, CPU time: ${Date.now() - startCpuTime}ms`);
       
-      enhancedLogger.info(`✨ FINAL: Successfully completed async analysis for ${analysisId}`, {
+      enhancedLogger.info(`✨ FINAL: Successfully completed narrative analysis for ${analysisId}`, {
         analysisId,
-        stage: 'FINAL_SUCCESS',
+        wordCount: response.word_count,
+        analysisType: response.analysis_type,
+        stage: 'NARRATIVE_FINAL_SUCCESS',
         totalCpuTime: Date.now() - startCpuTime
       });
     } catch (dbError) {
@@ -537,13 +540,32 @@ export async function performAsyncAnalysis(
       errorMessage: error instanceof Error ? error.message : 'Unknown'
     });
 
-    // No fallback: if AI fails, mark as failed immediately
-    let errorCode = 'AI_SERVICE_UNAVAILABLE';
-    let errorMessage = 'AI analysis failed. Please try submitting again.';
-    if (error instanceof Error && error.message.includes('timeout')) {
-      errorCode = 'ANALYSIS_TIMEOUT';
-      errorMessage = 'Analysis timed out. Please try again later.';
-      enhancedLogger.warn(`⏰ Analysis timed out for ${analysisId}`, { analysisId });
+    // Classify error types for narrative analysis
+    let errorCode = 'NARRATIVE_ANALYSIS_FAILED';
+    let errorMessage = 'Failed to generate narrative analysis. Please try again.';
+    let userMessage = 'We encountered an issue generating your career analysis. Please try submitting your resume again.';
+
+    if (error instanceof Error) {
+      const errorMsg = error.message.toLowerCase();
+      
+      if (errorMsg.includes('timeout')) {
+        errorCode = 'ANALYSIS_TIMEOUT';
+        errorMessage = 'Narrative analysis timed out.';
+        userMessage = 'Your analysis is taking longer than expected. Please try again - shorter resumes typically process faster.';
+        enhancedLogger.warn(`⏰ Narrative analysis timed out for ${analysisId}`, { analysisId });
+      } else if (errorMsg.includes('api') || errorMsg.includes('network')) {
+        errorCode = 'AI_SERVICE_UNAVAILABLE';
+        errorMessage = 'AI service temporarily unavailable.';
+        userMessage = 'Our AI analysis service is temporarily unavailable. Please try again in a few minutes.';
+      } else if (errorMsg.includes('rate limit') || errorMsg.includes('quota')) {
+        errorCode = 'RATE_LIMIT_EXCEEDED';
+        errorMessage = 'Rate limit exceeded for AI service.';
+        userMessage = 'We\'re experiencing high demand. Please try again in a few minutes.';
+      } else if (errorMsg.includes('content') || errorMsg.includes('length')) {
+        errorCode = 'CONTENT_PROCESSING_ERROR';
+        errorMessage = 'Unable to process resume content.';
+        userMessage = 'We had trouble processing your resume content. Please ensure it\'s in a supported format and try again.';
+      }
     }
 
     const errorRecord = {
@@ -551,32 +573,56 @@ export async function performAsyncAnalysis(
       user_id: userId,
       timestamp: new Date().toISOString(),
       status: 'failed',
-      aiPowered: false,
+      narrative: '',
+      analysis_type: 'standalone',
+      word_count: 0,
+      aiPowered: true,
       error: {
         code: errorCode,
         message: errorMessage,
-        details: error instanceof Error ? error.message : 'Unknown error'
+        user_message: userMessage,
+        details: error instanceof Error ? error.message : 'Unknown error',
+        processing_time: Date.now() - startCpuTime
       },
       metadata: {
-        processingFailed: new Date().toISOString()
+        processingFailed: new Date().toISOString(),
+        errorType: error?.constructor?.name || 'Unknown',
+        cpuTime: Date.now() - startCpuTime
       }
     };
 
     try {
+      // Store error in narrative cache
+      const narrativeCache = new NarrativeKVCache(env);
+      const errorCacheEntry = {
+        analysisId,
+        userId,
+        narrative: `Analysis failed: ${errorRecord.error.user_message}`,
+        analysisType: 'standalone' as const,
+        wordCount: 0,
+        status: 'failed' as const,
+        timestamp: errorRecord.timestamp,
+        error: errorRecord.error.message
+      };
+      
+      await narrativeCache.storeAnalysis(errorCacheEntry);
+      
+      // Update legacy database for backward compatibility
       await updateDatabaseWithError(env, analysisId, userId, errorRecord);
       
-      // Also update KV cache with error status
+      // Update legacy KV cache
       await kvStorage.putAnalysisStatus(analysisId, errorRecord);
       
       enhancedLogger.logAnalysisComplete(analysisId, false, {
         errorCode,
-        errorMessage,
-        stage: 'ASYNC_FAILED'
+        errorMessage: errorRecord.error.user_message,
+        stage: 'NARRATIVE_ASYNC_FAILED'
       });
       
-      enhancedLogger.error(`❌ FINAL: Analysis ${analysisId} marked as failed`, {
+      enhancedLogger.error(`❌ FINAL: Narrative analysis ${analysisId} marked as failed`, {
         analysisId,
         errorCode,
+        userMessage: errorRecord.error.user_message,
         stage: 'FINAL_FAILED'
       });
     } catch (dbError) {

@@ -54,7 +54,8 @@
   - Optimize cache usage to store only completed analyses
   - _Requirements: 4.1_
 
-- [ ] 7. Simplify Prompt Engineering
+- [x] 7. Simplify Prompt Engineering
+
 
 
   - Rewrite DeepSeek prompts to request only narrative output
@@ -63,7 +64,8 @@
   - Test prompts to ensure consistent narrative responses
   - _Requirements: 1.1, 1.3, 5.1, 5.2_
 
-- [ ] 8. Update Analysis Status and Error Handling
+- [-] 8. Update Analysis Status and Error Handling
+
   - Remove parsing-related error handling and timeout logic
   - Simplify error cases to focus on API failures and network issues
   - Update analysis completion logic to handle narrative responses
