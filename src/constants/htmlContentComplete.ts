@@ -711,7 +711,12 @@ Responsibilities:
                             </div>
                             
                             <!-- Dynamic Loading Message -->
-                            <p id="progressText" class="text-lg text-primary animate-pulse font-medium mb-4">🧠 Initializing AI brain...</p>
+                            <p id="progressText" class="text-lg text-primary animate-pulse font-medium mb-2">🧠 Initializing AI brain...</p>
+                            <!-- Playful timer and ETA -->
+                            <p id="timerText" class="text-sm text-gray-400 mb-1">⏱️ 00:00 elapsed • ~01:00 remaining</p>
+                            <p id="etaText" class="text-xs text-gray-500 mb-4">Approximate total time ~ 1m 00s</p>
+                            <!-- Progress percent -->
+                            <p id="progressPercent" class="text-xs text-gray-500 mb-4">0%</p>
                             
                             <!-- Fun Tips (rotating) -->
                             <div class="text-xs text-gray-500 max-w-sm mx-auto">
@@ -753,7 +758,9 @@ Responsibilities:
             currentMessageIndex: 0,
             progressInterval: null,
             messageInterval: null,
-            pollInterval: null
+            pollInterval: null,
+            analysisStartTs: 0,
+            estimatedTotalMs: 60000
         };
 
         // Catchy loading messages
@@ -1260,6 +1267,34 @@ Responsibilities:
             }, 5000);
         }
 
+        function computeEstimatedDurationMs() {
+            // Heuristic based on resume size and presence of a job description
+            const jobDescriptionTextArea = document.getElementById('jobDescriptionTextArea');
+            const hasJob = !!(jobDescriptionTextArea && jobDescriptionTextArea.value.trim().length > 0);
+
+            // Resume size estimation (characters or file bytes)
+            let sizeFactor = 0; // 0..1 normalized
+            if (AppState.resumeText && AppState.resumeText.length > 0) {
+                sizeFactor = Math.min(AppState.resumeText.length / 6000, 1); // cap at ~6k chars
+            } else if (AppState.resumeFile && AppState.resumeFile.size) {
+                sizeFactor = Math.min(AppState.resumeFile.size / (400 * 1024), 1); // cap at ~400 KB
+            }
+
+            const base = 55000; // 55s base
+            const lengthPenalty = Math.floor(20000 * sizeFactor); // up to +20s
+            const jobPenalty = hasJob ? 20000 : 0; // +20s if job provided
+            const estimate = Math.max(45000, Math.min(90000, base + lengthPenalty + jobPenalty));
+            return estimate;
+        }
+
+        function formatTime(ms) {
+            const clamped = Math.max(0, Math.floor(ms / 1000));
+            const m = Math.floor(clamped / 60);
+            const s = clamped % 60;
+            const pad = function(n){ return n < 10 ? '0' + n : '' + n };
+            return m + ':' + pad(s);
+        }
+
         async function startAnalysis() {
             // Check authentication first
             if (!AppState.user) {
@@ -1489,21 +1524,41 @@ Responsibilities:
         }
 
         function startLoadingAnimation() {
+            AppState.analysisStartTs = Date.now();
+            AppState.estimatedTotalMs = computeEstimatedDurationMs();
+
+            // Initialize ETA UI
+            const etaEl = document.getElementById('etaText');
+            if (etaEl) {
+                const totalText = formatTime(AppState.estimatedTotalMs);
+                // Convert mm:ss into Xm Ys text
+                etaEl.textContent = 'Approximate total time ~ ' + totalText.replace(':', 'm ') + 's';
+            }
+
             let progress = 0;
             AppState.currentMessageIndex = 0;
             
             updateLoadingMessage();
             
-            // Progress bar animation
+            // Progress + timer update
             AppState.progressInterval = setInterval(() => {
-                progress += Math.random() * 8 + 2; // Slower, more realistic progress
-                if (progress > 90) progress = 90; // Don't complete until we get results
-                
+                const now = Date.now();
+                const elapsed = now - AppState.analysisStartTs;
+                const remaining = Math.max(0, AppState.estimatedTotalMs - elapsed);
+
+                // Update progress percent based on elapsed/estimate (cap at 92% while processing)
+                const targetPct = Math.min(92, Math.floor((elapsed / AppState.estimatedTotalMs) * 92));
+                // ease towards target with a little jitter
+                progress += Math.max(0, targetPct - progress) * 0.3 + Math.random() * 1.2;
+                if (progress > 92) progress = 92;
+
                 const progressBar = document.getElementById('progressBar');
-                if (progressBar) {
-                    progressBar.style.width = progress + '%';
-                }
-            }, 1200);
+                const percentEl = document.getElementById('progressPercent');
+                const timerEl = document.getElementById('timerText');
+                if (progressBar) progressBar.style.width = Math.max(0, Math.min(100, progress)).toFixed(0) + '%';
+                if (percentEl) percentEl.textContent = Math.floor(progress) + '%';
+                if (timerEl) timerEl.textContent = '⏱️ ' + formatTime(elapsed) + ' elapsed • ~' + formatTime(remaining) + ' remaining';
+            }, 900);
             
             // Message cycling
             AppState.messageInterval = setInterval(() => {
@@ -1577,6 +1632,10 @@ Responsibilities:
                                 progressText.textContent = '🎉 Analysis complete! Preparing your results...';
                                 progressText.className = 'text-lg text-green-400 font-semibold mb-4';
                             }
+                            const percentEl = document.getElementById('progressPercent');
+                            const timerEl = document.getElementById('timerText');
+                            if (percentEl) percentEl.textContent = '100%';
+                            if (timerEl) timerEl.textContent = '⏱️ ' + formatTime(Date.now() - AppState.analysisStartTs) + ' elapsed • ~00:00 remaining';
                             
                             // Show results after a brief delay
                             setTimeout(() => {
