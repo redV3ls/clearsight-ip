@@ -1717,7 +1717,7 @@ Responsibilities:
                 // lists
                 text = text.replace(/^(\d+)\.\s+(.*)$/gm, '<li class="ml-6 mb-2 list-decimal">$2</li>');
                 text = text.replace(/^[\\-\\*]\s+(.*)$/gm, '<li class="ml-6 mb-2 list-disc">$1</li>');
-                text = text.replace(/(<li[^>]*>.*<\/li>\s*)+/g, function(m){
+                text = text.replace(new RegExp('(\<li[^\>]*\>.*\</li\>\\s*)+', 'g'), function(m){
                     const isOrdered = m.includes('list-decimal');
                     return (isOrdered ? '<ol class="space-y-2 my-4 list-decimal list-inside text-gray-300">' : '<ul class="space-y-2 my-4 list-disc list-inside text-gray-300">') + m + (isOrdered ? '</ol>' : '</ul>');
                 });
