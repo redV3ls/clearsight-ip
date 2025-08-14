@@ -936,6 +936,8 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
     const limit = Math.min(parseInt(c.req.query('limit') || '10'), 50);
     const offset = (page - 1) * limit;
     const analysisType = c.req.query('type') as 'standalone' | 'job-comparison' | undefined;
+    const sortBy = c.req.query('sort') as 'created_at' | 'word_count' | undefined;
+    const sortOrder = c.req.query('order') as 'asc' | 'desc' | undefined;
 
     // Use narrative service for new analyses
     const database = createDatabase(c.env.DB);
@@ -944,7 +946,9 @@ analyze.get('/resume/history', async (c: AuthenticatedContext) => {
     const narrativeAnalyses = await narrativeService.getUserHistory(userId, {
       limit,
       offset,
-      analysisType
+      analysisType,
+      sortBy,
+      sortOrder
     });
 
     // Get legacy analyses for backward compatibility

@@ -1,4 +1,4 @@
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc, asc, and } from 'drizzle-orm';
 import { narrativeAnalysis } from '../db/schema';
 import { Database } from '../config/database';
 import { logger } from '../utils/logger';
@@ -108,11 +108,13 @@ export class NarrativeAnalysisService {
     options: { 
       limit?: number; 
       offset?: number; 
-      analysisType?: 'standalone' | 'job-comparison' 
+      analysisType?: 'standalone' | 'job-comparison';
+      sortBy?: 'created_at' | 'word_count';
+      sortOrder?: 'asc' | 'desc';
     } = {}
   ): Promise<NarrativeAnalysisRecord[]> {
     try {
-      const { limit = 10, offset = 0, analysisType } = options;
+      const { limit = 10, offset = 0, analysisType, sortBy = 'created_at', sortOrder = 'desc' } = options;
 
       let query = this.db
         .select()
@@ -129,8 +131,12 @@ export class NarrativeAnalysisService {
         );
       }
 
+      // Apply sorting
+      const sortColumn = sortBy === 'word_count' ? narrativeAnalysis.wordCount : narrativeAnalysis.createdAt;
+      const orderFn = sortOrder === 'asc' ? asc : desc;
+
       const results = await query
-        .orderBy(desc(narrativeAnalysis.createdAt))
+        .orderBy(orderFn(sortColumn))
         .limit(limit)
         .offset(offset);
 

@@ -103,7 +103,9 @@
   - Add performance tests to verify improved processing times
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 12. Update Analysis History and Retrieval
+- [x] 12. Update Analysis History and Retrieval
+
+
   - Modify analysis history endpoints to return narrative format
   - Ensure backward compatibility with existing analysis data
   - Update analysis retrieval by ID to handle narrative responses
