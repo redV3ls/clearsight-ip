@@ -431,6 +431,18 @@ app.get('/', (c) => {
   return c.html(HTML_CONTENT);
 });
 
+// Test UI endpoint - serve the narrative analysis test page
+app.get('/test-narrative-ui.html', async (c) => {
+  // Import the test UI content
+  const { TEST_NARRATIVE_UI_CONTENT } = await import('./constants/testNarrativeUI');
+  
+  // Set appropriate headers
+  c.header('Content-Type', 'text/html; charset=utf-8');
+  c.header('Cache-Control', 'no-cache');
+  
+  return c.html(TEST_NARRATIVE_UI_CONTENT);
+});
+
 // 404 handler
 app.notFound((c) => {
   return c.json({

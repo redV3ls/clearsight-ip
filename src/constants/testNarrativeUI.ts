@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+// Test Narrative UI HTML content for Cloudflare Workers
+export const TEST_NARRATIVE_UI_CONTENT = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -234,19 +235,19 @@ NICE TO HAVE:
             
             const analysisType = jobDescription ? 'Job Fit Analysis' : 'Standalone Career Analysis';
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `
+            resultsDiv.innerHTML = \`
                 <div class="loading">
-                    🔄 Performing ${analysisType}... This may take up to 2 minutes.
+                    🔄 Performing \${analysisType}... This may take up to 2 minutes.
                     <br><br>
                     <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 10px;">
                         <strong>What's happening:</strong><br>
-                        ${jobDescription ? 
+                        \${jobDescription ? 
                             '• Analyzing your CV against the job requirements<br>• Identifying skill gaps and strengths<br>• Generating personalized recommendations' : 
                             '• Analyzing your career progression<br>• Identifying improvement opportunities<br>• Suggesting career development paths'
                         }
                     </div>
                 </div>
-            `;
+            \`;
             
             try {
                 // Submit analysis
@@ -265,16 +266,16 @@ NICE TO HAVE:
                 
                 if (response.ok) {
                     currentAnalysisId = result.analysis_id;
-                    showSuccess(`Analysis submitted successfully! ID: ${result.analysis_id}`);
+                    showSuccess(\`Analysis submitted successfully! ID: \${result.analysis_id}\`);
                     
                     // Poll for results
                     pollForResults(result.analysis_id);
                 } else {
-                    showError(`Analysis failed: ${result.error?.message || 'Unknown error'}`);
+                    showError(\`Analysis failed: \${result.error?.message || 'Unknown error'}\`);
                 }
                 
             } catch (error) {
-                showError(`Network error: ${error.message}`);
+                showError(\`Network error: \${error.message}\`);
             }
         }
         
@@ -286,20 +287,20 @@ NICE TO HAVE:
                 attempts++;
                 
                 try {
-                    const response = await fetch(`/api/v1/analyze/resume/${analysisId}`);
+                    const response = await fetch(\`/api/v1/analyze/resume/\${analysisId}\`);
                     const result = await response.json();
                     
-                    console.log(`[POLL-${attempts}] Status: ${result.status}`, result);
+                    console.log(\`[POLL-\${attempts}] Status: \${result.status}\`, result);
                     
                     if (result.status === 'completed') {
                         console.log('✅ Analysis completed! Displaying results...');
                         displayResults(result);
                     } else if (result.status === 'failed') {
                         console.error('❌ Analysis failed:', result.error);
-                        showError(`Analysis failed: ${result.error?.message || result.error?.user_message || 'Unknown error'}`);
+                        showError(\`Analysis failed: \${result.error?.message || result.error?.user_message || 'Unknown error'}\`);
                     } else if (attempts < maxAttempts) {
                         // Still processing, check again in 10 seconds
-                        console.log(`⏳ Still processing... attempt ${attempts}/${maxAttempts}`);
+                        console.log(\`⏳ Still processing... attempt \${attempts}/\${maxAttempts}\`);
                         setTimeout(poll, 10000);
                         updateLoadingMessage(attempts);
                     } else {
@@ -308,11 +309,11 @@ NICE TO HAVE:
                     }
                     
                 } catch (error) {
-                    console.error(`❌ Polling error on attempt ${attempts}:`, error);
+                    console.error(\`❌ Polling error on attempt \${attempts}:\`, error);
                     if (attempts < maxAttempts) {
                         setTimeout(poll, 10000);
                     } else {
-                        showError(`Polling failed: ${error.message}`);
+                        showError(\`Polling failed: \${error.message}\`);
                     }
                 }
             };
@@ -323,7 +324,7 @@ NICE TO HAVE:
         function updateLoadingMessage(attempts) {
             const resultsDiv = document.getElementById('results');
             const dots = '.'.repeat((attempts % 3) + 1);
-            resultsDiv.innerHTML = `<div class="loading">🔄 Analyzing your CV${dots} (${attempts * 10}s elapsed)</div>`;
+            resultsDiv.innerHTML = \`<div class="loading">🔄 Analyzing your CV\${dots} (\${attempts * 10}s elapsed)</div>\`;
         }
         
         function displayResults(analysis) {
@@ -336,198 +337,51 @@ NICE TO HAVE:
             const hasJobDescription = analysis.hasJobDescription || analysis.analysisType === 'job-comparison';
             const analysisTypeLabel = hasJobDescription ? 'Job Fit Analysis' : 'Standalone Career Analysis';
             
-            html += `
+            html += \`
                 <div class="success" style="margin-bottom: 20px;">
-                    ✅ ${analysisTypeLabel} completed successfully!
-                    ${hasJobDescription ? '<br>📋 Job description was analyzed for fit assessment' : ''}
+                    ✅ \${analysisTypeLabel} completed successfully!
+                    \${hasJobDescription ? '<br>📋 Job description was analyzed for fit assessment' : ''}
                 </div>
-            `;
+            \`;
             
             // Show the main narrative content (this is the key improvement)
             if (analysis.narrative) {
-                html += `
+                html += \`
                     <div class="narrative" style="background: #f0f8ff; border-left: 4px solid #007bff; padding: 25px; margin: 20px 0; border-radius: 8px;">
-                        <h3>📖 ${hasJobDescription ? 'Your Job Fit Analysis' : 'Your Career Story'}</h3>
+                        <h3>📖 \${hasJobDescription ? 'Your Job Fit Analysis' : 'Your Career Story'}</h3>
                         <div style="line-height: 1.6; font-size: 16px;">
-                            ${analysis.narrative.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>')}
+                            \${analysis.narrative.replace(/\\n\\n/g, '</p><p>').replace(/\\n/g, '<br>')}
                         </div>
                     </div>
-                `;
-            }
-            
-            // Legacy support for older analysis format
-            if (analysis.standaloneAnalysis?.careerNarrative) {
-                html += `
-                    <div class="narrative">
-                        <h3>📖 Your Career Story</h3>
-                        <p>${analysis.standaloneAnalysis.careerNarrative.replace(/\n/g, '</p><p>')}</p>
-                    </div>
-                `;
-            }
-            
-            if (analysis.skillsGap?.narrativeSummary) {
-                html += `
-                    <div class="narrative">
-                        <h3>🎯 Gap Analysis Summary</h3>
-                        <p>${analysis.skillsGap.narrativeSummary.replace(/\n/g, '</p><p>')}</p>
-                    </div>
-                `;
-            }
-            
-            // Create tabs for different sections
-            html += '<div class="tabs">';
-            html += '<button class="tab active" onclick="showTab(\'skills\')">Skills</button>';
-            if (analysis.skillsGap) {
-                html += '<button class="tab" onclick="showTab(\'gaps\')">Skill Gaps</button>';
-                html += '<button class="tab" onclick="showTab(\'strengths\')">Strengths</button>';
-            }
-            if (analysis.standaloneAnalysis) {
-                html += '<button class="tab" onclick="showTab(\'improvements\')">Improvements</button>';
-                html += '<button class="tab" onclick="showTab(\'career\')">Career Paths</button>';
-            }
-            html += '</div>';
-            
-            // Skills tab
-            html += '<div id="skills-tab" class="tab-content active">';
-            html += '<div class="section"><h3>🛠️ Identified Skills</h3>';
-            if (analysis.skillsAnalysis?.skills) {
-                analysis.skillsAnalysis.skills.forEach(skill => {
-                    html += `
-                        <div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                            <strong>${skill.name}</strong> (${skill.category}) - ${skill.level}
-                            <br><small>Experience: ${skill.yearsExperience} years | Confidence: ${(skill.confidence * 100).toFixed(0)}%</small>
-                            ${skill.context ? `<br><em>${skill.context}</em>` : ''}
-                        </div>
-                    `;
-                });
-            }
-            html += '</div></div>';
-            
-            // Skill gaps tab
-            if (analysis.skillsGap) {
-                html += '<div id="gaps-tab" class="tab-content">';
-                html += '<div class="section"><h3>📈 Areas for Development</h3>';
-                if (analysis.skillsGap.missingSkills) {
-                    analysis.skillsGap.missingSkills.forEach(gap => {
-                        html += `
-                            <div style="margin: 15px 0; padding: 15px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
-                                <strong>${gap.name}</strong> - ${gap.difficulty} to learn
-                                <br><small>Priority: ${gap.priority}/10 | Time to competency: ${gap.learningTime} months</small>
-                                <br><em>${gap.description}</em>
-                                ${gap.personalizedStory ? `<br><strong>Why this matters for you:</strong> ${gap.personalizedStory}` : ''}
-                            </div>
-                        `;
-                    });
-                }
-                html += '</div></div>';
-                
-                // Strengths tab
-                html += '<div id="strengths-tab" class="tab-content">';
-                html += '<div class="section"><h3>💪 Your Strengths</h3>';
-                if (analysis.skillsGap.strengths) {
-                    analysis.skillsGap.strengths.forEach(strength => {
-                        html += `
-                            <div style="margin: 10px 0; padding: 10px; background: #d4edda; border-radius: 5px;">
-                                <strong>${strength.name}</strong> - ${strength.level}
-                                <br><small>Experience: ${strength.yearsExperience} years</small>
-                                ${strength.whyItMatters ? `<br><em>Why it matters: ${strength.whyItMatters}</em>` : ''}
-                            </div>
-                        `;
-                    });
-                }
-                html += '</div></div>';
-            }
-            
-            // Standalone analysis tabs
-            if (analysis.standaloneAnalysis) {
-                // Improvements tab
-                html += '<div id="improvements-tab" class="tab-content">';
-                html += '<div class="section"><h3>🚀 Improvement Areas</h3>';
-                if (analysis.standaloneAnalysis.improvementAreas) {
-                    analysis.standaloneAnalysis.improvementAreas.forEach(area => {
-                        html += `
-                            <div style="margin: 15px 0; padding: 15px; background: #f8d7da; border-radius: 5px;">
-                                <strong>${area.area}</strong>
-                                <br><strong>Current Impact:</strong> ${area.currentImpact}
-                                <br><strong>Strategy:</strong> ${area.improvementStrategy}
-                                <br><strong>Timeline:</strong> ${area.timeline}
-                            </div>
-                        `;
-                    });
-                }
-                html += '</div></div>';
-                
-                // Career paths tab
-                html += '<div id="career-tab" class="tab-content">';
-                html += '<div class="section"><h3>🎯 Career Path Options</h3>';
-                if (analysis.standaloneAnalysis.careerPathOptions) {
-                    analysis.standaloneAnalysis.careerPathOptions.forEach(path => {
-                        html += `
-                            <div style="margin: 15px 0; padding: 15px; background: #d1ecf1; border-radius: 5px;">
-                                <strong>${path.path}</strong> (Fit: ${path.fitScore}%)
-                                <br><em>${path.description}</em>
-                                <br><strong>Timeline:</strong> ${path.timeline}
-                                <br><strong>Market Outlook:</strong> ${path.marketOutlook}
-                                ${path.personalizedRoadmap ? `<br><strong>Your roadmap:</strong> ${path.personalizedRoadmap}` : ''}
-                            </div>
-                        `;
-                    });
-                }
-                html += '</div></div>';
-            }
-            
-            // Motivational message
-            if (analysis.standaloneAnalysis?.motivationalMessage) {
-                html += `
-                    <div class="narrative" style="background: #e7f3ff; border-left-color: #28a745;">
-                        <h3>💫 Encouragement</h3>
-                        <p>${analysis.standaloneAnalysis.motivationalMessage}</p>
-                    </div>
-                `;
+                \`;
             }
             
             // Analysis metadata
-            html += `
+            html += \`
                 <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 14px; color: #666;">
                     <h4 style="margin-top: 0; color: #333;">📊 Analysis Details</h4>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-                        <div><strong>Analysis ID:</strong> ${analysis.analysisId || analysis.analysis_id || 'N/A'}</div>
-                        <div><strong>Type:</strong> ${analysis.analysisType || (hasJobDescription ? 'job-comparison' : 'standalone')}</div>
-                        <div><strong>Word Count:</strong> ${analysis.wordCount || 'N/A'}</div>
-                        <div><strong>Processing Time:</strong> ${analysis.processingTime ? Math.round(analysis.processingTime/1000) + 's' : 'N/A'}</div>
-                        <div><strong>AI Provider:</strong> ${analysis.aiProvider || 'DeepSeek'}</div>
-                        <div><strong>Timestamp:</strong> ${analysis.timestamp ? new Date(analysis.timestamp).toLocaleString() : 'N/A'}</div>
+                        <div><strong>Analysis ID:</strong> \${analysis.analysisId || analysis.analysis_id || 'N/A'}</div>
+                        <div><strong>Type:</strong> \${analysis.analysisType || (hasJobDescription ? 'job-comparison' : 'standalone')}</div>
+                        <div><strong>Word Count:</strong> \${analysis.wordCount || 'N/A'}</div>
+                        <div><strong>Processing Time:</strong> \${analysis.processingTime ? Math.round(analysis.processingTime/1000) + 's' : 'N/A'}</div>
+                        <div><strong>AI Provider:</strong> \${analysis.aiProvider || 'DeepSeek'}</div>
+                        <div><strong>Timestamp:</strong> \${analysis.timestamp ? new Date(analysis.timestamp).toLocaleString() : 'N/A'}</div>
                     </div>
                 </div>
-            `;
+            \`;
             
             resultsDiv.innerHTML = html;
         }
         
-        function showTab(tabName) {
-            // Hide all tab contents
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            // Remove active class from all tabs
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected tab content
-            document.getElementById(tabName + '-tab').classList.add('active');
-            
-            // Add active class to clicked tab
-            event.target.classList.add('active');
-        }
-        
         function showError(message) {
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `<div class="error">❌ ${message}</div>`;
+            resultsDiv.innerHTML = \`<div class="error">❌ \${message}</div>\`;
         }
         
         function showSuccess(message) {
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `<div class="success">✅ ${message}</div>`;
+            resultsDiv.innerHTML = \`<div class="success">✅ \${message}</div>\`;
         }
         
         function clearResults() {
@@ -567,4 +421,4 @@ NICE TO HAVE:
         });
     </script>
 </body>
-</html>
+</html>`;
