@@ -45,7 +45,8 @@
   - Implement efficient querying for user analysis history
   - _Requirements: 4.1, 4.2_
 
-- [-] 6. Update KV Caching for Cloudflare Free Plan
+- [x] 6. Update KV Caching for Cloudflare Free Plan
+
 
   - Implement cache operations that respect 100K operations/day limit
   - Create cache key strategy for narrative analyses
@@ -54,6 +55,8 @@
   - _Requirements: 4.1_
 
 - [ ] 7. Simplify Prompt Engineering
+
+
   - Rewrite DeepSeek prompts to request only narrative output
   - Remove instructions for structured sections (SKILLS:, EXPERIENCE:, etc.)
   - Optimize prompts for storytelling and career guidance focus

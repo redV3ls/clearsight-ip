@@ -879,7 +879,7 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
             messages: [
               {
                 role: 'system',
-                content: 'You are an expert career-analysis model. Provide structured, accurate analysis based on the user\'s request. Be concise and factual. If a value is unknown, indicate it clearly. Do not invent information.'
+                content: 'You are a senior career coach specializing in narrative career analysis. Provide engaging, story-driven feedback that helps professionals understand their career journey and next steps. Be encouraging, insightful, and actionable. Focus on storytelling rather than lists or technical details.'
               },
               {
                 role: 'user',
@@ -985,62 +985,89 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
   }
 
   /**
-   * Create narrative-focused analysis prompt
+   * Create optimized narrative-focused analysis prompt
    */
   private createNarrativeAnalysisPrompt(cvText: string, jobDescription?: string): string {
-    const basePrompt = `
-You are a senior career coach providing personalized feedback on a professional's resume. 
-Write a comprehensive, engaging analysis that tells their career story.
+    const basePrompt = `You are an experienced career coach providing personalized resume feedback. Write a compelling narrative analysis that tells this professional's career story.
 
-Your analysis should:
-1. Describe their professional journey and career progression
-2. Highlight unique strengths and standout qualities  
-3. Identify areas for growth with specific guidance
-4. Provide encouraging but honest assessment
-5. Include actionable next steps for career advancement
-
+ANALYSIS STRUCTURE:
 ${jobDescription ? `
-6. Compare their background to the target role below
-7. Explain fit and identify any gaps
-8. Suggest strategies to strengthen their candidacy
+**Career Fit Analysis**
+Start by assessing how well this candidate matches the target role. Explain their strengths as a fit and identify any gaps.
 
-TARGET JOB DESCRIPTION:
+**Professional Journey**
+Tell the story of their career progression, highlighting key achievements and growth.
+
+**Unique Value Proposition** 
+Identify what makes them stand out and their competitive advantages.
+
+**Growth Opportunities**
+Suggest specific areas for development with actionable guidance.
+
+**Strategic Recommendations**
+Provide 2-3 concrete next steps to strengthen their candidacy for this role.
+
+TARGET ROLE:
 ${jobDescription}
-` : ''}
+` : `
+**Professional Journey**
+Tell the story of their career progression, highlighting key achievements and growth patterns.
 
-Write in a warm, professional tone as if speaking directly to the candidate.
-Focus on storytelling and career guidance rather than technical lists.
-Aim for 300-500 words that provide genuine value and insight.
+**Core Strengths**
+Identify their unique value proposition and what makes them stand out in their field.
 
-RESUME TO ANALYZE:
+**Market Position**
+Assess their current competitiveness and career level.
+
+**Growth Opportunities**
+Suggest specific areas for development with actionable guidance.
+
+**Career Advancement Strategy**
+Provide 2-3 concrete next steps for their professional growth.
+`}
+
+TONE & STYLE:
+- Write as if speaking directly to the candidate
+- Be encouraging yet honest and constructive
+- Focus on storytelling over technical lists
+- Aim for 350-450 words of genuine insight
+- Use specific examples from their experience
+
+RESUME:
 ${cvText}
-`;
+
+Write a cohesive narrative that flows naturally from one section to the next.`;
 
     return basePrompt;
   }
 
   /**
-   * Create skills extraction prompt (updated for narrative output)
+   * Create skills extraction prompt (optimized for narrative output)
    */
   private createSkillsExtractionPrompt(cvText: string): string {
-    return `
-You are a senior career coach providing personalized feedback on a professional's resume. 
-Write a comprehensive, engaging analysis that tells their career story.
+    return `You are an experienced career coach providing personalized resume feedback. Write a compelling narrative analysis of this professional's background.
 
-Your analysis should:
-1. Describe their professional journey and career progression
-2. Highlight unique strengths and standout qualities  
-3. Identify areas for growth with specific guidance
-4. Provide encouraging but honest assessment
-5. Include actionable next steps for career advancement
+**Professional Story**
+Tell the story of their career journey, highlighting key experiences and growth.
 
-Write in a warm, professional tone as if speaking directly to the candidate.
-Focus on storytelling and career guidance rather than technical lists.
-Aim for 300-500 words that provide genuine value and insight.
+**Core Strengths** 
+Identify their unique skills and what makes them valuable in their field.
 
-RESUME TO ANALYZE:
+**Career Positioning**
+Assess their current level and market competitiveness.
+
+**Development Areas**
+Suggest specific areas for growth with actionable guidance.
+
+**Next Steps**
+Provide 2-3 concrete recommendations for career advancement.
+
+Write in a warm, encouraging tone as if speaking directly to the candidate. Focus on storytelling and career guidance rather than technical lists. Aim for 350-450 words of genuine insight.
+
+RESUME:
 ${cvText}
-`;
+
+Create a cohesive narrative that flows naturally and provides real value to the professional.`;
   }
 
   /**

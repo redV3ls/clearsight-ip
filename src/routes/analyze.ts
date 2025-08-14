@@ -710,6 +710,64 @@ analyze.get('/cache-health', async (c: AuthenticatedContext) => {
 });
 
 /**
+ * POST /analyze/test-prompt - Test narrative prompt effectiveness
+ */
+analyze.post('/test-prompt', async (c: AuthenticatedContext) => {
+  try {
+    const { cvText, jobDescription } = await c.req.json();
+    
+    if (!cvText) {
+      return c.json({
+        error: {
+          code: 'MISSING_CV_TEXT',
+          message: 'CV text is required for prompt testing'
+        }
+      }, 400);
+    }
+
+    const { AIAnalysisService } = await import('../services/aiAnalysisService');
+    const aiService = new AIAnalysisService(c.env);
+    
+    // Generate narrative analysis
+    const result = await aiService.analyzeNarrativeCV(cvText, jobDescription, {
+      includeMetadata: true
+    });
+
+    // Analyze prompt effectiveness
+    const { PromptTester } = await import('../utils/promptTesting');
+    const qualityAnalysis = PromptTester.analyzeNarrativeQuality(result.narrative);
+    const qualityScore = PromptTester.calculateQualityScore(qualityAnalysis);
+
+    return c.json({
+      analysis_result: {
+        narrative: result.narrative,
+        word_count: result.word_count,
+        analysis_type: result.analysis_type,
+        processing_time: result.metadata?.processingTime
+      },
+      prompt_quality: {
+        ...qualityAnalysis,
+        quality_score: qualityScore
+      },
+      recommendations: qualityAnalysis.issues.length > 0 ? 
+        PromptTester.generateOptimizationSuggestions([qualityAnalysis]) : 
+        ['Prompt performance is good - no major issues detected'],
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Prompt test error:', error);
+    return c.json({
+      error: {
+        code: 'PROMPT_TEST_FAILED',
+        message: 'Failed to test prompt effectiveness',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }
+    }, 500);
+  }
+});
+
+/**
  * GET /analyze/resume/history - Get user's resume analysis history
  */
 analyze.get('/resume/history', async (c: AuthenticatedContext) => {
