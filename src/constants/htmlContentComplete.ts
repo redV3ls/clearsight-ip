@@ -593,18 +593,20 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     </div>
 
     <!-- Analysis Interface Modal -->
-    <div id="analysisInterface" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-lg max-w-7xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div class="p-6 flex-1 overflow-hidden flex flex-col">
-                <div class="flex justify-between items-center mb-6">
+    <div id="analysisInterface" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div id="analysisModal" class="bg-slate-800 rounded-lg w-full max-w-2xl my-8 flex flex-col transition-all duration-300 max-h-[calc(100vh-4rem)] overflow-hidden">
+            <!-- Header -->
+            <div class="p-6 border-b border-slate-700 flex-shrink-0">
+                <div class="flex justify-between items-center">
                     <h2 class="text-2xl font-bold text-primary">AI-Powered Skills Analysis</h2>
                     <button id="closeAnalysisInterface" class="text-gray-400 hover:text-white">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
+            </div>
 
-                <!-- Main content container with two columns -->
-                <div class="flex-1 overflow-hidden">
+            <!-- Main content container -->
+            <div class="flex-1 overflow-y-auto">
                     <div id="twoColumnLayout" class="hidden h-full flex gap-6">
                         <!-- Left Column: Input Section -->
                         <div class="w-1/2 overflow-y-auto pr-3">
@@ -622,43 +624,44 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     </div>
                     
                     <!-- Original single column layout -->
-                    <div id="singleColumnLayout" class="h-full overflow-y-auto">
+                    <div id="singleColumnLayout" class="overflow-y-auto">
                         <!-- Upload Section -->
-                        <div id="uploadSection" class="text-center py-12">
-                    <div class="mb-8">
-                        <i class="fas fa-upload text-6xl text-primary mb-4"></i>
-                        <h3 class="text-2xl font-bold text-white mb-4">Upload Your Resume</h3>
-                        <p class="text-gray-300 mb-6">
+                        <div id="uploadSection" class="p-6">
+                    <div class="mb-6 text-center">
+                        <i class="fas fa-upload text-4xl text-primary mb-3"></i>
+                        <h3 class="text-xl font-bold text-white mb-2">Upload Your Resume</h3>
+                        <p class="text-gray-300 text-sm mb-4">
                             Upload your CV or paste your resume text to get started with AI-powered analysis
                         </p>
                     </div>
                     
-                    <div class="grid md:grid-cols-2 gap-6 mb-8">
-                        <div class="border-2 border-dashed border-gray-600 rounded-lg p-8 hover:border-primary transition-colors cursor-pointer" id="fileUploadArea">
-                            <i class="fas fa-file-upload text-4xl text-gray-400 mb-4"></i>
-                            <p class="text-gray-300 mb-2">Drop your resume here</p>
-                            <p class="text-sm text-gray-400">PDF, DOC, DOCX, TXT</p>
+                    <div class="grid md:grid-cols-2 gap-4 mb-6">
+                        <div class="border-2 border-dashed border-gray-600 rounded-lg p-4 hover:border-primary transition-colors cursor-pointer text-center" id="fileUploadArea">
+                            <i class="fas fa-file-upload text-2xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-300 text-sm mb-1">Drop your resume here</p>
+                            <p class="text-xs text-gray-400">PDF, DOC, DOCX, TXT</p>
                             <input type="file" id="resumeFileInput" class="hidden" accept=".pdf,.doc,.docx,.txt">
                         </div>
                         
-                        <div class="border border-gray-600 rounded-lg p-6">
-                            <i class="fas fa-keyboard text-4xl text-gray-400 mb-4"></i>
-                            <p class="text-gray-300 mb-4">Or paste your resume text</p>
-                            <textarea id="resumeTextArea" class="w-full h-32 bg-slate-700 border border-slate-600 rounded-lg p-3 text-white resize-none focus:outline-none focus:border-primary" placeholder="Paste your resume content here..."></textarea>
+                        <div class="border border-gray-600 rounded-lg p-4">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-keyboard text-2xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-300 text-sm">Or paste your resume text</p>
+                            </div>
+                            <textarea id="resumeTextArea" class="w-full h-24 bg-slate-700 border border-slate-600 rounded-lg p-3 text-white text-sm resize-none focus:outline-none focus:border-primary" placeholder="Paste your resume content here..."></textarea>
                         </div>
                     </div>
                     
                     <!-- Job Description Section -->
-                    <div class="mb-8 p-6 bg-slate-700 rounded-lg border-2 border-dashed border-primary/50">
-                        <div class="flex items-center mb-4">
-                            <i class="fas fa-briefcase text-2xl text-primary mr-3"></i>
-                            <h4 class="text-xl font-bold text-white">🎯 Job Description (Optional - for Job Fit Analysis)</h4>
+                    <div class="mb-6 p-4 bg-slate-700 rounded-lg border border-primary/30">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-briefcase text-lg text-primary mr-2"></i>
+                            <h4 class="text-lg font-bold text-white">🎯 Job Description (Optional)</h4>
                         </div>
-                        <p class="text-gray-300 mb-4">
-                            <strong>💡 Pro Tip:</strong> Paste a job description here to get personalized analysis on how well your CV matches the role, 
-                            including specific gap analysis and recommendations for improvement.
+                        <p class="text-gray-300 text-sm mb-3">
+                            <strong>💡 Pro Tip:</strong> Add a job description for personalized job fit analysis with gap analysis and recommendations.
                         </p>
-                        <textarea id="jobDescriptionTextArea" class="w-full h-40 bg-slate-600 border border-slate-500 rounded-lg p-3 text-white resize-none focus:outline-none focus:border-primary" placeholder="Paste the complete job description here for detailed job fit analysis...
+                        <textarea id="jobDescriptionTextArea" class="w-full h-32 bg-slate-600 border border-slate-500 rounded-lg p-3 text-white text-sm resize-none focus:outline-none focus:border-primary" placeholder="Paste the complete job description here for detailed job fit analysis...
 
 Example:
 Senior Software Engineer - Frontend Focus
@@ -1055,12 +1058,28 @@ Responsibilities:
         // Analysis modal functions
         function showAnalysisInterface() {
             const modal = document.getElementById('analysisInterface');
+            const analysisModal = document.getElementById('analysisModal');
+            
+            // Reset modal to compact size
+            if (analysisModal) {
+                analysisModal.classList.remove('max-w-6xl');
+                analysisModal.classList.add('max-w-2xl');
+            }
+            
             modal?.classList.remove('hidden');
             AppState.currentModal = 'analysis';
         }
 
         function hideAnalysisInterface() {
             const modal = document.getElementById('analysisInterface');
+            const analysisModal = document.getElementById('analysisModal');
+            
+            // Reset modal to compact size for next time
+            if (analysisModal) {
+                analysisModal.classList.remove('max-w-6xl');
+                analysisModal.classList.add('max-w-2xl');
+            }
+            
             modal?.classList.add('hidden');
             AppState.currentModal = null;
         }
@@ -1780,6 +1799,13 @@ Responsibilities:
         function displayAnalysisResults(analysisData) {
             console.log('🎨 Displaying analysis results:', analysisData);
             stopLoadingAnimation();
+            
+            // Expand modal to show results
+            const analysisModal = document.getElementById('analysisModal');
+            if (analysisModal) {
+                analysisModal.classList.remove('max-w-2xl');
+                analysisModal.classList.add('max-w-6xl');
+            }
             
             // Simple markdown to HTML converter
             function mdToHtml(text) {
