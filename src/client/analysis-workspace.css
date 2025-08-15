@@ -1,0 +1,465 @@
+/* Analysis Workspace Styles */
+
+/* Stepper Styles */
+.step-item {
+    @apply flex flex-col items-center space-y-2 transition-all duration-200;
+}
+
+.step-item.active .step-circle {
+    @apply bg-primary text-white;
+}
+
+.step-item.completed .step-circle {
+    @apply bg-green-500 text-white;
+}
+
+.step-circle {
+    @apply w-8 h-8 rounded-full bg-slate-600 text-gray-300 flex items-center justify-center font-semibold text-sm transition-all duration-200;
+}
+
+.step-label {
+    @apply text-sm text-gray-400 font-medium;
+}
+
+.step-item.active .step-label {
+    @apply text-primary;
+}
+
+.step-item.completed .step-label {
+    @apply text-green-400;
+}
+
+.step-connector {
+    @apply w-16 h-px bg-slate-600 mt-4;
+}
+
+/* Upload Card Styles */
+.upload-card {
+    @apply border-2 border-dashed border-slate-600 rounded-lg transition-all duration-200;
+}
+
+.upload-card.drag-over {
+    @apply border-primary bg-primary/5;
+}
+
+.drop-zone {
+    @apply p-8 text-center;
+}
+
+.file-info {
+    @apply p-4 bg-slate-700 rounded-lg border border-slate-600;
+}
+
+/* Weighting Panel */
+.weighting-toggle.active i {
+    @apply rotate-180;
+}
+
+.weighting-content {
+    @apply transition-all duration-200 ease-in-out;
+}
+
+.weighting-content.hidden {
+    @apply max-h-0 overflow-hidden opacity-0;
+}
+
+.weighting-content:not(.hidden) {
+    @apply max-h-96 opacity-100;
+}
+
+/* Range Slider Styles */
+input[type="range"] {
+    @apply appearance-none bg-slate-600 h-2 rounded-lg outline-none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    @apply appearance-none w-4 h-4 bg-primary rounded-full cursor-pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    @apply w-4 h-4 bg-primary rounded-full cursor-pointer border-none;
+}
+
+/* Results Tabs */
+.results-tab {
+    @apply px-4 py-3 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium;
+}
+
+.results-tab.active {
+    @apply text-primary border-primary;
+}
+
+.tab-content {
+    @apply transition-all duration-200;
+}
+
+.tab-content.hidden {
+    @apply opacity-0 pointer-events-none;
+}
+
+.tab-content.active {
+    @apply opacity-100;
+}
+
+/* Skeleton Loaders */
+.skeleton-card {
+    @apply bg-slate-800 rounded-lg p-6 border border-slate-700;
+}
+
+.skeleton-header {
+    @apply h-6 bg-slate-700 rounded-lg mb-4 animate-pulse;
+    width: 60%;
+}
+
+.skeleton-content {
+    @apply space-y-3;
+}
+
+.skeleton-line {
+    @apply h-4 bg-slate-700 rounded animate-pulse;
+}
+
+.skeleton-line.short {
+    width: 70%;
+}
+
+/* Fit Gauge */
+.fit-gauge {
+    @apply relative w-32 h-32 mx-auto;
+}
+
+.gauge-bg {
+    @apply stroke-slate-700;
+    stroke-width: 8;
+    fill: none;
+}
+
+.gauge-fill {
+    @apply stroke-primary;
+    stroke-width: 8;
+    fill: none;
+    stroke-linecap: round;
+    transition: stroke-dasharray 1s ease-in-out;
+}
+
+.gauge-text {
+    @apply text-2xl font-bold text-white;
+}
+
+/* Skill Chips */
+.skill-chip {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer;
+}
+
+.skill-chip.matched {
+    @apply bg-green-500/20 text-green-400 border border-green-500/30;
+}
+
+.skill-chip.partial {
+    @apply bg-yellow-500/20 text-yellow-400 border border-yellow-500/30;
+}
+
+.skill-chip.missing {
+    @apply bg-red-500/20 text-red-400 border border-red-500/30;
+}
+
+.skill-chip:hover {
+    @apply scale-105 shadow-lg;
+}
+
+/* Evidence Table */
+.evidence-table {
+    @apply w-full border-collapse;
+}
+
+.evidence-table th {
+    @apply bg-slate-800 text-left p-4 font-semibold text-gray-300 border-b border-slate-700;
+}
+
+.evidence-table td {
+    @apply p-4 border-b border-slate-700 text-gray-300;
+}
+
+.evidence-table tr:hover {
+    @apply bg-slate-800/50;
+}
+
+/* Charts Container */
+.chart-container {
+    @apply bg-slate-800 rounded-lg p-6 border border-slate-700;
+}
+
+/* Toast Styles */
+.toast {
+    @apply bg-slate-800 border border-slate-700 rounded-lg p-4 shadow-lg max-w-sm transform transition-all duration-300 ease-in-out;
+}
+
+.toast.success {
+    @apply border-green-500/30 bg-green-500/10;
+}
+
+.toast.error {
+    @apply border-red-500/30 bg-red-500/10;
+}
+
+.toast.warning {
+    @apply border-yellow-500/30 bg-yellow-500/10;
+}
+
+.toast.info {
+    @apply border-blue-500/30 bg-blue-500/10;
+}
+
+.toast-enter {
+    @apply translate-x-full opacity-0;
+}
+
+.toast-enter-active {
+    @apply translate-x-0 opacity-100;
+}
+
+.toast-exit {
+    @apply translate-x-0 opacity-100;
+}
+
+.toast-exit-active {
+    @apply translate-x-full opacity-0;
+}
+
+/* Resize Handle */
+#resizeHandle {
+    @apply relative;
+}
+
+#resizeHandle::before {
+    content: '';
+    @apply absolute inset-y-0 -left-1 -right-1;
+}
+
+#resizeHandle:hover::before {
+    @apply bg-primary/20;
+}
+
+/* Quick Compare Mode */
+.quick-compare #leftRail {
+    @apply w-1/2;
+}
+
+.quick-compare #rightPane {
+    @apply w-1/2;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .quick-compare #leftRail {
+        @apply w-full;
+    }
+    
+    .quick-compare #rightPane {
+        @apply hidden;
+    }
+}
+
+@media (max-width: 768px) {
+    #leftRail {
+        @apply w-full;
+    }
+    
+    #rightPane {
+        @apply hidden;
+    }
+    
+    .mobile-show-results #leftRail {
+        @apply hidden;
+    }
+    
+    .mobile-show-results #rightPane {
+        @apply flex;
+    }
+}
+
+/* Dark Theme Overrides */
+.dark .bg-slate-900 {
+    @apply bg-gray-900;
+}
+
+.dark .bg-slate-800 {
+    @apply bg-gray-800;
+}
+
+.dark .bg-slate-700 {
+    @apply bg-gray-700;
+}
+
+.dark .border-slate-700 {
+    @apply border-gray-700;
+}
+
+.dark .border-slate-600 {
+    @apply border-gray-600;
+}
+
+.dark .text-gray-200 {
+    @apply text-gray-100;
+}
+
+.dark .text-gray-300 {
+    @apply text-gray-200;
+}
+
+.dark .text-gray-400 {
+    @apply text-gray-300;
+}
+
+/* Light Theme */
+.light {
+    @apply bg-white text-gray-900;
+}
+
+.light .bg-slate-900 {
+    @apply bg-white;
+}
+
+.light .bg-slate-800 {
+    @apply bg-gray-50;
+}
+
+.light .bg-slate-700 {
+    @apply bg-gray-100;
+}
+
+.light .border-slate-700 {
+    @apply border-gray-200;
+}
+
+.light .border-slate-600 {
+    @apply border-gray-300;
+}
+
+.light .text-gray-200 {
+    @apply text-gray-900;
+}
+
+.light .text-gray-300 {
+    @apply text-gray-700;
+}
+
+.light .text-gray-400 {
+    @apply text-gray-600;
+}
+
+/* Accessibility */
+.focus-visible {
+    @apply outline-2 outline-primary outline-offset-2;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .skill-chip.matched {
+        @apply bg-green-600 text-white;
+    }
+    
+    .skill-chip.partial {
+        @apply bg-yellow-600 text-black;
+    }
+    
+    .skill-chip.missing {
+        @apply bg-red-600 text-white;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    #leftRail,
+    #stepper,
+    header {
+        @apply hidden;
+    }
+    
+    #rightPane {
+        @apply w-full;
+    }
+    
+    .no-print {
+        @apply hidden;
+    }
+}
+
+/* Animation keyframes */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft 0.3s ease-out;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Custom scrollbar for results pane */
+.overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+    @apply bg-slate-800;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+    @apply bg-slate-600 rounded-full;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary;
+}

@@ -132,9 +132,9 @@ class App {
     }
 
     setupAnalysisEventListeners() {
-        // Analysis interface
+        // Analysis interface - redirect to new workspace
         document.getElementById('analyzeSkillsBtn')?.addEventListener('click', () => {
-            this.analysisManager.showAnalysisInterface();
+            window.location.href = '/analysis.html';
         });
         
         document.getElementById('closeAnalysisInterface')?.addEventListener('click', () => {

@@ -448,6 +448,18 @@ app.get('/test-narrative-ui.html', async (c) => {
   return c.html(TEST_NARRATIVE_UI_CONTENT);
 });
 
+// Analysis workspace endpoint - serve the new analysis workspace
+app.get('/analysis.html', async (c) => {
+  // Import the analysis workspace content
+  const { ANALYSIS_WORKSPACE_CONTENT } = await import('./constants/analysisWorkspace');
+  
+  // Set appropriate headers
+  c.header('Content-Type', 'text/html; charset=utf-8');
+  c.header('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+  
+  return c.html(ANALYSIS_WORKSPACE_CONTENT);
+});
+
 // 404 handler
 app.notFound((c) => {
   return c.json({
