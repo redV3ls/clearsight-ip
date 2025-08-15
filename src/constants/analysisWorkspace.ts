@@ -1316,4 +1316,4 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
         });
     </script>
 </body>
-</html>`;`
+</html>`;
