@@ -492,6 +492,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 if (response.ok) {
                     const data = await response.json();
                     AppState.currentUser = data.data.user;
+                } else if (response.status === 401) {
+                    // Token expired during auth check - silently log out
+                    AppState.currentUser = null;
                 } else {
                     AppState.currentUser = null;
                 }
@@ -633,6 +636,25 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             
             AppState.currentUser = null;
             updateAuthUI();
+        }
+
+        function handleTokenExpiration() {
+            console.log('Token expired - logging out user');
+            
+            // Clear user state immediately
+            AppState.currentUser = null;
+            
+            // Update UI to unauthenticated state
+            updateAuthUI();
+            
+            // Hide analysis interface if open
+            hideAnalysisInterface();
+            
+            // Show login modal with expiration message
+            showAuthModal('login');
+            
+            // Show error message
+            showAuthError('Your session has expired. Please log in again.');
         }
 
         function showAuthError(message) {
@@ -831,11 +853,20 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     setTimeout(() => {
                         displayResults(data);
                     }, 1500);
+                } else if (response.status === 401) {
+                    // Token expired
+                    handleTokenExpiration();
+                    return;
                 } else {
                     throw new Error(data.error?.message || 'Analysis failed');
                 }
             } catch (error) {
                 console.error('Analysis error:', error);
+                // Check for authentication errors
+                if (error.message && (error.message.includes('401') || error.message.includes('Unauthorized'))) {
+                    handleTokenExpiration();
+                    return;
+                }
                 showAnalysisError(error.message || 'Analysis failed. Please try again.');
                 resetAnalysis();
             } finally {

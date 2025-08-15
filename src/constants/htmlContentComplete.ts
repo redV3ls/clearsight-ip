@@ -594,8 +594,8 @@ export const HTML_CONTENT = `<!DOCTYPE html
 
     <!-- Analysis Interface Modal -->
     <div id="analysisInterface" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
+        <div class="bg-slate-800 rounded-lg max-w-7xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="p-6 flex-1 overflow-hidden flex flex-col">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-primary">AI-Powered Skills Analysis</h2>
                     <button id="closeAnalysisInterface" class="text-gray-400 hover:text-white">
@@ -603,8 +603,28 @@ export const HTML_CONTENT = `<!DOCTYPE html
                     </button>
                 </div>
 
-                <!-- Upload Section -->
-                <div id="uploadSection" class="text-center py-12">
+                <!-- Main content container with two columns -->
+                <div class="flex-1 overflow-hidden">
+                    <div id="twoColumnLayout" class="hidden h-full flex gap-6">
+                        <!-- Left Column: Input Section -->
+                        <div class="w-1/2 overflow-y-auto pr-3">
+                            <div id="inputSection" class="space-y-6">
+                                <!-- Input content will be moved here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column: Results Section -->
+                        <div class="w-1/2 overflow-y-auto pl-3 border-l border-slate-600">
+                            <div id="resultsPanelContent" class="space-y-6">
+                                <!-- Results will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Original single column layout -->
+                    <div id="singleColumnLayout" class="h-full overflow-y-auto">
+                        <!-- Upload Section -->
+                        <div id="uploadSection" class="text-center py-12">
                     <div class="mb-8">
                         <i class="fas fa-upload text-6xl text-primary mb-4"></i>
                         <h3 class="text-2xl font-bold text-white mb-4">Upload Your Resume</h3>
@@ -833,6 +853,10 @@ Responsibilities:
                         AppState.user = data.data.user;
                         updateUIForAuthenticatedUser();
                     }
+                } else if (response.status === 401) {
+                    // Token expired during auth check - silently log out
+                    AppState.currentUser = null;
+                    updateUIForUnauthenticatedUser();
                 }
             } catch (error) {
                 console.log('User not authenticated');
@@ -1216,6 +1240,33 @@ Responsibilities:
             }
         }
 
+        // Token expiration handling
+        function handleTokenExpiration() {
+            console.log('Token expired - logging out user');
+            
+            // Clear user state immediately
+            AppState.currentUser = null;
+            
+            // Stop any ongoing analysis
+            if (AppState.pollInterval) {
+                clearInterval(AppState.pollInterval);
+                AppState.pollInterval = null;
+            }
+            
+            // Update UI to unauthenticated state
+            updateUIForUnauthenticatedUser();
+            
+            // Hide analysis interface if open
+            hideAnalysisInterface();
+            
+            // Show login modal with expiration message
+            showAuthModal('login');
+            showNotification('Your session has expired. Please log in again.', 'warning');
+            
+            // Clear any auth error that might be showing
+            hideAuthError();
+        }
+
         // Auth error handling
         function showAuthError(message) {
             const errorDiv = document.getElementById('authError');
@@ -1406,9 +1457,10 @@ Responsibilities:
                 if (error.message.includes('Failed to fetch')) {
                     errorMessage = 'Network error: Unable to connect to analysis service. Please check your internet connection.';
                 } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-                    errorMessage = 'Authentication error: Please log in again.';
-                    hideAnalysisInterface();
-                    showAuthModal('login');
+                    errorMessage = 'Your session has expired. Please log in again.';
+                    // Log out the user and clear their session
+                    handleTokenExpiration();
+                    return; // Don't show notification as handleTokenExpiration will handle it
                 } else if (error.message.includes('timeout')) {
                     errorMessage = 'Analysis timed out. Please try again with a shorter resume.';
                 }
@@ -1435,7 +1487,16 @@ Responsibilities:
             } else if (success && (data.success || data.status === 'completed')) {
                 // Show completed analysis results
                 stopLoadingAnimation();
-                displayAnalysisResults(data.data || data);
+                // Extract the actual analysis data from various possible locations
+                let analysisData = data;
+                if (data.data) {
+                    analysisData = data.data;
+                }
+                if (data.analysis) {
+                    analysisData = data.analysis;
+                }
+                console.log('Extracted analysis data for display:', analysisData);
+                displayAnalysisResults(analysisData);
                 showNotification('Analysis completed successfully!', 'success');
             } else {
                 let errorMessage = 'Analysis failed. Please try again.';
@@ -1446,9 +1507,12 @@ Responsibilities:
                     console.error('Server error details:', data.error);
                     
                     // Check for specific error codes
-                    if (data.error.code === 'AUTH_REQUIRED' || data.error.code === 'AUTHENTICATION_REQUIRED') {
-                        errorMessage = 'Please log in to analyze your resume.';
-                        shouldShowLogin = true;
+                    if (data.error.code === 'AUTH_REQUIRED' || data.error.code === 'AUTHENTICATION_REQUIRED' || 
+                        data.error.code === 'TOKEN_EXPIRED' || data.error.code === 'EXPIRED_TOKEN' || data.error.code === 'INVALID_TOKEN') {
+                        errorMessage = 'Your session has expired. Please log in again.';
+                        // Log out the user and clear their session
+                        handleTokenExpiration();
+                        return; // Don't continue with normal error handling
                     } else if (data.error.code === 'AI_SERVICE_UNAVAILABLE') {
                         errorMessage = 'AI analysis service is temporarily unavailable. Please try again later.';
                     } else if (data.error.code === 'MISSING_CONTENT') {
@@ -1639,7 +1703,15 @@ Responsibilities:
                             
                             // Show results after a brief delay
                             setTimeout(() => {
-                                displayAnalysisResults(data);
+                                // Extract the analysis data from the response
+                                let analysisData = data;
+                                if (data.analysis) {
+                                    analysisData = data.analysis;
+                                } else if (data.data) {
+                                    analysisData = data.data;
+                                }
+                                console.log('Extracted analysis data from polling:', analysisData);
+                                displayAnalysisResults(analysisData);
                                 showNotification('🎉 Your analysis is ready!', 'success');
                             }, 2000);
                             
@@ -1651,6 +1723,11 @@ Responsibilities:
                         }
                         // If still processing, continue polling
                         
+                    } else if (response.status === 401) {
+                        // Token expired during polling
+                        stopLoadingAnimation();
+                        handleTokenExpiration();
+                        return; // Stop polling
                     } else if (response.status === 404) {
                         // Analysis not found - might have been cleaned up
                         stopLoadingAnimation();
@@ -1723,7 +1800,7 @@ Responsibilities:
                 });
                 // paragraphs
                 const parts = text.split(/\\n\\n+/).map(function(p){ return p.trim(); }).filter(Boolean);
-                return parts.map(function(p){ return p.startsWith('<') ? p : '<p class="mb-4 text-gray-300 leading-relaxed">' + p + '</p>'; }).join('\\n');
+                return parts.map(function(p){ return p.startsWith('<') ? p : '<p class="mb-4 text-gray-300 leading-relaxed">' + p + '</p>'; }).join('\n');
             }
             
             const loadingSection = document.getElementById('loadingSection');
