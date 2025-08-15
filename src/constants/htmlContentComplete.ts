@@ -1,5 +1,5 @@
 // Complete HTML content with inline JavaScript and CSS for Cloudflare Workers
-export const HTML_CONTENT = `<!DOCTYPE html
+export const HTML_CONTENT = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">

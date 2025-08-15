@@ -350,7 +350,7 @@ NICE TO HAVE:
                     <div class="narrative" style="background: #f0f8ff; border-left: 4px solid #007bff; padding: 25px; margin: 20px 0; border-radius: 8px;">
                         <h3>📖 \${hasJobDescription ? 'Your Job Fit Analysis' : 'Your Career Story'}</h3>
                         <div style="line-height: 1.6; font-size: 16px;">
-                            \${analysis.narrative.replace(/\\\\n\\\\n/g, '</p><p>').replace(/\\\\n/g, '<br>')}
+                            \${analysis.narrative.replace(/\\n\\n/g, '</p><p>').replace(/\\n/g, '<br>')}
                         </div>
                     </div>
                 \`;
