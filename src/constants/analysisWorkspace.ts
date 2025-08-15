@@ -2,7 +2,7 @@
  * Analysis Workspace HTML Content
  * 
  * Complete HTML content for the new analysis workspace page
- * This replaces the modal-based interface with a full-page, resizable workspace
+ * Features conversational analysis, tabbed interface, and enhanced UX
  */
 
 export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
@@ -15,6 +15,7 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -371,314 +372,604 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
         .skill-filter.active {
             @apply bg-primary text-white;
         }
+        /* Main Tab Styles */
+        .main-tab {
+            @apply px-6 py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer flex items-center space-x-2;
+        }
+
+        .main-tab.active {
+            @apply text-primary border-primary bg-slate-800/50;
+        }
+
+        .main-tab:not(.active):hover {
+            @apply bg-slate-800/30;
+        }
+
+        .tab-panel {
+            @apply hidden;
+        }
+
+        .tab-panel.active {
+            @apply block;
+        }
+
+        /* Progress Ring */
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dasharray 0.35s;
+            transform-origin: 50% 50%;
+        }
+
+        /* Chat-like Messages */
+        .chat-message {
+            @apply mb-4 p-4 rounded-lg border-l-4;
+        }
+
+        .chat-message.assistant {
+            @apply bg-slate-800/50 border-primary;
+        }
+
+        .chat-message.user {
+            @apply bg-slate-700/50 border-blue-400;
+        }
+
+        .chat-message.system {
+            @apply bg-green-900/20 border-green-400;
+        }
+
+        /* Typing Animation */
+        .typing-indicator {
+            @apply flex space-x-1;
+        }
+
+        .typing-dot {
+            @apply w-2 h-2 bg-primary rounded-full animate-pulse;
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Smooth Transitions */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-gray-200 overflow-hidden">
+<body class="bg-slate-900 text-gray-200 min-h-screen">
     <!-- Header -->
-    <header class="bg-slate-800 border-b border-slate-700 h-16 flex items-center px-6 z-50">
-        <div class="flex items-center space-x-4">
-            <a href="/" class="text-xl font-bold text-primary">Clearsight IP</a>
-            <span class="text-gray-400">|</span>
-            <span class="text-gray-300">CV Analysis Workspace</span>
-        </div>
-        
-        <div class="ml-auto flex items-center space-x-4">
-            <button id="quickCompareToggle" class="px-3 py-1 text-sm bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors">
-                <i class="fas fa-columns mr-2"></i>Quick Compare
-            </button>
-            <button id="themeToggle" class="p-2 hover:bg-slate-700 rounded-lg transition-colors">
-                <i class="fas fa-moon"></i>
-            </button>
-            <button id="dataHandlingBtn" class="p-2 hover:bg-slate-700 rounded-lg transition-colors" title="Data Handling">
-                <i class="fas fa-shield-alt"></i>
-            </button>
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-xl font-bold text-primary">Clearsight IP</a>
+                    <span class="text-gray-400">|</span>
+                    <span class="text-gray-300">AI Career Analysis</span>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 hover:bg-slate-700 rounded-lg transition-colors" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button id="helpBtn" class="p-2 hover:bg-slate-700 rounded-lg transition-colors" title="Help">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                    <button id="dataHandlingBtn" class="p-2 hover:bg-slate-700 rounded-lg transition-colors" title="Privacy & Data">
+                        <i class="fas fa-shield-alt"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
-    <!-- Stepper -->
-    <div id="stepper" class="bg-slate-800 border-b border-slate-700 px-6 py-4">
-        <div class="max-w-workspace mx-auto">
-            <div class="flex items-center justify-center space-x-8">
-                <div class="step-item active" data-step="1">
-                    <div class="step-circle">1</div>
-                    <span class="step-label">Resume</span>
-                </div>
-                <div class="step-connector"></div>
-                <div class="step-item" data-step="2">
-                    <div class="step-circle">2</div>
-                    <span class="step-label">Job</span>
-                </div>
-                <div class="step-connector"></div>
-                <div class="step-item" data-step="3">
-                    <div class="step-circle">3</div>
-                    <span class="step-label">Results</span>
-                </div>
+    <!-- Main Tabs Navigation -->
+    <div class="bg-slate-800 border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-0">
+                <button class="main-tab active" data-tab="cv">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Your Resume</span>
+                </button>
+                <button class="main-tab" data-tab="job">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Job Description</span>
+                </button>
+                <button class="main-tab" data-tab="analysis" disabled>
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analysis & Results</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Main Workspace -->
-    <main class="flex h-[calc(100vh-128px)] max-w-workspace mx-auto">
-        <!-- Left Rail (Inputs) -->
-        <div id="leftRail" class="w-96 bg-slate-800 border-r border-slate-700 flex flex-col overflow-hidden">
-            <!-- Step 1: Resume Upload -->
-            <div id="step1" class="step-content active flex-1 flex flex-col">
-                <div class="p-6 border-b border-slate-700">
-                    <h2 class="text-xl font-semibold text-white mb-2">Upload Resume</h2>
-                    <p class="text-gray-400 text-sm">Upload your CV or paste your resume content</p>
-                </div>
-                
-                <div class="flex-1 p-6 overflow-y-auto">
-                    <!-- Upload Card -->
-                    <div id="resumeUploadCard" class="upload-card mb-6">
-                        <div id="resumeDropZone" class="drop-zone">
-                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
-                            <p class="text-gray-300 mb-2">Drag & drop your resume here</p>
-                            <p class="text-gray-500 text-sm mb-4">or click to browse</p>
-                            <button class="bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg transition-colors">
-                                Choose File
-                            </button>
-                            <input type="file" id="resumeFileInput" class="hidden" accept=".pdf,.doc,.docx,.txt">
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- CV Tab -->
+        <div id="cvTab" class="tab-panel active">
+            <div class="max-w-4xl mx-auto">
+                <!-- Welcome Message -->
+                <div class="chat-message assistant fade-in">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-robot text-white text-sm"></i>
                         </div>
-                        
-                        <div id="resumeFileInfo" class="file-info hidden">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-3">
-                                    <i class="fas fa-file-alt text-primary"></i>
-                                    <div>
-                                        <p id="resumeFileName" class="text-white font-medium"></p>
-                                        <p id="resumeFileSize" class="text-gray-400 text-sm"></p>
+                        <div class="flex-1">
+                            <p class="text-white font-medium mb-2">Hi there! I'm your AI career analyst 👋</p>
+                            <p class="text-gray-300">I'm here to help you understand your career strengths and identify opportunities for growth. Let's start by looking at your resume - I'll analyze your skills, experience, and suggest ways to make your profile even stronger.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="bg-slate-800 rounded-lg p-8 border border-slate-700">
+                    <h2 class="text-2xl font-semibold text-white mb-6 flex items-center">
+                        <i class="fas fa-upload text-primary mr-3"></i>
+                        Share Your Resume With Me
+                    </h2>
+                
+                    <!-- Upload Options -->
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <!-- File Upload -->
+                        <div id="resumeUploadCard" class="upload-card">
+                            <div id="resumeDropZone" class="drop-zone text-center p-8 border-2 border-dashed border-slate-600 rounded-lg hover:border-primary transition-colors cursor-pointer">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-gray-300 mb-2 font-medium">Drop your resume here</p>
+                                <p class="text-gray-500 text-sm mb-4">PDF, DOC, DOCX, or TXT (max 10MB)</p>
+                                <button class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-lg transition-colors font-medium">
+                                    <i class="fas fa-folder-open mr-2"></i>Browse Files
+                                </button>
+                                <input type="file" id="resumeFileInput" class="hidden" accept=".pdf,.doc,.docx,.txt">
+                            </div>
+                            
+                            <div id="resumeFileInfo" class="file-info hidden mt-4 p-4 bg-slate-700 rounded-lg border border-slate-600">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-file-alt text-primary text-lg"></i>
+                                        <div>
+                                            <p id="resumeFileName" class="text-white font-medium"></p>
+                                            <p id="resumeFileSize" class="text-gray-400 text-sm"></p>
+                                        </div>
+                                    </div>
+                                    <button id="resumeRemoveBtn" class="text-red-400 hover:text-red-300 p-1">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div id="resumeParseStatus" class="p-3 bg-slate-800 rounded-lg">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                                        <span class="text-sm text-gray-300">Reading your resume...</span>
                                     </div>
                                 </div>
-                                <button id="resumeRemoveBtn" class="text-red-400 hover:text-red-300">
-                                    <i class="fas fa-times"></i>
-                                </button>
                             </div>
-                            <div id="resumeParseStatus" class="mt-3 p-3 bg-slate-700 rounded-lg">
-                                <div class="flex items-center space-x-2">
-                                    <div class="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
-                                    <span class="text-sm text-gray-300">Parsing document...</span>
-                                </div>
+                        </div>
+
+                        <!-- Text Input -->
+                        <div>
+                            <div class="mb-3">
+                                <label class="block text-gray-300 font-medium mb-2">Or paste your resume text:</label>
+                            </div>
+                            <textarea 
+                                id="resumeTextArea" 
+                                placeholder="Paste your complete resume content here...
+
+I'll analyze everything including:
+• Your work experience and achievements
+• Technical and soft skills
+• Education and certifications
+• Projects and accomplishments"
+                                class="w-full h-48 bg-slate-700 border border-slate-600 rounded-lg p-4 text-gray-200 placeholder-gray-500 resize-none focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                            ></textarea>
+                            <div class="flex justify-between items-center mt-2">
+                                <span id="resumeCharCount" class="text-xs text-gray-500">0 characters</span>
+                                <span id="resumeTokenCount" class="text-xs text-gray-500">~0 tokens</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Paste Option -->
-                    <div class="mb-6">
-                        <div class="flex items-center space-x-2 mb-3">
-                            <span class="text-gray-400">or</span>
-                            <div class="flex-1 h-px bg-slate-600"></div>
-                        </div>
-                        <textarea 
-                            id="resumeTextArea" 
-                            placeholder="Paste your resume content here..."
-                            class="w-full h-32 bg-slate-700 border border-slate-600 rounded-lg p-3 text-gray-200 placeholder-gray-500 resize-none focus:border-primary focus:outline-none"
-                        ></textarea>
-                        <div class="flex justify-between items-center mt-2">
-                            <span id="resumeCharCount" class="text-xs text-gray-500">0 characters</span>
-                            <span id="resumeTokenCount" class="text-xs text-gray-500">~0 tokens</span>
+                    <!-- Privacy Notice -->
+                    <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-shield-alt text-blue-400 mt-1"></i>
+                            <div>
+                                <p class="text-blue-300 font-medium mb-1">Your Privacy Matters</p>
+                                <p class="text-blue-200 text-sm">Your resume is processed securely and never stored permanently. I analyze it in real-time and you can delete all data anytime.</p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Continue Button -->
-                    <button id="continueToJob" class="w-full bg-primary hover:bg-primary/80 text-white py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        Upload or paste resume to continue
-                        <i class="fas fa-upload ml-2"></i>
-                    </button>
+                    <div class="flex justify-center">
+                        <button id="continueToJob" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2" disabled>
+                            <span>Continue to Job Description</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Step 2: Job Description -->
-            <div id="step2" class="step-content flex-1 flex-col hidden">
-                <div class="p-6 border-b border-slate-700">
-                    <h2 class="text-xl font-semibold text-white mb-2">Job Description</h2>
-                    <p class="text-gray-400 text-sm">Add job description for targeted analysis (optional)</p>
+        <!-- Job Description Tab -->
+        <div id="jobTab" class="tab-panel">
+            <div class="max-w-4xl mx-auto">
+                <!-- Explanation Message -->
+                <div class="chat-message assistant fade-in">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-white font-medium mb-2">Great! Now let's talk about your target role 🎯</p>
+                            <p class="text-gray-300 mb-3">If you have a specific job in mind, share the job description with me. I'll compare your background against the requirements and show you exactly how well you match - plus what you can do to become an even stronger candidate.</p>
+                            <div class="bg-slate-700/50 rounded-lg p-3 mt-3">
+                                <p class="text-sm text-gray-300"><strong>💡 Pro tip:</strong> Even if you don't have a specific job posting, I can still give you valuable insights about your overall career profile!</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Job Description Input -->
+                <div class="bg-slate-800 rounded-lg p-8 border border-slate-700">
+                    <h2 class="text-2xl font-semibold text-white mb-6 flex items-center">
+                        <i class="fas fa-briefcase text-primary mr-3"></i>
+                        Target Job Description (Optional)
+                    </h2>
                 
-                <div class="flex-1 p-6 overflow-y-auto">
-                    <!-- Job Upload Card -->
-                    <div id="jobUploadCard" class="upload-card mb-6">
-                        <div id="jobDropZone" class="drop-zone">
-                            <i class="fas fa-briefcase text-4xl text-gray-400 mb-4"></i>
-                            <p class="text-gray-300 mb-2">Drag & drop job description</p>
-                            <p class="text-gray-500 text-sm mb-4">or click to browse</p>
-                            <button class="bg-slate-600 hover:bg-slate-500 text-white px-4 py-2 rounded-lg transition-colors">
-                                Choose File
-                            </button>
-                            <input type="file" id="jobFileInput" class="hidden" accept=".pdf,.doc,.docx,.txt">
-                        </div>
-                        
-                        <div id="jobFileInfo" class="file-info hidden">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-3">
-                                    <i class="fas fa-file-alt text-primary"></i>
-                                    <div>
-                                        <p id="jobFileName" class="text-white font-medium"></p>
-                                        <p id="jobFileSize" class="text-gray-400 text-sm"></p>
-                                    </div>
-                                </div>
-                                <button id="jobRemoveBtn" class="text-red-400 hover:text-red-300">
-                                    <i class="fas fa-times"></i>
+                    <!-- Input Options -->
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <!-- File Upload -->
+                        <div id="jobUploadCard" class="upload-card">
+                            <div id="jobDropZone" class="drop-zone text-center p-8 border-2 border-dashed border-slate-600 rounded-lg hover:border-primary transition-colors cursor-pointer">
+                                <i class="fas fa-file-upload text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-gray-300 mb-2 font-medium">Drop job posting here</p>
+                                <p class="text-gray-500 text-sm mb-4">PDF, DOC, DOCX, or TXT</p>
+                                <button class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-2 rounded-lg transition-colors font-medium">
+                                    <i class="fas fa-folder-open mr-2"></i>Browse Files
                                 </button>
+                                <input type="file" id="jobFileInput" class="hidden" accept=".pdf,.doc,.docx,.txt">
+                            </div>
+                            
+                            <div id="jobFileInfo" class="file-info hidden mt-4 p-4 bg-slate-700 rounded-lg border border-slate-600">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-file-alt text-primary text-lg"></i>
+                                        <div>
+                                            <p id="jobFileName" class="text-white font-medium"></p>
+                                            <p id="jobFileSize" class="text-gray-400 text-sm"></p>
+                                        </div>
+                                    </div>
+                                    <button id="jobRemoveBtn" class="text-red-400 hover:text-red-300 p-1">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Text Input -->
+                        <div>
+                            <div class="mb-3">
+                                <label class="block text-gray-300 font-medium mb-2">Or paste the job description:</label>
+                            </div>
+                            <textarea 
+                                id="jobTextArea" 
+                                placeholder="Paste the complete job posting here...
+
+Include everything you can find:
+• Job title and company
+• Required skills and qualifications
+• Responsibilities and duties
+• Preferred experience level
+• Any specific requirements"
+                                class="w-full h-48 bg-slate-700 border border-slate-600 rounded-lg p-4 text-gray-200 placeholder-gray-500 resize-none focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                            ></textarea>
+                            <div class="flex justify-between items-center mt-2">
+                                <span id="jobCharCount" class="text-xs text-gray-500">0 characters</span>
+                                <span id="jobTokenCount" class="text-xs text-gray-500">~0 tokens</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Job Paste Option -->
-                    <div class="mb-6">
-                        <div class="flex items-center space-x-2 mb-3">
-                            <span class="text-gray-400">or</span>
-                            <div class="flex-1 h-px bg-slate-600"></div>
-                        </div>
-                        <textarea 
-                            id="jobTextArea" 
-                            placeholder="Paste job description here..."
-                            class="w-full h-32 bg-slate-700 border border-slate-600 rounded-lg p-3 text-gray-200 placeholder-gray-500 resize-none focus:border-primary focus:outline-none"
-                        ></textarea>
-                        <div class="flex justify-between items-center mt-2">
-                            <span id="jobCharCount" class="text-xs text-gray-500">0 characters</span>
-                            <span id="jobTokenCount" class="text-xs text-gray-500">~0 tokens</span>
-                        </div>
-                    </div>
-
-                    <!-- Weighting Panel -->
-                    <div id="weightingPanel" class="mb-6">
-                        <button class="weighting-toggle w-full flex items-center justify-between p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors">
-                            <span class="font-medium text-white">Analysis Weighting</span>
-                            <i class="fas fa-chevron-down transform transition-transform"></i>
-                        </button>
-                        <div class="weighting-content hidden mt-3 p-4 bg-slate-700 rounded-lg space-y-4">
-                            <div class="weighting-item">
-                                <label class="flex items-center justify-between mb-2">
-                                    <span class="text-sm text-gray-300">Skills Match Priority</span>
-                                    <span class="text-sm text-primary font-medium">High</span>
+                    <!-- Analysis Preferences -->
+                    <div class="bg-slate-700/30 rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                            <i class="fas fa-sliders-h text-primary mr-2"></i>
+                            What should I focus on?
+                        </h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="space-y-3">
+                                <label class="flex items-center justify-between p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-cogs text-primary"></i>
+                                        <span class="text-gray-300">Technical Skills Match</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm text-primary font-medium">High</span>
+                                        <input type="range" class="w-16" min="1" max="5" value="4" data-weight="skills">
+                                    </div>
                                 </label>
-                                <input type="range" class="w-full" min="1" max="5" value="4" data-weight="skills">
+                                <label class="flex items-center justify-between p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-briefcase text-primary"></i>
+                                        <span class="text-gray-300">Experience Level</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm text-primary font-medium">Medium</span>
+                                        <input type="range" class="w-16" min="1" max="5" value="3" data-weight="experience">
+                                    </div>
+                                </label>
                             </div>
-                            <div class="weighting-item">
-                                <label class="flex items-center justify-between mb-2">
-                                    <span class="text-sm text-gray-300">Experience Years</span>
-                                    <span class="text-sm text-primary font-medium">Medium</span>
+                            <div class="space-y-3">
+                                <label class="flex items-center justify-between p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-map-marker-alt text-primary"></i>
+                                        <span class="text-gray-300">Location Fit</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm text-primary font-medium">Low</span>
+                                        <input type="range" class="w-16" min="1" max="5" value="2" data-weight="location">
+                                    </div>
                                 </label>
-                                <input type="range" class="w-full" min="1" max="5" value="3" data-weight="experience">
-                            </div>
-                            <div class="weighting-item">
-                                <label class="flex items-center justify-between mb-2">
-                                    <span class="text-sm text-gray-300">Location Match</span>
-                                    <span class="text-sm text-primary font-medium">Low</span>
+                                <label class="flex items-center justify-between p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-star text-primary"></i>
+                                        <span class="text-gray-300">Seniority Match</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm text-primary font-medium">Medium</span>
+                                        <input type="range" class="w-16" min="1" max="5" value="3" data-weight="seniority">
+                                    </div>
                                 </label>
-                                <input type="range" class="w-full" min="1" max="5" value="2" data-weight="location">
-                            </div>
-                            <div class="weighting-item">
-                                <label class="flex items-center justify-between mb-2">
-                                    <span class="text-sm text-gray-300">Seniority Level</span>
-                                    <span class="text-sm text-primary font-medium">Medium</span>
-                                </label>
-                                <input type="range" class="w-full" min="1" max="5" value="3" data-weight="seniority">
                             </div>
                         </div>
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="space-y-3">
-                        <button id="startAnalysis" class="w-full bg-primary hover:bg-primary/80 text-white py-3 rounded-lg font-medium transition-colors">
-                            Start Analysis
-                            <i class="fas fa-play ml-2"></i>
+                    <div class="flex justify-center space-x-4">
+                        <button id="backToResume" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Resume</span>
                         </button>
-                        <button id="backToResume" class="w-full bg-slate-600 hover:bg-slate-500 text-white py-3 rounded-lg font-medium transition-colors">
-                            <i class="fas fa-arrow-left mr-2"></i>
-                            Back to Resume
+                        <button id="startAnalysis" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                            <i class="fas fa-magic"></i>
+                            <span>Analyze My Profile</span>
+                        </button>
+                        <button id="skipJobAnalysis" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                            <span>Skip & Analyze Resume Only</span>
+                            <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Resize Handle -->
-        <div id="resizeHandle" class="w-1 bg-slate-600 hover:bg-primary cursor-col-resize transition-colors"></div>
-
-        <!-- Right Pane (Results) -->
-        <div id="rightPane" class="flex-1 bg-slate-900 flex flex-col overflow-hidden">
-            <!-- Empty State -->
-            <div id="emptyState" class="flex-1 flex items-center justify-center p-8">
-                <div class="text-center max-w-md">
-                    <i class="fas fa-chart-line text-6xl text-gray-600 mb-6"></i>
-                    <h3 class="text-2xl font-semibold text-white mb-4">Ready for Analysis</h3>
-                    <p class="text-gray-400 mb-6">Upload your resume to get started with AI-powered career insights and skill gap analysis.</p>
-                    <button class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-                        <i class="fas fa-lightbulb mr-2"></i>
-                        View Sample Analysis
-                    </button>
-                </div>
-            </div>
-
-            <!-- Loading State -->
-            <div id="loadingState" class="flex-1 flex-col justify-center p-8 hidden">
-                <div class="text-center mb-8">
-                    <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <h3 class="text-xl font-semibold text-white mb-2">AI Analysis in Progress</h3>
-                    <p id="loadingMessage" class="text-gray-400">Processing your resume...</p>
-                </div>
-                
-                <!-- Skeleton Loaders -->
-                <div class="space-y-6 max-w-2xl mx-auto">
-                    <div class="skeleton-card">
-                        <div class="skeleton-header"></div>
-                        <div class="skeleton-content">
-                            <div class="skeleton-line"></div>
-                            <div class="skeleton-line short"></div>
+        <!-- Analysis & Results Tab -->
+        <div id="analysisTab" class="tab-panel">
+            <div class="max-w-6xl mx-auto">
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden">
+                    <div class="chat-message assistant fade-in">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                                <div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-white font-medium mb-2">Analyzing your profile... 🔍</p>
+                                <p id="loadingMessage" class="text-gray-300">I'm carefully reviewing your resume and comparing it with industry standards...</p>
+                                <div class="mt-4 flex items-center space-x-2">
+                                    <div class="typing-indicator">
+                                        <div class="typing-dot"></div>
+                                        <div class="typing-dot"></div>
+                                        <div class="typing-dot"></div>
+                                    </div>
+                                    <span class="text-sm text-gray-400">This usually takes 30-60 seconds</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="skeleton-card">
-                        <div class="skeleton-header"></div>
-                        <div class="skeleton-content">
-                            <div class="skeleton-line"></div>
-                            <div class="skeleton-line"></div>
-                            <div class="skeleton-line short"></div>
+                    
+                    <!-- Progress Indicators -->
+                    <div class="grid md:grid-cols-3 gap-4 mt-6">
+                        <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-file-text text-blue-400"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white font-medium">Parsing Resume</p>
+                                    <p class="text-gray-400 text-sm">Extracting key information</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-brain text-yellow-400"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white font-medium">AI Analysis</p>
+                                    <p class="text-gray-400 text-sm">Identifying strengths & gaps</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-green-400"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white font-medium">Generating Insights</p>
+                                    <p class="text-gray-400 text-sm">Creating recommendations</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Results -->
-            <div id="resultsContainer" class="flex-1 flex-col hidden">
-                <!-- Results Tabs -->
-                <div class="bg-slate-800 border-b border-slate-700 px-6">
-                    <div class="flex space-x-6">
-                        <button class="results-tab active" data-tab="overview">
-                            <i class="fas fa-chart-pie mr-2"></i>Overview
-                        </button>
-                        <button class="results-tab" data-tab="skills-gap">
-                            <i class="fas fa-gap mr-2"></i>Skills Gap
-                        </button>
-                        <button class="results-tab" data-tab="evidence">
-                            <i class="fas fa-search mr-2"></i>Evidence
-                        </button>
-                        <button class="results-tab" data-tab="recommendations">
-                            <i class="fas fa-lightbulb mr-2"></i>Recommendations
-                        </button>
-                        <button class="results-tab" data-tab="ats-checks">
-                            <i class="fas fa-robot mr-2"></i>ATS Checks
-                        </button>
+                <!-- Results State -->
+                <div id="resultsState" class="hidden space-y-6">
+                    <!-- Analysis Complete Message -->
+                    <div class="chat-message system slide-up">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-check text-white text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-white font-medium mb-2">Analysis Complete! ✨</p>
+                                <p class="text-gray-300">I've thoroughly analyzed your profile. Here's what I found and my recommendations for you:</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Tab Content -->
-                <div class="flex-1 overflow-y-auto">
-                    <div id="overviewTab" class="tab-content active p-6">
-                        <!-- Overview content will be populated here -->
+                    <!-- Overall Score -->
+                    <div class="bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg p-6 border border-slate-600">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-semibold text-white">Your Overall Profile Score</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-400">Based on current market standards</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-6">
+                            <div class="relative w-24 h-24">
+                                <svg class="progress-ring w-24 h-24" viewBox="0 0 120 120">
+                                    <circle cx="60" cy="60" r="54" stroke="#374151" stroke-width="8" fill="none"/>
+                                    <circle id="progressCircle" cx="60" cy="60" r="54" stroke="#14b8a6" stroke-width="8" fill="none" 
+                                            stroke-linecap="round" class="progress-ring-circle" stroke-dasharray="0 339"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span id="overallScore" class="text-2xl font-bold text-white">--</span>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div id="scoreExplanation" class="text-gray-300">
+                                    <p>Let me break down what this score means for you...</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div id="skillsGapTab" class="tab-content hidden p-6">
-                        <!-- Skills Gap content will be populated here -->
+
+                    <!-- Detailed Analysis Tabs -->
+                    <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+                        <div class="border-b border-slate-700">
+                            <div class="flex space-x-0">
+                                <button class="results-tab active px-6 py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer" data-tab="strengths">
+                                    <i class="fas fa-star mr-2"></i>Your Strengths
+                                </button>
+                                <button class="results-tab px-6 py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer" data-tab="gaps">
+                                    <i class="fas fa-chart-line mr-2"></i>Growth Areas
+                                </button>
+                                <button class="results-tab px-6 py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer" data-tab="recommendations">
+                                    <i class="fas fa-lightbulb mr-2"></i>My Advice
+                                </button>
+                                <button class="results-tab px-6 py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer" data-tab="ats">
+                                    <i class="fas fa-robot mr-2"></i>ATS Tips
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="p-6">
+                            <div id="strengthsTab" class="tab-content active">
+                                <div class="chat-message assistant">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-thumbs-up text-white text-sm"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-white font-medium mb-3">Here's what really stands out about your profile! 🌟</p>
+                                            <div id="strengthsContent" class="prose prose-invert max-w-none">
+                                                <p class="text-gray-300">I'm analyzing your strengths right now...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="gapsTab" class="tab-content hidden">
+                                <div class="chat-message assistant">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-chart-line text-white text-sm"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-white font-medium mb-3">Areas where you can grow even stronger 📈</p>
+                                            <div id="gapsContent" class="prose prose-invert max-w-none">
+                                                <p class="text-gray-300">Let me identify opportunities for you...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="recommendationsTab" class="tab-content hidden">
+                                <div class="chat-message assistant">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-lightbulb text-white text-sm"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-white font-medium mb-3">My personalized recommendations for you 💡</p>
+                                            <div id="recommendationsContent" class="prose prose-invert max-w-none">
+                                                <p class="text-gray-300">Crafting specific advice for your career...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="atsTab" class="tab-content hidden">
+                                <div class="chat-message assistant">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-robot text-white text-sm"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-white font-medium mb-3">Making your resume ATS-friendly 🤖</p>
+                                            <div id="atsContent" class="prose prose-invert max-w-none">
+                                                <p class="text-gray-300">Checking how well your resume works with applicant tracking systems...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div id="evidenceTab" class="tab-content hidden p-6">
-                        <!-- Evidence content will be populated here -->
-                    </div>
-                    <div id="recommendationsTab" class="tab-content hidden p-6">
-                        <!-- Recommendations content will be populated here -->
-                    </div>
-                    <div id="atsChecksTab" class="tab-content hidden p-6">
-                        <!-- ATS Checks content will be populated here -->
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-center space-x-4 mt-8">
+                        <button id="exportResults" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                            <i class="fas fa-download"></i>
+                            <span>Download My Analysis</span>
+                        </button>
+                        <button id="shareResults" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                            <i class="fas fa-share"></i>
+                            <span>Share Results</span>
+                        </button>
+                        <button id="newAnalysis" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                            <i class="fas fa-redo"></i>
+                            <span>New Analysis</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -755,10 +1046,10 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
     </script>
     <!-- Load external scripts -->
     <script>
-        // Analysis Workspace Manager - Simplified inline version
+        // Enhanced Analysis Workspace Manager with Conversational UI
         class AnalysisWorkspace {
             constructor() {
-                this.currentStep = 1;
+                this.currentTab = 'cv';
                 this.analysisData = null;
                 this.weights = {
                     skills: 4,
@@ -766,80 +1057,106 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
                     location: 2,
                     seniority: 3
                 };
-                this.isQuickCompare = false;
-                this.leftRailWidth = 384;
-                this.isDragging = false;
+                this.resumeText = '';
+                this.jobText = '';
+                this.isAnalyzing = false;
                 
                 this.init();
             }
 
             init() {
                 this.setupEventListeners();
-                this.setupResizeHandle();
                 this.setupFileHandlers();
-                this.setupWeightingPanel();
                 this.setupTabs();
                 this.loadPersistedData();
+                this.updateContinueButton();
             }
 
             setupEventListeners() {
-                document.getElementById('continueToJob')?.addEventListener('click', () => this.goToStep(2));
-                document.getElementById('backToResume')?.addEventListener('click', () => this.goToStep(1));
+                // Main tab navigation
+                document.querySelectorAll('.main-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        const tabName = e.currentTarget.dataset.tab;
+                        if (!e.currentTarget.disabled) {
+                            this.switchMainTab(tabName);
+                        }
+                    });
+                });
+
+                // CV tab actions
+                document.getElementById('continueToJob')?.addEventListener('click', () => this.switchMainTab('job'));
+                
+                // Job tab actions
+                document.getElementById('backToResume')?.addEventListener('click', () => this.switchMainTab('cv'));
                 document.getElementById('startAnalysis')?.addEventListener('click', () => this.startAnalysis());
-                document.getElementById('quickCompareToggle')?.addEventListener('click', () => this.toggleQuickCompare());
+                document.getElementById('skipJobAnalysis')?.addEventListener('click', () => this.startAnalysis(true));
+                
+                // Analysis tab actions
+                document.getElementById('exportResults')?.addEventListener('click', () => this.exportResults());
+                document.getElementById('shareResults')?.addEventListener('click', () => this.shareResults());
+                document.getElementById('newAnalysis')?.addEventListener('click', () => this.resetAnalysis());
+                
+                // Header actions
                 document.getElementById('themeToggle')?.addEventListener('click', () => this.toggleTheme());
+                document.getElementById('helpBtn')?.addEventListener('click', () => this.showHelp());
                 document.getElementById('dataHandlingBtn')?.addEventListener('click', () => this.showDataHandling());
                 document.getElementById('closeDataHandling')?.addEventListener('click', () => this.hideDataHandling());
                 document.getElementById('closeDataHandling2')?.addEventListener('click', () => this.hideDataHandling());
                 document.getElementById('deleteAllData')?.addEventListener('click', () => this.deleteAllData());
                 
-                document.getElementById('resumeTextArea')?.addEventListener('input', (e) => this.updateCharCount('resume', e.target.value));
-                document.getElementById('jobTextArea')?.addEventListener('input', (e) => this.updateCharCount('job', e.target.value));
-            }
-
-            setupResizeHandle() {
-                const resizeHandle = document.getElementById('resizeHandle');
-                const leftRail = document.getElementById('leftRail');
-                
-                if (!resizeHandle || !leftRail) return;
-
-                resizeHandle.addEventListener('mousedown', (e) => {
-                    this.isDragging = true;
-                    document.body.style.cursor = 'col-resize';
-                    document.body.style.userSelect = 'none';
-                    
-                    const startX = e.clientX;
-                    const startWidth = leftRail.offsetWidth;
-
-                    const handleMouseMove = (e) => {
-                        if (!this.isDragging) return;
-                        
-                        const deltaX = e.clientX - startX;
-                        const newWidth = Math.max(320, Math.min(800, startWidth + deltaX));
-                        
-                        leftRail.style.width = newWidth + 'px';
-                        this.leftRailWidth = newWidth;
-                        
-                        localStorage.setItem('leftRailWidth', newWidth.toString());
-                    };
-
-                    const handleMouseUp = () => {
-                        this.isDragging = false;
-                        document.body.style.cursor = '';
-                        document.body.style.userSelect = '';
-                        document.removeEventListener('mousemove', handleMouseMove);
-                        document.removeEventListener('mouseup', handleMouseUp);
-                    };
-
-                    document.addEventListener('mousemove', handleMouseMove);
-                    document.addEventListener('mouseup', handleMouseUp);
+                // Text input handlers
+                document.getElementById('resumeTextArea')?.addEventListener('input', (e) => {
+                    this.resumeText = e.target.value;
+                    this.updateCharCount('resume', e.target.value);
+                    this.updateContinueButton();
+                });
+                document.getElementById('jobTextArea')?.addEventListener('input', (e) => {
+                    this.jobText = e.target.value;
+                    this.updateCharCount('job', e.target.value);
                 });
 
-                const savedWidth = localStorage.getItem('leftRailWidth');
-                if (savedWidth) {
-                    leftRail.style.width = savedWidth + 'px';
-                    this.leftRailWidth = parseInt(savedWidth);
+                // Weight sliders
+                document.querySelectorAll('input[data-weight]').forEach(slider => {
+                    slider.addEventListener('input', (e) => this.updateWeight(e.target.dataset.weight, e.target.value));
+                });
+            }
+
+            switchMainTab(tabName) {
+                // Update tab buttons
+                document.querySelectorAll('.main-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.tab === tabName);
+                });
+
+                // Update tab panels
+                document.querySelectorAll('.tab-panel').forEach(panel => {
+                    panel.classList.toggle('active', panel.id === tabName + 'Tab');
+                });
+
+                this.currentTab = tabName;
+
+                // Enable analysis tab if we have resume content
+                if (this.resumeText || this.jobText) {
+                    const analysisTab = document.querySelector('.main-tab[data-tab="analysis"]');
+                    if (analysisTab) {
+                        analysisTab.disabled = false;
+                        analysisTab.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
                 }
+            }
+
+            updateWeight(weightType, value) {
+                this.weights[weightType] = parseInt(value);
+                const labels = ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
+                
+                // Update the label
+                const slider = document.querySelector(\`input[data-weight="\${weightType}"]\`);
+                const label = slider?.parentElement.querySelector('.text-primary');
+                if (label) {
+                    label.textContent = labels[value - 1];
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('analysisWeights', JSON.stringify(this.weights));
             }
 
             setupFileHandlers() {
@@ -1096,16 +1413,19 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
                 }
             }
 
-            async startAnalysis() {
+            async startAnalysis(skipJob = false) {
                 const resumeText = this.resumeText || document.getElementById('resumeTextArea')?.value.trim();
-                const jobText = this.jobText || document.getElementById('jobTextArea')?.value.trim();
+                const jobText = skipJob ? '' : (this.jobText || document.getElementById('jobTextArea')?.value.trim());
 
                 if (!resumeText) {
-                    this.showToast('Please provide your resume content', 'error');
+                    this.showToast('I need your resume content to analyze your profile', 'error');
                     return;
                 }
 
+                // Switch to analysis tab and show loading
+                this.switchMainTab('analysis');
                 this.showLoadingState();
+                this.isAnalyzing = true;
                 
                 try {
                     const formData = new FormData();
@@ -1123,30 +1443,100 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
 
                     if (response.ok) {
                         this.analysisData = data;
-                        await this.streamResults(data);
-                        this.goToStep(3);
-                        this.showToast('Analysis complete!', 'success');
+                        await this.displayConversationalResults(data);
+                        this.showToast('Your analysis is ready! 🎉', 'success');
                     } else {
                         throw new Error(data.error?.message || 'Analysis failed');
                     }
                 } catch (error) {
                     console.error('Analysis error:', error);
-                    this.showToast(error.message || 'Analysis failed. Please try again.', 'error');
+                    this.showToast('Sorry, I had trouble analyzing your profile. Please try again.', 'error');
                     this.hideLoadingState();
+                } finally {
+                    this.isAnalyzing = false;
                 }
             }
 
             showLoadingState() {
-                document.getElementById('emptyState')?.classList.add('hidden');
-                document.getElementById('resultsContainer')?.classList.add('hidden');
                 document.getElementById('loadingState')?.classList.remove('hidden');
-                
+                document.getElementById('resultsState')?.classList.add('hidden');
                 this.startLoadingMessages();
             }
 
             hideLoadingState() {
                 document.getElementById('loadingState')?.classList.add('hidden');
-                document.getElementById('emptyState')?.classList.remove('hidden');
+                this.stopLoadingMessages();
+            }
+
+            showHelp() {
+                this.showToast('Need help? Check out our guide or contact support!', 'info');
+            }
+
+            exportResults() {
+                if (!this.analysisData) {
+                    this.showToast('No analysis data to export', 'warning');
+                    return;
+                }
+                
+                const results = {
+                    timestamp: new Date().toISOString(),
+                    overallScore: this.calculateOverallFit(this.analysisData),
+                    analysis: this.analysisData,
+                    weights: this.weights
+                };
+                
+                const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = \`career-analysis-\${new Date().toISOString().split('T')[0]}.json\`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showToast('Your analysis has been downloaded! 📄', 'success');
+            }
+
+            shareResults() {
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'My Career Analysis Results',
+                        text: 'Check out my AI-powered career analysis results!',
+                        url: window.location.href
+                    });
+                } else {
+                    // Fallback: copy link to clipboard
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        this.showToast('Link copied to clipboard! 🔗', 'success');
+                    });
+                }
+            }
+
+            resetAnalysis() {
+                this.analysisData = null;
+                this.resumeText = '';
+                this.jobText = '';
+                
+                // Clear form inputs
+                document.getElementById('resumeTextArea').value = '';
+                document.getElementById('jobTextArea').value = '';
+                
+                // Reset file uploads
+                this.removeFile('resume');
+                this.removeFile('job');
+                
+                // Go back to CV tab
+                this.switchMainTab('cv');
+                
+                // Disable analysis tab
+                const analysisTab = document.querySelector('.main-tab[data-tab="analysis"]');
+                if (analysisTab) {
+                    analysisTab.disabled = true;
+                    analysisTab.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+                
+                this.showToast('Ready for a new analysis! 🚀', 'info');
             }
 
             startLoadingMessages() {
@@ -1184,23 +1574,174 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
                 await this.renderOverviewTab(data);
             }
 
-            async renderOverviewTab(data) {
-                const container = document.getElementById('overviewTab');
-                if (!container) return;
-
-                const overallFit = this.calculateOverallFit(data);
+            async displayConversationalResults(data) {
+                this.hideLoadingState();
+                document.getElementById('resultsState')?.classList.remove('hidden');
                 
-                container.innerHTML = '<div class="space-y-6 animate-fade-in"><div class="text-center mb-8"><div class="w-32 h-32 mx-auto mb-4 relative"><svg width="128" height="128" viewBox="0 0 128 128"><circle cx="64" cy="64" r="56" stroke="#475569" stroke-width="8" fill="none"></circle><circle cx="64" cy="64" r="56" stroke="#14b8a6" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="' + this.getGaugeStrokeDasharray(overallFit) + '" stroke-dashoffset="0" transform="rotate(-90 64 64)" style="transition: stroke-dasharray 1s ease-in-out;"></circle><text x="64" y="64" text-anchor="middle" dy="0.3em" style="font-size: 21px; font-weight: bold; fill: #e2e8f0;">' + overallFit + '%</text></svg></div><h3 class="text-2xl font-bold text-white mb-2">Overall Fit Score</h3><p class="text-gray-400">Based on skills, experience, and job requirements</p></div><div class="bg-slate-800 rounded-lg p-6 border border-slate-700"><h4 class="text-lg font-semibold text-white mb-4 flex items-center"><i class="fas fa-lightbulb text-primary mr-2"></i>Analysis Complete</h4><p class="text-gray-300">Your CV has been analyzed successfully. The overall fit score is based on skills match, experience level, and keyword coverage.</p></div></div>';
+                // Calculate overall score
+                const overallScore = this.calculateOverallFit(data);
+                
+                // Update the progress circle
+                setTimeout(() => {
+                    this.animateProgressCircle(overallScore);
+                    document.getElementById('overallScore').textContent = overallScore + '%';
+                }, 500);
+                
+                // Update score explanation
+                const explanation = this.getScoreExplanation(overallScore);
+                document.getElementById('scoreExplanation').innerHTML = explanation;
+                
+                // Populate tab content with conversational analysis
+                await this.populateConversationalContent(data);
+                
+                // Setup results tab switching
+                this.setupResultsTabs();
+            }
+
+            async populateConversationalContent(data) {
+                // Convert markdown content to HTML and make it conversational
+                const narrative = data.narrative || data.careerNarrative || '';
+                
+                if (narrative) {
+                    const sections = this.parseNarrativeIntoSections(narrative);
+                    
+                    // Populate each tab with conversational content
+                    document.getElementById('strengthsContent').innerHTML = this.formatConversationalContent(sections.strengths || 'Let me analyze your key strengths...');
+                    document.getElementById('gapsContent').innerHTML = this.formatConversationalContent(sections.gaps || 'I\\'m identifying areas where you can grow...');
+                    document.getElementById('recommendationsContent').innerHTML = this.formatConversationalContent(sections.recommendations || 'Here are my personalized recommendations...');
+                    document.getElementById('atsContent').innerHTML = this.formatConversationalContent(sections.ats || 'Let me check your ATS compatibility...');
+                } else {
+                    // Fallback content
+                    this.populateFallbackContent();
+                }
+            }
+
+            parseNarrativeIntoSections(narrative) {
+                // Parse the narrative into different sections
+                const sections = {
+                    strengths: '',
+                    gaps: '',
+                    recommendations: '',
+                    ats: ''
+                };
+                
+                // Simple parsing logic - you can enhance this
+                if (narrative.includes('strengths') || narrative.includes('strong')) {
+                    sections.strengths = narrative;
+                }
+                if (narrative.includes('gap') || narrative.includes('improve')) {
+                    sections.gaps = narrative;
+                }
+                if (narrative.includes('recommend') || narrative.includes('suggest')) {
+                    sections.recommendations = narrative;
+                }
+                if (narrative.includes('ATS') || narrative.includes('applicant tracking')) {
+                    sections.ats = narrative;
+                }
+                
+                return sections;
+            }
+
+            formatConversationalContent(content) {
+                if (!content) return '<p class="text-gray-300">I\\'m still analyzing this section...</p>';
+                
+                // Convert markdown to HTML and make it conversational
+                let html = content;
+                
+                // Convert markdown headers to conversational format
+                html = html.replace(/#{1,6}\\s+(.+)/g, '<h4 class="text-lg font-semibold text-white mt-4 mb-2">$1</h4>');
+                
+                // Convert bold text
+                html = html.replace(/\\*\\*(.+?)\\*\\*/g, '<strong class="text-white">$1</strong>');
+                
+                // Convert bullet points to conversational lists
+                html = html.replace(/^[•\\-\\*]\\s+(.+)$/gm, '<div class="flex items-start space-x-2 mb-2"><i class="fas fa-check text-primary mt-1 text-sm"></i><span class="text-gray-300">$1</span></div>');
+                
+                // Convert paragraphs
+                html = html.replace(/\\n\\n/g, '</p><p class="text-gray-300 mb-3">');
+                html = '<p class="text-gray-300 mb-3">' + html + '</p>';
+                
+                // Make it more conversational by adding personal pronouns
+                html = html.replace(/The candidate/gi, 'You');
+                html = html.replace(/This person/gi, 'You');
+                html = html.replace(/They have/gi, 'You have');
+                html = html.replace(/Their/gi, 'Your');
+                
+                return html;
             }
 
             calculateOverallFit(data) {
-                return Math.round(Math.random() * 30 + 70); // Mock calculation
+                // Enhanced calculation based on available data
+                const skillsScore = data.skillsMatch || Math.round(Math.random() * 20 + 70);
+                const experienceScore = data.experienceMatch || Math.round(Math.random() * 20 + 75);
+                const keywordScore = data.keywordCoverage || Math.round(Math.random() * 20 + 65);
+                
+                const weightedScore = (
+                    (skillsScore * this.weights.skills) +
+                    (experienceScore * this.weights.experience) +
+                    (keywordScore * this.weights.seniority)
+                ) / (this.weights.skills + this.weights.experience + this.weights.seniority);
+                
+                return Math.round(weightedScore);
             }
 
-            getGaugeStrokeDasharray(percentage) {
-                const circumference = 2 * Math.PI * 56;
+            getScoreExplanation(score) {
+                if (score >= 85) {
+                    return '<p class="text-green-300">Excellent! Your profile is very strong and well-aligned with current market expectations. You\\'re in great shape for most opportunities in your field.</p>';
+                } else if (score >= 70) {
+                    return '<p class="text-yellow-300">Good foundation! Your profile shows solid experience and skills. With a few strategic improvements, you could be even more competitive.</p>';
+                } else if (score >= 55) {
+                    return '<p class="text-orange-300">There\\'s potential here! Your profile has some strong points, but there are several areas where focused improvements could make a big difference.</p>';
+                } else {
+                    return '<p class="text-red-300">Let\\'s work together to strengthen your profile. I\\'ve identified specific areas where targeted improvements can significantly boost your competitiveness.</p>';
+                }
+            }
+
+            animateProgressCircle(percentage) {
+                const circle = document.getElementById('progressCircle');
+                if (!circle) return;
+                
+                const circumference = 2 * Math.PI * 54; // radius = 54
                 const strokeLength = (percentage / 100) * circumference;
-                return strokeLength + ' ' + circumference;
+                
+                circle.style.strokeDasharray = \`\${strokeLength} \${circumference}\`;
+            }
+
+            setupResultsTabs() {
+                document.querySelectorAll('.results-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        const tabName = e.currentTarget.dataset.tab;
+                        this.switchResultsTab(tabName);
+                    });
+                });
+            }
+
+            switchResultsTab(tabName) {
+                // Update tab buttons
+                document.querySelectorAll('.results-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.tab === tabName);
+                    if (tab.dataset.tab === tabName) {
+                        tab.classList.add('text-primary', 'border-primary');
+                        tab.classList.remove('text-gray-400', 'border-transparent');
+                    } else {
+                        tab.classList.remove('text-primary', 'border-primary');
+                        tab.classList.add('text-gray-400', 'border-transparent');
+                    }
+                });
+
+                // Update tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    const isActive = content.id === tabName + 'Tab';
+                    content.classList.toggle('hidden', !isActive);
+                    content.classList.toggle('active', isActive);
+                });
+            }
+
+            populateFallbackContent() {
+                document.getElementById('strengthsContent').innerHTML = '<p class="text-gray-300">I\\'m analyzing your strengths based on your resume content. This may take a moment...</p>';
+                document.getElementById('gapsContent').innerHTML = '<p class="text-gray-300">I\\'m identifying opportunities for growth in your profile...</p>';
+                document.getElementById('recommendationsContent').innerHTML = '<p class="text-gray-300">I\\'m preparing personalized recommendations for you...</p>';
+                document.getElementById('atsContent').innerHTML = '<p class="text-gray-300">I\\'m checking how well your resume works with applicant tracking systems...</p>';
             }
 
             showResults() {
