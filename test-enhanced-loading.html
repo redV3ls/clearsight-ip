@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Loading Screen Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#1e40af'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-gray-200">
+    <div class="min-h-screen flex items-center justify-center">
+        <!-- Loading Section -->
+        <div id="loadingSection" class="w-full max-w-2xl mx-auto px-4">
+            <div class="text-center py-12">
+                <div class="relative mb-8">
+                    <!-- Animated AI Brain -->
+                    <div class="relative mx-auto w-24 h-24 mb-6">
+                        <div class="absolute inset-0 bg-gradient-to-r from-primary to-blue-400 rounded-full animate-pulse"></div>
+                        <div class="absolute inset-2 bg-slate-800 rounded-full flex items-center justify-center">
+                            <i class="fas fa-brain text-2xl text-primary animate-bounce"></i>
+                        </div>
+                        <!-- Orbiting dots -->
+                        <div class="absolute inset-0 animate-spin">
+                            <div class="absolute top-0 left-1/2 w-2 h-2 bg-primary rounded-full transform -translate-x-1/2 -translate-y-1"></div>
+                            <div class="absolute bottom-0 left-1/2 w-2 h-2 bg-blue-400 rounded-full transform -translate-x-1/2 translate-y-1"></div>
+                            <div class="absolute left-0 top-1/2 w-2 h-2 bg-green-400 rounded-full transform -translate-y-1/2 -translate-x-1"></div>
+                            <div class="absolute right-0 top-1/2 w-2 h-2 bg-purple-400 rounded-full transform -translate-y-1/2 translate-x-1"></div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold text-white mb-4">
+                        <i class="fas fa-magic mr-2 text-primary"></i>
+                        AI Analysis in Progress
+                    </h3>
+                    <p class="text-gray-300 mb-6">Our AI is working its magic on your resume!</p>
+                    
+                    <!-- Progress Bar -->
+                    <div class="w-full max-w-md mx-auto bg-gray-600 rounded-full h-4 mb-6 overflow-hidden">
+                        <div id="progressBar" class="bg-gradient-to-r from-primary via-blue-400 to-green-400 h-4 rounded-full transition-all duration-500 ease-out relative" style="width: 0%">
+                            <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dynamic Loading Message -->
+                    <p id="progressText" class="text-lg text-primary animate-pulse font-medium mb-2">🧠 Initializing AI brain...</p>
+                    <!-- Playful timer and ETA -->
+                    <p id="timerText" class="text-sm text-gray-400 mb-1">⏱️ 00:00 elapsed • ~01:00 remaining</p>
+                    <p id="etaText" class="text-xs text-gray-500 mb-4">Approximate total time ~ 1m 00s</p>
+                    <!-- Progress percent -->
+                    <p id="progressPercent" class="text-xs text-gray-500 mb-4">0%</p>
+                    
+                    <!-- Fun Tips (rotating) -->
+                    <div class="text-xs text-gray-500 max-w-sm mx-auto mb-6">
+                        <p id="funFactText" class="mb-2">💡 Tip: Quantified results (numbers!) are recruiter magnets.</p>
+                    </div>
+                    
+                    <!-- Mini Game Section -->
+                    <div class="bg-slate-700/50 rounded-lg p-4 max-w-md mx-auto border border-slate-600">
+                        <h4 class="text-sm font-semibold text-primary mb-3">🎮 While You Wait: Reaction Game!</h4>
+                        <div id="gameArea" class="mb-3">
+                            <div id="gameInstructions" class="text-xs text-gray-400 mb-2">
+                                Click the button when it turns green! Test your reflexes.
+                            </div>
+                            <button id="gameButton" class="w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors duration-200 cursor-pointer">
+                                🔴 Wait for it...
+                            </button>
+                            <div id="gameScore" class="text-xs text-gray-400 mt-2 min-h-4">
+                                Best reaction time: --
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced loading messages
+        const LOADING_MESSAGES = [
+            "🧠 Spinning up the AI engines...",
+            "📄 Skimming your resume like a seasoned recruiter...",
+            "🔍 Spotting achievements worth bragging about...",
+            "🎯 Mapping your strengths to real job requirements...",
+            "🧩 Piecing together your standout story...",
+            "📈 Estimating your role fit with evidence...",
+            "✨ Polishing actionable CV improvements...",
+            "🧪 Pressure-testing examples for interviews...",
+            "🚀 Drafting your personalized action plan...",
+            "🎉 Wrapping up with next steps you can use today...",
+            "🤖 Teaching robots to appreciate your awesomeness...",
+            "📊 Crunching numbers like a caffeinated accountant...",
+            "🎭 Rehearsing your elevator pitch with Shakespeare...",
+            "🔬 Analyzing your potential with scientific precision...",
+            "🎪 Juggling your skills like a career circus performer...",
+            "🧙‍♂️ Casting spells to make recruiters notice you...",
+            "🎨 Painting your professional masterpiece...",
+            "🏆 Polishing your achievements until they shine...",
+            "🎯 Aiming for career bullseyes...",
+            "🚀 Launching your career into orbit...",
+            "🔮 Predicting your bright professional future...",
+            "🎵 Composing your career symphony...",
+            "🏗️ Building bridges to your dream job...",
+            "🌟 Sprinkling some career magic dust...",
+            "🎲 Rolling the dice of opportunity..."
+        ];
+
+        const FUN_FACTS = [
+            "💡 Tip: Quantified results (numbers!) are recruiter magnets.",
+            "🎯 Pro: Mirror the job's top keywords in your resume summary.",
+            "📈 Did you know? Tailored CVs get up to 3x more interviews.",
+            "✨ Tip: Replace responsibilities with outcomes to stand out.",
+            "⚡ Pro: Keep bullets crisp—1 line wins more attention than 3.",
+            "🎪 Tip: Align your skills section with the job's requirements.",
+            "🚀 Pro: Lead with impact verbs—built, led, launched, improved.",
+            "⏰ Did you know? Most scans happen in under 10 seconds.",
+            "🎭 Fun fact: 'Responsible for' is the most overused phrase on resumes.",
+            "🧠 Pro tip: Use the STAR method (Situation, Task, Action, Result).",
+            "🎨 Did you know? White space makes your resume easier to read.",
+            "🔍 Tip: ATS systems love simple, clean formatting.",
+            "🎯 Pro: Your resume should tell a story, not list duties.",
+            "💎 Fun fact: The average recruiter spends 7.4 seconds on a resume.",
+            "🌟 Tip: Include soft skills through examples, not just lists.",
+            "🎪 Did you know? 75% of resumes never reach human eyes (ATS filters)."
+        ];
+
+        // Game state
+        let gameState = {
+            isWaiting: false,
+            startTime: 0,
+            bestTime: null,
+            gameTimeout: null,
+            attempts: 0
+        };
+
+        let currentMessageIndex = 0;
+        let progressInterval;
+        let messageInterval;
+
+        function startDemo() {
+            initializeReactionGame();
+            startLoadingAnimation();
+        }
+
+        function startLoadingAnimation() {
+            let progress = 0;
+            currentMessageIndex = 0;
+            
+            updateLoadingMessage();
+            
+            // Progress update
+            progressInterval = setInterval(() => {
+                progress += Math.random() * 2 + 0.5;
+                if (progress > 95) progress = 95;
+
+                const progressBar = document.getElementById('progressBar');
+                const percentEl = document.getElementById('progressPercent');
+                if (progressBar) progressBar.style.width = Math.max(0, Math.min(100, progress)).toFixed(0) + '%';
+                if (percentEl) percentEl.textContent = Math.floor(progress) + '%';
+            }, 1000);
+            
+            // Message cycling
+            messageInterval = setInterval(() => {
+                currentMessageIndex = (currentMessageIndex + 1) % LOADING_MESSAGES.length;
+                updateLoadingMessage();
+            }, 3000);
+        }
+
+        function updateLoadingMessage() {
+            const message = LOADING_MESSAGES[currentMessageIndex];
+            const progressText = document.getElementById('progressText');
+            const funFactEl = document.getElementById('funFactText');
+            
+            if (progressText) {
+                progressText.textContent = message;
+            }
+            if (funFactEl) {
+                const idx = Math.floor(Math.random() * FUN_FACTS.length);
+                funFactEl.textContent = FUN_FACTS[idx];
+            }
+        }
+
+        function initializeReactionGame() {
+            const gameButton = document.getElementById('gameButton');
+            if (!gameButton) return;
+            
+            gameButton.addEventListener('click', handleGameClick);
+            resetGame();
+        }
+
+        function resetGame() {
+            const gameButton = document.getElementById('gameButton');
+            if (!gameButton) return;
+            
+            gameState.isWaiting = false;
+            gameButton.className = 'w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors duration-200 cursor-pointer';
+            gameButton.textContent = '🔴 Click to start!';
+            
+            if (gameState.gameTimeout) {
+                clearTimeout(gameState.gameTimeout);
+                gameState.gameTimeout = null;
+            }
+            
+            // Start next round after a random delay
+            const delay = Math.random() * 4000 + 2000; // 2-6 seconds
+            gameState.gameTimeout = setTimeout(startReactionTest, delay);
+        }
+
+        function startReactionTest() {
+            const gameButton = document.getElementById('gameButton');
+            if (!gameButton) return;
+            
+            gameState.isWaiting = true;
+            gameState.startTime = Date.now();
+            gameButton.className = 'w-full py-3 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors duration-200 cursor-pointer animate-pulse';
+            gameButton.textContent = '🟢 CLICK NOW!';
+        }
+
+        function handleGameClick() {
+            const gameButton = document.getElementById('gameButton');
+            const gameScore = document.getElementById('gameScore');
+            if (!gameButton || !gameScore) return;
+            
+            if (gameState.isWaiting) {
+                // Good click!
+                const reactionTime = Date.now() - gameState.startTime;
+                gameState.attempts++;
+                
+                if (!gameState.bestTime || reactionTime < gameState.bestTime) {
+                    gameState.bestTime = reactionTime;
+                }
+                
+                gameButton.className = 'w-full py-3 px-4 bg-blue-500 text-white rounded-lg font-medium';
+                gameButton.textContent = '⚡ ' + reactionTime + 'ms - Nice!';
+                gameScore.textContent = 'Best: ' + gameState.bestTime + 'ms | Attempts: ' + gameState.attempts;
+                
+                setTimeout(resetGame, 1500);
+            } else {
+                // Too early!
+                gameButton.className = 'w-full py-3 px-4 bg-yellow-500 text-white rounded-lg font-medium';
+                gameButton.textContent = '⚠️ Too early! Wait for green...';
+                
+                if (gameState.gameTimeout) {
+                    clearTimeout(gameState.gameTimeout);
+                }
+                
+                setTimeout(resetGame, 1500);
+            }
+        }
+
+        // Start the demo when page loads
+        window.addEventListener('DOMContentLoaded', startDemo);
+    </script>
+</body>
+</html>
