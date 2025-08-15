@@ -1059,11 +1059,19 @@ Responsibilities:
         function showAnalysisInterface() {
             const modal = document.getElementById('analysisInterface');
             const analysisModal = document.getElementById('analysisModal');
+            const singleColumnLayout = document.getElementById('singleColumnLayout');
+            const twoColumnLayout = document.getElementById('twoColumnLayout');
             
-            // Reset modal to compact size
+            // Reset modal to compact size and single column layout
             if (analysisModal) {
                 analysisModal.classList.remove('max-w-6xl');
                 analysisModal.classList.add('max-w-2xl');
+            }
+            
+            // Ensure we start with single column layout
+            if (singleColumnLayout && twoColumnLayout) {
+                singleColumnLayout.classList.remove('hidden');
+                twoColumnLayout.classList.add('hidden');
             }
             
             modal?.classList.remove('hidden');
@@ -1073,11 +1081,19 @@ Responsibilities:
         function hideAnalysisInterface() {
             const modal = document.getElementById('analysisInterface');
             const analysisModal = document.getElementById('analysisModal');
+            const singleColumnLayout = document.getElementById('singleColumnLayout');
+            const twoColumnLayout = document.getElementById('twoColumnLayout');
             
             // Reset modal to compact size for next time
             if (analysisModal) {
                 analysisModal.classList.remove('max-w-6xl');
                 analysisModal.classList.add('max-w-2xl');
+            }
+            
+            // Reset to single column layout
+            if (singleColumnLayout && twoColumnLayout) {
+                singleColumnLayout.classList.remove('hidden');
+                twoColumnLayout.classList.add('hidden');
             }
             
             modal?.classList.add('hidden');
@@ -1807,6 +1823,21 @@ Responsibilities:
                 analysisModal.classList.add('max-w-6xl');
             }
             
+            // Switch to two-column layout
+            const singleColumnLayout = document.getElementById('singleColumnLayout');
+            const twoColumnLayout = document.getElementById('twoColumnLayout');
+            const inputSection = document.getElementById('inputSection');
+            const uploadSection = document.getElementById('uploadSection');
+            
+            if (singleColumnLayout && twoColumnLayout && inputSection && uploadSection) {
+                // Move upload section to left column
+                inputSection.innerHTML = uploadSection.outerHTML;
+                
+                // Hide single column and show two column layout
+                singleColumnLayout.classList.add('hidden');
+                twoColumnLayout.classList.remove('hidden');
+            }
+            
             // Simple markdown to HTML converter
             function mdToHtml(text) {
                 if (!text) return '';
@@ -1835,7 +1866,10 @@ Responsibilities:
             if (loadingSection) loadingSection.classList.add('hidden');
             if (resultsSection) resultsSection.classList.remove('hidden');
             
-            const resultsContent = document.getElementById('resultsContent');
+            // Display results in the right column instead of the original results section
+            const resultsPanelContent = document.getElementById('resultsPanelContent');
+            const resultsContent = resultsPanelContent || document.getElementById('resultsContent');
+            
             if (resultsContent && analysisData) {
                 // Determine analysis type
                 const hasJobDescription = analysisData.hasJobDescription || analysisData.analysisType === 'job-comparison';
