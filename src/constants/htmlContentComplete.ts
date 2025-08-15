@@ -1968,18 +1968,46 @@ Responsibilities:
             function mdToHtml(text) {
                 if (!text) return '';
                 
-                // Use only string methods - NO REGEX to avoid syntax errors
-                // Convert double line breaks to paragraph breaks
-                while (text.indexOf('\\n\\n') !== -1) {
-                    text = text.split('\\n\\n').join('</p><p class="mb-4 text-gray-300 leading-relaxed">');
+                // Process line by line to handle headers and lists
+                var lines = text.split('\\n');
+                var processedLines = [];
+                
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i];
+                    var processedLine = line;
+                    
+                    // Process headers (### ## #)
+                    if (line.indexOf('### ') === 0) {
+                        var headerText = line.substring(4);
+                        processedLine = '<h3 class="text-lg font-bold text-primary mt-6 mb-3">' + headerText + '</h3>';
+                    } else if (line.indexOf('## ') === 0) {
+                        var headerText = line.substring(3);
+                        processedLine = '<h2 class="text-xl font-bold text-white mt-6 mb-3 border-b border-slate-600 pb-2">' + headerText + '</h2>';
+                    } else if (line.indexOf('# ') === 0) {
+                        var headerText = line.substring(2);
+                        processedLine = '<h1 class="text-2xl font-bold text-white mt-6 mb-4">' + headerText + '</h1>';
+                    }
+                    // Process lists
+                    else if (line.indexOf('- ') === 0) {
+                        var listText = line.substring(2);
+                        processedLine = '<li class="ml-6 mb-2 list-disc text-gray-300">' + listText + '</li>';
+                    } else if (line.indexOf('* ') === 0) {
+                        var listText = line.substring(2);
+                        processedLine = '<li class="ml-6 mb-2 list-disc text-gray-300">' + listText + '</li>';
+                    }
+                    // Process numbered lists (1. 2. etc.)
+                    else if (line.length > 2 && line.charAt(1) === '.' && line.charAt(2) === ' ') {
+                        var listText = line.substring(3);
+                        processedLine = '<li class="ml-6 mb-2 list-decimal text-gray-300">' + listText + '</li>';
+                    }
+                    
+                    processedLines.push(processedLine);
                 }
                 
-                // Convert single line breaks to <br>
-                while (text.indexOf('\\n') !== -1) {
-                    text = text.split('\\n').join('<br>');
-                }
+                // Join lines back together
+                text = processedLines.join('<br>');
                 
-                // Simple bold formatting **text** -> <strong>text</strong>
+                // Process bold formatting **text** -> <strong>text</strong>
                 while (text.indexOf('**') !== -1) {
                     var firstPos = text.indexOf('**');
                     var secondPos = text.indexOf('**', firstPos + 2);
@@ -1993,8 +2021,27 @@ Responsibilities:
                     }
                 }
                 
-                // Wrap in paragraph tags
-                text = '<p class="mb-4 text-gray-300 leading-relaxed">' + text + '</p>';
+                // Process italic formatting *text* -> <em>text</em>
+                while (text.indexOf('*') !== -1) {
+                    var firstPos = text.indexOf('*');
+                    var secondPos = text.indexOf('*', firstPos + 1);
+                    if (secondPos !== -1 && secondPos - firstPos > 1) {
+                        var beforeItalic = text.substring(0, firstPos);
+                        var italicText = text.substring(firstPos + 1, secondPos);
+                        var afterItalic = text.substring(secondPos + 1);
+                        // Only convert if it's not part of a list marker
+                        if (beforeItalic.length === 0 || beforeItalic.charAt(beforeItalic.length - 1) !== ' ') {
+                            text = beforeItalic + '<em class="text-gray-300">' + italicText + '</em>' + afterItalic;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                
+                // Wrap in div with proper spacing
+                text = '<div class="space-y-2">' + text + '</div>';
                 
                 return text;
             }
