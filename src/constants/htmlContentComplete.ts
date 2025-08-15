@@ -1968,10 +1968,30 @@ Responsibilities:
             function mdToHtml(text) {
                 if (!text) return '';
                 
-                // Simple text processing - convert line breaks and basic formatting
-                text = text.replace(/\n\n+/g, '</p><p class="mb-4 text-gray-300 leading-relaxed">');
-                text = text.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
-                text = text.replace(/\*([^*]+)\*/g, '<em class="text-gray-300">$1</em>');
+                // Use only string methods - NO REGEX to avoid syntax errors
+                // Convert double line breaks to paragraph breaks
+                while (text.indexOf('\\n\\n') !== -1) {
+                    text = text.split('\\n\\n').join('</p><p class="mb-4 text-gray-300 leading-relaxed">');
+                }
+                
+                // Convert single line breaks to <br>
+                while (text.indexOf('\\n') !== -1) {
+                    text = text.split('\\n').join('<br>');
+                }
+                
+                // Simple bold formatting **text** -> <strong>text</strong>
+                while (text.indexOf('**') !== -1) {
+                    var firstPos = text.indexOf('**');
+                    var secondPos = text.indexOf('**', firstPos + 2);
+                    if (secondPos !== -1) {
+                        var beforeBold = text.substring(0, firstPos);
+                        var boldText = text.substring(firstPos + 2, secondPos);
+                        var afterBold = text.substring(secondPos + 2);
+                        text = beforeBold + '<strong class="text-white font-semibold">' + boldText + '</strong>' + afterBold;
+                    } else {
+                        break;
+                    }
+                }
                 
                 // Wrap in paragraph tags
                 text = '<p class="mb-4 text-gray-300 leading-relaxed">' + text + '</p>';
@@ -2009,20 +2029,24 @@ Responsibilities:
                     '<p class="text-gray-300">Your personalized insights are ready.</p>' +
                 '</div>';
                 
-                // Main narrative content rendered as markdown
+                // Main narrative content - safe display without regex
                 if (analysisData.narrative) {
-                    const convertedHtml = mdToHtml(analysisData.narrative);
-                    console.log('🔍 Debug - Original narrative:', analysisData.narrative);
-                    console.log('🔍 Debug - Converted HTML:', convertedHtml);
+                    var safeNarrative = '';
+                    try {
+                        safeNarrative = mdToHtml(analysisData.narrative);
+                        console.log('🔍 Debug - Converted HTML successfully');
+                    } catch (error) {
+                        console.log('🔍 Debug - Markdown conversion failed, using fallback');
+                        // Safe fallback - just convert line breaks to <br>
+                        safeNarrative = '<p class="text-gray-300">' + analysisData.narrative.split('\\n').join('<br>') + '</p>';
+                    }
                     
                     html += '<div class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border border-primary/30 rounded-lg p-6 mb-6">' +
                         '<h5 class="text-xl font-bold text-white mb-4 flex items-center">' +
                             '<i class="fas fa-' + (hasJobDescription ? 'bullseye' : 'user-tie') + ' text-primary mr-3"></i>' +
                             headerTitle +
                         '</h5>' +
-                        '<div class="prose prose-invert max-w-none text-gray-300">' + 
-                            (convertedHtml || '<p class="text-gray-300">' + analysisData.narrative.replace(/\n/g, '<br>') + '</p>') + 
-                        '</div>' +
+                        '<div class="text-gray-300 leading-relaxed">' + safeNarrative + '</div>' +
                     '</div>';
                 } else {
                     html += '<div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-6">' +
