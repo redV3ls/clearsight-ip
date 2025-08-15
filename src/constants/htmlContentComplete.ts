@@ -1799,7 +1799,7 @@ Responsibilities:
                     return (isOrdered ? '<ol class="space-y-2 my-4 list-decimal list-inside text-gray-300">' : '<ul class="space-y-2 my-4 list-disc list-inside text-gray-300">') + m + (isOrdered ? '</ol>' : '</ul>');
                 });
                 // paragraphs
-                const parts = text.split(/\\n\\n+/).map(function(p){ return p.trim(); }).filter(Boolean);
+                const parts = text.split(/\n\n+/).map(function(p){ return p.trim(); }).filter(Boolean);
                 return parts.map(function(p){ return p.startsWith('<') ? p : '<p class="mb-4 text-gray-300 leading-relaxed">' + p + '</p>'; }).join('\n');
             }
             
