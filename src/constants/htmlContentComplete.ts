@@ -1789,8 +1789,8 @@ Responsibilities:
                 text = text.replace(/^##\s+(.*)$/gm, '<h2 class="text-xl font-bold text-white mt-6 mb-3 border-b border-slate-600 pb-2">$1</h2>');
                 text = text.replace(/^#\s+(.*)$/gm, '<h1 class="text-2xl font-bold text-white mt-6 mb-4">$1</h1>');
                 // bold/italic
-                text = text.replace(/\*\*([^\*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
-                text = text.replace(/(^|\s)\*([^\*][^\*]*?)\*(?=\s|$)/g, '$1<em>$2</em>');
+                text = text.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+                text = text.replace(/(^|\s)\*([^*][^*]*?)\*(?=\s|$)/g, '$1<em>$2</em>');
                 // lists
                 text = text.replace(/^(\d+)\.\s+(.*)$/gm, '<li class="ml-6 mb-2 list-decimal">$2</li>');
                 text = text.replace(/^[-*]\s+(.*)$/gm, '<li class="ml-6 mb-2 list-disc">$1</li>');
