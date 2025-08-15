@@ -617,7 +617,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         
                         <!-- Right Column: Results Section -->
                         <div class="w-1/2 overflow-y-auto pl-3 border-l border-slate-600">
-                            <div id="resultsPanelContent" class="space-y-6">
+                            <div id="resultsPanelContent" class="space-y-6 p-4 bg-slate-800/50 rounded-lg">
                                 <!-- Results will appear here -->
                             </div>
                         </div>
@@ -742,8 +742,24 @@ Responsibilities:
                             <p id="progressPercent" class="text-xs text-gray-500 mb-4">0%</p>
                             
                             <!-- Fun Tips (rotating) -->
-                            <div class="text-xs text-gray-500 max-w-sm mx-auto">
+                            <div class="text-xs text-gray-500 max-w-sm mx-auto mb-6">
                                 <p id="funFactText" class="mb-2">💡 Tip: Quantified results (numbers!) are recruiter magnets.</p>
+                            </div>
+                            
+                            <!-- Mini Game Section -->
+                            <div class="bg-slate-700/50 rounded-lg p-4 max-w-md mx-auto border border-slate-600">
+                                <h4 class="text-sm font-semibold text-primary mb-3">🎮 While You Wait: Reaction Game!</h4>
+                                <div id="gameArea" class="mb-3">
+                                    <div id="gameInstructions" class="text-xs text-gray-400 mb-2">
+                                        Click the button when it turns green! Test your reflexes.
+                                    </div>
+                                    <button id="gameButton" class="w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors duration-200 cursor-pointer">
+                                        🔴 Wait for it...
+                                    </button>
+                                    <div id="gameScore" class="text-xs text-gray-400 mt-2 min-h-4">
+                                        Best reaction time: --
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -797,19 +813,42 @@ Responsibilities:
             "✨ Polishing actionable CV improvements...",
             "🧪 Pressure-testing examples for interviews...",
             "🚀 Drafting your personalized action plan...",
-            "🎉 Wrapping up with next steps you can use today..."
+            "🎉 Wrapping up with next steps you can use today...",
+            "🤖 Teaching robots to appreciate your awesomeness...",
+            "📊 Crunching numbers like a caffeinated accountant...",
+            "🎭 Rehearsing your elevator pitch with Shakespeare...",
+            "🔬 Analyzing your potential with scientific precision...",
+            "🎪 Juggling your skills like a career circus performer...",
+            "🧙‍♂️ Casting spells to make recruiters notice you...",
+            "🎨 Painting your professional masterpiece...",
+            "🏆 Polishing your achievements until they shine...",
+            "🎯 Aiming for career bullseyes...",
+            "🚀 Launching your career into orbit...",
+            "🔮 Predicting your bright professional future...",
+            "🎵 Composing your career symphony...",
+            "🏗️ Building bridges to your dream job...",
+            "🌟 Sprinkling some career magic dust...",
+            "🎲 Rolling the dice of opportunity..."
         ];
 
         // Rotating fun tips/facts displayed under the progress
         const FUN_FACTS = [
-            "Tip: Quantified results (numbers!) are recruiter magnets.",
-            "Pro: Mirror the job's top keywords in your resume summary.",
-            "Did you know? Tailored CVs get up to 3x more interviews.",
-            "Tip: Replace responsibilities with outcomes to stand out.",
-            "Pro: Keep bullets crisp—1 line wins more attention than 3.",
-            "Tip: Align your skills section with the job's requirements.",
-            "Pro: Lead with impact verbs—built, led, launched, improved.",
-            "Did you know? Most scans happen in under 10 seconds.",
+            "💡 Tip: Quantified results (numbers!) are recruiter magnets.",
+            "🎯 Pro: Mirror the job's top keywords in your resume summary.",
+            "📈 Did you know? Tailored CVs get up to 3x more interviews.",
+            "✨ Tip: Replace responsibilities with outcomes to stand out.",
+            "⚡ Pro: Keep bullets crisp—1 line wins more attention than 3.",
+            "🎪 Tip: Align your skills section with the job's requirements.",
+            "🚀 Pro: Lead with impact verbs—built, led, launched, improved.",
+            "⏰ Did you know? Most scans happen in under 10 seconds.",
+            "🎭 Fun fact: 'Responsible for' is the most overused phrase on resumes.",
+            "🧠 Pro tip: Use the STAR method (Situation, Task, Action, Result).",
+            "🎨 Did you know? White space makes your resume easier to read.",
+            "🔍 Tip: ATS systems love simple, clean formatting.",
+            "🎯 Pro: Your resume should tell a story, not list duties.",
+            "💎 Fun fact: The average recruiter spends 7.4 seconds on a resume.",
+            "🌟 Tip: Include soft skills through examples, not just lists.",
+            "🎪 Did you know? 75% of resumes never reach human eyes (ATS filters)."
         ];
 
         // API Configuration
@@ -1638,6 +1677,7 @@ Responsibilities:
             AppState.currentMessageIndex = 0;
             
             updateLoadingMessage();
+            initializeReactionGame();
             
             // Progress + timer update
             AppState.progressInterval = setInterval(() => {
@@ -1679,6 +1719,12 @@ Responsibilities:
                 clearInterval(AppState.pollInterval);
                 AppState.pollInterval = null;
             }
+            
+            // Clean up game
+            if (gameState.gameTimeout) {
+                clearTimeout(gameState.gameTimeout);
+                gameState.gameTimeout = null;
+            }
         }
 
         function updateLoadingMessage() {
@@ -1692,7 +1738,84 @@ Responsibilities:
             }
             if (funFactEl) {
                 const idx = Math.floor(Math.random() * FUN_FACTS.length);
-                funFactEl.textContent = '💡 ' + FUN_FACTS[idx];
+                funFactEl.textContent = FUN_FACTS[idx];
+            }
+        }
+
+        // Reaction Game Logic
+        let gameState = {
+            isWaiting: false,
+            startTime: 0,
+            bestTime: null,
+            gameTimeout: null,
+            attempts: 0
+        };
+
+        function initializeReactionGame() {
+            const gameButton = document.getElementById('gameButton');
+            if (!gameButton) return;
+            
+            gameButton.addEventListener('click', handleGameClick);
+            resetGame();
+        }
+
+        function resetGame() {
+            const gameButton = document.getElementById('gameButton');
+            if (!gameButton) return;
+            
+            gameState.isWaiting = false;
+            gameButton.className = 'w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors duration-200 cursor-pointer';
+            gameButton.textContent = '🔴 Click to start!';
+            
+            if (gameState.gameTimeout) {
+                clearTimeout(gameState.gameTimeout);
+                gameState.gameTimeout = null;
+            }
+            
+            // Start next round after a random delay
+            const delay = Math.random() * 4000 + 2000; // 2-6 seconds
+            gameState.gameTimeout = setTimeout(startReactionTest, delay);
+        }
+
+        function startReactionTest() {
+            const gameButton = document.getElementById('gameButton');
+            if (!gameButton) return;
+            
+            gameState.isWaiting = true;
+            gameState.startTime = Date.now();
+            gameButton.className = 'w-full py-3 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors duration-200 cursor-pointer animate-pulse';
+            gameButton.textContent = '🟢 CLICK NOW!';
+        }
+
+        function handleGameClick() {
+            const gameButton = document.getElementById('gameButton');
+            const gameScore = document.getElementById('gameScore');
+            if (!gameButton || !gameScore) return;
+            
+            if (gameState.isWaiting) {
+                // Good click!
+                const reactionTime = Date.now() - gameState.startTime;
+                gameState.attempts++;
+                
+                if (!gameState.bestTime || reactionTime < gameState.bestTime) {
+                    gameState.bestTime = reactionTime;
+                }
+                
+                gameButton.className = 'w-full py-3 px-4 bg-blue-500 text-white rounded-lg font-medium';
+                gameButton.textContent = '⚡ ' + reactionTime + 'ms - Nice!';
+                gameScore.textContent = 'Best: ' + gameState.bestTime + 'ms | Attempts: ' + gameState.attempts;
+                
+                setTimeout(resetGame, 1500);
+            } else {
+                // Too early!
+                gameButton.className = 'w-full py-3 px-4 bg-yellow-500 text-white rounded-lg font-medium';
+                gameButton.textContent = '⚠️ Too early! Wait for green...';
+                
+                if (gameState.gameTimeout) {
+                    clearTimeout(gameState.gameTimeout);
+                }
+                
+                setTimeout(resetGame, 1500);
             }
         }
 
@@ -1828,14 +1951,22 @@ Responsibilities:
             const twoColumnLayout = document.getElementById('twoColumnLayout');
             const inputSection = document.getElementById('inputSection');
             const uploadSection = document.getElementById('uploadSection');
+            const testResultsPanel = document.getElementById('resultsPanelContent');
             
             if (singleColumnLayout && twoColumnLayout && inputSection && uploadSection) {
                 // Move upload section to left column
                 inputSection.innerHTML = uploadSection.outerHTML;
                 
+                // Add test content to right column to verify it's working
+                if (testResultsPanel) {
+                    testResultsPanel.innerHTML = '<div class="text-white bg-red-500 p-4 rounded">🔍 DEBUG: Right column is working!</div>';
+                }
+                
                 // Hide single column and show two column layout
                 singleColumnLayout.classList.add('hidden');
                 twoColumnLayout.classList.remove('hidden');
+                
+                console.log('🔄 Switched to two-column layout');
             }
             
             // Simple markdown to HTML converter
@@ -1869,6 +2000,10 @@ Responsibilities:
             // Display results in the right column instead of the original results section
             const resultsPanelContent = document.getElementById('resultsPanelContent');
             const resultsContent = resultsPanelContent || document.getElementById('resultsContent');
+            
+            console.log('🔍 Debug - resultsPanelContent:', resultsPanelContent);
+            console.log('🔍 Debug - resultsContent:', resultsContent);
+            console.log('🔍 Debug - twoColumnLayout visible:', !document.getElementById('twoColumnLayout')?.classList.contains('hidden'));
             
             if (resultsContent && analysisData) {
                 // Determine analysis type
