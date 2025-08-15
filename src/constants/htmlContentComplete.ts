@@ -1967,23 +1967,16 @@ Responsibilities:
             // Simple markdown to HTML converter
             function mdToHtml(text) {
                 if (!text) return '';
-                // headers
-                text = text.replace(new RegExp('^###\\s+(.*)$', 'gm'), "<h3 class='text-lg font-bold text-primary mt-6 mb-3'>$1</h3>");
-                text = text.replace(new RegExp('^##\\s+(.*)$', 'gm'), "<h2 class='text-xl font-bold text-white mt-6 mb-3 border-b border-slate-600 pb-2'>$1</h2>");
-                text = text.replace(new RegExp('^#\\s+(.*)$', 'gm'), "<h1 class='text-2xl font-bold text-white mt-6 mb-4'>$1</h1>");
-                // bold/italic
-                text = text.replace(new RegExp('\\*\\*([^*]+)\\*\\*', 'g'), "<strong class='text-white font-semibold'>$1</strong>");
-                text = text.replace(new RegExp('(^|\\s)\\*([^*][^*]*?)\\*(?=\\s|$)', 'g'), '$1<em>$2</em>');
-                // lists
-                text = text.replace(new RegExp('^(\\d+)\\.\\s+(.*)$', 'gm'), "<li class='ml-6 mb-2 list-decimal'>$2</li>");
-                text = text.replace(new RegExp('^[-*]\\s+(.*)$', 'gm'), "<li class='ml-6 mb-2 list-disc'>$1</li>");
-                text = text.replace(new RegExp('(<li[^>]*>.*</li>\\s*)+', 'g'), function(m){
-                    const isOrdered = m.includes('list-decimal');
-                    return (isOrdered ? "<ol class='space-y-2 my-4 list-decimal list-inside text-gray-300'>" : "<ul class='space-y-2 my-4 list-disc list-inside text-gray-300'>") + m + (isOrdered ? '</ol>' : '</ul>');
-                });
-                // paragraphs
-                const parts = text.split(new RegExp('\\n\\n+', 'g')).map(function(p){ return p.trim(); }).filter(Boolean);
-                return parts.map(function(p){ return p.startsWith('<') ? p : "<p class='mb-4 text-gray-300 leading-relaxed'>" + p + '</p>'; }).join('\n');
+                
+                // Simple text processing - convert line breaks and basic formatting
+                text = text.replace(/\n\n+/g, '</p><p class="mb-4 text-gray-300 leading-relaxed">');
+                text = text.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+                text = text.replace(/\*([^*]+)\*/g, '<em class="text-gray-300">$1</em>');
+                
+                // Wrap in paragraph tags
+                text = '<p class="mb-4 text-gray-300 leading-relaxed">' + text + '</p>';
+                
+                return text;
             }
             
             const loadingSection = document.getElementById('loadingSection');
