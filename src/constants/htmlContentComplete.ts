@@ -617,7 +617,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         
                         <!-- Right Column: Results Section -->
                         <div class="w-1/2 overflow-y-auto pl-3 border-l border-slate-600">
-                            <div id="resultsPanelContent" class="space-y-6 p-4 bg-slate-800/50 rounded-lg">
+                            <div id="resultsPanelContent" class="space-y-6 p-4 text-gray-300">
                                 <!-- Results will appear here -->
                             </div>
                         </div>
@@ -1957,11 +1957,6 @@ Responsibilities:
                 // Move upload section to left column
                 inputSection.innerHTML = uploadSection.outerHTML;
                 
-                // Add test content to right column to verify it's working
-                if (testResultsPanel) {
-                    testResultsPanel.innerHTML = '<div class="text-white bg-red-500 p-4 rounded">🔍 DEBUG: Right column is working!</div>';
-                }
-                
                 // Hide single column and show two column layout
                 singleColumnLayout.classList.add('hidden');
                 twoColumnLayout.classList.remove('hidden');
@@ -1988,7 +1983,7 @@ Responsibilities:
                 });
                 // paragraphs
                 const parts = text.split(new RegExp('\\n\\n+', 'g')).map(function(p){ return p.trim(); }).filter(Boolean);
-                return parts.map(function(p){ return p.startsWith('<') ? p : "<p class='mb-4 text-gray-300 leading-relaxed'>" + p + '</p>'; }).join('\\n');
+                return parts.map(function(p){ return p.startsWith('<') ? p : "<p class='mb-4 text-gray-300 leading-relaxed'>" + p + '</p>'; }).join('\n');
             }
             
             const loadingSection = document.getElementById('loadingSection');
@@ -2023,12 +2018,18 @@ Responsibilities:
                 
                 // Main narrative content rendered as markdown
                 if (analysisData.narrative) {
+                    const convertedHtml = mdToHtml(analysisData.narrative);
+                    console.log('🔍 Debug - Original narrative:', analysisData.narrative);
+                    console.log('🔍 Debug - Converted HTML:', convertedHtml);
+                    
                     html += '<div class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border border-primary/30 rounded-lg p-6 mb-6">' +
                         '<h5 class="text-xl font-bold text-white mb-4 flex items-center">' +
                             '<i class="fas fa-' + (hasJobDescription ? 'bullseye' : 'user-tie') + ' text-primary mr-3"></i>' +
                             headerTitle +
                         '</h5>' +
-                        '<div class="prose prose-invert max-w-none">' + mdToHtml(analysisData.narrative) + '</div>' +
+                        '<div class="prose prose-invert max-w-none text-gray-300">' + 
+                            (convertedHtml || '<p class="text-gray-300">' + analysisData.narrative.replace(/\n/g, '<br>') + '</p>') + 
+                        '</div>' +
                     '</div>';
                 } else {
                     html += '<div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-6">' +
