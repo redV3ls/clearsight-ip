@@ -18,6 +18,7 @@ import { createDatabase } from '../config/database';
 import { NarrativeKVCache } from '../services/narrativeKVCache';
 import { NarrativeResponseFormatter } from '../services/narrativeResponseFormatter';
 import { CloudflareOptimizer, trackWorkerRequest, checkResourceLimits, getOptimizedQueryParams } from '../utils/cloudflareOptimizer';
+import { historyHandler, getAnalysisHandler, deleteAnalysisHandler } from './analyze/handlers/history';
 
 const analyze = new Hono<{ Bindings: Env }>();
 
@@ -1028,6 +1029,21 @@ analyze.post('/test-prompt', async (c: AuthenticatedContext) => {
     }, 500);
   }
 });
+
+/**
+ * GET /analyze/history - Get user's analysis history
+ */
+analyze.get('/history', historyHandler);
+
+/**
+ * GET /analyze/history/:id - Get specific analysis by ID
+ */
+analyze.get('/history/:id', getAnalysisHandler);
+
+/**
+ * DELETE /analyze/history/:id - Delete specific analysis
+ */
+analyze.delete('/history/:id', deleteAnalysisHandler);
 
 /**
  * GET /analyze/resume/history - Get user's resume analysis history

@@ -127,8 +127,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <a href="#features" class="nav-link text-gray-300 hover:text-primary">Success Stories</a>
                     <a href="#how-it-works" class="nav-link text-gray-300 hover:text-primary">How It Works</a>
                     <a href="#pricing" class="nav-link text-gray-300 hover:text-primary">Pricing</a>
-                    <a href="#demo" class="nav-link text-gray-300 hover:text-primary">Try Demo</a>
                     <a href="/docs" class="nav-link text-gray-300 hover:text-primary">API Docs</a>
+                    <a href="#history" id="historyLink" class="nav-link text-gray-300 hover:text-primary hidden">My Analyses</a>
                     
                     <div id="authButtons" class="flex items-center space-x-4">
                         <button id="headerLoginBtn" class="auth-button text-gray-300 hover:text-primary px-4 py-2 rounded-lg border border-gray-600 hover:border-primary transition-colors">
@@ -165,8 +165,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 <a href="#features" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">Success Stories</a>
                 <a href="#how-it-works" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">How It Works</a>
                 <a href="#pricing" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">Pricing</a>
-                <a href="#demo" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">Try Demo</a>
                 <a href="/docs" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">API Docs</a>
+                <a href="#history" id="mobileHistoryLink" class="mobile-menu-item block text-gray-300 hover:text-primary py-2 hidden">My Analyses</a>
             </div>
         </div>
     </nav>
@@ -447,9 +447,71 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     </div>
                 </div>
             </div>
-        </section>
+    </section>
 
-        <!-- Demo Section -->
+    <!-- My Analyses History Section -->
+    <section id="history" class="py-20 bg-slate-900 hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-white mb-4">My Analysis History</h2>
+                <p class="text-xl text-gray-300">
+                    View and manage all your previous resume analyses
+                </p>
+            </div>
+            
+            <!-- Filter and Sort Controls -->
+            <div class="bg-slate-800 rounded-lg p-4 mb-6 flex flex-wrap gap-4 items-center justify-between">
+                <div class="flex gap-4 items-center">
+                    <select id="historyFilter" class="bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-primary">
+                        <option value="all">All Analyses</option>
+                        <option value="completed">Completed</option>
+                        <option value="processing">Processing</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                    <select id="historySort" class="bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:border-primary">
+                        <option value="recent">Most Recent</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
+                </div>
+                <div class="flex gap-4 items-center">
+                    <span id="historyCount" class="text-gray-400">Loading...</span>
+                    <button id="refreshHistory" class="bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <!-- History Content -->
+            <div id="historyContent">
+                <!-- Loading State -->
+                <div id="historyLoading" class="text-center py-12">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-slate-800 rounded-full mb-4">
+                        <i class="fas fa-spinner fa-spin text-primary text-2xl"></i>
+                    </div>
+                    <p class="text-gray-400">Loading your analysis history...</p>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="historyEmpty" class="hidden text-center py-12">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-slate-800 rounded-full mb-4">
+                        <i class="fas fa-folder-open text-gray-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-300 mb-2">No Analyses Yet</h3>
+                    <p class="text-gray-400 mb-6">Start by analyzing your resume to see results here</p>
+                    <button onclick="showAnalysisInterface()" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Analyze Resume Now
+                    </button>
+                </div>
+                
+                <!-- History Grid -->
+                <div id="historyGrid" class="hidden grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <!-- Analysis cards will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
         <section id="demo" class="py-20 bg-slate-900">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
@@ -986,7 +1048,10 @@ Requirements:
             register: API_V1_BASE_URL + '/auth/register',
             logout: API_V1_BASE_URL + '/auth/logout',
             me: API_V1_BASE_URL + '/auth/me',
-            analyzeResume: API_V1_BASE_URL + '/analyze/resume'
+            analyzeResume: API_V1_BASE_URL + '/analyze/resume',
+            analysisHistory: API_V1_BASE_URL + '/analyze/history',
+            getAnalysis: (id) => API_V1_BASE_URL + '/analyze/history/' + id,
+            deleteAnalysis: (id) => API_V1_BASE_URL + '/analyze/history/' + id
         };
 
         // Initialize application
@@ -997,6 +1062,7 @@ Requirements:
             setupNavigationListeners();
             setupAuthListeners();
             setupAnalysisListeners();
+            setupHistoryListeners();
             setupUIListeners();
             
             // Check authentication status
@@ -1037,11 +1103,17 @@ Requirements:
             const authButtons = document.getElementById('authButtons');
             const userMenu = document.getElementById('userMenu');
             const userEmail = document.getElementById('userEmail');
+            const historyLink = document.getElementById('historyLink');
+            const mobileHistoryLink = document.getElementById('mobileHistoryLink');
 
             if (authButtons && userMenu && userEmail && AppState.user) {
                 authButtons.classList.add('hidden');
                 userMenu.classList.remove('hidden');
                 userEmail.textContent = AppState.user.email;
+                
+                // Show My Analyses links
+                if (historyLink) historyLink.classList.remove('hidden');
+                if (mobileHistoryLink) mobileHistoryLink.classList.remove('hidden');
             }
         }
 
@@ -1064,8 +1136,13 @@ Requirements:
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
+                    const targetId = this.getAttribute('href');
+                    const target = document.querySelector(targetId);
+                    
+                    // Handle history section specially
+                    if (targetId === '#history') {
+                        handleHistoryNavigation();
+                    } else if (target) {
                         target.scrollIntoView({
                             behavior: 'smooth',
                             block: 'start'
@@ -1188,6 +1265,334 @@ Requirements:
             
             console.log('Analysis listeners setup complete');
         }
+        
+        // Setup history section listeners
+        function setupHistoryListeners() {
+            const historyFilter = document.getElementById('historyFilter');
+            const historySort = document.getElementById('historySort');
+            const refreshHistory = document.getElementById('refreshHistory');
+            
+            historyFilter?.addEventListener('change', filterHistory);
+            historySort?.addEventListener('change', sortHistory);
+            refreshHistory?.addEventListener('click', loadAnalysisHistory);
+        }
+        
+        // History navigation handler
+        function handleHistoryNavigation() {
+            if (!AppState.user) {
+                showAuthModal('login');
+                showNotification('Please log in to view your analysis history.', 'info');
+                return;
+            }
+            
+            // Show history section
+            const historySection = document.getElementById('history');
+            if (historySection) {
+                // Hide all other sections first
+                document.querySelectorAll('section').forEach(section => {
+                    if (section.id !== 'history') {
+                        section.classList.add('hidden');
+                    }
+                });
+                
+                // Show history section
+                historySection.classList.remove('hidden');
+                
+                // Scroll to top of section
+                historySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // Load history data
+                loadAnalysisHistory();
+            }
+            
+            closeMobileMenu();
+        }
+        
+        // Load analysis history from API
+        async function loadAnalysisHistory() {
+            const historyLoading = document.getElementById('historyLoading');
+            const historyEmpty = document.getElementById('historyEmpty');
+            const historyGrid = document.getElementById('historyGrid');
+            const historyCount = document.getElementById('historyCount');
+            
+            // Show loading state
+            if (historyLoading) historyLoading.classList.remove('hidden');
+            if (historyEmpty) historyEmpty.classList.add('hidden');
+            if (historyGrid) historyGrid.classList.add('hidden');
+            if (historyCount) historyCount.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch(API_ENDPOINTS.analysisHistory, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayAnalysisHistory(data.analyses || []);
+                } else if (response.status === 401) {
+                    handleTokenExpiration();
+                } else {
+                    throw new Error('Failed to load history');
+                }
+            } catch (error) {
+                console.error('Error loading analysis history:', error);
+                showNotification('Failed to load analysis history. Please try again.', 'error');
+                
+                // Show empty state on error
+                if (historyLoading) historyLoading.classList.add('hidden');
+                if (historyEmpty) historyEmpty.classList.remove('hidden');
+                if (historyCount) historyCount.textContent = 'Error';
+            }
+        }
+        
+        // Display analysis history
+        function displayAnalysisHistory(analyses) {
+            const historyLoading = document.getElementById('historyLoading');
+            const historyEmpty = document.getElementById('historyEmpty');
+            const historyGrid = document.getElementById('historyGrid');
+            const historyCount = document.getElementById('historyCount');
+            
+            // Hide loading
+            if (historyLoading) historyLoading.classList.add('hidden');
+            
+            // Update count
+            if (historyCount) {
+                historyCount.textContent = analyses.length === 0 ? 'No analyses' : 
+                    analyses.length === 1 ? '1 analysis' : `${analyses.length} analyses`;
+            }
+            
+            if (!analyses || analyses.length === 0) {
+                // Show empty state
+                if (historyEmpty) historyEmpty.classList.remove('hidden');
+                if (historyGrid) historyGrid.classList.add('hidden');
+                return;
+            }
+            
+            // Hide empty state and show grid
+            if (historyEmpty) historyEmpty.classList.add('hidden');
+            if (historyGrid) {
+                historyGrid.classList.remove('hidden');
+                
+                // Store original data for filtering
+                AppState.allAnalyses = analyses;
+                
+                // Apply current filter and sort
+                applyFilterAndSort();
+            }
+        }
+        
+        // Filter history
+        function filterHistory() {
+            applyFilterAndSort();
+        }
+        
+        // Sort history
+        function sortHistory() {
+            applyFilterAndSort();
+        }
+        
+        // Apply filter and sort to history
+        function applyFilterAndSort() {
+            if (!AppState.allAnalyses) return;
+            
+            const historyFilter = document.getElementById('historyFilter');
+            const historySort = document.getElementById('historySort');
+            const historyGrid = document.getElementById('historyGrid');
+            
+            let filtered = [...AppState.allAnalyses];
+            
+            // Apply filter
+            const filterValue = historyFilter?.value || 'all';
+            if (filterValue !== 'all') {
+                filtered = filtered.filter(analysis => analysis.status === filterValue);
+            }
+            
+            // Apply sort
+            const sortValue = historySort?.value || 'recent';
+            filtered.sort((a, b) => {
+                const dateA = new Date(a.created_at);
+                const dateB = new Date(b.created_at);
+                return sortValue === 'recent' ? dateB - dateA : dateA - dateB;
+            });
+            
+            // Render filtered and sorted analyses
+            renderAnalysisCards(filtered);
+        }
+        
+        // Render analysis cards
+        function renderAnalysisCards(analyses) {
+            const historyGrid = document.getElementById('historyGrid');
+            if (!historyGrid) return;
+            
+            historyGrid.innerHTML = '';
+            
+            analyses.forEach(analysis => {
+                const card = createAnalysisCard(analysis);
+                historyGrid.appendChild(card);
+            });
+        }
+        
+        // Create analysis card element
+        function createAnalysisCard(analysis) {
+            const card = document.createElement('div');
+            card.className = 'bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-primary transition-all';
+            
+            // Determine status color and icon
+            let statusColor = 'text-gray-400';
+            let statusIcon = 'fa-circle';
+            let statusBg = 'bg-gray-600/20';
+            
+            if (analysis.status === 'completed') {
+                statusColor = 'text-green-400';
+                statusIcon = 'fa-check-circle';
+                statusBg = 'bg-green-600/20';
+            } else if (analysis.status === 'processing') {
+                statusColor = 'text-yellow-400';
+                statusIcon = 'fa-spinner fa-spin';
+                statusBg = 'bg-yellow-600/20';
+            } else if (analysis.status === 'failed') {
+                statusColor = 'text-red-400';
+                statusIcon = 'fa-exclamation-circle';
+                statusBg = 'bg-red-600/20';
+            }
+            
+            // Determine analysis type
+            const hasJob = analysis.has_job_description || analysis.analysis_type === 'job-comparison';
+            const typeText = hasJob ? 'Job Match Analysis' : 'CV Analysis';
+            const typeIcon = hasJob ? 'fa-bullseye' : 'fa-user-tie';
+            
+            // Format date
+            const date = new Date(analysis.created_at);
+            const formattedDate = date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas ${typeIcon} text-primary"></i>
+                        <span class="font-semibold text-white">${typeText}</span>
+                    </div>
+                    <div class="${statusBg} px-2 py-1 rounded-full">
+                        <i class="fas ${statusIcon} ${statusColor} text-xs"></i>
+                        <span class="${statusColor} text-xs ml-1">${analysis.status}</span>
+                    </div>
+                </div>
+                
+                <div class="text-gray-400 text-sm mb-4">
+                    <i class="fas fa-clock mr-1"></i>
+                    ${formattedDate}
+                </div>
+                
+                ${analysis.narrative ? `
+                    <div class="text-gray-300 text-sm mb-4 line-clamp-3">
+                        ${analysis.narrative.substring(0, 150)}${analysis.narrative.length > 150 ? '...' : ''}
+                    </div>
+                ` : ''}
+                
+                <div class="flex gap-2">
+                    ${analysis.status === 'completed' ? `
+                        <button onclick="viewAnalysis('${analysis.id}')" class="flex-1 bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                            <i class="fas fa-eye mr-1"></i>
+                            View
+                        </button>
+                    ` : ''}
+                    ${analysis.status === 'processing' ? `
+                        <button onclick="checkAnalysisStatus('${analysis.id}')" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                            <i class="fas fa-sync-alt mr-1"></i>
+                            Check Status
+                        </button>
+                    ` : ''}
+                    <button onclick="deleteAnalysis('${analysis.id}')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                        <i class="fas fa-trash mr-1"></i>
+                        Delete
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // View analysis details
+        window.viewAnalysis = async function(analysisId) {
+            try {
+                const response = await fetch(API_ENDPOINTS.getAnalysis(analysisId), {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    // Display the analysis in the analysis interface
+                    displayAnalysisResults(data.analysis || data);
+                    showAnalysisInterface();
+                } else {
+                    throw new Error('Failed to load analysis');
+                }
+            } catch (error) {
+                console.error('Error viewing analysis:', error);
+                showNotification('Failed to load analysis details.', 'error');
+            }
+        };
+        
+        // Check analysis status
+        window.checkAnalysisStatus = async function(analysisId) {
+            try {
+                const response = await fetch(API_ENDPOINTS.getAnalysis(analysisId), {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'completed') {
+                        showNotification('Analysis completed! Refreshing...', 'success');
+                        loadAnalysisHistory();
+                    } else if (data.status === 'processing') {
+                        showNotification('Analysis is still processing. Please check back later.', 'info');
+                    } else {
+                        showNotification(`Analysis status: ${data.status}`, 'info');
+                    }
+                } else {
+                    throw new Error('Failed to check status');
+                }
+            } catch (error) {
+                console.error('Error checking analysis status:', error);
+                showNotification('Failed to check analysis status.', 'error');
+            }
+        };
+        
+        // Delete analysis
+        window.deleteAnalysis = async function(analysisId) {
+            if (!confirm('Are you sure you want to delete this analysis? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(API_ENDPOINTS.deleteAnalysis(analysisId), {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    showNotification('Analysis deleted successfully.', 'success');
+                    loadAnalysisHistory();
+                } else {
+                    throw new Error('Failed to delete analysis');
+                }
+            } catch (error) {
+                console.error('Error deleting analysis:', error);
+                showNotification('Failed to delete analysis.', 'error');
+            }
+        };
 
         // UI utility functions
         function setupUIListeners() {
@@ -2602,6 +3007,9 @@ Requirements:
             }
             showAnalysisInterface();
         }
+        
+        // Add startAnalysisFromDemo button handler
+        document.getElementById('startAnalysisFromDemo')?.addEventListener('click', handleAnalyzeSkillsClick);
 
         // Helper functions for analysis results
         function startNewAnalysis() {
