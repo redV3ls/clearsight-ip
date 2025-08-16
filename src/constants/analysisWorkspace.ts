@@ -2168,29 +2168,119 @@ Include everything you can find:
             }
 
             formatConversationalContent(content) {
-                if (!content) return '<p class="text-gray-300">I\\'m still analyzing this section...</p>';
+                if (!content) return '<p class="text-gray-300">I\'m still analyzing this section...</p>';
                 
-                // Convert markdown to HTML and make it conversational
-                let html = content;
+                // Use marked.js for proper markdown parsing if available
+                let html = '';
+                if (typeof marked !== 'undefined') {
+                    html = marked.parse(content);
+                } else {
+                    html = content;
+                }
                 
-                // Convert markdown headers to conversational format
-                html = html.replace(/#{1,6}\\s+(.+)/g, '<h4 class="text-lg font-semibold text-white mt-4 mb-2">$1</h4>');
+                // Enhanced formatting with styled components
                 
-                // Convert bold text
-                html = html.replace(/\\*\\*(.+?)\\*\\*/g, '<strong class="text-white">$1</strong>');
+                // Format match scores (e.g., "Match Score: 72%" or "Score: 85%")
+                html = html.replace(/(Match\s+Score|Score|Fit|Compatibility)[:\s]+(\d+)%/gi, (match, label, score) => {
+                    const scoreNum = parseInt(score);
+                    let scoreColor = 'text-red-400';
+                    let bgColor = 'bg-red-500/10';
+                    let borderColor = 'border-red-500/30';
+                    
+                    if (scoreNum >= 80) {
+                        scoreColor = 'text-green-400';
+                        bgColor = 'bg-green-500/10';
+                        borderColor = 'border-green-500/30';
+                    } else if (scoreNum >= 60) {
+                        scoreColor = 'text-yellow-400';
+                        bgColor = 'bg-yellow-500/10';
+                        borderColor = 'border-yellow-500/30';
+                    }
+                    
+                    return `<div class="inline-flex items-center space-x-3 ${bgColor} ${borderColor} border rounded-lg px-4 py-2 mb-4">
+                        <span class="text-gray-300 font-medium">${label}:</span>
+                        <span class="${scoreColor} text-2xl font-bold">${score}%</span>
+                        <div class="w-32 h-2 bg-slate-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-primary to-accent" style="width: ${score}%"></div>
+                        </div>
+                    </div>`;
+                });
                 
-                // Convert bullet points to conversational lists
-                html = html.replace(/^[•\\-\\*]\\s+(.+)$/gm, '<div class="flex items-start space-x-2 mb-2"><i class="fas fa-check text-primary mt-1 text-sm"></i><span class="text-gray-300">$1</span></div>');
+                // Format Critical Gaps sections
+                html = html.replace(/(Critical\s+Gaps?|Missing\s+Skills?|Key\s+Gaps?|Skills?\s+to\s+Develop)[:\s]*(<\/?(p|h\d)>)?/gi, 
+                    '<div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">' +
+                    '<div class="flex items-center text-red-400 mb-3">' +
+                    '<i class="fas fa-exclamation-triangle mr-2"></i>' +
+                    '<span class="font-semibold text-lg">Critical Gaps:</span>' +
+                    '</div>');
                 
-                // Convert paragraphs
-                html = html.replace(/\\n\\n/g, '</p><p class="text-gray-300 mb-3">');
-                html = '<p class="text-gray-300 mb-3">' + html + '</p>';
+                // Format Quick Wins sections
+                html = html.replace(/(Quick\s+Wins?|Immediate\s+Actions?|Next\s+Steps?|Recommendations?)[:\s]*(<\/?(p|h\d)>)?/gi, 
+                    '<div class="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-4">' +
+                    '<div class="flex items-center text-green-400 mb-3">' +
+                    '<i class="fas fa-lightbulb mr-2"></i>' +
+                    '<span class="font-semibold text-lg">Quick Wins:</span>' +
+                    '</div>');
+                
+                // Format important skills or technologies (words in quotes or specific tech terms)
+                html = html.replace(/["']([^"']+)["']/g, '<span class="text-primary font-medium">$1</span>');
+                html = html.replace(/\b(TypeScript|JavaScript|Python|React|Node\.js|AWS|Docker|Kubernetes|GraphQL|REST API|CI\/CD|Agile|Scrum)\b/g, 
+                    '<span class="bg-slate-700 text-primary px-2 py-1 rounded text-sm font-medium">$1</span>');
+                
+                // Format percentages with visual indicators
+                html = html.replace(/(\d+)%/g, (match, num) => {
+                    const percentage = parseInt(num);
+                    if (percentage >= 80) {
+                        return `<span class="text-green-400 font-semibold">${num}%</span>`;
+                    } else if (percentage >= 60) {
+                        return `<span class="text-yellow-400 font-semibold">${num}%</span>`;
+                    } else {
+                        return `<span class="text-red-400 font-semibold">${num}%</span>`;
+                    }
+                });
+                
+                // Format time estimates (e.g., "2-3 weeks", "4-6 weeks")
+                html = html.replace(/(\d+[-–]\d+\s+(?:weeks?|months?|days?))/gi, 
+                    '<span class="bg-slate-700 text-yellow-400 px-2 py-1 rounded text-sm">📅 $1</span>');
+                
+                // Convert markdown headers to styled headers
+                html = html.replace(/<h1>/g, '<h1 class="text-2xl font-bold text-white mt-6 mb-3">');
+                html = html.replace(/<h2>/g, '<h2 class="text-xl font-bold text-white mt-5 mb-3">');
+                html = html.replace(/<h3>/g, '<h3 class="text-lg font-semibold text-white mt-4 mb-2">');
+                html = html.replace(/<h4>/g, '<h4 class="text-base font-semibold text-white mt-3 mb-2">');
+                
+                // Style paragraphs
+                html = html.replace(/<p>/g, '<p class="text-gray-300 mb-3 leading-relaxed">');
+                
+                // Convert bullet points to styled lists
+                html = html.replace(/<ul>/g, '<ul class="space-y-2 mb-4">');
+                html = html.replace(/<li>/g, '<li class="flex items-start space-x-2"><i class="fas fa-chevron-right text-primary mt-1 text-sm"></i><span class="text-gray-300">');
+                html = html.replace(/<\/li>/g, '</span></li>');
+                
+                // Style strong/bold text
+                html = html.replace(/<strong>/g, '<strong class="text-white font-semibold">');
+                html = html.replace(/<b>/g, '<b class="text-white font-semibold">');
+                
+                // Add icons for specific keywords
+                html = html.replace(/\b(Warning|Caution|Important):/gi, 
+                    '<span class="text-yellow-400"><i class="fas fa-exclamation-circle mr-1"></i>$1:</span>');
+                html = html.replace(/\b(Success|Excellent|Great):/gi, 
+                    '<span class="text-green-400"><i class="fas fa-check-circle mr-1"></i>$1:</span>');
+                html = html.replace(/\b(Error|Failed|Problem):/gi, 
+                    '<span class="text-red-400"><i class="fas fa-times-circle mr-1"></i>$1:</span>');
                 
                 // Make it more conversational by adding personal pronouns
                 html = html.replace(/The candidate/gi, 'You');
                 html = html.replace(/This person/gi, 'You');
                 html = html.replace(/They have/gi, 'You have');
                 html = html.replace(/Their/gi, 'Your');
+                
+                // Close any unclosed divs from section formatting
+                const openDivs = (html.match(/<div/g) || []).length;
+                const closeDivs = (html.match(/<\/div>/g) || []).length;
+                if (openDivs > closeDivs) {
+                    html += '</div>'.repeat(openDivs - closeDivs);
+                }
                 
                 return html;
             }
