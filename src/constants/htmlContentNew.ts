@@ -168,80 +168,13 @@ const getInlineAppScript = () => {
                 </section>
             </main>
 
-            <!-- Analysis Interface Modal -->
+            <!-- Tabbed Analysis Interface -->
+            <div id="tabbedAnalysisContainer" class="hidden"></div>
+            
+            <!-- Analysis Interface Modal (for backward compatibility) -->
             <div id="analysisInterface" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                <div class="bg-slate-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-bold text-primary">AI-Powered Skills Analysis</h2>
-                            <button onclick="hideAnalysisInterface()" class="text-gray-400 hover:text-white">
-                                <i class="fas fa-times text-xl"></i>
-                            </button>
-                        </div>
-
-                        <div id="uploadSection" class="space-y-6">
-                            <div>
-                                <label class="block text-lg font-semibold text-gray-200 mb-3">
-                                    <i class="fas fa-file-alt mr-2 text-primary"></i>Upload Your CV/Resume
-                                </label>
-                                <div onclick="document.getElementById('cvFileInput').click()" class="border-2 border-dashed border-gray-600 hover:border-primary rounded-lg p-8 text-center cursor-pointer transition-colors">
-                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
-                                    <p class="text-gray-300 mb-2">Drop your CV here or click to browse</p>
-                                    <p class="text-sm text-gray-500">PDF, DOC, DOCX, or TXT (max 5MB)</p>
-                                </div>
-                                <input type="file" id="cvFileInput" class="hidden" accept=".pdf,.doc,.docx,.txt" onchange="handleFileSelect(this.files[0], 'cv')">
-                                <div id="cvFileInfo" class="hidden mt-3 p-3 bg-slate-700 rounded-lg flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-file text-primary mr-2"></i>
-                                        <span id="cvFileName" class="text-gray-200"></span>
-                                    </div>
-                                    <button onclick="clearFile('cv')" class="text-red-400 hover:text-red-300">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div id="analysisError" class="hidden bg-red-900/20 border border-red-500/30 rounded-lg p-4">
-                                <div class="flex items-center text-red-400">
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                                    <span class="font-semibold">Error</span>
-                                </div>
-                                <p class="text-red-300 mt-1"></p>
-                            </div>
-
-                            <div class="flex justify-end space-x-4">
-                                <button onclick="hideAnalysisInterface()" class="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:border-gray-500 transition-colors">
-                                    Cancel
-                                </button>
-                                <button onclick="performAnalysis()" class="px-6 py-3 bg-primary hover:bg-primary/80 text-white rounded-lg transition-colors">
-                                    <i class="fas fa-brain mr-2"></i>Start AI Analysis
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="loadingSection" class="hidden text-center py-12">
-                            <div class="relative mb-8">
-                                <div class="animate-spin w-20 h-20 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-                                <div class="absolute inset-0 flex items-center justify-center">
-                                    <i class="fas fa-brain text-primary text-2xl animate-pulse"></i>
-                                </div>
-                            </div>
-                            <h3 class="text-2xl font-bold text-gray-200 mb-4">
-                                <i class="fas fa-brain mr-2"></i>AI Analysis in Progress...
-                            </h3>
-                            <div class="bg-slate-700 rounded-lg p-6 mb-6 max-w-md mx-auto">
-                                <p class="text-gray-300 mb-4">Our AI is working its magic on your profile!</p>
-                                <div class="w-full bg-gray-600 rounded-full h-3 mb-4 overflow-hidden">
-                                    <div id="progressBar" class="bg-gradient-to-r from-primary to-blue-400 h-3 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
-                                </div>
-                                <p id="progressText" class="text-sm text-primary animate-pulse font-medium">🧠 Initializing AI brain...</p>
-                            </div>
-                        </div>
-
-                        <div id="resultsSection" class="hidden">
-                            <div id="resultsContent" class="space-y-6"></div>
-                        </div>
-                    </div>
+                <div id="analysisContent" class="bg-slate-800 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden">
+                    <!-- Content will be dynamically inserted here -->
                 </div>
             </div>
 
@@ -466,9 +399,121 @@ const getInlineAppScript = () => {
         }
     }
 
+    // Import the tabbed interface module dynamically
+    async function loadTabbedInterface() {
+        try {
+            const module = await import('/js/TabbedAnalysisInterface.js');
+            return module.TabbedAnalysisInterface || module.default;
+        } catch (error) {
+            console.error('Failed to load tabbed interface:', error);
+            return null;
+        }
+    }
+
     // Analysis functions
-    function showAnalysisInterface() {
-        document.getElementById('analysisInterface').classList.remove('hidden');
+    async function showAnalysisInterface() {
+        const analysisInterface = document.getElementById('analysisInterface');
+        const analysisContent = document.getElementById('analysisContent');
+        
+        // Try to load and use the tabbed interface
+        const TabbedInterface = await loadTabbedInterface();
+        
+        if (TabbedInterface && analysisContent) {
+            // Use the new tabbed interface
+            analysisInterface.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Initialize the tabbed interface inside the modal
+            analysisContent.innerHTML = '<div id="tabbedContent"></div>';
+            new TabbedInterface('tabbedContent');
+        } else {
+            // Fallback to legacy modal interface
+            showLegacyAnalysisInterface();
+        }
+    }
+    
+    function showLegacyAnalysisInterface() {
+        const analysisInterface = document.getElementById('analysisInterface');
+        const analysisContent = document.getElementById('analysisContent');
+        
+        if (!analysisContent) return;
+        
+        // Insert legacy modal content
+        analysisContent.innerHTML = `
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-primary">AI-Powered Skills Analysis</h2>
+                    <button onclick="hideAnalysisInterface()" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div id="uploadSection" class="space-y-6">
+                    <div>
+                        <label class="block text-lg font-semibold text-gray-200 mb-3">
+                            <i class="fas fa-file-alt mr-2 text-primary"></i>Upload Your CV/Resume
+                        </label>
+                        <div onclick="document.getElementById('cvFileInput').click()" class="border-2 border-dashed border-gray-600 hover:border-primary rounded-lg p-8 text-center cursor-pointer transition-colors">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-gray-300 mb-2">Drop your CV here or click to browse</p>
+                            <p class="text-sm text-gray-500">PDF, DOC, DOCX, or TXT (max 5MB)</p>
+                        </div>
+                        <input type="file" id="cvFileInput" class="hidden" accept=".pdf,.doc,.docx,.txt" onchange="handleFileSelect(this.files[0], 'cv')">
+                        <div id="cvFileInfo" class="hidden mt-3 p-3 bg-slate-700 rounded-lg flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-file text-primary mr-2"></i>
+                                <span id="cvFileName" class="text-gray-200"></span>
+                            </div>
+                            <button onclick="clearFile('cv')" class="text-red-400 hover:text-red-300">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="analysisError" class="hidden bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+                        <div class="flex items-center text-red-400">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <span class="font-semibold">Error</span>
+                        </div>
+                        <p class="text-red-300 mt-1"></p>
+                    </div>
+
+                    <div class="flex justify-end space-x-4">
+                        <button onclick="hideAnalysisInterface()" class="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:border-gray-500 transition-colors">
+                            Cancel
+                        </button>
+                        <button onclick="performAnalysis()" class="px-6 py-3 bg-primary hover:bg-primary/80 text-white rounded-lg transition-colors">
+                            <i class="fas fa-brain mr-2"></i>Start AI Analysis
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loadingSection" class="hidden text-center py-12">
+                    <div class="relative mb-8">
+                        <div class="animate-spin w-20 h-20 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-brain text-primary text-2xl animate-pulse"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-200 mb-4">
+                        <i class="fas fa-brain mr-2"></i>AI Analysis in Progress...
+                    </h3>
+                    <div class="bg-slate-700 rounded-lg p-6 mb-6 max-w-md mx-auto">
+                        <p class="text-gray-300 mb-4">Our AI is working its magic on your profile!</p>
+                        <div class="w-full bg-gray-600 rounded-full h-3 mb-4 overflow-hidden">
+                            <div id="progressBar" class="bg-gradient-to-r from-primary to-blue-400 h-3 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                        </div>
+                        <p id="progressText" class="text-sm text-primary animate-pulse font-medium">🧠 Initializing AI brain...</p>
+                    </div>
+                </div>
+
+                <div id="resultsSection" class="hidden">
+                    <div id="resultsContent" class="space-y-6"></div>
+                </div>
+            </div>
+        `;
+        
+        analysisInterface.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
 
