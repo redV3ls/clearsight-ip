@@ -1475,48 +1475,47 @@ Requirements:
                 minute: '2-digit'
             });
             
-            card.innerHTML = `
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center space-x-2">
-                        <i class="fas ${typeIcon} text-primary"></i>
-                        <span class="font-semibold text-white">${typeText}</span>
-                    </div>
-                    <div class="${statusBg} px-2 py-1 rounded-full">
-                        <i class="fas ${statusIcon} ${statusColor} text-xs"></i>
-                        <span class="${statusColor} text-xs ml-1">${analysis.status}</span>
-                    </div>
-                </div>
+            card.innerHTML = 
+                '<div class="flex justify-between items-start mb-4">' +
+                    '<div class="flex items-center space-x-2">' +
+                        '<i class="fas ' + typeIcon + ' text-primary"></i>' +
+                        '<span class="font-semibold text-white">' + typeText + '</span>' +
+                    '</div>' +
+                    '<div class="' + statusBg + ' px-2 py-1 rounded-full">' +
+                        '<i class="fas ' + statusIcon + ' ' + statusColor + ' text-xs"></i>' +
+                        '<span class="' + statusColor + ' text-xs ml-1">' + analysis.status + '</span>' +
+                    '</div>' +
+                '</div>' +
                 
-                <div class="text-gray-400 text-sm mb-4">
-                    <i class="fas fa-clock mr-1"></i>
-                    ${formattedDate}
-                </div>
+                '<div class="text-gray-400 text-sm mb-4">' +
+                    '<i class="fas fa-clock mr-1"></i>' +
+                    formattedDate +
+                '</div>' +
                 
-                ${analysis.narrative ? `
-                    <div class="text-gray-300 text-sm mb-4 line-clamp-3">
-                        ${analysis.narrative.substring(0, 150)}${analysis.narrative.length > 150 ? '...' : ''}
-                    </div>
-                ` : ''}
+                (analysis.narrative ? 
+                    '<div class="text-gray-300 text-sm mb-4 line-clamp-3">' +
+                        analysis.narrative.substring(0, 150) + (analysis.narrative.length > 150 ? '...' : '') +
+                    '</div>'
+                : '') +
                 
-                <div class="flex gap-2">
-                    ${analysis.status === 'completed' ? `
-                        <button onclick="viewAnalysis('${analysis.id}')" class="flex-1 bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg text-sm transition-colors">
-                            <i class="fas fa-eye mr-1"></i>
-                            View
-                        </button>
-                    ` : ''}
-                    ${analysis.status === 'processing' ? `
-                        <button onclick="checkAnalysisStatus('${analysis.id}')" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
-                            <i class="fas fa-sync-alt mr-1"></i>
-                            Check Status
-                        </button>
-                    ` : ''}
-                    <button onclick="deleteAnalysis('${analysis.id}')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
-                        <i class="fas fa-trash mr-1"></i>
-                        Delete
-                    </button>
-                </div>
-            `;
+                '<div class="flex gap-2">' +
+                    (analysis.status === 'completed' ? 
+                        '<button onclick="viewAnalysis(\'' + analysis.id + '\')" class="flex-1 bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg text-sm transition-colors">' +
+                            '<i class="fas fa-eye mr-1"></i>' +
+                            'View' +
+                        '</button>'
+                    : '') +
+                    (analysis.status === 'processing' ? 
+                        '<button onclick="checkAnalysisStatus(\'' + analysis.id + '\')" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">' +
+                            '<i class="fas fa-sync-alt mr-1"></i>' +
+                            'Check Status' +
+                        '</button>'
+                    : '') +
+                    '<button onclick="deleteAnalysis(\'' + analysis.id + '\')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">' +
+                        '<i class="fas fa-trash mr-1"></i>' +
+                        'Delete' +
+                    '</button>' +
+                '</div>';
             
             return card;
         }
