@@ -2053,6 +2053,9 @@ Requirements:
             console.log('🎨 Displaying analysis results:', analysisData);
             stopLoadingAnimation();
             
+            // IMPORTANT: Switch to Analysis tab to show results
+            switchAnalysisTab('analysis');
+            
             // Expand modal to show results
             const analysisModal = document.getElementById('analysisModal');
             if (analysisModal) {
@@ -2160,6 +2163,7 @@ Requirements:
                 return text;
             }
             
+            // Hide loading and show results within the Analysis tab
             const loadingSection = document.getElementById('loadingSection');
             const resultsSection = document.getElementById('resultsSection');
             
