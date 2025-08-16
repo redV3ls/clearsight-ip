@@ -2137,7 +2137,7 @@ Requirements:
                 if (!text) return '';
                 
                 // Process line by line to handle headers and lists
-                var lines = text.split('\n');
+                var lines = text.split('\\n');
                 var processedLines = [];
                 var inList = false;
                 
