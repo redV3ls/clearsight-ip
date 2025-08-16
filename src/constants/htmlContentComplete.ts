@@ -1084,7 +1084,7 @@ Requirements:
 
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.success) {
+            if (response.ok) {
                         AppState.user = data.data.user;
                         updateUIForAuthenticatedUser();
                     }
@@ -1523,7 +1523,7 @@ Requirements:
         // View analysis details
         window.viewAnalysis = async function(analysisId) {
             try {
-                const response = await fetch(API_ENDPOINTS.getAnalysis(analysisId), {
+                const response = await fetch(API_ENDPOINTS.getAnalysis(analysisId), {\n                    method: 'GET',\n                    headers: { ...getAuthHeaders() },
                     method: 'GET',
                     credentials: 'include'
                 });
