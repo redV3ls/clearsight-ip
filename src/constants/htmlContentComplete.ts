@@ -1757,11 +1757,13 @@ Requirements:
         window.resetToUploadScreen = function() {
             stopLoadingAnimation();
             
-            const uploadSection = document.getElementById('uploadSection');
+            // Switch back to upload tab
+            switchAnalysisTab('upload');
+            
+            // Hide loading and results sections within Analysis tab
             const loadingSection = document.getElementById('loadingSection');
             const resultsSection = document.getElementById('resultsSection');
             
-            if (uploadSection) uploadSection.classList.remove('hidden');
             if (loadingSection) loadingSection.classList.add('hidden');
             if (resultsSection) resultsSection.classList.add('hidden');
             
@@ -1770,6 +1772,21 @@ Requirements:
             if (progressBar) {
                 progressBar.style.width = '0%';
             }
+            
+            // Reset modal size back to normal
+            const analysisModal = document.getElementById('analysisModal');
+            if (analysisModal) {
+                analysisModal.classList.remove('max-w-6xl');
+                analysisModal.classList.add('max-w-4xl');
+            }
+            
+            // Clear any existing game state
+            if (gameState.gameTimeout) {
+                clearTimeout(gameState.gameTimeout);
+                gameState.gameTimeout = null;
+            }
+            gameState.attempts = 0;
+            gameState.bestTime = null;
             
             AppState.isAnalyzing = false;
             updateAnalysisButton();
@@ -1808,7 +1825,11 @@ Requirements:
                 const progressBar = document.getElementById('progressBar');
                 const percentEl = document.getElementById('progressPercent');
                 const timerEl = document.getElementById('timerText');
-                if (progressBar) progressBar.style.width = Math.max(0, Math.min(100, progress)).toFixed(0) + '%';
+                if (progressBar) {
+                    progressBar.style.width = Math.max(0, Math.min(100, progress)).toFixed(0) + '%';
+                    // Add a subtle animation to the progress bar
+                    progressBar.style.transition = 'width 0.9s ease-out';
+                }
                 if (percentEl) percentEl.textContent = Math.floor(progress) + '%';
                 if (timerEl) timerEl.textContent = '⏱️ ' + formatTime(elapsed) + ' elapsed • ~' + formatTime(remaining) + ' remaining';
             }, 900);
@@ -1867,19 +1888,40 @@ Requirements:
 
         function initializeReactionGame() {
             const gameButton = document.getElementById('gameButton');
-            if (!gameButton) return;
+            if (!gameButton) {
+                console.log('Game button not found, skipping game initialization');
+                return;
+            }
             
-            gameButton.addEventListener('click', handleGameClick);
+            // Remove any existing event listeners to prevent duplicates
+            const newButton = gameButton.cloneNode(true);
+            gameButton.parentNode.replaceChild(newButton, gameButton);
+            
+            // Add fresh event listener
+            newButton.addEventListener('click', handleGameClick);
+            
+            // Reset game state
+            gameState = {
+                isWaiting: false,
+                startTime: 0,
+                bestTime: null,
+                gameTimeout: null,
+                attempts: 0
+            };
+            
             resetGame();
         }
 
         function resetGame() {
             const gameButton = document.getElementById('gameButton');
-            if (!gameButton) return;
+            if (!gameButton) {
+                console.log('Game button not found in resetGame');
+                return;
+            }
             
             gameState.isWaiting = false;
             gameButton.className = 'w-full py-3 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors duration-200 cursor-pointer';
-            gameButton.textContent = '🔴 Click to start!';
+            gameButton.textContent = '🔴 Wait for green...';
             
             if (gameState.gameTimeout) {
                 clearTimeout(gameState.gameTimeout);
@@ -1901,10 +1943,19 @@ Requirements:
             gameButton.textContent = '🟢 CLICK NOW!';
         }
 
-        function handleGameClick() {
+        function handleGameClick(e) {
+            // Prevent event bubbling
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
             const gameButton = document.getElementById('gameButton');
             const gameScore = document.getElementById('gameScore');
-            if (!gameButton || !gameScore) return;
+            if (!gameButton || !gameScore) {
+                console.log('Game elements not found in handleGameClick');
+                return;
+            }
             
             if (gameState.isWaiting) {
                 // Good click!
@@ -2086,43 +2137,85 @@ Requirements:
                 if (!text) return '';
                 
                 // Process line by line to handle headers and lists
-                var lines = text.split('\\n');
+                var lines = text.split('\n');
                 var processedLines = [];
+                var inList = false;
                 
                 for (var i = 0; i < lines.length; i++) {
                     var line = lines[i];
                     var processedLine = line;
                     
-                    // Process headers (### ## #)
-                    if (line.indexOf('### ') === 0) {
+                    // Process headers (#### ### ## #)
+                    if (line.indexOf('#### ') === 0) {
+                        var headerText = line.substring(5);
+                        processedLine = '<h4 class="text-base font-semibold text-gray-200 mt-4 mb-2">' + headerText + '</h4>';
+                        inList = false;
+                    } else if (line.indexOf('### ') === 0) {
                         var headerText = line.substring(4);
-                        processedLine = '<h3 class="text-lg font-bold text-primary mt-6 mb-3">' + headerText + '</h3>';
+                        processedLine = '<h3 class="text-lg font-bold text-primary mt-5 mb-2">' + headerText + '</h3>';
+                        inList = false;
                     } else if (line.indexOf('## ') === 0) {
                         var headerText = line.substring(3);
                         processedLine = '<h2 class="text-xl font-bold text-white mt-6 mb-3 border-b border-slate-600 pb-2">' + headerText + '</h2>';
+                        inList = false;
                     } else if (line.indexOf('# ') === 0) {
                         var headerText = line.substring(2);
                         processedLine = '<h1 class="text-2xl font-bold text-white mt-6 mb-4">' + headerText + '</h1>';
+                        inList = false;
                     }
                     // Process lists
                     else if (line.indexOf('- ') === 0) {
                         var listText = line.substring(2);
-                        processedLine = '<li class="ml-6 mb-2 list-disc text-gray-300">' + listText + '</li>';
+                        if (!inList) {
+                            processedLine = '<ul class="list-disc list-inside space-y-1 my-2"><li class="ml-4 text-gray-300">' + listText + '</li>';
+                            inList = true;
+                        } else {
+                            processedLine = '<li class="ml-4 text-gray-300">' + listText + '</li>';
+                        }
                     } else if (line.indexOf('* ') === 0) {
                         var listText = line.substring(2);
-                        processedLine = '<li class="ml-6 mb-2 list-disc text-gray-300">' + listText + '</li>';
+                        if (!inList) {
+                            processedLine = '<ul class="list-disc list-inside space-y-1 my-2"><li class="ml-4 text-gray-300">' + listText + '</li>';
+                            inList = true;
+                        } else {
+                            processedLine = '<li class="ml-4 text-gray-300">' + listText + '</li>';
+                        }
                     }
-                    // Process numbered lists (1. 2. etc.)
-                    else if (line.length > 2 && line.charAt(1) === '.' && line.charAt(2) === ' ') {
-                        var listText = line.substring(3);
-                        processedLine = '<li class="ml-6 mb-2 list-decimal text-gray-300">' + listText + '</li>';
+                    // Process numbered lists (1. 2. etc. and double digit)
+                    else if (line.match(/^\d+\.\s/)) {
+                        var match = line.match(/^\d+\.\s/);
+                        var listText = line.substring(match[0].length);
+                        processedLine = '<li class="ml-4 mb-1 text-gray-300"><span class="font-medium">' + match[0].trim() + '</span> ' + listText + '</li>';
+                    }
+                    // Handle empty lines and close lists if needed
+                    else if (line.trim() === '') {
+                        if (inList) {
+                            processedLines[processedLines.length - 1] += '</ul>';
+                            inList = false;
+                        }
+                        processedLine = '<br/>';
+                    }
+                    // Regular paragraph text
+                    else {
+                        if (inList) {
+                            processedLines[processedLines.length - 1] += '</ul>';
+                            inList = false;
+                        }
+                        if (line.trim()) {
+                            processedLine = '<p class="text-gray-300 my-2">' + line + '</p>';
+                        }
                     }
                     
                     processedLines.push(processedLine);
                 }
                 
-                // Join lines back together
-                text = processedLines.join('<br>');
+                // Close any open list at the end
+                if (inList && processedLines.length > 0) {
+                    processedLines[processedLines.length - 1] += '</ul>';
+                }
+                
+                // Join lines - no extra <br> needed since we're handling spacing with classes
+                text = processedLines.join('');
                 
                 // Process bold formatting **text** -> <strong>text</strong>
                 while (text.indexOf('**') !== -1) {
@@ -2157,9 +2250,7 @@ Requirements:
                     }
                 }
                 
-                // Wrap in div with proper spacing
-                text = '<div class="space-y-2">' + text + '</div>';
-                
+                // No extra wrapper needed since we handle spacing inline
                 return text;
             }
             

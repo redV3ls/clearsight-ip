@@ -924,7 +924,7 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
                 content: prompt
               }
             ],
-            max_tokens: Math.min(this.config.maxTokens, 1500), // Increased for complete responses
+            max_tokens: Math.min(this.config.maxTokens, 2500), // Increased for complete responses with learning resources
             temperature: Math.min(this.config.temperature, 0.1), // Lower temperature for faster, more focused responses
             stream: false // Ensure non-streaming response for Cloudflare Workers
           }),
@@ -1054,7 +1054,12 @@ Make this feel like a comprehensive career consultation with a mentor who sees t
     // Improved standalone analysis prompt with CV improvement focus
     const basePrompt = `You are a professional career coach analyzing this CV to provide actionable improvement guidance.
 
-IMPORTANT: Format your response using proper markdown with clear sections. Use ## for main headers and ### for subheaders.
+CRITICAL REQUIREMENTS:
+1. Format your response using proper markdown with ## for headers and ### for subheaders
+2. MUST include ALL sections, especially Quick Wins and Learning Resources
+3. Be SPECIFIC with resource names, platforms, and URLs where possible
+4. Provide at least 3 Quick Wins that can be done TODAY
+5. Include exact course names, not generic recommendations
 
 Provide your analysis in the following structure:
 
@@ -1078,23 +1083,40 @@ Provide your analysis in the following structure:
 
 ### Action Plan with Learning Resources
 
-#### Quick Wins (Can Do Today)
-[List 2-3 immediate improvements with specific resources:]
-- Update LinkedIn headline - Resource: LinkedIn optimization guide
-- Add quantified achievements to CV - Resource: STAR method template
-- Complete a free online assessment - Resource: Specific skill assessment platform
+#### 🚀 Quick Wins (Can Do Today)
+**MANDATORY: Provide 3 immediate actions with SPECIFIC resources**
+1. **[Specific Action]** - Learn via: [Exact Course/Tutorial Name on Platform]
+   - Example: "Add metrics to CV" - Resource: "How to Quantify Your Resume" guide on Indeed Career Guide
+2. **[Specific Action]** - Practice with: [Specific Tool/Platform]
+   - Example: "Update LinkedIn headline" - Resource: LinkedIn's "Writing a Great Headline" course (free, 30 mins)
+3. **[Specific Action]** - Implement: [Specific Template/Framework]
+   - Example: "Create portfolio" - Resource: GitHub Pages tutorial + template repository
 
-#### Short-term Development (1-3 months)
-[List 2-3 skill development priorities with learning paths:]
-- Learn [specific skill] - Resource: Coursera/Udemy course name + certification
-- Build portfolio project - Resource: GitHub project templates and tutorials
-- Practice interview skills - Resource: Specific mock interview platforms
+#### 📚 Short-term Development (1-3 months)
+**MANDATORY: List 3 skills with EXACT learning resources**
+1. **[Skill to Learn]** 
+   - Primary Resource: [Specific Course Name] on [Platform] ([Duration], [Cost])
+   - Backup Resource: [Alternative free resource]
+   - Practice Project: [Specific project idea]
+2. **[Skill to Learn]**
+   - Primary Resource: [Specific Course/Certification]
+   - Documentation: [Official docs or guides]
+   - Community: [Relevant forum/community]
+3. **[Skill to Learn]**
+   - Video Course: [YouTube channel/Udemy course]
+   - Book: [Specific title and author]
+   - Hands-on: [Practice platform or exercises]
 
-#### Long-term Positioning (6-12 months)
-[List 2-3 strategic career moves with development plans:]
-- Obtain professional certification - Resource: Certification body and study materials
-- Develop expertise in emerging technology - Resource: Learning pathway and communities
-- Build industry network - Resource: Professional associations and events
+#### 🎯 Long-term Positioning (6-12 months)
+**MANDATORY: Include 2-3 strategic moves with pathways**
+1. **[Career Goal]**
+   - Certification Path: [Specific certification + preparation resources]
+   - Study Plan: [Recommended timeline and materials]
+   - Cost: [Estimated investment]
+2. **[Expertise Area]**
+   - Learning Pathway: [Step-by-step progression]
+   - Key Resources: [Bootcamps, degree programs, or specializations]
+   - Networking: [Professional associations or events to join]
 
 ### Market Positioning Strategy
 [How to better position themselves based on their experience]
