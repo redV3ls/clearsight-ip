@@ -787,18 +787,9 @@ Requirements:
                 </div>
                 
                 <!-- Results Section -->
-                <div id="resultsSection" class="hidden">
-                    <div class="text-center py-12">
-                        <div class="mb-8">
-                            <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <i class="fas fa-check text-white text-2xl"></i>
-                            </div>
-                            <h3 class="text-2xl font-bold text-green-400 mb-4">Analysis Complete!</h3>
-                            <p class="text-gray-300 mb-6">Your personalized career insights are ready.</p>
-                            <div id="resultsContent" class="text-left bg-slate-700 rounded-lg p-6">
-                                <!-- Results will be populated here -->
-                            </div>
-                        </div>
+                <div id="resultsSection" class="hidden p-6">
+                    <div id="resultsContent">
+                        <!-- Results will be populated here dynamically -->
                     </div>
                 </div>
                     </div>
@@ -2175,13 +2166,11 @@ Requirements:
             if (loadingSection) loadingSection.classList.add('hidden');
             if (resultsSection) resultsSection.classList.remove('hidden');
             
-            // Display results in the right column instead of the original results section
-            const resultsPanelContent = document.getElementById('resultsPanelContent');
-            const resultsContent = resultsPanelContent || document.getElementById('resultsContent');
+            // Display results in the results content area
+            const resultsContent = document.getElementById('resultsContent');
             
-            console.log('🔍 Debug - resultsPanelContent:', resultsPanelContent);
             console.log('🔍 Debug - resultsContent:', resultsContent);
-            console.log('🔍 Debug - twoColumnLayout visible:', !document.getElementById('twoColumnLayout')?.classList.contains('hidden'));
+            console.log('🔍 Debug - resultsSection visible:', !resultsSection?.classList.contains('hidden'));
             
             if (resultsContent && analysisData) {
                 // Determine analysis type
