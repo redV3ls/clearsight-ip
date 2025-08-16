@@ -1558,7 +1558,7 @@ Requirements:
                     } else if (data.status === 'processing') {
                         showNotification('Analysis is still processing. Please check back later.', 'info');
                     } else {
-                        showNotification(`Analysis status: ${data.status}`, 'info');
+                        showNotification('Analysis status: ' + data.status, 'info');
                     }
                 } else {
                     throw new Error('Failed to check status');
