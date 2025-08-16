@@ -594,7 +594,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
     <!-- Analysis Interface Modal -->
     <div id="analysisInterface" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div id="analysisModal" class="bg-slate-800 rounded-lg w-full max-w-2xl my-8 flex flex-col transition-all duration-300 max-h-[calc(100vh-4rem)] overflow-hidden">
+        <div id="analysisModal" class="bg-slate-800 rounded-lg w-full max-w-4xl my-8 flex flex-col transition-all duration-300 max-h-[calc(100vh-4rem)] overflow-hidden">
             <!-- Header -->
             <div class="p-6 border-b border-slate-700 flex-shrink-0">
                 <div class="flex justify-between items-center">
@@ -605,28 +605,31 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 </div>
             </div>
 
+            <!-- Tab Navigation -->
+            <div class="border-b border-slate-700">
+                <div class="flex px-6">
+                    <button id="uploadTabBtn" class="tab-button px-6 py-3 text-white border-b-2 border-primary transition-colors">
+                        <i class="fas fa-upload mr-2"></i>
+                        <span>Upload Resume</span>
+                    </button>
+                    <button id="jobTabBtn" class="tab-button px-6 py-3 text-gray-400 border-b-2 border-transparent hover:text-white transition-colors">
+                        <i class="fas fa-briefcase mr-2"></i>
+                        <span>Job Description</span>
+                        <span class="ml-2 text-xs opacity-60">(Optional)</span>
+                    </button>
+                    <button id="analysisTabBtn" class="tab-button px-6 py-3 text-gray-400 border-b-2 border-transparent hover:text-white transition-colors" disabled>
+                        <i class="fas fa-brain mr-2"></i>
+                        <span>Analysis</span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Main content container -->
             <div class="flex-1 overflow-y-auto">
-                    <div id="twoColumnLayout" class="hidden h-full flex gap-6">
-                        <!-- Left Column: Input Section -->
-                        <div class="w-1/2 overflow-y-auto pr-3">
-                            <div id="inputSection" class="space-y-6">
-                                <!-- Input content will be moved here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Right Column: Results Section -->
-                        <div class="w-1/2 overflow-y-auto pl-3 border-l border-slate-600">
-                            <div id="resultsPanelContent" class="space-y-6 p-4 text-gray-300">
-                                <!-- Results will appear here -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Original single column layout -->
-                    <div id="singleColumnLayout" class="overflow-y-auto">
-                        <!-- Upload Section -->
-                        <div id="uploadSection" class="p-6">
+                    <!-- Tab Content Container -->
+                    <div id="tabContentContainer">
+                        <!-- Upload Tab Content -->
+                        <div id="uploadTabContent" class="tab-content p-6">
                     <div class="mb-6 text-center">
                         <i class="fas fa-upload text-4xl text-primary mb-3"></i>
                         <h3 class="text-xl font-bold text-white mb-2">Upload Your Resume</h3>
@@ -695,11 +698,71 @@ Responsibilities:
                         </div>
                     </div>
                     
-                    <button id="startAnalysisBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        <i class="fas fa-brain mr-2"></i>
-                        Start AI Analysis
-                    </button>
+                    <div class="flex justify-between items-center">
+                        <button id="skipJobBtn" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fas fa-forward mr-2"></i>
+                            Skip to Analysis
+                        </button>
+                        <button id="continueToJobBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Continue to Job Description
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
                 </div>
+                
+                <!-- Job Tab Content -->
+                <div id="jobTabContent" class="tab-content hidden p-6">
+                    <div class="mb-6 text-center">
+                        <i class="fas fa-briefcase text-4xl text-primary mb-3"></i>
+                        <h3 class="text-xl font-bold text-white mb-2">Job Description (Optional)</h3>
+                        <p class="text-gray-300 text-sm mb-4">
+                            Add a job description for targeted skills gap analysis and job fit assessment
+                        </p>
+                    </div>
+                    
+                    <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-info-circle text-blue-400 mr-3"></i>
+                            <p class="text-blue-300 text-sm">
+                                This step is optional. Skip it for a general career analysis or add a job description for specific job fit insights.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Paste Job Description</label>
+                        <textarea id="jobDescriptionTextArea" class="w-full h-48 bg-slate-700 border border-slate-600 rounded-lg p-3 text-white text-sm resize-none focus:outline-none focus:border-primary" placeholder="Paste the complete job description here for detailed job fit analysis...
+
+Example:
+Senior Software Engineer - Frontend Focus
+Company: TechCorp Inc.
+
+Requirements:
+- 5+ years of React development experience
+- Strong TypeScript skills
+- Experience with modern CI/CD pipelines
+..."></textarea>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <button id="backToUploadBtn" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back
+                        </button>
+                        <div>
+                            <button id="skipAnalysisBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors mr-3">
+                                Skip to Analysis
+                            </button>
+                            <button id="startAnalysisBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                                <i class="fas fa-brain mr-2"></i>
+                                Start AI Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analysis Tab Content -->
+                <div id="analysisTabContent" class="tab-content hidden">
                 
                 <!-- Loading Section -->
                 <div id="loadingSection" class="hidden">
@@ -780,6 +843,7 @@ Responsibilities:
                         </div>
                     </div>
                 </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -1027,6 +1091,35 @@ Responsibilities:
             // Analysis start
             startAnalysisBtn?.addEventListener('click', startAnalysis);
             
+            // Tab navigation listeners
+            const uploadTabBtn = document.getElementById('uploadTabBtn');
+            const jobTabBtn = document.getElementById('jobTabBtn');
+            const analysisTabBtn = document.getElementById('analysisTabBtn');
+            const continueToJobBtn = document.getElementById('continueToJobBtn');
+            const backToUploadBtn = document.getElementById('backToUploadBtn');
+            const skipJobBtn = document.getElementById('skipJobBtn');
+            const skipAnalysisBtn = document.getElementById('skipAnalysisBtn');
+            
+            uploadTabBtn?.addEventListener('click', () => switchAnalysisTab('upload'));
+            jobTabBtn?.addEventListener('click', () => switchAnalysisTab('job'));
+            analysisTabBtn?.addEventListener('click', () => switchAnalysisTab('analysis'));
+            
+            continueToJobBtn?.addEventListener('click', () => {
+                switchAnalysisTab('job');
+            });
+            
+            backToUploadBtn?.addEventListener('click', () => {
+                switchAnalysisTab('upload');
+            });
+            
+            skipJobBtn?.addEventListener('click', () => {
+                startAnalysis();
+            });
+            
+            skipAnalysisBtn?.addEventListener('click', () => {
+                startAnalysis();
+            });
+            
             // Initialize analysis type indicator
             updateAnalysisTypeIndicator();
             
@@ -1104,7 +1197,7 @@ Responsibilities:
             // Reset modal to compact size and single column layout
             if (analysisModal) {
                 analysisModal.classList.remove('max-w-6xl');
-                analysisModal.classList.add('max-w-2xl');
+                analysisModal.classList.add('max-w-4xl');
             }
             
             // Ensure we start with single column layout
@@ -1113,8 +1206,63 @@ Responsibilities:
                 twoColumnLayout.classList.add('hidden');
             }
             
+            // Reset to upload tab
+            switchAnalysisTab('upload');
+            
             modal?.classList.remove('hidden');
             AppState.currentModal = 'analysis';
+        }
+        
+        // Tab switching functionality for analysis interface
+        function switchAnalysisTab(tabName) {
+            const uploadTabBtn = document.getElementById('uploadTabBtn');
+            const jobTabBtn = document.getElementById('jobTabBtn');
+            const analysisTabBtn = document.getElementById('analysisTabBtn');
+            const uploadTabContent = document.getElementById('uploadTabContent');
+            const jobTabContent = document.getElementById('jobTabContent');
+            const analysisTabContent = document.getElementById('analysisTabContent');
+            
+            // Reset all tabs and content
+            const tabs = [uploadTabBtn, jobTabBtn, analysisTabBtn];
+            const contents = [uploadTabContent, jobTabContent, analysisTabContent];
+            
+            tabs.forEach(tab => {
+                if (tab) {
+                    tab.classList.remove('text-white', 'border-primary');
+                    tab.classList.add('text-gray-400', 'border-transparent');
+                }
+            });
+            
+            contents.forEach(content => {
+                if (content) content.classList.add('hidden');
+            });
+            
+            // Activate selected tab
+            switch(tabName) {
+                case 'upload':
+                    if (uploadTabBtn) {
+                        uploadTabBtn.classList.add('text-white', 'border-primary');
+                        uploadTabBtn.classList.remove('text-gray-400', 'border-transparent');
+                    }
+                    if (uploadTabContent) uploadTabContent.classList.remove('hidden');
+                    break;
+                    
+                case 'job':
+                    if (jobTabBtn) {
+                        jobTabBtn.classList.add('text-white', 'border-primary');
+                        jobTabBtn.classList.remove('text-gray-400', 'border-transparent');
+                    }
+                    if (jobTabContent) jobTabContent.classList.remove('hidden');
+                    break;
+                    
+                case 'analysis':
+                    if (analysisTabBtn) {
+                        analysisTabBtn.classList.add('text-white', 'border-primary');
+                        analysisTabBtn.classList.remove('text-gray-400', 'border-transparent');
+                    }
+                    if (analysisTabContent) analysisTabContent.classList.remove('hidden');
+                    break;
+            }
         }
 
         function hideAnalysisInterface() {
@@ -1180,15 +1328,25 @@ Responsibilities:
         }
 
         function updateAnalysisButton() {
-            const button = document.getElementById('startAnalysisBtn');
+            const startButton = document.getElementById('startAnalysisBtn');
+            const continueButton = document.getElementById('continueToJobBtn');
+            const skipJobButton = document.getElementById('skipJobBtn');
             const hasContent = AppState.resumeFile || AppState.resumeText.trim().length > 0;
             
             if (hasContent) {
-                button?.removeAttribute('disabled');
-                button?.classList.remove('opacity-50', 'cursor-not-allowed');
+                startButton?.removeAttribute('disabled');
+                startButton?.classList.remove('opacity-50', 'cursor-not-allowed');
+                continueButton?.removeAttribute('disabled');
+                continueButton?.classList.remove('opacity-50', 'cursor-not-allowed');
+                skipJobButton?.removeAttribute('disabled');
+                skipJobButton?.classList.remove('opacity-50', 'cursor-not-allowed');
             } else {
-                button?.setAttribute('disabled', 'true');
-                button?.classList.add('opacity-50', 'cursor-not-allowed');
+                startButton?.setAttribute('disabled', 'true');
+                startButton?.classList.add('opacity-50', 'cursor-not-allowed');
+                continueButton?.setAttribute('disabled', 'true');
+                continueButton?.classList.add('opacity-50', 'cursor-not-allowed');
+                skipJobButton?.setAttribute('disabled', 'true');
+                skipJobButton?.classList.add('opacity-50', 'cursor-not-allowed');
             }
         }
 
@@ -1610,13 +1768,20 @@ Responsibilities:
 
         // Loading screen functions
         function showLoadingScreen() {
-            const uploadSection = document.getElementById('uploadSection');
+            // Switch to analysis tab and show loading
+            switchAnalysisTab('analysis');
+            
             const loadingSection = document.getElementById('loadingSection');
             const resultsSection = document.getElementById('resultsSection');
             
-            if (uploadSection) uploadSection.classList.add('hidden');
             if (loadingSection) loadingSection.classList.remove('hidden');
             if (resultsSection) resultsSection.classList.add('hidden');
+            
+            // Enable analysis tab
+            const analysisTabBtn = document.getElementById('analysisTabBtn');
+            if (analysisTabBtn) {
+                analysisTabBtn.removeAttribute('disabled');
+            }
         }
 
         window.retryAnalysis = function() {
