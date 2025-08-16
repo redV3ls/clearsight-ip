@@ -495,9 +495,16 @@ class UIManager {
 
     static renderAnalysisInterface() {
         return `
+            <!-- Include tabbed interface CSS -->
+            <link rel="stylesheet" href="/css/tabbed-interface.css">
+            
             <div id="analysisInterface" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                <div class="bg-slate-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                    <div class="p-6">
+                <div id="analysisContent" class="bg-slate-800 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden">
+                    <!-- Tabbed interface will be injected here by JavaScript -->
+                    <div id="tabbedInterfaceContainer"></div>
+                    
+                    <!-- Fallback content for when tabbed interface fails to load -->
+                    <div id="fallbackContent" class="p-6 hidden">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-2xl font-bold text-primary">AI-Powered Skills Analysis</h2>
                             <button id="closeAnalysisInterface" class="text-gray-400 hover:text-white">
@@ -506,7 +513,60 @@ class UIManager {
                         </div>
 
                         <div id="uploadSection" class="space-y-6">
-                            <!-- Upload forms would go here -->
+                            <div>
+                                <label class="block text-lg font-semibold text-gray-200 mb-3">
+                                    <i class="fas fa-file-alt mr-2 text-primary"></i>Upload Your CV/Resume
+                                </label>
+                                <div id="cvDropZone" class="border-2 border-dashed border-gray-600 hover:border-primary rounded-lg p-8 text-center cursor-pointer transition-colors">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                    <p class="text-gray-300 mb-2">Drop your CV here or click to browse</p>
+                                    <p class="text-sm text-gray-500">PDF, DOC, DOCX, or TXT (max 5MB)</p>
+                                </div>
+                                <input type="file" id="cvFileInput" class="hidden" accept=".pdf,.doc,.docx,.txt">
+                                <div id="cvFileInfo" class="hidden mt-3 p-3 bg-slate-700 rounded-lg flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file text-primary mr-2"></i>
+                                        <span id="cvFileName" class="text-gray-200"></span>
+                                    </div>
+                                    <button id="clearCvBtn" class="text-red-400 hover:text-red-300">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-lg font-semibold text-gray-200 mb-3">
+                                    <i class="fas fa-briefcase mr-2 text-primary"></i>Job Description (Optional)
+                                </label>
+                                <div id="jobDropZone" class="border-2 border-dashed border-gray-600 hover:border-primary rounded-lg p-6 text-center cursor-pointer transition-colors">
+                                    <i class="fas fa-briefcase text-3xl text-gray-400 mb-3"></i>
+                                    <p class="text-gray-300 mb-2">Drop job description or click to browse</p>
+                                    <p class="text-sm text-gray-500">Optional - for targeted analysis</p>
+                                </div>
+                                <input type="file" id="jobFileInput" class="hidden" accept=".pdf,.doc,.docx,.txt">
+                                <div id="jobFileInfo" class="hidden mt-3 p-3 bg-slate-700 rounded-lg flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file text-primary mr-2"></i>
+                                        <span id="jobFileName" class="text-gray-200"></span>
+                                    </div>
+                                    <button id="clearJobBtn" class="text-red-400 hover:text-red-300">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="analysisError" class="hidden bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+                                <p class="text-red-300"></p>
+                            </div>
+
+                            <div class="flex justify-end space-x-4">
+                                <button id="cancelAnalysisBtn" class="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:border-gray-500 transition-colors">
+                                    Cancel
+                                </button>
+                                <button id="startAnalysisBtn" class="px-6 py-3 bg-primary hover:bg-primary/80 text-white rounded-lg transition-colors">
+                                    <i class="fas fa-brain mr-2"></i>Start AI Analysis
+                                </button>
+                            </div>
                         </div>
 
                         <div id="loadingSection" class="hidden text-center py-12">

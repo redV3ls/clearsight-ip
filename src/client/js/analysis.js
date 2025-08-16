@@ -25,9 +25,104 @@ class AnalysisManager {
         };
     }
 
-    showAnalysisInterface() {
-        this.elements.analysisInterface?.classList.remove('hidden');
+    async showAnalysisInterface() {
+        const analysisInterface = this.elements.analysisInterface;
+        if (!analysisInterface) return;
+        
+        analysisInterface.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        
+        // Try to load and initialize the tabbed interface
+        const container = document.getElementById('tabbedInterfaceContainer');
+        const fallback = document.getElementById('fallbackContent');
+        
+        if (container) {
+            try {
+                // Check if TabbedAnalysisInterface is available
+                if (typeof window.TabbedAnalysisInterface !== 'undefined') {
+                    // Use the tabbed interface
+                    new window.TabbedAnalysisInterface('tabbedInterfaceContainer');
+                    if (fallback) fallback.classList.add('hidden');
+                } else {
+                    // Try to load the script dynamically
+                    const script = document.createElement('script');
+                    script.src = '/js/TabbedAnalysisInterface.js';
+                    script.onload = () => {
+                        if (window.TabbedAnalysisInterface) {
+                            new window.TabbedAnalysisInterface('tabbedInterfaceContainer');
+                            if (fallback) fallback.classList.add('hidden');
+                        } else {
+                            this.showFallbackInterface();
+                        }
+                    };
+                    script.onerror = () => {
+                        this.showFallbackInterface();
+                    };
+                    document.head.appendChild(script);
+                }
+            } catch (error) {
+                console.error('Failed to load tabbed interface:', error);
+                this.showFallbackInterface();
+            }
+        } else {
+            this.showFallbackInterface();
+        }
+    }
+    
+    showFallbackInterface() {
+        const fallback = document.getElementById('fallbackContent');
+        if (fallback) {
+            fallback.classList.remove('hidden');
+            // Re-cache elements for fallback interface
+            this.elements = this.cacheElements();
+            this.setupFallbackEventListeners();
+        }
+    }
+    
+    setupFallbackEventListeners() {
+        // Setup event listeners for fallback interface
+        const cvDropZone = document.getElementById('cvDropZone');
+        const cvFileInput = document.getElementById('cvFileInput');
+        const jobDropZone = document.getElementById('jobDropZone');
+        const jobFileInput = document.getElementById('jobFileInput');
+        const startBtn = document.getElementById('startAnalysisBtn');
+        const cancelBtn = document.getElementById('cancelAnalysisBtn');
+        const clearCvBtn = document.getElementById('clearCvBtn');
+        const clearJobBtn = document.getElementById('clearJobBtn');
+        
+        if (cvDropZone && cvFileInput) {
+            cvDropZone.addEventListener('click', () => cvFileInput.click());
+            cvFileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    this.handleFileSelect(e.target.files[0], 'cv');
+                }
+            });
+        }
+        
+        if (jobDropZone && jobFileInput) {
+            jobDropZone.addEventListener('click', () => jobFileInput.click());
+            jobFileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    this.handleFileSelect(e.target.files[0], 'job');
+                }
+            });
+        }
+        
+        if (startBtn) {
+            startBtn.addEventListener('click', () => this.performAnalysis());
+        }
+        
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => this.hideAnalysisInterface());
+        }
+        
+        if (clearCvBtn) {
+            clearCvBtn.addEventListener('click', () => this.clearFile('cv'));
+        }
+        
+        if (clearJobBtn) {
+            clearJobBtn.addEventListener('click', () => this.clearFile('job'));
+        }
     }
 
     hideAnalysisInterface() {
