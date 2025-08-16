@@ -7,7 +7,7 @@
 import { Context } from 'hono';
 import { createResponse } from '../../../middleware/common/responseBuilder';
 import { logger } from '../../../utils/logger';
-import { db } from '../../../lib/database';
+import { db } from '../../../config/database';
 import { AuthenticatedContext } from '../../../types/auth';
 
 /**

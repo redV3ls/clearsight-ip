@@ -1362,7 +1362,7 @@ Requirements:
             // Update count
             if (historyCount) {
                 historyCount.textContent = analyses.length === 0 ? 'No analyses' : 
-                    analyses.length === 1 ? '1 analysis' : `${analyses.length} analyses`;
+                    analyses.length === 1 ? '1 analysis' : analyses.length + ' analyses';
             }
             
             if (!analyses || analyses.length === 0) {
