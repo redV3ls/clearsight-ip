@@ -773,15 +773,46 @@ STRUCTURED RECOMMENDATIONS:
     "immediate": [
       {
         "skill": "skill to develop",
-        "rationale": "why this skill matters now",
-        "learningApproach": "best way to learn this",
-        "timeframe": "how long it should take",
-        "resources": ["specific resources"],
-        "applicationStrategy": "how to apply/showcase this skill"
+        "rationale": "why this is a QUICK WIN",
+        "learningApproach": "step-by-step approach to learn this TODAY",
+        "timeframe": "1-2 hours to 1 week maximum",
+        "resources": [
+          "Free online course: [Platform] - [Course Name] - [URL if known]",
+          "Tutorial: [Specific tutorial with platform]",
+          "Documentation: [Official docs or guides]",
+          "YouTube: [Channel or video series recommendation]"
+        ],
+        "applicationStrategy": "how to immediately apply and showcase this skill"
       }
     ],
-    "shortTerm": [...],
-    "longTerm": [...]
+    "shortTerm": [
+      {
+        "skill": "skill to develop",
+        "rationale": "career impact in 1-3 months",
+        "learningApproach": "structured learning path",
+        "timeframe": "1-3 months",
+        "resources": [
+          "Course: [Platform] - [Specific course with certification]",
+          "Book: [Title and author]",
+          "Project: [Hands-on project idea with resources]"
+        ],
+        "applicationStrategy": "portfolio or certification to showcase"
+      }
+    ],
+    "longTerm": [
+      {
+        "skill": "advanced skill",
+        "rationale": "long-term career advancement",
+        "learningApproach": "comprehensive mastery plan",
+        "timeframe": "6-12 months",
+        "resources": [
+          "Professional certification: [Name and provider]",
+          "Bootcamp or intensive program: [Specific recommendation]",
+          "Mentorship: [How to find appropriate mentors]"
+        ],
+        "applicationStrategy": "career transition or promotion strategy"
+      }
+    ]
   },
   "marketInsights": [
     {
@@ -1045,16 +1076,25 @@ Provide your analysis in the following structure:
 - Critical skills missing for their level
 - Emerging skills to consider
 
-### Action Plan
+### Action Plan with Learning Resources
 
-#### Immediate Actions (Today)
-[List 2-3 things they can fix right now]
+#### Quick Wins (Can Do Today)
+[List 2-3 immediate improvements with specific resources:]
+- Update LinkedIn headline - Resource: LinkedIn optimization guide
+- Add quantified achievements to CV - Resource: STAR method template
+- Complete a free online assessment - Resource: Specific skill assessment platform
 
 #### Short-term Development (1-3 months)
-[List 2-3 skill development priorities]
+[List 2-3 skill development priorities with learning paths:]
+- Learn [specific skill] - Resource: Coursera/Udemy course name + certification
+- Build portfolio project - Resource: GitHub project templates and tutorials
+- Practice interview skills - Resource: Specific mock interview platforms
 
 #### Long-term Positioning (6-12 months)
-[List 2-3 strategic career moves]
+[List 2-3 strategic career moves with development plans:]
+- Obtain professional certification - Resource: Certification body and study materials
+- Develop expertise in emerging technology - Resource: Learning pathway and communities
+- Build industry network - Resource: Professional associations and events
 
 ### Market Positioning Strategy
 [How to better position themselves based on their experience]
@@ -1162,8 +1202,9 @@ NARRATIVE REQUIREMENTS:
 1. Write a compelling narrative that explains the candidate's fit for this role
 2. Be honest about weaknesses but frame them as growth opportunities
 3. Highlight transferable skills and hidden strengths
-4. Provide a clear roadmap for improvement
-5. Make it personal and motivating
+4. Provide a clear roadmap for improvement with SPECIFIC LEARNING RESOURCES
+5. Include QUICK WINS that can be implemented immediately
+6. Make it personal and motivating
 
 Candidate Profile:
 ${JSON.stringify(skillsAnalysis, null, 2)}
@@ -1237,14 +1278,28 @@ Then provide structured data with narrative elements:
     "immediate": [
       {
         "skill": "skill name",
-        "action": "specific action to take",
-        "timeframe": "timeframe", 
-        "resources": ["specific resources"],
-        "whyNow": "Why this should be prioritized immediately"
+        "action": "specific action to take - QUICK WIN that can be done TODAY",
+        "timeframe": "timeframe (e.g., '1-2 hours', 'Today', 'This week')", 
+        "resources": ["SPECIFIC learning resources: online courses, tutorials, documentation, books with URLs where possible"],
+        "whyNow": "Why this is a QUICK WIN and should be done immediately"
       }
     ],
-    "shortTerm": [...],
-    "longTerm": [...]
+    "shortTerm": [
+      {
+        "skill": "skill name",
+        "action": "specific development action",
+        "timeframe": "1-3 months",
+        "resources": ["Specific courses, certifications, or learning paths with platform names"]
+      }
+    ],
+    "longTerm": [
+      {
+        "skill": "skill name",
+        "action": "strategic career development",
+        "timeframe": "6-12 months",
+        "resources": ["Advanced certifications, degree programs, or specialized training"]
+      }
+    ]
   },
   "marketInsights": ["current market trends with personal relevance"],
   "competitiveAdvantage": ["unique strengths that set candidate apart"],
