@@ -563,7 +563,48 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
         }
 
         .tab-panel.active {
-            @apply block;
+            @apply block opacity-100 transform translate-x-0;
+        }
+
+        /* Tab content animations */
+        .tab-panel.entering {
+            @apply opacity-0 transform translate-x-4;
+        }
+
+        .tab-panel.entered {
+            @apply opacity-100 transform translate-x-0;
+        }
+
+        .tab-panel.exiting {
+            @apply opacity-0 transform -translate-x-4;
+        }
+
+        /* Keyboard navigation styles */
+        .main-tab:focus-visible {
+            @apply outline-2 outline-primary outline-offset-2;
+        }
+
+        /* Loading state improvements */
+        .loading-shimmer {
+            background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Success state animations */
+        .success-bounce {
+            animation: successBounce 0.6s ease-out;
+        }
+
+        @keyframes successBounce {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         /* Progress Ring */
@@ -785,6 +826,22 @@ I'll analyze everything including:
                             <div>
                                 <p class="text-blue-300 font-medium mb-1">Your Privacy Matters</p>
                                 <p class="text-blue-200 text-sm">Your resume is processed securely and never stored permanently. I analyze it in real-time and you can delete all data anytime.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Help Tips -->
+                    <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-lightbulb text-blue-400 mt-1"></i>
+                            <div>
+                                <p class="text-blue-300 font-medium mb-1">💡 Pro Tips for Better Results</p>
+                                <ul class="text-blue-200 text-sm space-y-1">
+                                    <li>• Include quantified achievements (e.g., "Increased sales by 25%")</li>
+                                    <li>• List both technical and soft skills</li>
+                                    <li>• Use keywords from your target industry</li>
+                                    <li>• Keep formatting simple for better ATS compatibility</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -1356,22 +1413,80 @@ Include everything you can find:
                 document.getElementById('closeDataHandling2')?.addEventListener('click', () => this.hideDataHandling());
                 document.getElementById('deleteAllData')?.addEventListener('click', () => this.deleteAllData());
                 
-                // Text input handlers
+                // Text input handlers with auto-save
                 document.getElementById('resumeTextArea')?.addEventListener('input', (e) => {
                     this.resumeText = e.target.value;
                     this.updateCharCount('resume', e.target.value);
                     this.updateContinueButton();
+                    this.autoSave('resumeText', e.target.value);
                 });
                 document.getElementById('jobTextArea')?.addEventListener('input', (e) => {
                     this.jobText = e.target.value;
                     this.updateCharCount('job', e.target.value);
                     this.updateJobTabStatus();
+                    this.autoSave('jobText', e.target.value);
                 });
 
                 // Weight sliders
                 document.querySelectorAll('input[data-weight]').forEach(slider => {
                     slider.addEventListener('input', (e) => this.updateWeight(e.target.dataset.weight, e.target.value));
                 });
+
+                // Keyboard navigation
+                document.addEventListener('keydown', (e) => this.handleKeyboardNavigation(e));
+            }
+
+            handleKeyboardNavigation(e) {
+                // Only handle keyboard navigation if not typing in an input
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+                switch (e.key) {
+                    case 'ArrowLeft':
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        this.navigateToPreviousTab();
+                        break;
+                    case 'ArrowRight':
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        this.navigateToNextTab();
+                        break;
+                    case 'Enter':
+                    case ' ':
+                        if (e.target.classList.contains('main-tab')) {
+                            e.preventDefault();
+                            const tabName = e.target.dataset.tab;
+                            if (!e.target.disabled) {
+                                this.switchMainTab(tabName);
+                            }
+                        }
+                        break;
+                    case 'Escape':
+                        // Close any open modals or return to CV tab
+                        this.hideDataHandling();
+                        break;
+                }
+            }
+
+            navigateToPreviousTab() {
+                const tabOrder = ['cv', 'job', 'analysis'];
+                const currentIndex = tabOrder.indexOf(this.currentTab);
+                if (currentIndex > 0) {
+                    this.switchMainTab(tabOrder[currentIndex - 1]);
+                }
+            }
+
+            navigateToNextTab() {
+                const tabOrder = ['cv', 'job', 'analysis'];
+                const currentIndex = tabOrder.indexOf(this.currentTab);
+                const nextTab = tabOrder[currentIndex + 1];
+                
+                if (nextTab) {
+                    const nextTabElement = document.querySelector(\`[data-tab="\${nextTab}"]\`);
+                    if (nextTabElement && !nextTabElement.disabled) {
+                        this.switchMainTab(nextTab);
+                    }
+                }
             }
 
             switchMainTab(tabName) {
@@ -1533,6 +1648,15 @@ Include everything you can find:
                 this.showFileInfo(file, type);
                 this.parseFile(file, type);
                 this.updateContinueButton();
+                
+                // Add success animation to the upload card
+                const uploadCard = document.getElementById(`${type}UploadCard`);
+                if (uploadCard) {
+                    uploadCard.classList.add('success-bounce');
+                    setTimeout(() => {
+                        uploadCard.classList.remove('success-bounce');
+                    }, 600);
+                }
             }
 
             validateFile(file) {
@@ -1804,11 +1928,23 @@ Include everything you can find:
                 document.getElementById('loadingState')?.classList.remove('hidden');
                 document.getElementById('resultsState')?.classList.add('hidden');
                 this.startLoadingMessages();
+                
+                // Add shimmer effect to progress indicators
+                document.querySelectorAll('.bg-slate-800').forEach(el => {
+                    if (el.closest('#loadingState')) {
+                        el.classList.add('loading-shimmer');
+                    }
+                });
             }
 
             hideLoadingState() {
                 document.getElementById('loadingState')?.classList.add('hidden');
                 this.stopLoadingMessages();
+                
+                // Remove shimmer effects
+                document.querySelectorAll('.loading-shimmer').forEach(el => {
+                    el.classList.remove('loading-shimmer');
+                });
             }
 
             toggleMobileMenu() {
@@ -2197,6 +2333,30 @@ Include everything you can find:
                     icon.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
                 }
                 
+                // Restore saved resume and job text
+                const savedResumeText = localStorage.getItem('resumeText');
+                const savedJobText = localStorage.getItem('jobText');
+                
+                if (savedResumeText) {
+                    const resumeTextArea = document.getElementById('resumeTextArea');
+                    if (resumeTextArea) {
+                        resumeTextArea.value = savedResumeText;
+                        this.resumeText = savedResumeText;
+                        this.updateCharCount('resume', savedResumeText);
+                        this.updateContinueButton();
+                    }
+                }
+                
+                if (savedJobText) {
+                    const jobTextArea = document.getElementById('jobTextArea');
+                    if (jobTextArea) {
+                        jobTextArea.value = savedJobText;
+                        this.jobText = savedJobText;
+                        this.updateCharCount('job', savedJobText);
+                        this.updateJobTabStatus();
+                    }
+                }
+                
                 // Setup mobile-specific event listeners
                 this.setupMobileOptimizations();
             }
@@ -2263,6 +2423,32 @@ Include everything you can find:
                 } else if (toastContainer) {
                     toastContainer.className = 'fixed top-20 right-6 z-50 space-y-2';
                 }
+            }
+
+            autoSave(key, value) {
+                // Debounced auto-save to avoid excessive localStorage writes
+                clearTimeout(this.autoSaveTimeout);
+                this.autoSaveTimeout = setTimeout(() => {
+                    try {
+                        localStorage.setItem(key, value);
+                        
+                        // Show subtle save indicator
+                        if (value.length > 10) { // Only show for meaningful content
+                            const saveIndicator = document.createElement('div');
+                            saveIndicator.className = 'fixed top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs opacity-0 transition-opacity duration-300 z-50';
+                            saveIndicator.textContent = '✓ Saved';
+                            document.body.appendChild(saveIndicator);
+                            
+                            setTimeout(() => saveIndicator.classList.add('opacity-100'), 10);
+                            setTimeout(() => {
+                                saveIndicator.classList.remove('opacity-100');
+                                setTimeout(() => saveIndicator.remove(), 300);
+                            }, 1500);
+                        }
+                    } catch (error) {
+                        console.warn('Auto-save failed:', error);
+                    }
+                }, 1000); // Save after 1 second of inactivity
             }
 
             showToast(message, type = 'info', duration = 5000) {
