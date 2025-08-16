@@ -1,3 +1,7 @@
+        .tab-content {
+            min-height: 420px; /* Or a suitable fixed height */
+        }
+
 // Complete HTML content with inline JavaScript and CSS for Cloudflare Workers
 export const HTML_CONTENT = `<!DOCTYPE html>
 <html lang="en">
@@ -610,7 +614,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 <div class="flex px-6">
                     <button id="uploadTabBtn" class="tab-button px-6 py-3 text-white border-b-2 border-primary transition-colors">
                         <i class="fas fa-upload mr-2"></i>
-                        <span>Upload Resume</span>
+                        <span>Resume (CV)</span>
                     </button>
                     <button id="jobTabBtn" class="tab-button px-6 py-3 text-gray-400 border-b-2 border-transparent hover:text-white transition-colors">
                         <i class="fas fa-briefcase mr-2"></i>
@@ -655,54 +659,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         </div>
                     </div>
                     
-                    <!-- Job Description Section -->
-                    <div class="mb-6 p-4 bg-slate-700 rounded-lg border border-primary/30">
-                        <div class="flex items-center mb-3">
-                            <i class="fas fa-briefcase text-lg text-primary mr-2"></i>
-                            <h4 class="text-lg font-bold text-white">🎯 Job Description (Optional)</h4>
-                        </div>
-                        <p class="text-gray-300 text-sm mb-3">
-                            <strong>💡 Pro Tip:</strong> Add a job description for personalized job fit analysis with gap analysis and recommendations.
-                        </p>
-                        <textarea id="jobDescriptionTextArea" class="w-full h-32 bg-slate-600 border border-slate-500 rounded-lg p-3 text-white text-sm resize-none focus:outline-none focus:border-primary" placeholder="Paste the complete job description here for detailed job fit analysis...
-
-Example:
-Senior Software Engineer - Frontend Focus
-Company: TechCorp Inc.
-
-Requirements:
-- 5+ years of React development experience
-- Strong TypeScript skills
-- Experience with modern CI/CD pipelines
-- Bachelor's degree in Computer Science or equivalent
-
-Responsibilities:
-- Lead frontend development initiatives
-- Mentor junior developers
-- Collaborate with design and product teams
-..."></textarea>
-                        
-                        <!-- Analysis Type Indicator -->
-                        <div id="analysisTypeIndicator" class="mt-4 p-3 bg-slate-600 rounded-lg border-l-4 border-yellow-500">
-                            <div class="flex items-center">
-                                <i class="fas fa-info-circle text-yellow-500 mr-2"></i>
-                                <span class="font-semibold text-white">Analysis Type:</span>
-                                <span id="analysisTypeText" class="ml-2 text-gray-300">📖 Standalone Career Analysis - General career guidance and improvement suggestions</span>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-4 flex gap-3">
-                            <button id="clearJobDescriptionBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                <i class="fas fa-eraser mr-2"></i>Clear Job Description
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-between items-center">
-                        <button id="skipJobBtn" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fas fa-forward mr-2"></i>
-                            Skip to Analysis
-                        </button>
+                    <div class="flex justify-end">
                         <button id="continueToJobBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                             Continue to Job Description
                             <i class="fas fa-arrow-right ml-2"></i>
