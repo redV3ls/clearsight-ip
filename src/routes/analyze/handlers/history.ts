@@ -7,7 +7,6 @@
 import { Context } from 'hono';
 import { createResponse } from '../../../middleware/common/responseBuilder';
 import { logger } from '../../../utils/logger';
-import { db } from '../../../config/database';
 import { AuthenticatedContext } from '../../../types/auth';
 
 /**
@@ -51,11 +50,13 @@ export async function historyHandler(c: AuthenticatedContext): Promise<Response>
       LIMIT 50
     `;
 
+    // Get D1 database from context
+    const db = c.env.DB as D1Database;
     const stmt = db.prepare(query);
-    const analyses = stmt.all(userId) as any[];
+    const analyses = await stmt.bind(userId).all() as any;
 
     // Transform the results for the API response
-    const transformedAnalyses = analyses.map(analysis => {
+    const transformedAnalyses = (analyses.results || []).map(analysis => {
       // Parse metadata if it's a JSON string
       let metadata = {};
       if (analysis.metadata) {
@@ -157,10 +158,12 @@ export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Respo
       WHERE id = ? AND user_id = ?
     `;
 
+    // Get D1 database from context
+    const db = c.env.DB as D1Database;
     const stmt = db.prepare(query);
-    const analysis = stmt.get(analysisId, userId) as any;
+    const result = await stmt.bind(analysisId, userId).first();
 
-    if (!analysis) {
+    if (!result) {
       return response.error(
         'NOT_FOUND',
         'Analysis not found',
@@ -168,6 +171,8 @@ export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Respo
       );
     }
 
+    const analysis = result;
+    
     // Parse metadata if it's a JSON string
     let metadata = {};
     if (analysis.metadata) {
@@ -256,10 +261,12 @@ export async function deleteAnalysisHandler(c: AuthenticatedContext): Promise<Re
       WHERE id = ? AND user_id = ?
     `;
 
+    // Get D1 database from context
+    const db = c.env.DB as D1Database;
     const stmt = db.prepare(query);
-    const result = stmt.run(analysisId, userId) as any;
+    const result = await stmt.bind(analysisId, userId).run();
 
-    if (result.changes === 0) {
+    if (!result.success || result.meta.changes === 0) {
       return response.error(
         'NOT_FOUND',
         'Analysis not found',
