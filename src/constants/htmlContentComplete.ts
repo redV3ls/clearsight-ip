@@ -1500,18 +1500,18 @@ Requirements:
                 
                 '<div class="flex gap-2">' +
                     (analysis.status === 'completed' ? 
-                        '<button onclick="viewAnalysis(\'' + analysis.id + '\')" class="flex-1 bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg text-sm transition-colors">' +
+                        '<button onclick="viewAnalysis(&quot;' + analysis.id + '&quot;)" class="flex-1 bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg text-sm transition-colors">' +
                             '<i class="fas fa-eye mr-1"></i>' +
                             'View' +
                         '</button>'
                     : '') +
                     (analysis.status === 'processing' ? 
-                        '<button onclick="checkAnalysisStatus(\'' + analysis.id + '\')" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">' +
+                        '<button onclick="checkAnalysisStatus(&quot;' + analysis.id + '&quot;)" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">' +
                             '<i class="fas fa-sync-alt mr-1"></i>' +
                             'Check Status' +
                         '</button>'
                     : '') +
-                    '<button onclick="deleteAnalysis(\'' + analysis.id + '\')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">' +
+                    '<button onclick="deleteAnalysis(&quot;' + analysis.id + '&quot;)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">' +
                         '<i class="fas fa-trash mr-1"></i>' +
                         'Delete' +
                     '</button>' +
