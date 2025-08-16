@@ -1642,7 +1642,7 @@ Include everything you can find:
                 
                 // Show mobile-friendly success message
                 if (window.innerWidth < 640) {
-                    this.showToast(`📄 ${file.name} uploaded successfully!`, 'success');
+                    this.showToast(\`📄 \${file.name} uploaded successfully!\`, 'success');
                 }
                 
                 this.showFileInfo(file, type);
@@ -1650,7 +1650,7 @@ Include everything you can find:
                 this.updateContinueButton();
                 
                 // Add success animation to the upload card
-                const uploadCard = document.getElementById(`${type}UploadCard`);
+                const uploadCard = document.getElementById(\`\${type}UploadCard\`);
                 if (uploadCard) {
                     uploadCard.classList.add('success-bounce');
                     setTimeout(() => {
@@ -2108,7 +2108,7 @@ Include everything you can find:
                 // Mobile-specific: Show completion message
                 if (window.innerWidth < 640) {
                     setTimeout(() => {
-                        this.showToast(`🎉 Your analysis is complete! Score: ${overallScore}%`, 'success', 6000);
+                        this.showToast(\`🎉 Your analysis is complete! Score: \${overallScore}%\`, 'success', 6000);
                     }, 1000);
                 }
                 
