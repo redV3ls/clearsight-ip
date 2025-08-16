@@ -2388,7 +2388,7 @@ Requirements:
                 }
                 
                 // Process plain URLs (http://, https://, www.)
-                var urlRegex = /(https?:\/\/[^\s<>"]+|www\.[^\s<>"]+)/g;
+                var urlRegex = /(https?:\/\/[^\\s<>"]+|www\\.[^\\s<>"]+)/g;
                 text = text.replace(urlRegex, function(url) {
                     // Skip if already part of an anchor tag
                     if (text.indexOf('href="' + url) > -1 || text.indexOf('>' + url + '</a>') > -1) {
