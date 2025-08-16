@@ -2197,13 +2197,13 @@ Include everything you can find:
                         borderColor = 'border-yellow-500/30';
                     }
                     
-                    return `<div class="inline-flex items-center space-x-3 ${bgColor} ${borderColor} border rounded-lg px-4 py-2 mb-4">
-                        <span class="text-gray-300 font-medium">${label}:</span>
-                        <span class="${scoreColor} text-2xl font-bold">${score}%</span>
-                        <div class="w-32 h-2 bg-slate-700 rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-primary to-accent" style="width: ${score}%"></div>
-                        </div>
-                    </div>`;
+                    return '<div class="inline-flex items-center space-x-3 ' + bgColor + ' ' + borderColor + ' border rounded-lg px-4 py-2 mb-4">' +
+                        '<span class="text-gray-300 font-medium">' + label + ':</span>' +
+                        '<span class="' + scoreColor + ' text-2xl font-bold">' + score + '%</span>' +
+                        '<div class="w-32 h-2 bg-slate-700 rounded-full overflow-hidden">' +
+                            '<div class="h-full bg-gradient-to-r from-primary to-accent" style="width: ' + score + '%"></div>' +
+                        '</div>' +
+                    '</div>';
                 });
                 
                 // Format Critical Gaps sections
@@ -2231,17 +2231,17 @@ Include everything you can find:
                 html = html.replace(/(\d+)%/g, (match, num) => {
                     const percentage = parseInt(num);
                     if (percentage >= 80) {
-                        return `<span class="text-green-400 font-semibold">${num}%</span>`;
+                        return '<span class="text-green-400 font-semibold">' + num + '%</span>';
                     } else if (percentage >= 60) {
-                        return `<span class="text-yellow-400 font-semibold">${num}%</span>`;
+                        return '<span class="text-yellow-400 font-semibold">' + num + '%</span>';
                     } else {
-                        return `<span class="text-red-400 font-semibold">${num}%</span>`;
+                        return '<span class="text-red-400 font-semibold">' + num + '%</span>';
                     }
                 });
                 
                 // Format time estimates (e.g., "2-3 weeks", "4-6 weeks")
                 html = html.replace(/(\d+[-–]\d+\s+(?:weeks?|months?|days?))/gi, 
-                    '<span class="bg-slate-700 text-yellow-400 px-2 py-1 rounded text-sm">📅 $1</span>');
+                    '<span class="bg-slate-700 text-yellow-400 px-2 py-1 rounded text-sm">⏱️ $1</span>');
                 
                 // Convert markdown headers to styled headers
                 html = html.replace(/<h1>/g, '<h1 class="text-2xl font-bold text-white mt-6 mb-3">');
