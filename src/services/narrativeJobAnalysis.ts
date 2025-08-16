@@ -117,7 +117,15 @@ export class NarrativeJobAnalysisService {
   ): string {
     return `You are a professional career coach analyzing this CV against a specific job to provide actionable improvement guidance.
 
-IMPORTANT: Format your response using proper markdown with clear sections. Use ## for main headers and ### for subheaders. Do NOT add emojis or decorative elements. Do NOT use legacy titles like "Your Career Story". Do NOT include any sections other than those specified below.
+CRITICAL REQUIREMENTS:
+1. Format your response using proper markdown with ## for headers and ### for subheaders
+2. MUST include ALL sections listed below, especially Quick Wins and Learning Resources
+3. Be SPECIFIC with resource names, platforms, courses, and URLs where possible
+4. Provide at least 3 Quick Wins that can be done TODAY with exact resources
+5. Include exact course names and platforms, not generic recommendations
+6. Do NOT skip the learning resources sections - they are MANDATORY
+
+IMPORTANT: Do NOT add emojis in section headers (they are shown in the template for emphasis only). Do NOT use legacy titles like "Your Career Story". Do NOT include any sections other than those specified below.
 
 Provide your analysis in the following structure and only these sections:
 
@@ -146,16 +154,53 @@ Provide your analysis in the following structure and only these sections:
 - Skills to emphasize based on requirements
 - Sections to reorganize or add
 
-### Action Plan
+### Action Plan with Learning Resources
 
-#### Before Applying (Immediate)
-[2-3 things to update on CV right now]
+#### 🚀 Quick Wins (Can Do Today)
+**MANDATORY: Provide 3 immediate actions with SPECIFIC resources**
+1. **[Specific Action]** - Learn via: [Exact Course/Tutorial Name on Platform]
+   - Example: "Tailor CV keywords" - Resource: "Resume Keyword Optimization" guide on Indeed Career Guide
+2. **[Specific Action]** - Practice with: [Specific Tool/Platform]
+   - Example: "Practice coding problems" - Resource: LeetCode's "Top Interview Questions" (free tier)
+3. **[Specific Action]** - Implement: [Specific Template/Framework]
+   - Example: "Create portfolio project" - Resource: GitHub's "Hello World" tutorial + portfolio templates
 
-#### Interview Preparation
-[2-3 areas to prepare stories/examples for]
+#### 📚 Short-term Development (1-3 months)
+**MANDATORY: List 3 skills with EXACT learning resources for this role**
+1. **[Required Skill from Job]** 
+   - Primary Resource: [Specific Course Name] on [Platform] ([Duration], [Cost])
+   - Backup Resource: [Alternative free resource]
+   - Practice Project: [Specific project idea related to the job]
+2. **[Required Skill from Job]**
+   - Primary Resource: [Specific Course/Certification]
+   - Documentation: [Official docs or guides]
+   - Community: [Relevant forum/community]
+3. **[Required Skill from Job]**
+   - Video Course: [YouTube channel/Udemy course]
+   - Book: [Specific title and author]
+   - Hands-on: [Practice platform or exercises]
 
-#### Skill Development Priority
-[2-3 skills to develop to become ideal candidate]
+#### 🎯 Interview Preparation Strategy
+**MANDATORY: Include specific preparation resources**
+1. **Technical Preparation**
+   - Resource: [Specific interview prep platform/course]
+   - Practice: [Mock interview platform]
+   - Study Guide: [Company-specific or role-specific guide]
+2. **Behavioral Preparation**
+   - STAR Method Guide: [Specific resource]
+   - Company Research: [Where to find insights]
+   - Question Bank: [Specific preparation resource]
+
+#### 🎓 Long-term Positioning (6-12 months)
+**MANDATORY: Include 2 strategic moves with pathways**
+1. **[Career Goal for This Path]**
+   - Certification Path: [Specific certification + preparation resources]
+   - Study Plan: [Recommended timeline and materials]
+   - Cost: [Estimated investment]
+2. **[Expertise Area for Role Growth]**
+   - Learning Pathway: [Step-by-step progression]
+   - Key Resources: [Bootcamps, degree programs, or specializations]
+   - Networking: [Professional associations or events to join]
 
 ### Application Strategy
 [How to position themselves as the best candidate, including cover letter points and networking approaches]
