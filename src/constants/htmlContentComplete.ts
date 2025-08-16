@@ -1530,6 +1530,8 @@ Requirements:
                         'Content-Type': 'application/json'
                     }
                 });
+                
+                if (response.ok) {
                     const data = await response.json();
                     // Display the analysis in the analysis interface
                     displayAnalysisResults(data.analysis || data);
