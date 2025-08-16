@@ -2365,10 +2365,27 @@ Requirements:
                 }
                 
                 // Process markdown links [text](url) -> <a href="url">text</a>
-                var markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-                text = text.replace(markdownLinkRegex, function(match, linkText, url) {
-                    return '<a href="' + url + '" class="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">' + linkText + '</a>';
-                });
+                // Simplified markdown link processing without regex to avoid browser parsing issues
+                var linkStart = text.indexOf('[');
+                while (linkStart !== -1) {
+                    var linkEnd = text.indexOf(']', linkStart);
+                    if (linkEnd !== -1 && text.charAt(linkEnd + 1) === '(') {
+                        var urlStart = linkEnd + 2;
+                        var urlEnd = text.indexOf(')', urlStart);
+                        if (urlEnd !== -1) {
+                            var linkText = text.substring(linkStart + 1, linkEnd);
+                            var url = text.substring(urlStart, urlEnd);
+                            var beforeLink = text.substring(0, linkStart);
+                            var afterLink = text.substring(urlEnd + 1);
+                            text = beforeLink + '<a href="' + url + '" class="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">' + linkText + '</a>' + afterLink;
+                            linkStart = text.indexOf('[', linkStart + 1);
+                        } else {
+                            linkStart = text.indexOf('[', linkStart + 1);
+                        }
+                    } else {
+                        linkStart = text.indexOf('[', linkStart + 1);
+                    }
+                }
                 
                 // Process plain URLs (http://, https://, www.)
                 var urlRegex = /(https?:\/\/[^\s<>"]+|www\.[^\s<>"]+)/g;
