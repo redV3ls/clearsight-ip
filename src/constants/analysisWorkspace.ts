@@ -270,32 +270,205 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
             @apply w-1/2;
         }
 
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .quick-compare #leftRail {
-                @apply w-full;
+        /* Enhanced Responsive Design */
+        
+        /* Mobile-first approach */
+        @media (max-width: 640px) {
+            /* Mobile: Stack everything vertically */
+            .main-tab {
+                @apply px-3 py-3 text-sm;
             }
             
-            .quick-compare #rightPane {
+            .main-tab span {
                 @apply hidden;
+            }
+            
+            .main-tab i {
+                @apply text-lg;
+            }
+            
+            .chat-message {
+                @apply p-3;
+            }
+            
+            .chat-message .w-8 {
+                @apply w-6 h-6;
+            }
+            
+            .upload-card .drop-zone {
+                @apply p-4;
+            }
+            
+            .upload-card .drop-zone i {
+                @apply text-2xl mb-2;
+            }
+            
+            .grid.md\\:grid-cols-2 {
+                @apply grid-cols-1;
+            }
+            
+            .grid.md\\:grid-cols-3 {
+                @apply grid-cols-1;
+            }
+            
+            .flex.space-x-4 {
+                @apply flex-col space-x-0 space-y-3;
+            }
+            
+            .results-tab {
+                @apply px-3 py-2 text-sm;
+            }
+            
+            .results-tab span {
+                @apply hidden sm:inline;
+            }
+            
+            /* Mobile action buttons */
+            .mobile-action-buttons {
+                @apply flex-col space-x-0 space-y-3;
+            }
+            
+            .mobile-action-buttons button {
+                @apply w-full justify-center;
+            }
+            
+            /* Mobile skip option - make it prominent */
+            .mobile-skip-prominent {
+                @apply bg-primary hover:bg-primary/80 text-white;
             }
         }
 
-        @media (max-width: 768px) {
-            #leftRail {
-                @apply w-full;
+        @media (min-width: 641px) and (max-width: 768px) {
+            /* Tablet: Optimize for medium screens */
+            .main-tab {
+                @apply px-4 py-3;
             }
             
-            #rightPane {
+            .grid.md\\:grid-cols-2 {
+                @apply grid-cols-1;
+            }
+            
+            .grid.md\\:grid-cols-3 {
+                @apply grid-cols-2;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            /* Desktop: Full responsive layout */
+            .grid.md\\:grid-cols-2 {
+                @apply grid-cols-2;
+            }
+            
+            .grid.md\\:grid-cols-3 {
+                @apply grid-cols-3;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            /* Large desktop: Optimal spacing */
+            .main-tab {
+                @apply px-6 py-4;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .main-tab,
+            .results-tab,
+            button {
+                @apply min-h-[44px]; /* iOS recommended touch target */
+            }
+            
+            .upload-card .drop-zone {
+                @apply min-h-[120px];
+            }
+            
+            /* Improve touch scrolling */
+            .overflow-x-auto {
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+            .overflow-x-auto::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        /* Landscape mobile optimizations */
+        .landscape-mobile .chat-message {
+            @apply p-2;
+        }
+        
+        .landscape-mobile .upload-card .drop-zone {
+            @apply p-4;
+        }
+        
+        .landscape-mobile .main-tab {
+            @apply px-2 py-2 text-sm;
+        }
+
+        /* iOS Safari specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .sticky {
+                position: -webkit-sticky;
+            }
+            
+            /* Fix viewport height on iOS */
+            .min-h-screen {
+                min-height: -webkit-fill-available;
+            }
+        }
+
+        /* Android Chrome specific fixes */
+        @media screen and (max-width: 640px) {
+            /* Prevent zoom on input focus */
+            input[type="text"],
+            input[type="email"],
+            input[type="password"],
+            textarea,
+            select {
+                font-size: 16px;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .main-tab.active {
+                @apply bg-primary text-white border-2 border-white;
+            }
+            
+            .chat-message.assistant {
+                @apply border-l-4 border-primary bg-slate-700;
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                @apply transition-none;
+            }
+            
+            .animate-spin,
+            .animate-pulse {
+                @apply animate-none;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .main-tab,
+            header,
+            .no-print {
                 @apply hidden;
             }
             
-            .mobile-show-results #leftRail {
-                @apply hidden;
+            .tab-panel {
+                @apply block;
             }
             
-            .mobile-show-results #rightPane {
-                @apply flex;
+            .chat-message {
+                @apply break-inside-avoid;
             }
         }
 
@@ -464,23 +637,36 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
     <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-4">
-                    <a href="/" class="text-xl font-bold text-primary">Clearsight IP</a>
-                    <span class="text-gray-400">|</span>
-                    <span class="text-gray-300">AI Career Analysis</span>
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <a href="/" class="text-lg sm:text-xl font-bold text-primary">Clearsight IP</a>
+                    <span class="text-gray-400 hidden sm:inline">|</span>
+                    <span class="text-gray-300 text-sm sm:text-base hidden sm:inline">AI Career Analysis</span>
+                    <span class="text-gray-300 text-xs sm:hidden">Analysis</span>
                 </div>
                 
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-1 sm:space-x-4">
                     <button id="themeToggle" class="p-2 hover:bg-slate-700 rounded-lg transition-colors" title="Toggle Theme">
-                        <i class="fas fa-moon"></i>
+                        <i class="fas fa-moon text-sm sm:text-base"></i>
                     </button>
-                    <button id="helpBtn" class="p-2 hover:bg-slate-700 rounded-lg transition-colors" title="Help">
+                    <button id="helpBtn" class="p-2 hover:bg-slate-700 rounded-lg transition-colors hidden sm:block" title="Help">
                         <i class="fas fa-question-circle"></i>
                     </button>
                     <button id="dataHandlingBtn" class="p-2 hover:bg-slate-700 rounded-lg transition-colors" title="Privacy & Data">
-                        <i class="fas fa-shield-alt"></i>
+                        <i class="fas fa-shield-alt text-sm sm:text-base"></i>
+                    </button>
+                    <!-- Mobile menu button -->
+                    <button id="mobileMenuBtn" class="p-2 hover:bg-slate-700 rounded-lg transition-colors sm:hidden" title="Menu">
+                        <i class="fas fa-bars"></i>
                     </button>
                 </div>
+            </div>
+            
+            <!-- Mobile menu -->
+            <div id="mobileMenu" class="hidden sm:hidden border-t border-slate-700 py-2">
+                <button id="mobileHelpBtn" class="w-full text-left px-4 py-2 text-gray-300 hover:text-white hover:bg-slate-700 transition-colors flex items-center space-x-2">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Help & Support</span>
+                </button>
             </div>
         </div>
     </header>
@@ -488,18 +674,21 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
     <!-- Main Tabs Navigation -->
     <div class="bg-slate-800 border-b border-slate-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex space-x-0">
-                <button class="main-tab active" data-tab="cv">
+            <div class="flex space-x-0 overflow-x-auto">
+                <button class="main-tab active flex-shrink-0" data-tab="cv">
                     <i class="fas fa-file-alt"></i>
-                    <span>Your Resume</span>
+                    <span class="hidden sm:inline">Your Resume</span>
+                    <span class="sm:hidden">Resume</span>
                 </button>
-                <button class="main-tab" data-tab="job">
+                <button class="main-tab flex-shrink-0" data-tab="job">
                     <i class="fas fa-briefcase"></i>
-                    <span>Job Description</span>
+                    <span class="hidden sm:inline">Job Description</span>
+                    <span class="sm:hidden">Job</span>
                 </button>
-                <button class="main-tab" data-tab="analysis" disabled>
+                <button class="main-tab flex-shrink-0" data-tab="analysis" disabled>
                     <i class="fas fa-chart-line"></i>
-                    <span>Analysis & Results</span>
+                    <span class="hidden sm:inline">Analysis & Results</span>
+                    <span class="sm:hidden">Results</span>
                 </button>
             </div>
         </div>
@@ -518,7 +707,7 @@ export const ANALYSIS_WORKSPACE_CONTENT = `<!DOCTYPE html>
                         </div>
                         <div class="flex-1">
                             <p class="text-white font-medium mb-2">Hi there! I'm your AI career analyst 👋</p>
-                            <p class="text-gray-300">I'm here to help you understand your career strengths and identify opportunities for growth. Let's start by looking at your resume - I'll analyze your skills, experience, and suggest ways to make your profile even stronger.</p>
+                            <p class="text-gray-300 text-sm sm:text-base">I'm here to help you understand your career strengths and identify opportunities for growth. Let's start by looking at your resume - I'll analyze your skills, experience, and suggest ways to make your profile even stronger.</p>
                         </div>
                     </div>
                 </div>
@@ -746,19 +935,33 @@ Include everything you can find:
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex justify-center space-x-4">
+                    <div class="flex justify-center space-x-4 mobile-action-buttons">
                         <button id="backToResume" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
                             <i class="fas fa-arrow-left"></i>
-                            <span>Back to Resume</span>
+                            <span class="hidden sm:inline">Back to Resume</span>
+                            <span class="sm:hidden">Back</span>
                         </button>
                         <button id="startAnalysis" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
                             <i class="fas fa-magic"></i>
-                            <span>Analyze My Profile</span>
+                            <span class="hidden sm:inline">Analyze My Profile</span>
+                            <span class="sm:hidden">Analyze</span>
                         </button>
-                        <button id="skipJobAnalysis" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
-                            <span>Skip & Analyze Resume Only</span>
+                        <button id="skipJobAnalysis" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 mobile-skip-prominent">
+                            <span class="hidden sm:inline">Skip & Analyze Resume Only</span>
+                            <span class="sm:hidden">Skip Job</span>
                             <i class="fas fa-arrow-right"></i>
                         </button>
+                    </div>
+
+                    <!-- Mobile Skip Explanation -->
+                    <div class="mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg sm:hidden">
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-info-circle text-blue-400 mt-0.5 text-sm"></i>
+                            <div>
+                                <p class="text-blue-300 text-sm font-medium">No job description?</p>
+                                <p class="text-blue-200 text-xs">Tap "Skip Job" to analyze your resume against general market standards.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -872,18 +1075,26 @@ Include everything you can find:
                     <!-- Detailed Analysis Tabs -->
                     <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
                         <div class="border-b border-slate-700">
-                            <div class="flex space-x-0">
-                                <button class="results-tab active px-6 py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer" data-tab="strengths">
-                                    <i class="fas fa-star mr-2"></i>Your Strengths
+                            <div class="flex space-x-0 overflow-x-auto">
+                                <button class="results-tab active px-3 sm:px-6 py-3 sm:py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer flex-shrink-0" data-tab="strengths">
+                                    <i class="fas fa-star mr-1 sm:mr-2"></i>
+                                    <span class="hidden sm:inline">Your Strengths</span>
+                                    <span class="sm:hidden">Strengths</span>
                                 </button>
-                                <button class="results-tab px-6 py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer" data-tab="gaps">
-                                    <i class="fas fa-chart-line mr-2"></i>Growth Areas
+                                <button class="results-tab px-3 sm:px-6 py-3 sm:py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer flex-shrink-0" data-tab="gaps">
+                                    <i class="fas fa-chart-line mr-1 sm:mr-2"></i>
+                                    <span class="hidden sm:inline">Growth Areas</span>
+                                    <span class="sm:hidden">Growth</span>
                                 </button>
-                                <button class="results-tab px-6 py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer" data-tab="recommendations">
-                                    <i class="fas fa-lightbulb mr-2"></i>My Advice
+                                <button class="results-tab px-3 sm:px-6 py-3 sm:py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer flex-shrink-0" data-tab="recommendations">
+                                    <i class="fas fa-lightbulb mr-1 sm:mr-2"></i>
+                                    <span class="hidden sm:inline">My Advice</span>
+                                    <span class="sm:hidden">Advice</span>
                                 </button>
-                                <button class="results-tab px-6 py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer" data-tab="ats">
-                                    <i class="fas fa-robot mr-2"></i>ATS Tips
+                                <button class="results-tab px-3 sm:px-6 py-3 sm:py-4 text-gray-400 hover:text-white border-b-2 border-transparent transition-all duration-200 font-medium cursor-pointer flex-shrink-0" data-tab="ats">
+                                    <i class="fas fa-robot mr-1 sm:mr-2"></i>
+                                    <span class="hidden sm:inline">ATS Tips</span>
+                                    <span class="sm:hidden">ATS</span>
                                 </button>
                             </div>
                         </div>
@@ -957,18 +1168,21 @@ Include everything you can find:
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex justify-center space-x-4 mt-8">
-                        <button id="exportResults" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                    <div class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-8">
+                        <button id="exportResults" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
                             <i class="fas fa-download"></i>
-                            <span>Download My Analysis</span>
+                            <span class="hidden sm:inline">Download My Analysis</span>
+                            <span class="sm:hidden">Download</span>
                         </button>
-                        <button id="shareResults" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                        <button id="shareResults" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
                             <i class="fas fa-share"></i>
-                            <span>Share Results</span>
+                            <span class="hidden sm:inline">Share Results</span>
+                            <span class="sm:hidden">Share</span>
                         </button>
-                        <button id="newAnalysis" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                        <button id="newAnalysis" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
                             <i class="fas fa-redo"></i>
-                            <span>New Analysis</span>
+                            <span class="hidden sm:inline">New Analysis</span>
+                            <span class="sm:hidden">New</span>
                         </button>
                     </div>
                 </div>
@@ -1099,7 +1313,9 @@ Include everything you can find:
                 // Header actions
                 document.getElementById('themeToggle')?.addEventListener('click', () => this.toggleTheme());
                 document.getElementById('helpBtn')?.addEventListener('click', () => this.showHelp());
+                document.getElementById('mobileHelpBtn')?.addEventListener('click', () => this.showHelp());
                 document.getElementById('dataHandlingBtn')?.addEventListener('click', () => this.showDataHandling());
+                document.getElementById('mobileMenuBtn')?.addEventListener('click', () => this.toggleMobileMenu());
                 document.getElementById('closeDataHandling')?.addEventListener('click', () => this.hideDataHandling());
                 document.getElementById('closeDataHandling2')?.addEventListener('click', () => this.hideDataHandling());
                 document.getElementById('deleteAllData')?.addEventListener('click', () => this.deleteAllData());
@@ -1204,6 +1420,12 @@ Include everything you can find:
 
             handleFileSelect(file, type) {
                 if (!this.validateFile(file)) return;
+                
+                // Show mobile-friendly success message
+                if (window.innerWidth < 640) {
+                    this.showToast(`📄 ${file.name} uploaded successfully!`, 'success');
+                }
+                
                 this.showFileInfo(file, type);
                 this.parseFile(file, type);
                 this.updateContinueButton();
@@ -1418,8 +1640,16 @@ Include everything you can find:
                 const jobText = skipJob ? '' : (this.jobText || document.getElementById('jobTextArea')?.value.trim());
 
                 if (!resumeText) {
-                    this.showToast('I need your resume content to analyze your profile', 'error');
+                    const message = window.innerWidth < 640 
+                        ? '📄 Please add your resume first!' 
+                        : 'I need your resume content to analyze your profile';
+                    this.showToast(message, 'error');
                     return;
+                }
+
+                // Mobile-specific: Show skip confirmation
+                if (skipJob && window.innerWidth < 640) {
+                    this.showToast('🚀 Analyzing your resume against general market standards...', 'info');
                 }
 
                 // Switch to analysis tab and show loading
@@ -1468,8 +1698,37 @@ Include everything you can find:
                 this.stopLoadingMessages();
             }
 
+            toggleMobileMenu() {
+                const mobileMenu = document.getElementById('mobileMenu');
+                if (mobileMenu) {
+                    mobileMenu.classList.toggle('hidden');
+                }
+            }
+
             showHelp() {
-                this.showToast('Need help? Check out our guide or contact support!', 'info');
+                // Close mobile menu if open
+                const mobileMenu = document.getElementById('mobileMenu');
+                if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+                
+                // Show contextual help based on current tab
+                let helpMessage = '';
+                switch (this.currentTab) {
+                    case 'cv':
+                        helpMessage = '📄 Upload your resume or paste the text. I support PDF, DOC, DOCX, and TXT files up to 10MB.';
+                        break;
+                    case 'job':
+                        helpMessage = '💼 Add a job description for targeted analysis, or skip this step for general career insights.';
+                        break;
+                    case 'analysis':
+                        helpMessage = '📊 Your analysis is ready! Explore different tabs to see strengths, growth areas, and personalized advice.';
+                        break;
+                    default:
+                        helpMessage = '🤖 I\'m here to help analyze your career profile. Start by uploading your resume!';
+                }
+                
+                this.showToast(helpMessage, 'info', 8000);
             }
 
             exportResults() {
@@ -1596,6 +1855,23 @@ Include everything you can find:
                 
                 // Setup results tab switching
                 this.setupResultsTabs();
+                
+                // Mobile-specific: Show completion message
+                if (window.innerWidth < 640) {
+                    setTimeout(() => {
+                        this.showToast(`🎉 Your analysis is complete! Score: ${overallScore}%`, 'success', 6000);
+                    }, 1000);
+                }
+                
+                // Auto-scroll to results on mobile
+                if (window.innerWidth < 768) {
+                    setTimeout(() => {
+                        document.getElementById('resultsState')?.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                        });
+                    }, 1500);
+                }
             }
 
             async populateConversationalContent(data) {
@@ -1806,6 +2082,73 @@ Include everything you can find:
                 const icon = document.querySelector('#themeToggle i');
                 if (icon) {
                     icon.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+                }
+                
+                // Setup mobile-specific event listeners
+                this.setupMobileOptimizations();
+            }
+
+            setupMobileOptimizations() {
+                // Handle orientation changes
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(() => {
+                        this.handleOrientationChange();
+                    }, 100);
+                });
+
+                // Handle window resize for responsive adjustments
+                window.addEventListener('resize', () => {
+                    this.handleWindowResize();
+                });
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    const mobileMenu = document.getElementById('mobileMenu');
+                    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                    
+                    if (mobileMenu && !mobileMenu.classList.contains('hidden') && 
+                        !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+
+                // Improve touch scrolling on iOS
+                if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                    document.body.style.webkitOverflowScrolling = 'touch';
+                }
+            }
+
+            handleOrientationChange() {
+                // Adjust layout for orientation changes
+                const isLandscape = window.orientation === 90 || window.orientation === -90;
+                
+                if (isLandscape && window.innerWidth < 768) {
+                    // Landscape mobile: optimize for horizontal space
+                    document.body.classList.add('landscape-mobile');
+                } else {
+                    document.body.classList.remove('landscape-mobile');
+                }
+            }
+
+            handleWindowResize() {
+                // Close mobile menu on resize to desktop
+                if (window.innerWidth >= 640) {
+                    const mobileMenu = document.getElementById('mobileMenu');
+                    if (mobileMenu) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+                
+                // Adjust toast positioning for mobile
+                this.adjustToastPosition();
+            }
+
+            adjustToastPosition() {
+                const toastContainer = document.getElementById('toastContainer');
+                if (toastContainer && window.innerWidth < 640) {
+                    toastContainer.className = 'fixed top-4 left-4 right-4 z-50 space-y-2';
+                } else if (toastContainer) {
+                    toastContainer.className = 'fixed top-20 right-6 z-50 space-y-2';
                 }
             }
 
