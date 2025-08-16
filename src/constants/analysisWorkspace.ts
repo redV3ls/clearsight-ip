@@ -789,12 +789,22 @@ I'll analyze everything including:
                         </div>
                     </div>
 
-                    <!-- Continue Button -->
-                    <div class="flex justify-center">
-                        <button id="continueToJob" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2" disabled>
-                            <span>Continue to Job Description</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-400">
+                            Step 1 of 3
+                        </div>
+                        <div class="flex space-x-3">
+                            <button id="skipToAnalysis" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                                <i class="fas fa-forward"></i>
+                                <span class="hidden sm:inline">Skip to Analysis</span>
+                                <span class="sm:hidden">Skip</span>
+                            </button>
+                            <button id="continueToJob" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2" disabled>
+                                <span>Continue to Job Description</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -934,23 +944,28 @@ Include everything you can find:
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex justify-center space-x-4 mobile-action-buttons">
-                        <button id="backToResume" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
-                            <i class="fas fa-arrow-left"></i>
-                            <span class="hidden sm:inline">Back to Resume</span>
-                            <span class="sm:hidden">Back</span>
-                        </button>
-                        <button id="startAnalysis" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
-                            <i class="fas fa-magic"></i>
-                            <span class="hidden sm:inline">Analyze My Profile</span>
-                            <span class="sm:hidden">Analyze</span>
-                        </button>
-                        <button id="skipJobAnalysis" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 mobile-skip-prominent">
-                            <span class="hidden sm:inline">Skip & Analyze Resume Only</span>
-                            <span class="sm:hidden">Skip Job</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-4">
+                            <div class="text-sm text-gray-400">Step 2 of 3</div>
+                            <button id="backToResume" class="bg-slate-600 hover:bg-slate-500 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                                <i class="fas fa-arrow-left"></i>
+                                <span class="hidden sm:inline">Back to Resume</span>
+                                <span class="sm:hidden">Back</span>
+                            </button>
+                        </div>
+                        <div class="flex space-x-3 mobile-action-buttons">
+                            <button id="skipJobAnalysis" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 mobile-skip-prominent">
+                                <span class="hidden sm:inline">Skip & Analyze Resume Only</span>
+                                <span class="sm:hidden">Skip Job</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <button id="startAnalysis" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                                <i class="fas fa-magic"></i>
+                                <span class="hidden sm:inline">Analyze My Profile</span>
+                                <span class="sm:hidden">Analyze</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Mobile Skip Explanation -->
@@ -1167,23 +1182,41 @@ Include everything you can find:
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-8">
-                        <button id="exportResults" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
-                            <i class="fas fa-download"></i>
-                            <span class="hidden sm:inline">Download My Analysis</span>
-                            <span class="sm:hidden">Download</span>
-                        </button>
-                        <button id="shareResults" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
-                            <i class="fas fa-share"></i>
-                            <span class="hidden sm:inline">Share Results</span>
-                            <span class="sm:hidden">Share</span>
-                        </button>
-                        <button id="newAnalysis" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
-                            <i class="fas fa-redo"></i>
-                            <span class="hidden sm:inline">New Analysis</span>
-                            <span class="sm:hidden">New</span>
-                        </button>
+                    <!-- Navigation and Action Buttons -->
+                    <div class="border-t border-slate-700 pt-6 mt-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="flex items-center space-x-4">
+                                <div class="text-sm text-gray-400">Step 3 of 3 - Complete!</div>
+                                <div class="flex space-x-2">
+                                    <button id="backToCv" class="bg-slate-600 hover:bg-slate-500 text-white px-3 py-2 rounded-lg font-medium transition-colors flex items-center space-x-1 text-sm">
+                                        <i class="fas fa-file-alt"></i>
+                                        <span class="hidden sm:inline">Edit Resume</span>
+                                    </button>
+                                    <button id="backToJob" class="bg-slate-600 hover:bg-slate-500 text-white px-3 py-2 rounded-lg font-medium transition-colors flex items-center space-x-1 text-sm">
+                                        <i class="fas fa-briefcase"></i>
+                                        <span class="hidden sm:inline">Edit Job</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                            <button id="exportResults" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                                <i class="fas fa-download"></i>
+                                <span class="hidden sm:inline">Download My Analysis</span>
+                                <span class="sm:hidden">Download</span>
+                            </button>
+                            <button id="shareResults" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                                <i class="fas fa-share"></i>
+                                <span class="hidden sm:inline">Share Results</span>
+                                <span class="sm:hidden">Share</span>
+                            </button>
+                            <button id="newAnalysis" class="bg-slate-600 hover:bg-slate-500 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                                <i class="fas fa-redo"></i>
+                                <span class="hidden sm:inline">New Analysis</span>
+                                <span class="sm:hidden">New</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1299,6 +1332,7 @@ Include everything you can find:
 
                 // CV tab actions
                 document.getElementById('continueToJob')?.addEventListener('click', () => this.switchMainTab('job'));
+                document.getElementById('skipToAnalysis')?.addEventListener('click', () => this.startAnalysis(true));
                 
                 // Job tab actions
                 document.getElementById('backToResume')?.addEventListener('click', () => this.switchMainTab('cv'));
@@ -1306,6 +1340,8 @@ Include everything you can find:
                 document.getElementById('skipJobAnalysis')?.addEventListener('click', () => this.startAnalysis(true));
                 
                 // Analysis tab actions
+                document.getElementById('backToCv')?.addEventListener('click', () => this.switchMainTab('cv'));
+                document.getElementById('backToJob')?.addEventListener('click', () => this.switchMainTab('job'));
                 document.getElementById('exportResults')?.addEventListener('click', () => this.exportResults());
                 document.getElementById('shareResults')?.addEventListener('click', () => this.shareResults());
                 document.getElementById('newAnalysis')?.addEventListener('click', () => this.resetAnalysis());
@@ -1329,6 +1365,7 @@ Include everything you can find:
                 document.getElementById('jobTextArea')?.addEventListener('input', (e) => {
                     this.jobText = e.target.value;
                     this.updateCharCount('job', e.target.value);
+                    this.updateJobTabStatus();
                 });
 
                 // Weight sliders
@@ -1338,26 +1375,82 @@ Include everything you can find:
             }
 
             switchMainTab(tabName) {
-                // Update tab buttons
+                const previousTab = this.currentTab;
+                
+                // Update tab buttons with completion status
                 document.querySelectorAll('.main-tab').forEach(tab => {
-                    tab.classList.toggle('active', tab.dataset.tab === tabName);
+                    const isActive = tab.dataset.tab === tabName;
+                    tab.classList.toggle('active', isActive);
+                    
+                    // Mark completed tabs
+                    if (tab.dataset.tab === 'cv' && this.resumeText) {
+                        tab.classList.add('completed');
+                    }
+                    if (tab.dataset.tab === 'job' && this.jobText) {
+                        tab.classList.add('completed');
+                    }
                 });
 
-                // Update tab panels
-                document.querySelectorAll('.tab-panel').forEach(panel => {
-                    panel.classList.toggle('active', panel.id === tabName + 'Tab');
-                });
+                // Animate tab panel transitions
+                const currentPanel = document.getElementById(previousTab + 'Tab');
+                const newPanel = document.getElementById(tabName + 'Tab');
+                
+                if (currentPanel && newPanel && currentPanel !== newPanel) {
+                    // Exit animation for current panel
+                    currentPanel.classList.add('exiting');
+                    
+                    setTimeout(() => {
+                        // Hide current panel
+                        currentPanel.classList.remove('active', 'exiting');
+                        
+                        // Show new panel with enter animation
+                        newPanel.classList.add('active', 'entering');
+                        
+                        setTimeout(() => {
+                            newPanel.classList.remove('entering');
+                            newPanel.classList.add('entered');
+                        }, 50);
+                    }, 150);
+                } else if (newPanel) {
+                    // Direct switch without animation
+                    document.querySelectorAll('.tab-panel').forEach(panel => {
+                        panel.classList.toggle('active', panel.id === tabName + 'Tab');
+                    });
+                }
 
                 this.currentTab = tabName;
+                this.updateProgressIndicator();
 
                 // Enable analysis tab if we have resume content
-                if (this.resumeText || this.jobText) {
+                if (this.resumeText) {
                     const analysisTab = document.querySelector('.main-tab[data-tab="analysis"]');
                     if (analysisTab) {
                         analysisTab.disabled = false;
                         analysisTab.classList.remove('opacity-50', 'cursor-not-allowed');
                     }
                 }
+
+                // Scroll to top on tab change
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            updateProgressIndicator() {
+                const dots = ['progressDot1', 'progressDot2', 'progressDot3'];
+                const tabOrder = ['cv', 'job', 'analysis'];
+                const currentIndex = tabOrder.indexOf(this.currentTab);
+                
+                dots.forEach((dotId, index) => {
+                    const dot = document.getElementById(dotId);
+                    if (dot) {
+                        if (index <= currentIndex) {
+                            dot.classList.remove('bg-slate-600');
+                            dot.classList.add('bg-primary');
+                        } else {
+                            dot.classList.remove('bg-primary');
+                            dot.classList.add('bg-slate-600');
+                        }
+                    }
+                });
             }
 
             updateWeight(weightType, value) {
@@ -1373,6 +1466,17 @@ Include everything you can find:
                 
                 // Save to localStorage
                 localStorage.setItem('analysisWeights', JSON.stringify(this.weights));
+            }
+
+            updateJobTabStatus() {
+                const hasJob = this.jobText || document.getElementById('jobTextArea')?.value.trim();
+                const jobTab = document.getElementById('jobTabBtn');
+                
+                if (jobTab && hasJob) {
+                    jobTab.classList.add('completed');
+                } else if (jobTab) {
+                    jobTab.classList.remove('completed');
+                }
             }
 
             setupFileHandlers() {
@@ -1532,18 +1636,27 @@ Include everything you can find:
 
             updateContinueButton() {
                 const continueBtn = document.getElementById('continueToJob');
+                const skipBtn = document.getElementById('skipToAnalysis');
                 const hasResume = this.resumeText || document.getElementById('resumeTextArea')?.value.trim();
                 
                 if (continueBtn) {
                     continueBtn.disabled = !hasResume;
                     continueBtn.classList.toggle('opacity-50', !hasResume);
                     continueBtn.classList.toggle('cursor-not-allowed', !hasResume);
-                    
-                    if (hasResume) {
-                        continueBtn.innerHTML = 'Continue to Job Description <i class="fas fa-arrow-right ml-2"></i>';
-                    } else {
-                        continueBtn.innerHTML = 'Upload or paste resume to continue <i class="fas fa-upload ml-2"></i>';
-                    }
+                }
+                
+                if (skipBtn) {
+                    skipBtn.disabled = !hasResume;
+                    skipBtn.classList.toggle('opacity-50', !hasResume);
+                    skipBtn.classList.toggle('cursor-not-allowed', !hasResume);
+                }
+
+                // Update CV tab completion status
+                const cvTab = document.getElementById('cvTabBtn');
+                if (cvTab && hasResume) {
+                    cvTab.classList.add('completed');
+                } else if (cvTab) {
+                    cvTab.classList.remove('completed');
                 }
             }
 
