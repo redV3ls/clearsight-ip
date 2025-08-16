@@ -397,6 +397,7 @@ class UIManager {
     }
 
     static renderDemoSection() {
+        // Updated demo section with examples instead of demo button
         return `
             <section id="demo" class="py-20 bg-slate-900">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
