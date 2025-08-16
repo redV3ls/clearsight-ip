@@ -1084,7 +1084,7 @@ Requirements:
 
                 if (response.ok) {
                     const data = await response.json();
-            if (response.ok) {
+                    if (data.success && data.data && data.data.user) {
                         AppState.user = data.data.user;
                         updateUIForAuthenticatedUser();
                     }
@@ -1523,12 +1523,13 @@ Requirements:
         // View analysis details
         window.viewAnalysis = async function(analysisId) {
             try {
-                const response = await fetch(API_ENDPOINTS.getAnalysis(analysisId), {\n                    method: 'GET',\n                    headers: { ...getAuthHeaders() },
+                const response = await fetch(API_ENDPOINTS.getAnalysis(analysisId), {
                     method: 'GET',
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
-                
-                if (response.ok) {
                     const data = await response.json();
                     // Display the analysis in the analysis interface
                     displayAnalysisResults(data.analysis || data);
@@ -1547,7 +1548,10 @@ Requirements:
             try {
                 const response = await fetch(API_ENDPOINTS.getAnalysis(analysisId), {
                     method: 'GET',
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
                 
                 if (response.ok) {
@@ -1578,7 +1582,10 @@ Requirements:
             try {
                 const response = await fetch(API_ENDPOINTS.deleteAnalysis(analysisId), {
                     method: 'DELETE',
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
                 
                 if (response.ok) {
