@@ -212,9 +212,13 @@ class App {
             this.toggleMobileMenu();
         });
 
-        // Demo button
+        // Demo buttons
         document.getElementById('startDemoBtn')?.addEventListener('click', () => {
             this.startDemo();
+        });
+        
+        document.getElementById('startAnalysisFromDemo')?.addEventListener('click', () => {
+            window.location.href = '/analysis.html';
         });
 
         // Smooth scrolling for navigation links

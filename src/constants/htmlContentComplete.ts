@@ -2250,6 +2250,32 @@ Requirements:
                     }
                 }
                 
+                // Process markdown links [text](url) -> <a href="url">text</a>
+                var markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+                text = text.replace(markdownLinkRegex, function(match, linkText, url) {
+                    return '<a href="' + url + '" class="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">' + linkText + '</a>';
+                });
+                
+                // Process plain URLs (http://, https://, www.)
+                var urlRegex = /(https?:\/\/[^\s<>"]+|www\.[^\s<>"]+)/g;
+                text = text.replace(urlRegex, function(url) {
+                    // Skip if already part of an anchor tag
+                    if (text.indexOf('href="' + url) > -1 || text.indexOf('>' + url + '</a>') > -1) {
+                        return url;
+                    }
+                    var displayUrl = url;
+                    var actualUrl = url;
+                    // Add protocol if missing for www. URLs
+                    if (url.indexOf('www.') === 0) {
+                        actualUrl = 'https://' + url;
+                    }
+                    // Truncate long URLs for display
+                    if (displayUrl.length > 50) {
+                        displayUrl = displayUrl.substring(0, 47) + '...';
+                    }
+                    return '<a href="' + actualUrl + '" class="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">' + displayUrl + '</a>';
+                });
+                
                 // No extra wrapper needed since we handle spacing inline
                 return text;
             }

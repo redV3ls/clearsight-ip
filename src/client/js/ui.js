@@ -399,23 +399,137 @@ class UIManager {
     static renderDemoSection() {
         return `
             <section id="demo" class="py-20 bg-slate-900">
-                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 class="text-4xl font-bold text-white mb-4">Try Demo</h2>
-                    <p class="text-xl text-gray-300 mb-8">
-                        Experience the power of AI-driven career insights with our interactive demo
-                    </p>
-                    <div class="bg-slate-800 rounded-lg p-8 border border-slate-700">
-                        <div class="mb-6">
-                            <i class="fas fa-play-circle text-6xl text-primary mb-4"></i>
-                            <h3 class="text-2xl font-bold text-white mb-2">Interactive Demo</h3>
-                            <p class="text-gray-300">
-                                See how our AI analyzes a sample resume and provides actionable career insights
-                            </p>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl font-bold text-white mb-4">See What to Expect</h2>
+                        <p class="text-xl text-gray-300">
+                            Here's a sample of how our AI analyzes your resume against job descriptions to provide actionable insights
+                        </p>
+                    </div>
+                    
+                    <div class="grid lg:grid-cols-3 gap-6">
+                        <!-- Sample Resume -->
+                        <div class="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-file-alt text-primary mr-2"></i>
+                                <h3 class="text-lg font-semibold text-white">Sample Resume</h3>
+                            </div>
+                            <div class="bg-slate-900 rounded p-4 text-sm text-gray-300 font-mono">
+                                <p class="font-bold text-primary mb-2">John Smith</p>
+                                <p class="mb-3">Full-Stack Developer | 5 years experience</p>
+                                
+                                <p class="text-xs text-gray-400 mb-1">SKILLS:</p>
+                                <p class="mb-3">• JavaScript, React, Node.js<br/>• Python, Django<br/>• SQL, MongoDB<br/>• Git, Docker</p>
+                                
+                                <p class="text-xs text-gray-400 mb-1">EXPERIENCE:</p>
+                                <p class="mb-2">Senior Developer at TechCorp<br/>
+                                • Led team of 4 developers<br/>
+                                • Built RESTful APIs<br/>
+                                • Improved app performance by 40%</p>
+                                
+                                <p class="text-xs text-gray-400 mb-1">EDUCATION:</p>
+                                <p>BS Computer Science, State University</p>
+                            </div>
                         </div>
-                        <button id="startDemoBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
-                            <i class="fas fa-rocket mr-2"></i>
-                            Start Interactive Demo
-                        </button>
+                        
+                        <!-- Sample Job Description -->
+                        <div class="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-briefcase text-primary mr-2"></i>
+                                <h3 class="text-lg font-semibold text-white">Sample Job Description</h3>
+                            </div>
+                            <div class="bg-slate-900 rounded p-4 text-sm text-gray-300 font-mono">
+                                <p class="font-bold text-primary mb-2">Senior Full-Stack Engineer</p>
+                                <p class="mb-3">Leading Tech Company | Remote</p>
+                                
+                                <p class="text-xs text-gray-400 mb-1">REQUIREMENTS:</p>
+                                <p class="mb-3">• 5+ years full-stack development<br/>
+                                • Expert in React & TypeScript<br/>
+                                • Experience with AWS services<br/>
+                                • Knowledge of microservices<br/>
+                                • GraphQL experience preferred<br/>
+                                • CI/CD pipeline expertise</p>
+                                
+                                <p class="text-xs text-gray-400 mb-1">NICE TO HAVE:</p>
+                                <p>• Kubernetes experience<br/>
+                                • Machine learning basics<br/>
+                                • Agile/Scrum certification</p>
+                            </div>
+                        </div>
+                        
+                        <!-- AI Analysis Result -->
+                        <div class="bg-gradient-to-br from-slate-800 to-slate-700 rounded-lg p-6 border-2 border-primary">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-magic text-primary mr-2"></i>
+                                <h3 class="text-lg font-semibold text-white">AI Analysis Result</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <!-- Match Score -->
+                                <div class="bg-slate-900/50 rounded p-3">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm text-gray-400">Match Score</span>
+                                        <span class="text-2xl font-bold text-primary">72%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-700 rounded-full h-2">
+                                        <div class="bg-primary h-2 rounded-full" style="width: 72%"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Missing Skills -->
+                                <div class="bg-red-900/20 rounded p-3 border border-red-500/30">
+                                    <p class="text-sm font-semibold text-red-400 mb-2">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i> Critical Gaps:
+                                    </p>
+                                    <ul class="text-xs text-red-300 space-y-1">
+                                        <li>• TypeScript (Required)</li>
+                                        <li>• AWS Services</li>
+                                        <li>• GraphQL</li>
+                                        <li>• Kubernetes</li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- Recommendations -->
+                                <div class="bg-green-900/20 rounded p-3 border border-green-500/30">
+                                    <p class="text-sm font-semibold text-green-400 mb-2">
+                                        <i class="fas fa-lightbulb mr-1"></i> Quick Wins:
+                                    </p>
+                                    <ul class="text-xs text-green-300 space-y-1">
+                                        <li>• Add TypeScript to your stack (2-3 weeks)</li>
+                                        <li>• Get AWS Certified (4-6 weeks)</li>
+                                        <li>• Build a GraphQL project (1-2 weeks)</li>
+                                        <li>• Highlight team leadership experience</li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- Action Button -->
+                                <button id="startAnalysisFromDemo" class="w-full bg-primary hover:bg-primary/80 text-white py-3 px-4 rounded-lg font-semibold transition-colors">
+                                    <i class="fas fa-rocket mr-2"></i>
+                                    Analyze Your Resume Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Info -->
+                    <div class="mt-12 text-center">
+                        <p class="text-gray-400 mb-4">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Our AI analyzes your resume against real job descriptions to identify skill gaps and provide personalized recommendations
+                        </p>
+                        <div class="flex flex-wrap justify-center gap-4 text-sm">
+                            <div class="flex items-center text-gray-300">
+                                <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                                <span>No credit card required</span>
+                            </div>
+                            <div class="flex items-center text-gray-300">
+                                <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                                <span>Results in seconds</span>
+                            </div>
+                            <div class="flex items-center text-gray-300">
+                                <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                                <span>100% confidential</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
