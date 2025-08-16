@@ -1,7 +1,3 @@
-        .tab-content {
-            min-height: 420px; /* Or a suitable fixed height */
-        }
-
 // Complete HTML content with inline JavaScript and CSS for Cloudflare Workers
 export const HTML_CONTENT = `<!DOCTYPE html>
 <html lang="en">
@@ -110,6 +106,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         
         .analysis-type-indicator {
             transition: all 0.3s ease;
+        }
+        
+        /* Fix for modal tab height consistency */
+        .tab-content {
+            min-height: 420px; /* Or a suitable fixed height */
         }
     </style>
 </head>
