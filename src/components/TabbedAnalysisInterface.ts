@@ -328,13 +328,6 @@ export class TabbedAnalysisInterface {
                 <i class="fas fa-plus mr-2"></i>
                 New Analysis
               </button>
-              <button 
-                id="download-report-btn"
-                class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-8 py-3 rounded-lg transition-colors"
-              >
-                <i class="fas fa-download mr-2"></i>
-                Download Report
-              </button>
             </div>
           </div>
         </div>
@@ -475,12 +468,6 @@ export class TabbedAnalysisInterface {
     const newBtn = document.getElementById('new-analysis-btn');
     if (newBtn) {
       newBtn.addEventListener('click', () => this.resetAnalysis());
-    }
-
-    // Download report button
-    const downloadBtn = document.getElementById('download-report-btn');
-    if (downloadBtn) {
-      downloadBtn.addEventListener('click', () => this.downloadReport());
     }
   }
 
@@ -743,10 +730,6 @@ export class TabbedAnalysisInterface {
     this.init();
   }
 
-  private downloadReport(): void {
-    // Implement report download functionality
-    console.log('Downloading report...');
-  }
 
   private showError(message: string): void {
     // Show error notification

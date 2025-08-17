@@ -2914,15 +2914,11 @@ Requirements:
                     '</div>';
                 }
                 
-                // Action buttons (no analysis details for end users)
+                // Action button
                 html += '<div class="flex gap-4 justify-center">' +
                     '<button onclick="resetToUploadScreen()" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg transition-colors flex items-center">' +
                         '<i class="fas fa-plus mr-2"></i>' +
                         'Analyze Another Resume' +
-                    '</button>' +
-                    '<button onclick="downloadResults()" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-6 py-3 rounded-lg transition-colors flex items-center">' +
-                        '<i class="fas fa-download mr-2"></i>' +
-                        'Download Report' +
                     '</button>' +
                 '</div>';
                 
@@ -3026,10 +3022,6 @@ Requirements:
                                 '<i class="fas fa-plus mr-2"></i>' +
                                 'New Analysis' +
                             '</button>' +
-                            '<button onclick="downloadResults()" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-6 py-2 rounded-lg transition-colors">' +
-                                '<i class="fas fa-download mr-2"></i>' +
-                                'Download Report' +
-                            '</button>' +
                         '</div>' +
                     '</div>' +
                 '</div>';
@@ -3056,10 +3048,6 @@ Requirements:
             AppState.resumeFile = null;
             AppState.resumeText = '';
             showAnalysisInterface();
-        }
-
-        function downloadResults() {
-            showNotification('Download functionality coming soon!', 'info');
         }
 
         // Job Description Helper Functions
