@@ -17,7 +17,8 @@ export async function historyHandler(c: AuthenticatedContext): Promise<Response>
   const response = createResponse(c);
   
   try {
-    const userId = c.get('userId');
+    const user = c.get('user');
+    const userId = user?.id;
     
     if (!userId) {
       return response.error(
@@ -97,7 +98,7 @@ export async function historyHandler(c: AuthenticatedContext): Promise<Response>
   } catch (error) {
     logger.error('Failed to fetch analysis history', {
       requestId: c.get('requestId'),
-      userId: c.get('userId'),
+      userId: c.get('user')?.id,
       error: error instanceof Error ? error.message : 'Unknown error'
     });
 
@@ -117,7 +118,8 @@ export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Respo
   const response = createResponse(c);
   
   try {
-    const userId = c.get('userId');
+    const user = c.get('user');
+    const userId = user?.id;
     const analysisId = c.req.param('id');
     
     if (!userId) {
@@ -209,7 +211,7 @@ export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Respo
   } catch (error) {
     logger.error('Failed to fetch analysis', {
       requestId: c.get('requestId'),
-      userId: c.get('userId'),
+      userId: c.get('user')?.id,
       analysisId: c.req.param('id'),
       error: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -230,7 +232,8 @@ export async function deleteAnalysisHandler(c: AuthenticatedContext): Promise<Re
   const response = createResponse(c);
   
   try {
-    const userId = c.get('userId');
+    const user = c.get('user');
+    const userId = user?.id;
     const analysisId = c.req.param('id');
     
     if (!userId) {
@@ -288,7 +291,7 @@ export async function deleteAnalysisHandler(c: AuthenticatedContext): Promise<Re
   } catch (error) {
     logger.error('Failed to delete analysis', {
       requestId: c.get('requestId'),
-      userId: c.get('userId'),
+      userId: c.get('user')?.id,
       analysisId: c.req.param('id'),
       error: error instanceof Error ? error.message : 'Unknown error'
     });
