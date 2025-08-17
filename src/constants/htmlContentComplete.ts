@@ -1074,6 +1074,7 @@ Requirements:
         // Authentication status check
         async function checkAuthStatus() {
             try {
+                console.log('Checking authentication status...');
                 const response = await fetch(API_ENDPOINTS.me, {
                     method: 'GET',
                     credentials: 'include',
@@ -1082,19 +1083,27 @@ Requirements:
                     }
                 });
 
+                console.log('Auth check response status:', response.status);
+
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Auth check data:', data);
                     if (data.success && data.data && data.data.user) {
                         AppState.user = data.data.user;
                         updateUIForAuthenticatedUser();
+                        console.log('User authenticated:', AppState.user.email);
+                        return true;
                     }
                 } else if (response.status === 401) {
                     // Token expired during auth check - silently log out
-                    AppState.currentUser = null;
+                    console.log('Auth token expired or invalid');
+                    AppState.user = null;
                     updateUIForUnauthenticatedUser();
+                    return false;
                 }
             } catch (error) {
-                console.log('User not authenticated');
+                console.log('User not authenticated:', error);
+                return false;
             }
         }
 
@@ -1278,11 +1287,18 @@ Requirements:
         }
         
         // History navigation handler
-        function handleHistoryNavigation() {
+        async function handleHistoryNavigation() {
+            // First, verify current authentication status
             if (!AppState.user) {
-                showAuthModal('login');
-                showNotification('Please log in to view your analysis history.', 'info');
-                return;
+                // Try to re-check auth status before showing login
+                await checkAuthStatus();
+                
+                // If still not authenticated after check, show login
+                if (!AppState.user) {
+                    showAuthModal('login');
+                    showNotification('Please log in to view your analysis history.', 'info');
+                    return;
+                }
             }
             
             // Show history section
@@ -1315,6 +1331,17 @@ Requirements:
             const historyGrid = document.getElementById('historyGrid');
             const historyCount = document.getElementById('historyCount');
             
+            // First verify we're authenticated
+            if (!AppState.user) {
+                console.log('No user in AppState, checking auth status...');
+                const isAuthenticated = await checkAuthStatus();
+                if (!isAuthenticated) {
+                    console.log('User not authenticated, showing login modal');
+                    handleTokenExpiration();
+                    return;
+                }
+            }
+            
             // Show loading state
             if (historyLoading) historyLoading.classList.remove('hidden');
             if (historyEmpty) historyEmpty.classList.add('hidden');
@@ -1322,6 +1349,7 @@ Requirements:
             if (historyCount) historyCount.textContent = 'Loading...';
             
             try {
+                console.log('Fetching analysis history...');
                 const response = await fetch(API_ENDPOINTS.analysisHistory, {
                     method: 'GET',
                     credentials: 'include',
@@ -1330,10 +1358,14 @@ Requirements:
                     }
                 });
                 
+                console.log('History response status:', response.status);
+                
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('History data received:', data);
                     displayAnalysisHistory(data.analyses || []);
                 } else if (response.status === 401) {
+                    console.log('401 received while loading history, token expired');
                     handleTokenExpiration();
                 } else {
                     throw new Error('Failed to load history');
@@ -1953,7 +1985,7 @@ Requirements:
             console.log('Token expired - logging out user');
             
             // Clear user state immediately
-            AppState.currentUser = null;
+            AppState.user = null;
             
             // Stop any ongoing analysis
             if (AppState.pollInterval) {
