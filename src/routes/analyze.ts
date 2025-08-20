@@ -1033,17 +1033,23 @@ analyze.post('/test-prompt', async (c: AuthenticatedContext) => {
 /**
  * GET /analyze/history - Get user's analysis history
  */
-analyze.get('/history', historyHandler);
+analyze.get('/history', async (c: AuthenticatedContext) => {
+  return historyHandler(c);
+});
 
 /**
  * GET /analyze/history/:id - Get specific analysis by ID
  */
-analyze.get('/history/:id', getAnalysisHandler);
+analyze.get('/history/:id', async (c: AuthenticatedContext) => {
+  return getAnalysisHandler(c);
+});
 
 /**
  * DELETE /analyze/history/:id - Delete specific analysis
  */
-analyze.delete('/history/:id', deleteAnalysisHandler);
+analyze.delete('/history/:id', async (c: AuthenticatedContext) => {
+  return deleteAnalysisHandler(c);
+});
 
 /**
  * GET /analyze/resume/history - Get user's resume analysis history
