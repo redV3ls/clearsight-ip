@@ -2849,7 +2849,7 @@ Requirements:
                     return '<a href="' + searchUrl + '" class="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">"' + courseName + '" on ' + platform + '</a>';
                 });
                 
-                // Process standalone URLs - fixed regex without escaped backslashes
+                // Process standalone URLs - fixed regex
                 var urlRegex = /(https?:\/\/[^\s<>"]+|www\.[^\s<>"]+)/g;
                 text = text.replace(urlRegex, function(url) {
                     // Skip if already part of an anchor tag
