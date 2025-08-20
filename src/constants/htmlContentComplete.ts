@@ -2833,7 +2833,24 @@ Requirements:
                 }
                 
                 // Process plain URLs (http://, https://, www.)
-                var urlRegex = /(https?:\\/\\/[^\\s<>"]+|www\\.[^\\s<>"]+)/g;
+                // First, replace common course/resource patterns with clickable links
+                text = text.replace(/"([^"]+)"\s+on\s+(\w+)/g, function(match, courseName, platform) {
+                    // Convert course references to search links
+                    var searchUrl = '';
+                    if (platform.toLowerCase() === 'udemy') {
+                        searchUrl = 'https://www.udemy.com/courses/search/?q=' + encodeURIComponent(courseName);
+                    } else if (platform.toLowerCase() === 'coursera') {
+                        searchUrl = 'https://www.coursera.org/search?query=' + encodeURIComponent(courseName);
+                    } else if (platform.toLowerCase() === 'youtube') {
+                        searchUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(courseName);
+                    } else {
+                        return match; // Return original if platform not recognized
+                    }
+                    return '<a href="' + searchUrl + '" class="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">"' + courseName + '" on ' + platform + '</a>';
+                });
+                
+                // Process standalone URLs - fixed regex without escaped backslashes
+                var urlRegex = /(https?:\/\/[^\s<>"]+|www\.[^\s<>"]+)/g;
                 text = text.replace(urlRegex, function(url) {
                     // Skip if already part of an anchor tag
                     if (text.indexOf('href="' + url) > -1 || text.indexOf('>' + url + '</a>') > -1) {
