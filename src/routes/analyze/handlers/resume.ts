@@ -316,19 +316,33 @@ async function initializeAIService(c: AuthenticatedContext) {
  */
 async function storeAnalysisResult(c: AuthenticatedContext, response: ResumeAnalysisResponse) {
   try {
-    await c.env.DB
-      .prepare(`
+    // Start a transaction to ensure both inserts complete
+    const db = c.env.DB as D1Database;
+    await db.batch([
+      db.prepare(`
         INSERT INTO resume_analyses (
           id, user_id, analysis_data, created_at
         ) VALUES (?, ?, ?, ?)
-      `)
-      .bind(
+      `).bind(
         response.data.analysis_id,
         response.data.user_id,
         JSON.stringify(response),
         new Date().toISOString()
+      ),
+      db.prepare(`
+        INSERT INTO analyses (
+          id, user_id, analysis_type, status, created_at, narrative, metadata
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        response.data.analysis_id,
+        response.data.user_id,
+        response.data.analysis_type,
+        'completed',
+        new Date().toISOString(),
+        response.data.narrative,
+        JSON.stringify(response.metadata)
       )
-      .run();
+    ]);
 
     logger.info('Analysis result stored successfully', {
       analysisId: response.data.analysis_id,
