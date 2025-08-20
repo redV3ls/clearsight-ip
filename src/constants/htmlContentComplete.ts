@@ -2815,7 +2815,7 @@ Requirements:
                 while (linkStart !== -1) {
                     var linkEnd = text.indexOf(']', linkStart);
                     if (linkEnd !== -1 && text.charAt(linkEnd + 1) === '(') {
-                        var urlStart = linkEnd + 2;
+                                                var urlStart = linkEnd + 2;
                         var urlEnd = text.indexOf(')', urlStart);
                         if (urlEnd !== -1) {
                             var linkText = text.substring(linkStart + 1, linkEnd);
