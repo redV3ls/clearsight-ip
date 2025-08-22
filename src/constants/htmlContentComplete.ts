@@ -3002,9 +3002,9 @@ Requirements:
                 }
                 
                 // Process plain URLs (http://, https://, www.)
-                // First, replace common course/resource patterns with clickable links (more flexible)
-                // Supports: "Course Name" module/course/... on Provider (Provider can have spaces, e.g., Microsoft Learn)
-                text = text.replace(/\"([^\"]+)\"\\s+(?:module|course|learning\\s*path|lesson|tutorial|video|playlist)?\\s*on\\s+([A-Za-z][A-Za-z\\s]+?)(?=[\\)\\]\\.,;!]|\\s|$)/gi, function(match, courseName, platform) {
+                // First, replace common course/resource patterns with clickable links (supports normal/curly/single quotes)
+                // Matches: "Course Name" (optional: module/course/learning path/lesson/tutorial/video/playlist) on Provider
+                text = text.replace(/["'“”]([^"'“”]+)["'“”]\\s+(?:module|course|learning\\s*path|lesson|tutorial|video|playlist)?\\s*on\\s+([A-Za-z][A-Za-z\\s&+\.\-]+?)(?=[\\)\\]\\.,;!]|\\s|$)/gi, function(match, courseName, platform) {
                     function providerSearchUrl(p, name) {
                         var pl = (p || '').trim().toLowerCase();
                         if (pl === 'udemy') return 'https://www.udemy.com/courses/search/?q=' + encodeURIComponent(name);
@@ -3015,12 +3015,13 @@ Requirements:
                         if (pl.indexOf('pluralsight') !== -1) return 'https://www.pluralsight.com/search?q=' + encodeURIComponent(name);
                         if (pl.indexOf('freecodecamp') !== -1) return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(name + ' freeCodeCamp');
                         if (pl.indexOf('khan academy') !== -1) return 'https://www.khanacademy.org/search?query=' + encodeURIComponent(name);
-                        if (pl.indexOf('aws') !== -1) return 'https://www.google.com/search?q=' + encodeURIComponent(name + ' site:skillbuilder.aws OR site:aws.amazon.com/training');
+                        if (pl.indexOf('a cloud guru') !== -1 || pl.indexOf('acloudguru') !== -1) return 'https://www.google.com/search?q=' + encodeURIComponent(name + ' site:acloudguru.com');
+                        if (pl.indexOf('aws') !== -1 || pl.indexOf('amazon') !== -1) return 'https://www.google.com/search?q=' + encodeURIComponent(name + ' site:skillbuilder.aws OR site:aws.amazon.com/training');
                         // Fallback: generic Google search
                         return 'https://www.google.com/search?q=' + encodeURIComponent(name + ' ' + p);
                     }
                     var searchUrl = providerSearchUrl(platform, courseName);
-                    return '<a href="' + searchUrl + '" class="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">\"' + courseName + '\" on ' + platform + '</a>';
+                    return '<a href="' + searchUrl + '" class="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">"' + courseName + '" on ' + platform + '</a>';
                 });
                 
                 // Process standalone URLs - fixed regex
