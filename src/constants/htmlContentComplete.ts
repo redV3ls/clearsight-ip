@@ -947,6 +947,7 @@ Requirements:
             pollInterval: null,
             analysisStartTs: 0,
             estimatedTotalMs: 60000,
+            loadingActive: false,
             credits: 0
         };
 
@@ -2265,6 +2266,12 @@ Requirements:
                 button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Analyzing...';
                 button.disabled = true;
                 
+                // Show loading immediately while the request is being initiated
+                if (!AppState.loadingActive) {
+                    showLoadingScreen();
+                    startLoadingAnimation();
+                }
+                
                 // Prepare the request data
                 let requestData = {};
                 
@@ -2361,13 +2368,17 @@ Requirements:
                     errorMessage = 'Network error: Unable to connect to analysis service. Please check your internet connection.';
                 } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
                     errorMessage = 'Your session has expired. Please log in again.';
-                    // Log out the user and clear their session
+                    // Stop loader and log out the user
+                    stopLoadingAnimation();
                     handleTokenExpiration();
                     return; // Don't show notification as handleTokenExpiration will handle it
                 } else if (error.message.includes('timeout')) {
                     errorMessage = 'Analysis timed out. Please try again with a shorter resume.';
                 }
                 
+                // Ensure loader is stopped and UI reset on error
+                stopLoadingAnimation();
+                resetToUploadScreen();
                 showNotification(errorMessage, 'error');
             } finally {
                 AppState.isAnalyzing = false;
@@ -2382,8 +2393,10 @@ Requirements:
             if (success && data.status === 'processing') {
                 // Handle async processing response
                 AppState.currentAnalysisId = data.analysis_id;
-                showLoadingScreen();
-                startLoadingAnimation();
+                if (!AppState.loadingActive) {
+                    showLoadingScreen();
+                    startLoadingAnimation();
+                }
                 startPollingForResults(data.analysis_id);
                 console.log('Analysis submitted with ID:', data.analysis_id);
                 
@@ -2521,6 +2534,7 @@ Requirements:
         }
 
         function startLoadingAnimation() {
+            AppState.loadingActive = true;
             AppState.analysisStartTs = Date.now();
             AppState.estimatedTotalMs = computeEstimatedDurationMs();
 
@@ -2588,6 +2602,7 @@ Requirements:
                 clearTimeout(gameState.gameTimeout);
                 gameState.gameTimeout = null;
             }
+            AppState.loadingActive = false;
         }
 
         function updateLoadingMessage() {
