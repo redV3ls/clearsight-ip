@@ -1197,7 +1197,7 @@ Requirements:
                         });
 
                         // Try to parse JSON (may fail if upstream error)
-                        let data: any = null;
+                        let data = null;
                         try { data = await res.json(); } catch (_) { /* ignore */ }
 
                         if (res.ok && data?.url) {
