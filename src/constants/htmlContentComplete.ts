@@ -881,21 +881,8 @@ Requirements:
                             </h3>
                             <p class="text-gray-300 mb-6">Our AI is working its magic on your resume!</p>
                             
-                            <!-- Progress Bar -->
-                            <div class="w-full max-w-md mx-auto bg-gray-600 rounded-full h-4 mb-6 overflow-hidden">
-                                <div id="progressBar" class="bg-gradient-to-r from-primary via-blue-400 to-green-400 h-4 rounded-full transition-all duration-500 ease-out relative" style="width: 0%">
-                                    <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
-                                </div>
-                            </div>
-                            
                             <!-- Dynamic Loading Message -->
-                            <p id="progressText" class="text-lg text-primary animate-pulse font-medium mb-2">🧠 Initializing AI brain...</p>
-                            <!-- Playful timer and ETA -->
-                            <!-- Timers removed -->
-                            <!-- Progress percent -->
-                            <p id="progressPercent" class="text-xs text-gray-500 mb-4">0%</p>
-                            
-                            <!-- Fun Tips removed: combined into main loading messages -->
+                            <p id="progressText" class="text-lg text-primary animate-pulse font-medium mb-4">🧠 Initializing AI brain...</p>
                             
                             <!-- Mini Game Section -->
                             <div class="bg-slate-700/50 rounded-lg p-4 max-w-md mx-auto border border-slate-600">
