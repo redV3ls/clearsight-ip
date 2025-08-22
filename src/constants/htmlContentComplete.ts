@@ -891,15 +891,11 @@ Requirements:
                             <!-- Dynamic Loading Message -->
                             <p id="progressText" class="text-lg text-primary animate-pulse font-medium mb-2">🧠 Initializing AI brain...</p>
                             <!-- Playful timer and ETA -->
-                            <p id="timerText" class="text-sm text-gray-400 mb-1">⏱️ 00:00 elapsed • ~01:00 remaining</p>
-                            <p id="etaText" class="text-xs text-gray-500 mb-4">Approximate total time ~ 1m 00s</p>
+                            <!-- Timers removed -->
                             <!-- Progress percent -->
                             <p id="progressPercent" class="text-xs text-gray-500 mb-4">0%</p>
                             
-                            <!-- Fun Tips (rotating) -->
-                            <div class="text-xs text-gray-500 max-w-sm mx-auto mb-6">
-                                <p id="funFactText" class="mb-2">💡 Tip: Quantified results (numbers!) are recruiter magnets.</p>
-                            </div>
+                            <!-- Fun Tips removed: combined into main loading messages -->
                             
                             <!-- Mini Game Section -->
                             <div class="bg-slate-700/50 rounded-lg p-4 max-w-md mx-auto border border-slate-600">
@@ -1015,6 +1011,9 @@ Requirements:
             "🌟 Tip: Include soft skills through examples, not just lists.",
             "🎪 Did you know? 75% of resumes never reach human eyes (ATS filters)."
         ];
+
+        // Combined messages for loading screen
+        const COMBINED_MESSAGES = LOADING_MESSAGES.concat(FUN_FACTS);
 
         // API Configuration
         const API_BASE_URL = '/api';
@@ -2577,10 +2576,11 @@ Requirements:
             }, 900);
             
             // Message cycling
+            const listLen = COMBINED_MESSAGES.length || 1;
             AppState.messageInterval = setInterval(() => {
-                AppState.currentMessageIndex = (AppState.currentMessageIndex + 1) % LOADING_MESSAGES.length;
+                AppState.currentMessageIndex = (AppState.currentMessageIndex + 1) % listLen;
                 updateLoadingMessage();
-            }, 3000); // Change message every 3 seconds
+            }, 8000); // Change message every 8 seconds
         }
 
         function stopLoadingAnimation() {
@@ -2606,17 +2606,13 @@ Requirements:
         }
 
         function updateLoadingMessage() {
-            const message = LOADING_MESSAGES[AppState.currentMessageIndex];
+            const list = COMBINED_MESSAGES;
+            const message = list[AppState.currentMessageIndex % list.length];
             const progressText = document.getElementById('progressText');
-            const funFactEl = document.getElementById('funFactText');
             
             if (progressText) {
                 progressText.textContent = message;
                 progressText.className = 'text-lg text-primary animate-pulse font-medium mb-4';
-            }
-            if (funFactEl) {
-                const idx = Math.floor(Math.random() * FUN_FACTS.length);
-                funFactEl.textContent = FUN_FACTS[idx];
             }
         }
 
