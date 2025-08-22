@@ -52,6 +52,25 @@ Provide analysis in {{outputFormat}} format with:
 4. Missing skills for target role (if provided)
 5. Recommendations for skill development
 
+Linking and resources formatting rules:
+- When recommending external resources (courses, tutorials, docs, videos), include a clickable reference for each item.
+  - If responding in text/markdown, format each as a Markdown link: [Title](https://absolute.url). Do not use HTML <a> tags.
+  - If responding in JSON, include at minimum title and url fields for each resource; url must be an absolute http(s) link.
+- Never output a resource title without its corresponding URL.
+- Prefer official sources when relevant (e.g., vendor docs, Microsoft Learn, AWS Training) before third-party platforms.
+- If a precise URL is not known, link to a platform search for the topic using these patterns (replace YOUR_QUERY with the topic):
+  - Microsoft Learn: https://learn.microsoft.com/en-us/search/?terms=YOUR_QUERY
+  - Udemy: https://www.udemy.com/courses/search/?q=YOUR_QUERY
+  - Coursera: https://www.coursera.org/search?query=YOUR_QUERY
+  - YouTube: https://www.youtube.com/results?search_query=YOUR_QUERY
+  - edX: https://www.edx.org/search?q=YOUR_QUERY
+  - Pluralsight: https://www.pluralsight.com/search?q=YOUR_QUERY
+  - freeCodeCamp: https://www.google.com/search?q=site%3Afreecodecamp.org+YOUR_QUERY
+  - Khan Academy: https://www.khanacademy.org/search?page_search_query=YOUR_QUERY
+  - A Cloud Guru: https://acloudguru.com/search?query=YOUR_QUERY
+  - AWS Training: https://www.aws.training/LearningLibrary?search=YOUR_QUERY
+- Use absolute URLs starting with http:// or https:// (do not use bare www).
+
 {{#if includeExamples}}Include specific examples from the content.{{/if}}
 
 Response:`,
@@ -83,7 +102,25 @@ Maintain professional tone and technical accuracy.
 
 Text: "{{text}}"
 
-Translation:`,
+Linking and resources formatting rules:
+- If your response references any external resources (websites, documentation, examples), include a clickable reference for each.
+  - If responding in text/markdown, format each as a Markdown link: [Title](https://absolute.url). Do not use HTML <a> tags.
+  - If responding in JSON, include at minimum title and url fields for each resource; url must be an absolute http(s) link.
+- Never output a resource title without its corresponding URL.
+- Use absolute URLs starting with http:// or https:// (do not use bare www).
+- If a precise URL is not known, link to a platform search for the topic using these patterns (replace YOUR_QUERY with the topic):
+  - Microsoft Learn: https://learn.microsoft.com/en-us/search/?terms=YOUR_QUERY
+  - Udemy: https://www.udemy.com/courses/search/?q=YOUR_QUERY
+  - Coursera: https://www.coursera.org/search?query=YOUR_QUERY
+  - YouTube: https://www.youtube.com/results?search_query=YOUR_QUERY
+  - edX: https://www.edx.org/search?q=YOUR_QUERY
+  - Pluralsight: https://www.pluralsight.com/search?q=YOUR_QUERY
+  - freeCodeCamp: https://www.google.com/search?q=site%3Afreecodecamp.org+YOUR_QUERY
+  - Khan Academy: https://www.khanacademy.org/search?page_search_query=YOUR_QUERY
+  - A Cloud Guru: https://acloudguru.com/search?query=YOUR_QUERY
+  - AWS Training: https://www.aws.training/LearningLibrary?search=YOUR_QUERY
+
+Translation:`
       variables: ['text', 'sourceLanguage', 'targetLanguage', 'context'],
       description: 'Template for translating text between languages'
     });
