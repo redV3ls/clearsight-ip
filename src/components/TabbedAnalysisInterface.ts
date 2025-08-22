@@ -646,33 +646,17 @@ export class TabbedAnalysisInterface {
       'Preparing recommendations...'
     ];
 
-    let progress = 0;
     let messageIndex = 0;
-
-    const progressBar = document.getElementById('progress-bar') as HTMLElement;
     const progressMessage = document.getElementById('progress-message');
 
     const interval = setInterval(() => {
-      progress += Math.random() * 15 + 5;
-      
-      if (progress > 95) {
-        progress = 95;
-      }
-
-      if (progressBar) {
-        progressBar.style.width = `${progress}%`;
-      }
-
-      if (progressMessage && messageIndex < messages.length) {
-        progressMessage.textContent = messages[messageIndex];
+      if (progressMessage) {
+        progressMessage.textContent = messages[messageIndex % messages.length];
         messageIndex++;
       }
 
       if (this.analysisResult) {
         clearInterval(interval);
-        if (progressBar) {
-          progressBar.style.width = '100%';
-        }
         if (progressMessage) {
           progressMessage.textContent = 'Analysis complete!';
         }

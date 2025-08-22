@@ -2494,11 +2494,6 @@ Requirements:
             if (loadingSection) loadingSection.classList.add('hidden');
             if (resultsSection) resultsSection.classList.add('hidden');
             
-            // Reset progress
-            const progressBar = document.getElementById('progressBar');
-            if (progressBar) {
-                progressBar.style.width = '0%';
-            }
             
             // Reset modal size back to normal
             const analysisModal = document.getElementById('analysisModal');
@@ -2550,15 +2545,7 @@ Requirements:
                 progress += Math.max(0, targetPct - progress) * 0.3 + Math.random() * 1.2;
                 if (progress > 92) progress = 92;
 
-                const progressBar = document.getElementById('progressBar');
-                const percentEl = document.getElementById('progressPercent');
                 const timerEl = document.getElementById('timerText');
-                if (progressBar) {
-                    progressBar.style.width = Math.max(0, Math.min(100, progress)).toFixed(0) + '%';
-                    // Add a subtle animation to the progress bar
-                    progressBar.style.transition = 'width 0.9s ease-out';
-                }
-                if (percentEl) percentEl.textContent = Math.floor(progress) + '%';
                 if (timerEl) timerEl.textContent = '⏱️ ' + formatTime(elapsed) + ' elapsed • ~' + formatTime(remaining) + ' remaining';
             }, 900);
             
@@ -2736,19 +2723,11 @@ Requirements:
                             // Analysis completed!
                             stopLoadingAnimation();
                             
-                            // Complete the progress bar
-                            const progressBar = document.getElementById('progressBar');
                             const progressText = document.getElementById('progressText');
-                            
-                            if (progressBar) progressBar.style.width = '100%';
                             if (progressText) {
                                 progressText.textContent = '🎉 Analysis complete! Preparing your results...';
                                 progressText.className = 'text-lg text-green-400 font-semibold mb-4';
                             }
-                            const percentEl = document.getElementById('progressPercent');
-                            const timerEl = document.getElementById('timerText');
-                            if (percentEl) percentEl.textContent = '100%';
-                            if (timerEl) timerEl.textContent = '⏱️ ' + formatTime(Date.now() - AppState.analysisStartTs) + ' elapsed • ~00:00 remaining';
                             
                             // Show results after a brief delay
                             setTimeout(() => {

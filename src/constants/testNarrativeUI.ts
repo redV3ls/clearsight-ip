@@ -106,6 +106,7 @@ export const TEST_NARRATIVE_UI_CONTENT = `<!DOCTYPE html>
             display: block;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -259,6 +260,7 @@ NICE TO HAVE:
                 
                 const response = await fetch('/api/v1/analyze/resume', {
                     method: 'POST',
+                    credentials: 'include',
                     body: formData
                 });
                 
@@ -287,7 +289,7 @@ NICE TO HAVE:
                 attempts++;
                 
                 try {
-                    const response = await fetch(\`/api/v1/analyze/resume/\${analysisId}\`);
+                    const response = await fetch(`/api/v1/analyze/resume/${analysisId}`, { credentials: 'include' });
                     const result = await response.json();
                     
                     console.log(\`[POLL-\${attempts}] Status: \${result.status}\`, result);
@@ -346,14 +348,22 @@ NICE TO HAVE:
             
             // Show the main narrative content (this is the key improvement)
             if (analysis.narrative) {
-                html += \`
-                    <div class="narrative" style="background: #f0f8ff; border-left: 4px solid #007bff; padding: 25px; margin: 20px 0; border-radius: 8px;">
-                        <h3>📖 \${hasJobDescription ? 'Your Job Fit Analysis' : 'Your Career Story'}</h3>
-                        <div style="line-height: 1.6; font-size: 16px;">
-                            \${analysis.narrative.replace(/\\n\\n/g, '</p><p>').replace(/\\n/g, '<br>')}
-                        </div>
-                    </div>
-                \`;
+                // Parse Markdown and linkify URLs for clickable links
+                let narrativeHtml = (typeof marked !== 'undefined') 
+                    ? marked.parse(analysis.narrative)
+                    : analysis.narrative.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+                // Ensure anchors open in a new tab and are safe
+                narrativeHtml = narrativeHtml.replace(/<a\s+href=/g, '<a target="_blank" rel="noopener noreferrer" href=');
+                // Autolink bare URLs
+                narrativeHtml = narrativeHtml.replace(/(^|[^"'>])(https?:\/\/[^\s<]+)/g, (m, p, url) => p + '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + url + '</a>');
+
+                html += 
+                    '<div class="narrative" style="background: #f0f8ff; border-left: 4px solid #007bff; padding: 25px; margin: 20px 0; border-radius: 8px;">' +
+                        '<h3>📖 ' + (hasJobDescription ? 'Your Job Fit Analysis' : 'Your Career Story') + '</h3>' +
+                        '<div style="line-height: 1.6; font-size: 16px;">' +
+                            narrativeHtml +
+                        '</div>' +
+                    '</div>';
             }
             
             // Analysis metadata

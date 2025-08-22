@@ -105,13 +105,6 @@
   animation: slideInLeft 0.3s ease;
 }
 
-/* Progress Bar */
-#progress-bar {
-  background: linear-gradient(90deg, #3b82f6, #60a5fa, #3b82f6);
-  background-size: 200% 100%;
-  animation: shimmer 2s linear infinite;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-}
 
 /* Analysis Type Indicator */
 .analysis-type-indicator {
