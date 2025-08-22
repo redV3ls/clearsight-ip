@@ -145,6 +145,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                                 <i class="fas fa-user text-white text-sm"></i>
                             </div>
                             <span id="userEmail" class="text-gray-300 text-sm"></span>
+                            <span id="userCreditsBadge" class="hidden text-xs text-primary bg-primary/10 px-2 py-1 rounded border border-primary/40">0 credits</span>
                         </div>
                         <button id="logoutBtn" class="auth-button text-gray-300 hover:text-red-400 px-3 py-2 rounded-lg border border-gray-600 hover:border-red-400 transition-colors">
                             <i class="fas fa-sign-out-alt mr-2"></i>Logout
@@ -945,7 +946,8 @@ Requirements:
             messageInterval: null,
             pollInterval: null,
             analysisStartTs: 0,
-            estimatedTotalMs: 60000
+            estimatedTotalMs: 60000,
+            credits: 0
         };
 
         // Catchy loading messages
@@ -1000,6 +1002,7 @@ Requirements:
         // API Configuration
         const API_BASE_URL = '/api';
         const API_V1_BASE_URL = '/api/v1';
+        const API_BILLING_BASE_URL = '/api/billing';
         const API_ENDPOINTS = {
             login: API_V1_BASE_URL + '/auth/login',
             register: API_V1_BASE_URL + '/auth/register',
@@ -1008,7 +1011,11 @@ Requirements:
             analyzeResume: API_V1_BASE_URL + '/analyze/resume',
             analysisHistory: API_V1_BASE_URL + '/analyze/history',
             getAnalysis: (id) => API_V1_BASE_URL + '/analyze/history/' + id,
-            deleteAnalysis: (id) => API_V1_BASE_URL + '/analyze/history/' + id
+            deleteAnalysis: (id) => API_V1_BASE_URL + '/analyze/history/' + id,
+            // Billing endpoints
+            billingPlans: API_BILLING_BASE_URL + '/plans',
+            billingCredits: API_BILLING_BASE_URL + '/credits',
+            billingPurchase: API_BILLING_BASE_URL + '/purchase'
         };
 
         // Initialize application
@@ -1024,6 +1031,9 @@ Requirements:
             
             // Check authentication status
             checkAuthStatus();
+
+            // Attach purchase handlers
+            attachBuyPlanHandlers();
             
             console.log('Clearsight IP application loaded successfully!');
         });
@@ -1080,6 +1090,9 @@ Requirements:
                 // Show My Analyses links
                 if (historyLink) historyLink.classList.remove('hidden');
                 if (mobileHistoryLink) mobileHistoryLink.classList.remove('hidden');
+
+                // Fetch and display credits
+                fetchCredits();
             }
         }
 
@@ -1094,6 +1107,8 @@ Requirements:
             }
             
             AppState.user = null;
+            AppState.credits = 0;
+            updateCreditsUI();
         }
 
         // Navigation functionality
@@ -1120,6 +1135,77 @@ Requirements:
 
             // Mobile menu toggle
             document.getElementById('mobileMenuBtn')?.addEventListener('click', toggleMobileMenu);
+        }
+
+        // Billing helpers
+        async function fetchCredits() {
+            if (!AppState.user) {
+                AppState.credits = 0;
+                updateCreditsUI();
+                return 0;
+            }
+            try {
+                const res = await fetch(API_ENDPOINTS.billingCredits, { method: 'GET', credentials: 'include' });
+                if (!res.ok) throw new Error('Failed credits fetch');
+                const data = await res.json();
+                AppState.credits = typeof data.credits === 'number' ? data.credits : 0;
+                updateCreditsUI();
+                return AppState.credits;
+            } catch (e) {
+                AppState.credits = 0;
+                updateCreditsUI();
+                return 0;
+            }
+        }
+
+        function updateCreditsUI() {
+            const badge = document.getElementById('userCreditsBadge');
+            if (!badge) return;
+            if (AppState.user) {
+                badge.textContent = (AppState.credits || 0) + ' credits';
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+            // Re-evaluate analysis button state
+            updateAnalysisButton();
+        }
+
+        function attachBuyPlanHandlers() {
+            document.querySelectorAll('button.buy-plan')?.forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    if (!AppState.user) {
+                        showAuthModal('login');
+                        showNotification('Please log in to purchase credits.', 'info');
+                        return;
+                    }
+                    const planId = (e.currentTarget as HTMLElement).getAttribute('data-plan');
+                    if (!planId) return;
+                    try {
+                        const res = await fetch(API_ENDPOINTS.billingPurchase, {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ planId })
+                        });
+                        const data = await res.json();
+                        if (!res.ok) {
+                            showNotification(data?.error?.message || 'Purchase failed', 'error');
+                            return;
+                        }
+                        AppState.credits = data.credits || 0;
+                        updateCreditsUI();
+                        showNotification(data.message || 'Credits added!', 'success');
+                    } catch (err) {
+                        showNotification('Purchase failed. Please try again.', 'error');
+                    }
+                });
+            });
+        }
+
+        function goToPricing() {
+            const el = document.getElementById('pricing');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         // Authentication functionality
@@ -1797,8 +1883,9 @@ Requirements:
             const continueButton = document.getElementById('continueToJobBtn');
             const skipJobButton = document.getElementById('skipJobBtn');
             const hasContent = AppState.resumeFile || AppState.resumeText.trim().length > 0;
+            const hasCredits = (AppState.credits || 0) > 0;
             
-            if (hasContent) {
+            if (hasContent && hasCredits) {
                 startButton?.removeAttribute('disabled');
                 startButton?.classList.remove('opacity-50', 'cursor-not-allowed');
                 continueButton?.removeAttribute('disabled');
@@ -1847,6 +1934,7 @@ Requirements:
                 if (data.success) {
                     AppState.user = data.data.user;
                     updateUIForAuthenticatedUser();
+                    await fetchCredits();
                     hideAuthModal();
                     
                     // Show success message
@@ -1905,6 +1993,7 @@ Requirements:
                 if (data.success) {
                     AppState.user = data.data.user;
                     updateUIForAuthenticatedUser();
+                    await fetchCredits();
                     hideAuthModal();
                     
                     // Show success message
@@ -2097,6 +2186,8 @@ Requirements:
                     let data;
                     try {
                         data = await response.json();
+                        // Refresh credits after server-side consumption
+                        fetchCredits();
                     } catch (err) {
                         console.error('Failed to parse response as JSON:', err);
                         console.log('Response status:', response.status, 'Response text preview:', await response.text().catch(() => 'Unable to read'));
@@ -2131,6 +2222,8 @@ Requirements:
                     let data;
                     try {
                         data = await response.json();
+                        // Refresh credits after server-side consumption
+                        fetchCredits();
                     } catch (err) {
                         console.error('Failed to parse response as JSON:', err);
                         console.log('Response status:', response.status, 'Response text preview:', await response.text().catch(() => 'Unable to read'));
@@ -2216,7 +2309,13 @@ Requirements:
                         errorMessage = 'Please provide resume content or upload a file.';
                     }
                 } else if (!success) {
-                    errorMessage = 'Server error occurred during analysis. Please try again.';
+                    // If server denied due to no credits, guide the user
+                    if (data && data.error && data.error.code === 'PAYMENT_REQUIRED') {
+                        errorMessage = data.error.message || 'No analysis credits remaining.';
+                        goToPricing();
+                    } else {
+                        errorMessage = 'Server error occurred during analysis. Please try again.';
+                    }
                 }
                 
                 console.error('Analysis failed:', { data, success, errorMessage });
@@ -2807,8 +2906,8 @@ Requirements:
                 });
                 
                 // Process standalone URLs - fixed regex
-                // Use non-capturing group and ensure forward slashes are escaped so the literal parses correctly in the browser
-                var urlRegex = /(?:https?:\\/\\/|www\\.)[^\\s<>\"']+/g;
+                // Use non-capturing group; escape backslashes for template literal, but keep pattern simple
+                var urlRegex = /(?:https?:\\/\\/|www\\.)[^\\s<>"']+/g;
                 text = text.replace(urlRegex, function(url) {
                     // Skip if already part of an anchor tag
                     if (text.indexOf('href="' + url) > -1 || text.indexOf('>' + url + '</a>') > -1) {

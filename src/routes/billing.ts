@@ -3,8 +3,13 @@ import { Env } from '../index';
 import { AppError } from '../middleware/errorHandler';
 import { z } from 'zod';
 import { getPlans, getUserCredits, addUserCredits } from '../services/billing';
+import { requireAuth } from '../middleware/auth';
 
 const billing = new Hono<{ Bindings: Env }>();
+
+// Apply auth to all billing routes except plans listing
+billing.use('/credits', requireAuth);
+billing.use('/purchase', requireAuth);
 
 // GET /billing/plans - list available plans
 billing.get('/plans', async (c) => {
