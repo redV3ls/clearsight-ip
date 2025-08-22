@@ -1015,7 +1015,9 @@ Requirements:
             // Billing endpoints
             billingPlans: API_BILLING_BASE_URL + '/plans',
             billingCredits: API_BILLING_BASE_URL + '/credits',
-            billingPurchase: API_BILLING_BASE_URL + '/purchase'
+            billingPurchase: API_BILLING_BASE_URL + '/purchase', // legacy simulation
+            billingCheckout: API_BILLING_BASE_URL + '/checkout',
+            billingConfirm: API_BILLING_BASE_URL + '/confirm'
         };
 
         // Initialize application
@@ -1034,6 +1036,9 @@ Requirements:
 
             // Attach purchase handlers
             attachBuyPlanHandlers();
+
+            // Handle Stripe checkout return (success/cancel)
+            handleCheckoutReturn();
             
             console.log('Clearsight IP application loaded successfully!');
         });
@@ -1183,22 +1188,22 @@ Requirements:
                     const planId = targetEl ? targetEl.getAttribute('data-plan') : null;
                     if (!planId) return;
                     try {
-                        const res = await fetch(API_ENDPOINTS.billingPurchase, {
+                        // Create Stripe Checkout session
+                        const res = await fetch(API_ENDPOINTS.billingCheckout, {
                             method: 'POST',
                             credentials: 'include',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ planId })
                         });
                         const data = await res.json();
-                        if (!res.ok) {
-                            showNotification(data?.error?.message || 'Purchase failed', 'error');
+                        if (!res.ok || !data?.url) {
+                            showNotification(data?.error?.message || 'Unable to start checkout', 'error');
                             return;
                         }
-                        AppState.credits = data.credits || 0;
-                        updateCreditsUI();
-                        showNotification(data.message || 'Credits added!', 'success');
+                        // Redirect to Stripe Checkout
+                        window.location.href = data.url;
                     } catch (err) {
-                        showNotification('Purchase failed. Please try again.', 'error');
+                        showNotification('Failed to start checkout. Please try again.', 'error');
                     }
                 });
             });
@@ -1207,6 +1212,40 @@ Requirements:
         function goToPricing() {
             const el = document.getElementById('pricing');
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Handle Stripe checkout return
+        async function handleCheckoutReturn() {
+            try {
+                const url = new URL(window.location.href);
+                const purchase = url.searchParams.get('purchase');
+                const sessionId = url.searchParams.get('session_id');
+                if (purchase === 'success' && sessionId) {
+                    showNotification('Processing your purchase...', 'info');
+                    const res = await fetch(API_ENDPOINTS.billingConfirm, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        AppState.credits = data.credits || 0;
+                        updateCreditsUI();
+                        showNotification('Credits added! Thank you for your purchase.', 'success');
+                    } else {
+                        showNotification(data?.error?.message || 'Could not verify payment. If you were charged, please contact support.', 'error');
+                    }
+                    // Clean URL
+                    url.searchParams.delete('purchase');
+                    url.searchParams.delete('session_id');
+                    window.history.replaceState({}, document.title, url.pathname + url.search);
+                } else if (purchase === 'cancelled') {
+                    showNotification('Purchase cancelled.', 'info');
+                    url.searchParams.delete('purchase');
+                    window.history.replaceState({}, document.title, url.pathname + url.search);
+                }
+            } catch {}
         }
 
         // Authentication functionality
@@ -1885,6 +1924,16 @@ Requirements:
             const skipJobButton = document.getElementById('skipJobBtn');
             const hasContent = AppState.resumeFile || AppState.resumeText.trim().length > 0;
             const hasCredits = (AppState.credits || 0) > 0;
+
+            // Inline CTA element
+            let inlineCTA = document.getElementById('buyCreditsInline');
+            const jobTab = document.getElementById('jobTabContent');
+            if (!inlineCTA && jobTab) {
+                inlineCTA = document.createElement('div');
+                inlineCTA.id = 'buyCreditsInline';
+                inlineCTA.className = 'mt-2 text-sm text-gray-400';
+                jobTab.querySelector('div.flex.justify-between')?.appendChild(inlineCTA);
+            }
             
             if (hasContent && hasCredits) {
                 startButton?.removeAttribute('disabled');
@@ -1893,6 +1942,7 @@ Requirements:
                 continueButton?.classList.remove('opacity-50', 'cursor-not-allowed');
                 skipJobButton?.removeAttribute('disabled');
                 skipJobButton?.classList.remove('opacity-50', 'cursor-not-allowed');
+                if (inlineCTA) inlineCTA.innerHTML = '';
             } else {
                 startButton?.setAttribute('disabled', 'true');
                 startButton?.classList.add('opacity-50', 'cursor-not-allowed');
@@ -1900,6 +1950,13 @@ Requirements:
                 continueButton?.classList.add('opacity-50', 'cursor-not-allowed');
                 skipJobButton?.setAttribute('disabled', 'true');
                 skipJobButton?.classList.add('opacity-50', 'cursor-not-allowed');
+                if (hasContent && !hasCredits && inlineCTA) {
+                    inlineCTA.innerHTML = '<span class="text-yellow-400">You have no credits.</span> <button class="underline text-primary hover:text-primary/80">Buy credits</button>';
+                    const btn = inlineCTA.querySelector('button');
+                    btn?.addEventListener('click', (e) => { e.preventDefault(); goToPricing(); });
+                } else if (inlineCTA) {
+                    inlineCTA.innerHTML = '';
+                }
             }
         }
 

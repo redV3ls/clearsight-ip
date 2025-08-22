@@ -42,6 +42,13 @@ export interface Env {
   DEEPSEEK_MAX_TOKENS?: string;
   DEEPSEEK_TEMPERATURE?: string;
   DEEPSEEK_TIMEOUT?: string;
+
+  // Stripe configuration
+  STRIPE_SECRET_KEY?: string;
+  STRIPE_PRICE_ID_PACK_4?: string;
+  STRIPE_PRICE_ID_PACK_10?: string;
+  STRIPE_PRICE_ID_PACK_30?: string;
+  STRIPE_WEBHOOK_SECRET?: string; // optional, for future webhook support
 }
 
 const app = new Hono<{ Bindings: Env }>();
