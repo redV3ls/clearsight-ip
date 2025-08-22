@@ -14,7 +14,6 @@ import { CacheService, CacheNamespaces, CacheTTL } from '../services/cache';
 import { enhancedLogger } from '../utils/enhancedLogger';
 import { kvStorage } from '../utils/kvStorage';
 import { NarrativeAnalysisService } from '../services/narrativeAnalysisService';
-import { createDatabase } from '../config/database';
 import { NarrativeKVCache } from '../services/narrativeKVCache';
 import { NarrativeResponseFormatter } from '../services/narrativeResponseFormatter';
 import { CloudflareOptimizer, trackWorkerRequest, checkResourceLimits, getOptimizedQueryParams } from '../utils/cloudflareOptimizer';
@@ -68,6 +67,34 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
   }
   
   enhancedLogger.info('✅ User authenticated successfully', { userId });
+
+  // Enforce credit requirement up-front: consume one credit or return 402
+  let creditConsumed = false;
+  try {
+    const { consumeCreditOrThrow } = await import('../services/billing');
+    await consumeCreditOrThrow(c.env.CACHE, userId);
+    creditConsumed = true;
+    enhancedLogger.info('💳 Consumed 1 analysis credit', { userId });
+  } catch (err: any) {
+    const code = err?.code || err?.errorCode;
+    if (code === 'PAYMENT_REQUIRED') {
+      enhancedLogger.warn('⛔ No credits available - blocking analysis', { userId });
+      return c.json({
+        error: {
+          code: 'PAYMENT_REQUIRED',
+          message: 'No analysis credits remaining. Please purchase a plan to continue.'
+        }
+      }, 402);
+    }
+    // Any other billing error - fail closed
+    enhancedLogger.error('Billing error when consuming credit', err, { userId });
+    return c.json({
+      error: {
+        code: 'BILLING_ERROR',
+        message: 'Billing subsystem unavailable. Please try again later.'
+      }
+    }, 503);
+  }
 
   const analysisId = crypto.randomUUID();
   const startTime = Date.now(); // Track processing time for direct analysis
@@ -369,6 +396,17 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
           : 'Analysis failed. Please try again with a different CV or contact support.',
         retryable: true
       });
+
+      // If we consumed a credit and are not falling back to async (non-timeout), refund it
+      if (!isTimeoutError) {
+        try {
+          const { refundCredit } = await import('../services/billing');
+          await refundCredit(c.env.CACHE, userId);
+          enhancedLogger.info('💳 Refunded credit due to immediate failure', { userId, analysisId });
+        } catch (refundErr) {
+          enhancedLogger.warn('Failed to refund credit after failure', { userId, analysisId, error: refundErr instanceof Error ? refundErr.message : String(refundErr) });
+        }
+      }
       
       return c.json(errorResponse, isTimeoutError ? 202 : 500);
     }
@@ -672,6 +710,15 @@ export async function performAsyncAnalysis(
 
   } catch (error) {
     console.log(`[ASYNC-CATCH] ${analysisId} - Caught error: ${error instanceof Error ? error.message : 'Unknown'}, CPU time: ${Date.now() - startCpuTime}ms`);
+
+    // Refund consumed credit on async failure
+    try {
+      const { refundCredit } = await import('../services/billing');
+      await refundCredit(env.CACHE, userId);
+      enhancedLogger.info('💳 Refunded credit after async failure', { userId, analysisId });
+    } catch (refundErr) {
+      enhancedLogger.warn('Failed to refund credit after async failure', { userId, analysisId, error: refundErr instanceof Error ? refundErr.message : String(refundErr) });
+    }
     
     enhancedLogger.error(`🔥 Failed async analysis for ${analysisId}`, error, {
       analysisId,
