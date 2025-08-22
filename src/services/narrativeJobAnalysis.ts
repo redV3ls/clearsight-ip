@@ -125,6 +125,25 @@ CRITICAL REQUIREMENTS:
 5. Include exact course names and platforms, not generic recommendations
 6. Do NOT skip the learning resources sections - they are MANDATORY
 
+Linking and resources formatting rules:
+- When recommending external resources (courses, tutorials, docs, videos), include a clickable reference for each item.
+  - In text/markdown sections, format each as a Markdown link: [Title](https://absolute.url). Do not use HTML <a> tags.
+  - In any JSON-like examples where resources are strings, each string should be a Markdown link [Title](https://absolute.url).
+- Never output a resource title without its corresponding URL.
+- Prefer official sources when relevant (e.g., vendor docs, Microsoft Learn, AWS Training) before third-party platforms.
+- If a precise URL is not known, link to a platform search for the topic using these patterns (replace YOUR_QUERY with the topic):
+  - Microsoft Learn: https://learn.microsoft.com/en-us/search/?terms=YOUR_QUERY
+  - Udemy: https://www.udemy.com/courses/search/?q=YOUR_QUERY
+  - Coursera: https://www.coursera.org/search?query=YOUR_QUERY
+  - YouTube: https://www.youtube.com/results?search_query=YOUR_QUERY
+  - edX: https://www.edx.org/search?q=YOUR_QUERY
+  - Pluralsight: https://www.pluralsight.com/search?q=YOUR_QUERY
+  - freeCodeCamp: https://www.google.com/search?q=site%3Afreecodecamp.org+YOUR_QUERY
+  - Khan Academy: https://www.khanacademy.org/search?page_search_query=YOUR_QUERY
+  - A Cloud Guru: https://acloudguru.com/search?query=YOUR_QUERY
+  - AWS Training: https://www.aws.training/LearningLibrary?search=YOUR_QUERY
+- Use absolute URLs starting with http:// or https:// (do not use bare www).
+
 IMPORTANT: Do NOT add emojis in section headers (they are shown in the template for emphasis only). Do NOT use legacy titles like "Your Career Story". Do NOT include any sections other than those specified below.
 
 Provide your analysis in the following structure and only these sections:

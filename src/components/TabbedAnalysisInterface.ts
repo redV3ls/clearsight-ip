@@ -299,13 +299,10 @@ export class TabbedAnalysisInterface {
             AI Analysis in Progress...
           </h3>
           <div class="bg-slate-700 rounded-lg p-6 max-w-md mx-auto">
-            <p class="text-gray-300 mb-4">Our AI is analyzing your profile</p>
-            <div class="w-full bg-gray-600 rounded-full h-3 mb-4 overflow-hidden">
-              <div id="progress-bar" class="bg-gradient-to-r from-primary to-blue-400 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-            <p id="progress-message" class="text-sm text-primary animate-pulse font-medium">Initializing AI...</p>
+            <p class="text-gray-300">Our AI is analyzing your profile</p>
+            <p id="progress-message" class="mt-3 text-sm text-primary animate-pulse font-medium">Initializing AI...</p>
           </div>
-        </div>
+        </div
         
         <!-- Results (hidden initially) -->
         <div id="analysis-results" class="hidden">

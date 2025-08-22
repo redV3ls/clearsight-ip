@@ -2222,10 +2222,17 @@ Include everything you can find:
                     '<span class="font-semibold text-lg">Quick Wins:</span>' +
                     '</div>');
                 
-                // Format important skills or technologies (words in quotes or specific tech terms)
-                html = html.replace(/["']([^"']+)["']/g, '<span class="text-primary font-medium">$1</span>');
+                // Important tech terms highlighting (safe)
                 html = html.replace(/\b(TypeScript|JavaScript|Python|React|Node\.js|AWS|Docker|Kubernetes|GraphQL|REST API|CI\/CD|Agile|Scrum)\b/g, 
                     '<span class="bg-slate-700 text-primary px-2 py-1 rounded text-sm font-medium">$1</span>');
+                
+                // Ensure anchor tags are clickable and open in a new tab (style included)
+                html = html.replace(/<a\s+href=/g, '<a target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80" href=');
+                
+                // Simple autolink for bare URLs in text (avoids matching attributes)
+                html = html.replace(/(^|[^"'>])(https?:\/\/[\w\-\.]+[^\s<]*)/g, (m, prefix, url) => {
+                    return prefix + '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">' + url + '</a>';
+                });
                 
                 // Format percentages with visual indicators
                 html = html.replace(/(\d+)%/g, (match, num) => {
