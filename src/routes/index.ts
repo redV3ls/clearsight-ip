@@ -14,6 +14,7 @@ import { generateRouteDocumentation } from './common/routeBuilder';
 import authRoutes from './auth';
 import trendsRoutes from './trends';
 import analyzeRoutes from './analyze';
+import billingRoutes from './billing';
 
 /**
  * Main application router
@@ -142,6 +143,15 @@ export class AppRouter {
       path: '/api/analyze',
       handler: analyzeRoutes,
       description: 'CV and skills analysis endpoints',
+      version: '1.0.0'
+    });
+
+    // Billing routes (plans, credits, purchase)
+    this.app.route('/api/billing', billingRoutes);
+    this.routes.push({
+      path: '/api/billing',
+      handler: billingRoutes,
+      description: 'Billing endpoints: plans, credits, purchases',
       version: '1.0.0'
     });
 

@@ -16,6 +16,35 @@ export async function resumeHandler(c: AuthenticatedContext): Promise<Response> 
   const startTime = Date.now();
   const userId = c.user!.id;
 
+  // Enforce paid access: consume one credit before starting analysis
+  // If there are no credits, return 402 Payment Required with a helpful payload
+  try {
+    const { consumeCreditOrThrow } = await import('../../../services/billing');
+    try {
+      await consumeCreditOrThrow(c.env.CACHE, userId);
+    } catch (err) {
+      if (err && (err as any).code === 'PAYMENT_REQUIRED') {
+        return c.json({
+          success: false,
+          error: {
+            code: 'PAYMENT_REQUIRED',
+            message: 'No analysis credits remaining. Please purchase a plan to continue.'
+          }
+        }, 402);
+      }
+      throw err;
+    }
+  } catch (billingInitErr) {
+    // If billing module fails for some reason, block analysis (fail-closed)
+    return c.json({
+      success: false,
+      error: {
+        code: 'BILLING_ERROR',
+        message: 'Billing subsystem unavailable. Please try again later.'
+      }
+    }, 503);
+  }
+
   try {
     logger.info('Starting resume analysis (async)', { userId });
 
@@ -133,6 +162,14 @@ export async function resumeHandler(c: AuthenticatedContext): Promise<Response> 
           error: error instanceof Error ? error.message : 'Unknown error',
           stack: error instanceof Error ? error.stack : undefined
         });
+        // Refund the consumed credit on failure
+        try {
+          const { refundCredit } = await import('../../../services/billing');
+          await refundCredit(c.env.CACHE, userId);
+        } catch (e) {
+          // Log but do not fail the flow
+          console.warn('Failed to refund credit after failed analysis:', e);
+        }
         await setResumeStatus(c, analysisId, {
           status: 'failed',
           analysis_id: analysisId,

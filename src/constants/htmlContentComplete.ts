@@ -360,92 +360,49 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     </p>
                 </div>
                 
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="bg-slate-700 rounded-lg p-8 border border-slate-600">
-                        <h3 class="text-2xl font-bold text-white mb-4">Free</h3>
-                        <div class="text-4xl font-bold text-primary mb-6">$0<span class="text-lg text-gray-400">/month</span></div>
-                        <ul class="space-y-3 mb-8">
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                1 resume analysis per month
-                            </li>
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                Basic skill gap analysis
-                            </li>
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                General career recommendations
-                            </li>
-                        </ul>
-                        <button class="w-full bg-slate-600 hover:bg-slate-500 text-white py-3 px-6 rounded-lg transition-colors">
-                            Get Started
-                        </button>
-                    </div>
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <div class="bg-slate-700 rounded-lg p-8 border border-slate-600">
+                                <h3 class="text-2xl font-bold text-white mb-2">Starter Pack</h3>
+                                <div class="text-4xl font-bold text-primary mb-2">$5</div>
+                                <div class="text-gray-400 mb-4">4 analyses</div>
+                                <ul class="space-y-3 mb-8">
+                                    <li class="flex items-center text-gray-300"><i class="fas fa-check text-primary mr-3"></i>Pay-as-you-go</li>
+                                    <li class="flex items-center text-gray-300"><i class="fas fa-check text-primary mr-3"></i>No subscription</li>
+                                </ul>
+                                <button data-plan="pack-4" class="buy-plan w-full bg-primary hover:bg-primary/80 text-white py-3 px-6 rounded-lg transition-colors">
+                                    Buy Starter
+                                </button>
+                            </div>
 
-                    <div class="bg-slate-700 rounded-lg p-8 border-2 border-primary relative">
-                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                            <span class="bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">Most Popular</span>
+                            <div class="bg-slate-700 rounded-lg p-8 border-2 border-primary relative">
+                                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                                    <span class="bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">Most Popular</span>
+                                </div>
+                                <h3 class="text-2xl font-bold text-white mb-2">Pro Pack</h3>
+                                <div class="text-4xl font-bold text-primary mb-2">$10</div>
+                                <div class="text-gray-400 mb-4">10 analyses</div>
+                                <ul class="space-y-3 mb-8">
+                                    <li class="flex items-center text-gray-300"><i class="fas fa-check text-primary mr-3"></i>Best value for active users</li>
+                                    <li class="flex items-center text-gray-300"><i class="fas fa-check text-primary mr-3"></i>No subscription</li>
+                                </ul>
+                                <button data-plan="pack-10" class="buy-plan w-full bg-primary hover:bg-primary/80 text-white py-3 px-6 rounded-lg transition-colors">
+                                    Buy Pro Pack
+                                </button>
+                            </div>
+
+                            <div class="bg-slate-700 rounded-lg p-8 border border-slate-600">
+                                <h3 class="text-2xl font-bold text-white mb-2">Power Pack</h3>
+                                <div class="text-4xl font-bold text-primary mb-2">$20</div>
+                                <div class="text-gray-400 mb-4">30 analyses</div>
+                                <ul class="space-y-3 mb-8">
+                                    <li class="flex items-center text-gray-300"><i class="fas fa-check text-primary mr-3"></i>Highest value per analysis</li>
+                                    <li class="flex items-center text-gray-300"><i class="fas fa-check text-primary mr-3"></i>No subscription</li>
+                                </ul>
+                                <button data-plan="pack-30" class="buy-plan w-full bg-primary hover:bg-primary/80 text-white py-3 px-6 rounded-lg transition-colors">
+                                    Buy Power Pack
+                                </button>
+                            </div>
                         </div>
-                        <h3 class="text-2xl font-bold text-white mb-4">Pro</h3>
-                        <div class="text-4xl font-bold text-primary mb-6">$29<span class="text-lg text-gray-400">/month</span></div>
-                        <ul class="space-y-3 mb-8">
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                Unlimited resume analyses
-                            </li>
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                Advanced skill gap analysis
-                            </li>
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                Personalized career roadmap
-                            </li>
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                Industry-specific insights
-                            </li>
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                Priority support
-                            </li>
-                        </ul>
-                        <button class="w-full bg-primary hover:bg-primary/80 text-white py-3 px-6 rounded-lg transition-colors">
-                            Start Free Trial
-                        </button>
-                    </div>
-
-                    <div class="bg-slate-700 rounded-lg p-8 border border-slate-600">
-                        <h3 class="text-2xl font-bold text-white mb-4">Enterprise</h3>
-                        <div class="text-4xl font-bold text-primary mb-6">Custom</div>
-                        <ul class="space-y-3 mb-8">
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                Everything in Pro
-                            </li>
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                Team analytics dashboard
-                            </li>
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                Custom integrations
-                            </li>
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                Dedicated account manager
-                            </li>
-                            <li class="flex items-center text-gray-300">
-                                <i class="fas fa-check text-primary mr-3"></i>
-                                SLA guarantee
-                            </li>
-                        </ul>
-                        <button class="w-full bg-slate-600 hover:bg-slate-500 text-white py-3 px-6 rounded-lg transition-colors">
-                            Contact Sales
-                        </button>
-                    </div>
-                </div>
             </div>
     </section>
 
