@@ -976,7 +976,23 @@ Requirements:
             "🎵 Composing your career symphony...",
             "🏗️ Building bridges to your dream job...",
             "🌟 Sprinkling some career magic dust...",
-            "🎲 Rolling the dice of opportunity..."
+            "🎲 Rolling the dice of opportunity...",
+            "🧰 Refactoring your career story for maximum readability...",
+            "🛰️ Beaming your highlights to hiring satellites...",
+            "🧗‍♀️ Climbing the leaderboard of skills...",
+            "🍀 Optimizing for lucky breaks (backed by data)...",
+            "🧯 Extinguishing buzzwords, igniting impact...",
+            "🧭 Aligning your trajectory with dream-role north...",
+            "🍕 Slicing your experience into delicious, bite‑size wins...",
+            "💡 Upgrading bullets from 'did things' to 'changed outcomes'...",
+            "🛠️ Calibrating keywords to bypass grumpy ATS robots...",
+            "📦 Packaging achievements with measurable ribbons...",
+            "🎈 Inflating confidence (facts first, fluff never)...",
+            "🧩 Matching your puzzle pieces with market demand...",
+            "🛰️ Scanning the job galaxy for perfect orbits...",
+            "🎮 Unlocking hidden skill combos and power‑ups...",
+            "🧴 Polishing the 'wow' until it sparkles...",
+            "🧭 Plotting a fast path from here → dream role..."
         ];
 
         // Rotating fun tips/facts displayed under the progress
@@ -2986,20 +3002,25 @@ Requirements:
                 }
                 
                 // Process plain URLs (http://, https://, www.)
-                // First, replace common course/resource patterns with clickable links
-                text = text.replace(/"([^"]+)"\s+on\s+(\w+)/g, function(match, courseName, platform) {
-                    // Convert course references to search links
-                    var searchUrl = '';
-                    if (platform.toLowerCase() === 'udemy') {
-                        searchUrl = 'https://www.udemy.com/courses/search/?q=' + encodeURIComponent(courseName);
-                    } else if (platform.toLowerCase() === 'coursera') {
-                        searchUrl = 'https://www.coursera.org/search?query=' + encodeURIComponent(courseName);
-                    } else if (platform.toLowerCase() === 'youtube') {
-                        searchUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(courseName);
-                    } else {
-                        return match; // Return original if platform not recognized
+                // First, replace common course/resource patterns with clickable links (more flexible)
+                // Supports: "Course Name" module/course/... on Provider (Provider can have spaces, e.g., Microsoft Learn)
+                text = text.replace(/\"([^\"]+)\"\\s+(?:module|course|learning\\s*path|lesson|tutorial|video|playlist)?\\s*on\\s+([A-Za-z][A-Za-z\\s]+?)(?=[\\)\\]\\.,;!]|\\s|$)/gi, function(match, courseName, platform) {
+                    function providerSearchUrl(p, name) {
+                        var pl = (p || '').trim().toLowerCase();
+                        if (pl === 'udemy') return 'https://www.udemy.com/courses/search/?q=' + encodeURIComponent(name);
+                        if (pl === 'coursera') return 'https://www.coursera.org/search?query=' + encodeURIComponent(name);
+                        if (pl.indexOf('microsoft') !== -1 && pl.indexOf('learn') !== -1) return 'https://learn.microsoft.com/search/?terms=' + encodeURIComponent(name);
+                        if (pl.indexOf('youtube') !== -1) return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(name);
+                        if (pl.indexOf('edx') !== -1) return 'https://www.edx.org/search?q=' + encodeURIComponent(name);
+                        if (pl.indexOf('pluralsight') !== -1) return 'https://www.pluralsight.com/search?q=' + encodeURIComponent(name);
+                        if (pl.indexOf('freecodecamp') !== -1) return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(name + ' freeCodeCamp');
+                        if (pl.indexOf('khan academy') !== -1) return 'https://www.khanacademy.org/search?query=' + encodeURIComponent(name);
+                        if (pl.indexOf('aws') !== -1) return 'https://www.google.com/search?q=' + encodeURIComponent(name + ' site:skillbuilder.aws OR site:aws.amazon.com/training');
+                        // Fallback: generic Google search
+                        return 'https://www.google.com/search?q=' + encodeURIComponent(name + ' ' + p);
                     }
-                    return '<a href="' + searchUrl + '" class="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">"' + courseName + '" on ' + platform + '</a>';
+                    var searchUrl = providerSearchUrl(platform, courseName);
+                    return '<a href="' + searchUrl + '" class="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">\"' + courseName + '\" on ' + platform + '</a>';
                 });
                 
                 // Process standalone URLs - fixed regex
