@@ -3,14 +3,23 @@ import { Env } from '../index';
 import { AppError } from '../middleware/errorHandler';
 import { z } from 'zod';
 import { getPlans, getUserCredits, addUserCredits } from '../services/billing';
-import { requireAuth } from '../middleware/auth';
+import { authMiddleware, requireAuth } from '../middleware/auth';
 
 const billing = new Hono<{ Bindings: Env }>();
 
-// Apply auth to all billing routes except plans listing
+// Apply auth to sensitive billing routes. We must run full auth middleware first to populate c.set('user'),
+// then enforce that a user is present.
+// Note: Do NOT protect /plans to keep it publicly visible.
+billing.use('/credits', authMiddleware);
 billing.use('/credits', requireAuth);
+
+billing.use('/purchase', authMiddleware);
 billing.use('/purchase', requireAuth);
+
+billing.use('/checkout', authMiddleware);
 billing.use('/checkout', requireAuth);
+
+billing.use('/confirm', authMiddleware);
 billing.use('/confirm', requireAuth);
 
 // GET /billing/plans - list available plans
