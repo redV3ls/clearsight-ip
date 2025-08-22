@@ -1179,7 +1179,8 @@ Requirements:
                         showNotification('Please log in to purchase credits.', 'info');
                         return;
                     }
-                    const planId = (e.currentTarget as HTMLElement).getAttribute('data-plan');
+                    const targetEl = e.currentTarget instanceof HTMLElement ? e.currentTarget : (e.target instanceof HTMLElement ? e.target : null);
+                    const planId = targetEl ? targetEl.getAttribute('data-plan') : null;
                     if (!planId) return;
                     try {
                         const res = await fetch(API_ENDPOINTS.billingPurchase, {
