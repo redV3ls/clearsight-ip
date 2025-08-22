@@ -9,6 +9,7 @@ import { Hono } from 'hono';
 import { logger } from '../utils/logger';
 import { createResponse } from '../middleware/common/responseBuilder';
 import { generateRouteDocumentation } from './common/routeBuilder';
+import { errorHandler } from '../middleware/errorHandler';
 
 // Import route modules - Using new standardized routes
 import authRoutes from './auth';
@@ -40,8 +41,8 @@ export class AppRouter {
    * Sets up global middleware
    */
   private setupGlobalMiddleware(): void {
-    // Global error handler
-    this.app.onError((error, c) => {
+    // Global error handler (use centralized sanitizer so we preserve error codes like STRIPE_NOT_CONFIGURED)
+    this.app.onError(async (error, c) => {
       logger.error('Global error handler', {
         requestId: c.get('requestId'),
         error: error.message,
@@ -50,12 +51,8 @@ export class AppRouter {
         method: c.req.method
       });
 
-      const response = createResponse(c);
-      return response.error(
-        'INTERNAL_ERROR',
-        'An internal server error occurred',
-        500
-      );
+      // Delegate to the shared errorHandler to produce a sanitized response with proper status/code
+      return await errorHandler(error as Error, c);
     });
 
     // Global not found handler
