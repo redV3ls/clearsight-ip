@@ -9,64 +9,94 @@ const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?:
   const title = opts.title || 'Authentication required';
   const code = opts.code || 'AUTHENTICATION_REQUIRED';
   const help = opts.help || 'Sign in to continue.';
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Clearsight IP • API Docs – ${title}</title>
-  <style>
-    :root { --bg:#0b1020; --panel:#121a33; --accent:#4f8cff; --muted:#9fb4ff; --ok:#10b981; --err:#ef4444; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial; background: linear-gradient(180deg, #0b1020 0%, #0e1730 100%); color:#e6ecff; }
-    .wrap { max-width: 840px; margin: 6vh auto; padding: 24px; }
-    .card { background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:28px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
-    h1 { margin:0 0 8px; font-size: 28px; letter-spacing:.2px; }
-    .subtitle { color:#c7d7ff; margin: 0 0 22px; font-size: 14px; opacity:.9 }
-    .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-weight:600; background:rgba(239,68,68,.15); color:#ffb4b4; border:1px solid rgba(239,68,68,.35); margin-bottom:12px }
-    .panel { display:grid; grid-template-columns: 1fr; gap:18px; }
-    .section { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; }
-    .section h3 { margin:0 0 10px; font-size:14px; color:#d7e4ff; }
-    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; }
-    pre { background: #0a0f22; border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:12px; overflow:auto; color:#cfe3ff }
-    .actions { margin-top:18px; display:flex; gap:12px; flex-wrap:wrap }
-    .btn { appearance:none; border:1px solid rgba(255,255,255,0.12); background: #1a2447; color:#e6ecff; padding:10px 14px; border-radius:10px; text-decoration:none; font-weight:600 }
-    .btn.primary { background: linear-gradient(180deg, #3b82f6, #1d4ed8); border-color:#3b82f6 }
-    .hint { color:#b9c9ff; font-size:13px; opacity:.9 }
-    .footer { margin-top:22px; font-size:12px; color:#9fb4ff; opacity:.85 }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="card">
-      <div class="badge">${code}</div>
-      <h1>API documentation requires authentication</h1>
-      <p class="subtitle">${opts.message}</p>
-      <div class="panel">
-        <div class="section">
-          <h3>Quick options</h3>
-          <div class="actions">
-            <a class="btn primary" href="/">Sign in</a>
-            <a class="btn" href="#api-key">Use an API key</a>
-            <a class="btn" href="/api/v1">View API root</a>
-          </div>
-        </div>
-        <div id="api-key" class="section">
-          <h3>Using an API key</h3>
-          <p class="hint">If you have an API key, include it in requests as the X-API-Key header. Swagger UI will remember your auth if you authorize from the UI.</p>
-          <pre><code>curl -H "X-API-Key: {{YOUR_API_KEY}}" https://clearsight-ip.com/api/v1/health</code></pre>
-        </div>
-        <div class="section">
-          <h3>Using a bearer token</h3>
-          <p class="hint">If your session expired, sign in again to obtain a new token. Then open the docs and click “Authorize”.</p>
-          <pre><code>Authorization: Bearer {{YOUR_JWT_TOKEN}}</code></pre>
-        </div>
-      </div>
-      <div class="footer">Need help? See the README or contact support.</div>
-    </div>
-  </div>
-</body>
-</html>`;
+  return '<!DOCTYPE html>' +
+  '<html lang="en">' +
+  '<head>' +
+  '  <meta charset="utf-8" />' +
+  '  <meta name="viewport" content="width=device-width, initial-scale=1" />' +
+  '  <title>Clearsight IP • API Docs – ' + title + '</title>' +
+  '  <link rel="icon" type="image/svg+xml" href="/favicon.ico" />' +
+  '  <link rel="preconnect" href="https://fonts.googleapis.com" />' +
+  '  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />' +
+  '  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />' +
+  '  <style>' +
+  '    :root { --primary:#14b8a6; --bg:#0f172a; --panel:#1e293b; --muted:#cbd5e1; --border:#334155; --danger:#ef4444; }' +
+  '    *{ box-sizing:border-box } body{ margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:#e2e8f0; background: radial-gradient(1200px 600px at 20% -10%, rgba(20,184,166,.15), transparent), linear-gradient(180deg, #0f172a 0%, #0b1224 100%); }' +
+  '    .nav{ position:sticky; top:0; background:#111827; border-bottom:1px solid #1f2937; padding:12px 20px; display:flex; align-items:center; justify-content:space-between }' +
+  '    .brand{ color:var(--primary); font-weight:700; letter-spacing:.2px; text-decoration:none }' +
+  '    .nav a{ color:#cbd5e1; text-decoration:none; margin-left:14px } .nav a:hover{ color:var(--primary) }' +
+  '    .container{ max-width:980px; margin:8vh auto; padding:0 20px }' +
+  '    .hero{ display:grid; grid-template-columns: 1.2fr .8fr; gap:28px; align-items:stretch }' +
+  '    @media (max-width: 860px){ .hero{ grid-template-columns: 1fr } }' +
+  '    .card{ background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:28px; box-shadow:0 10px 30px rgba(0,0,0,.35) }' +
+  '    h1{ font-size:32px; margin:0 0 10px } .lead{ color:#cbd5e1; margin:0 0 18px }' +
+  '    .badge{ display:inline-block; padding:4px 10px; border-radius:999px; font-weight:700; font-size:12px; background:rgba(239,68,68,.15); color:#fecaca; border:1px solid rgba(239,68,68,.35); margin-bottom:12px }' +
+  '    .kpis{ background:#0b1224; border:1px solid #1f2937; border-radius:12px; padding:16px } .krow{ display:flex; justify-content:space-between; color:#cbd5e1; margin:8px 0 } .kval{ color:#f87171; font-weight:700 }' +
+  '    .actions{ display:flex; gap:12px; flex-wrap:wrap; margin-top:16px }' +
+  '    .btn{ appearance:none; border:1px solid var(--border); background:#1f2937; color:#e2e8f0; padding:12px 16px; border-radius:10px; text-decoration:none; font-weight:700 } .btn:hover{ border-color:var(--primary); color:var(--primary) }' +
+  '    .btn.primary{ background:linear-gradient(180deg, #16a34a, #0c8f84); background:linear-gradient(180deg, #14b8a6, #0d9488); border-color:transparent; color:#0b1020 } .btn.primary:hover{ filter:brightness(1.05) }' +
+  '    .section{ background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; margin-top:14px }' +
+  '    .section h3{ margin:0 0 8px; font-size:14px; color:#d1d5db }' +
+  '    pre{ background:#0a1222; border:1px solid #1f2937; border-radius:8px; padding:12px; overflow:auto; color:#c7d2fe; font-size:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace }' +
+  '    .footer{ margin-top:26px; color:#94a3b8; font-size:12px; text-align:center }' +
+  '  </style>' +
+  '</head>' +
+  '<body>' +
+  '  <header class="nav">' +
+  '    <a class="brand" href="/">Clearsight IP</a>' +
+  '    <div class="right">' +
+  '      <a href="/">Home</a>' +
+  '      <a href="/api/v1">API Root</a>' +
+  '      <a href="/docs">API Docs</a>' +
+  '    </div>' +
+  '  </header>' +
+  '  <main class="container">' +
+  '    <div class="hero">' +
+  '      <section class="card">' +
+  '        <div class="badge">' + code + '</div>' +
+  '        <h1>Access to API Docs requires sign-in</h1>' +
+  '        <p class="lead">' + opts.message + '</p>' +
+  '        <div class="section">' +
+  '          <h3>Quick actions</h3>' +
+  '          <div class="actions">' +
+  '            <a class="btn primary" href="/">Sign in</a>' +
+  '            <a class="btn" href="#api-key">Use an API key</a>' +
+  '            <a class="btn" href="/api/v1/docs">Reload docs</a>' +
+  '            <a class="btn" href="/api/v1">View API root</a>' +
+  '          </div>' +
+  '        </div>' +
+  '        <div class="section" id="api-key">' +
+  '          <h3>Using an API key</h3>' +
+  '          <p style="color:#a3b8ff; font-size:13px; margin:6px 0 10px">Click “Authorize” in the docs UI and paste your key in the X-API-Key field. Or call endpoints directly:</p>' +
+  '          <pre><code>curl -H "X-API-Key: {{YOUR_API_KEY}}" https://clearsight-ip.com/api/v1/health</code></pre>' +
+  '        </div>' +
+  '        <div class="section">' +
+  '          <h3>Using a bearer token</h3>' +
+  '          <p style="color:#a3b8ff; font-size:13px; margin:6px 0 10px">If your session expired, sign in again to obtain a new token, then click “Authorize”.</p>' +
+  '          <pre><code>Authorization: Bearer {{YOUR_JWT_TOKEN}}</code></pre>' +
+  '        </div>' +
+  '        <div class="footer">Need help? See the README or contact support.</div>' +
+  '      </section>' +
+  '      <aside class="card" aria-hidden="true">' +
+  '        <h2 style="margin:0 0 10px; font-size:16px; color:#93c5fd">Your current status</h2>' +
+  '        <div class="kpis">' +
+  '          <div class="krow"><span>Authentication</span><span class="kval">Required</span></div>' +
+  '          <div class="krow"><span>Docs access</span><span class="kval">Locked</span></div>' +
+  '          <div class="krow"><span>Error code</span><span class="kval">' + code + '</span></div>' +
+  '        </div>' +
+  '        <div class="section" style="margin-top:16px">' +
+  '          <h3>What to do</h3>' +
+  '          <ul style="margin:8px 0 0 18px; color:#cbd5e1; line-height:1.6">' +
+  '            <li>Open the home page and sign in.</li>' +
+  '            <li>Return to this page and click “Authorize”.</li>' +
+  '            <li>Alternatively, use an API key with the X-API-Key header.</li>' +
+  '          </ul>' +
+  '        </div>' +
+  '      </aside>' +
+  '    </div>' +
+  '  </main>' +
+  '</body>' +
+  '</html>';
 };
 
 export interface UserContext {
