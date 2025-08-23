@@ -8,7 +8,9 @@ import { z } from 'zod';
 const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?: string; help?: string }) => {
   const title = opts.title || 'Authentication required';
   const code = opts.code || 'AUTHENTICATION_REQUIRED';
+  const codeLabel = code === 'EXPIRED_TOKEN' ? 'AUTHENTICATION_REQUIRED' : code; // avoid exposing expired state
   const help = opts.help || 'Sign in to continue.';
+  const msg = /expired/i.test(opts.message || '') ? 'Please sign in to view the API documentation.' : (opts.message || 'Please sign in to view the API documentation.');
   return '<!DOCTYPE html>' +
   '<html lang="en">' +
   '<head>' +
@@ -26,15 +28,13 @@ const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?:
   '    .brand{ color:var(--primary); font-weight:700; letter-spacing:.2px; text-decoration:none }' +
   '    .nav a{ color:#cbd5e1; text-decoration:none; margin-left:14px } .nav a:hover{ color:var(--primary) }' +
   '    .container{ max-width:980px; margin:8vh auto; padding:0 20px }' +
-  '    .hero{ display:grid; grid-template-columns: 1.2fr .8fr; gap:28px; align-items:stretch }' +
-  '    @media (max-width: 860px){ .hero{ grid-template-columns: 1fr } }' +
+  '    .hero{ display:grid; grid-template-columns: 1fr; gap:28px; align-items:stretch }' +
   '    .card{ background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:28px; box-shadow:0 10px 30px rgba(0,0,0,.35) }' +
   '    h1{ font-size:32px; margin:0 0 10px } .lead{ color:#cbd5e1; margin:0 0 18px }' +
   '    .badge{ display:inline-block; padding:4px 10px; border-radius:999px; font-weight:700; font-size:12px; background:rgba(239,68,68,.15); color:#fecaca; border:1px solid rgba(239,68,68,.35); margin-bottom:12px }' +
-  '    .kpis{ background:#0b1224; border:1px solid #1f2937; border-radius:12px; padding:16px } .krow{ display:flex; justify-content:space-between; color:#cbd5e1; margin:8px 0 } .kval{ color:#f87171; font-weight:700 }' +
   '    .actions{ display:flex; gap:12px; flex-wrap:wrap; margin-top:16px }' +
   '    .btn{ appearance:none; border:1px solid var(--border); background:#1f2937; color:#e2e8f0; padding:12px 16px; border-radius:10px; text-decoration:none; font-weight:700 } .btn:hover{ border-color:var(--primary); color:var(--primary) }' +
-  '    .btn.primary{ background:linear-gradient(180deg, #16a34a, #0c8f84); background:linear-gradient(180deg, #14b8a6, #0d9488); border-color:transparent; color:#0b1020 } .btn.primary:hover{ filter:brightness(1.05) }' +
+  '    .btn.primary{ background:linear-gradient(180deg, #14b8a6, #0d9488); border-color:transparent; color:#0b1020 } .btn.primary:hover{ filter:brightness(1.05) }' +
   '    .section{ background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; margin-top:14px }' +
   '    .section h3{ margin:0 0 8px; font-size:14px; color:#d1d5db }' +
   '    pre{ background:#0a1222; border:1px solid #1f2937; border-radius:8px; padding:12px; overflow:auto; color:#c7d2fe; font-size:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace }' +
@@ -53,16 +53,13 @@ const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?:
   '  <main class="container">' +
   '    <div class="hero">' +
   '      <section class="card">' +
-  '        <div class="badge">' + code + '</div>' +
+  '        <div class="badge">' + codeLabel + '</div>' +
   '        <h1>Access to API Docs requires sign-in</h1>' +
-  '        <p class="lead">' + opts.message + '</p>' +
+  '        <p class="lead">' + msg + '</p>' +
   '        <div class="section">' +
   '          <h3>Quick actions</h3>' +
   '          <div class="actions">' +
   '            <a class="btn primary" href="/">Sign in</a>' +
-  '            <a class="btn" href="#api-key">Use an API key</a>' +
-  '            <a class="btn" href="/api/v1/docs">Reload docs</a>' +
-  '            <a class="btn" href="/api/v1">View API root</a>' +
   '          </div>' +
   '        </div>' +
   '        <div class="section" id="api-key">' +
@@ -72,27 +69,11 @@ const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?:
   '        </div>' +
   '        <div class="section">' +
   '          <h3>Using a bearer token</h3>' +
-  '          <p style="color:#a3b8ff; font-size:13px; margin:6px 0 10px">If your session expired, sign in again to obtain a new token, then click “Authorize”.</p>' +
+  '          <p style="color:#a3b8ff; font-size:13px; margin:6px 0 10px">Sign in to obtain a token, then click “Authorize”.</p>' +
   '          <pre><code>Authorization: Bearer {{YOUR_JWT_TOKEN}}</code></pre>' +
   '        </div>' +
   '        <div class="footer">Need help? See the README or contact support.</div>' +
   '      </section>' +
-  '      <aside class="card" aria-hidden="true">' +
-  '        <h2 style="margin:0 0 10px; font-size:16px; color:#93c5fd">Your current status</h2>' +
-  '        <div class="kpis">' +
-  '          <div class="krow"><span>Authentication</span><span class="kval">Required</span></div>' +
-  '          <div class="krow"><span>Docs access</span><span class="kval">Locked</span></div>' +
-  '          <div class="krow"><span>Error code</span><span class="kval">' + code + '</span></div>' +
-  '        </div>' +
-  '        <div class="section" style="margin-top:16px">' +
-  '          <h3>What to do</h3>' +
-  '          <ul style="margin:8px 0 0 18px; color:#cbd5e1; line-height:1.6">' +
-  '            <li>Open the home page and sign in.</li>' +
-  '            <li>Return to this page and click “Authorize”.</li>' +
-  '            <li>Alternatively, use an API key with the X-API-Key header.</li>' +
-  '          </ul>' +
-  '        </div>' +
-  '      </aside>' +
   '    </div>' +
   '  </main>' +
   '</body>' +
