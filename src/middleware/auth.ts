@@ -59,7 +59,7 @@ const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?:
   '        <div class="section">' +
   '          <h3>Quick actions</h3>' +
   '          <div class="actions">' +
-  '            <a class="btn primary" href="/">Sign in</a>' +
+  '            <a class="btn primary" href="/?auth=login&redirect=/api/v1/docs">Log in</a>' +
   '          </div>' +
   '        </div>' +
   '        <div class="section" id="api-key">' +

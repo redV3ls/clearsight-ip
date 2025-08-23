@@ -1037,6 +1037,9 @@ Requirements:
             // Check authentication status
             checkAuthStatus();
 
+            // If URL requests auth modal (from external redirect), open it
+            handleAuthModalQuery();
+
             // Attach purchase handlers
             attachBuyPlanHandlers();
 
@@ -1045,6 +1048,17 @@ Requirements:
             
             console.log('Clearsight IP application loaded successfully!');
         });
+
+        // Open auth modal based on URL query parameters
+        function handleAuthModalQuery() {
+            try {
+                const url = new URL(window.location.href);
+                const auth = url.searchParams.get('auth');
+                if (auth === 'login' || auth === 'register') {
+                    showAuthModal(auth);
+                }
+            } catch {}
+        }
 
         // Authentication status check
         async function checkAuthStatus() {
@@ -2037,6 +2051,16 @@ Requirements:
                     await fetchCredits();
                     hideAuthModal();
                     
+                    // Optional redirect after login when requested (e.g. from docs page)
+                    try {
+                        const url = new URL(window.location.href);
+                        const redirect = url.searchParams.get('redirect');
+                        if (redirect && redirect.startsWith('/')) {
+                            window.location.href = redirect;
+                            return; // Stop further execution
+                        }
+                    } catch {}
+                    
                     // Show success message
                     showNotification('Login successful! Welcome back.', 'success');
                 } else {
@@ -2095,6 +2119,16 @@ Requirements:
                     updateUIForAuthenticatedUser();
                     await fetchCredits();
                     hideAuthModal();
+                    
+                    // Optional redirect if requested in URL
+                    try {
+                        const url = new URL(window.location.href);
+                        const redirect = url.searchParams.get('redirect');
+                        if (redirect && redirect.startsWith('/')) {
+                            window.location.href = redirect;
+                            return;
+                        }
+                    } catch {}
                     
                     // Show success message
                     showNotification('Account created successfully! Welcome to Clearsight IP.', 'success');
