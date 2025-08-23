@@ -370,15 +370,9 @@ app.get('/health/detailed', async (c) => {
     healthStatus.status = 'degraded';
   }
 
-  // Check KV cache
-  try {
-    await c.env.CACHE.put('health_check', 'ok', { expirationTtl: 60 });
-    const result = await c.env.CACHE.get('health_check');
-    healthStatus.dependencies.cache = result === 'ok' ? 'healthy' : 'unhealthy';
-  } catch (error) {
-    healthStatus.dependencies.cache = 'unhealthy';
-    healthStatus.status = 'degraded';
-  }
+  // Skip KV cache writes/reads here to avoid burning KV quotas
+  // If needed, a lightweight read-only ping can be added behind a flag.
+  healthStatus.dependencies.cache = 'skipped';
 
   const statusCode = healthStatus.status === 'healthy' ? 200 : 503;
   return c.json(healthStatus, statusCode);

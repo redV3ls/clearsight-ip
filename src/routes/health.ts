@@ -40,15 +40,8 @@ health.get('/detailed', async (c) => {
     healthStatus.status = 'degraded';
   }
 
-  // Check KV cache
-  try {
-    await c.env.CACHE.put('health_check', 'ok', { expirationTtl: 60 });
-    const result = await c.env.CACHE.get('health_check');
-    healthStatus.dependencies.cache = result === 'ok' ? 'healthy' : 'unhealthy';
-  } catch (error) {
-    healthStatus.dependencies.cache = 'unhealthy';
-    healthStatus.status = 'degraded';
-  }
+  // Skip KV cache writes/reads here to conserve KV quota
+  healthStatus.dependencies.cache = 'skipped';
 
   const statusCode = healthStatus.status === 'healthy' ? 200 : 503;
   return c.json(healthStatus, statusCode);
@@ -60,13 +53,11 @@ health.get('/ready', async (c) => {
     // Check if database is ready
     await c.env.DB.prepare('SELECT 1').first();
     
-    // Check if cache is ready
-    await c.env.CACHE.put('readiness_check', 'ok', { expirationTtl: 60 });
-    
-    return c.json({
-      status: 'ready',
-      timestamp: new Date().toISOString(),
-    });
+  // Skip KV readiness write to conserve KV quota
+  return c.json({
+    status: 'ready',
+    timestamp: new Date().toISOString(),
+  });
   } catch (error) {
     return c.json({
       status: 'not ready',

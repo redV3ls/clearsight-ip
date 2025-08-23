@@ -2703,12 +2703,13 @@ Requirements:
             
             console.log('Starting polling for analysis:', analysisId);
             
+            // Increase polling interval to reduce load
             AppState.pollInterval = setInterval(async () => {
                 pollCount++;
                 console.log('Polling attempt', pollCount, 'for analysis:', analysisId);
                 
                 try {
-                    const response = await fetch(API_ENDPOINTS.analyzeResume + '/' + analysisId, {
+                    const response = await fetch((API_ENDPOINTS.analyzeResume + '/' + analysisId) + '?source=db', {
                         method: 'GET',
                         credentials: 'include'
                     });
@@ -2802,7 +2803,7 @@ Requirements:
                     }
                 }
                 
-            }, 5000); // Poll every 5 seconds
+            }, 10000); // Poll every 10 seconds to reduce load
         }
 
         function displayAnalysisResults(analysisData) {

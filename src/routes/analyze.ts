@@ -237,21 +237,20 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       throw dbError;
     }
 
-    // Store initial processing status in optimized narrative KV cache
+    // Store processing status in narrative KV and optionally in legacy KV (config-driven)
     const narrativeCache = new NarrativeKVCache(c.env);
     const processingStored = await narrativeCache.storeProcessingStatus(analysisId, userId);
-    
-    // Also store in legacy KV for backward compatibility
-    const kvStored = await kvStorage.putAnalysisStatus(analysisId, initialRecord);
-    
-    if (!processingStored && !kvStored) {
-      enhancedLogger.warn('⚠️ Failed to store initial status in both KV caches', { analysisId });
+
+    const skipLegacyKV = c.env.SKIP_LEGACY_KV_WRITES === 'true';
+    let legacyKvStored: boolean | null = null;
+    if (!skipLegacyKV) {
+      legacyKvStored = await kvStorage.putAnalysisStatus(analysisId, initialRecord);
+    }
+
+    if (!processingStored && (!skipLegacyKV && legacyKvStored === false)) {
+      enhancedLogger.warn('⚠️ Failed to store initial status in KV caches', { analysisId, narrativeCache: processingStored, legacyCache: legacyKvStored });
     } else {
-      enhancedLogger.info('✅ Initial status stored in KV cache', { 
-        analysisId,
-        narrativeCache: processingStored,
-        legacyCache: kvStored
-      });
+      enhancedLogger.info('✅ Initial status stored', { analysisId, narrativeCache: processingStored, legacyCache: skipLegacyKV ? 'skipped' : legacyKvStored });
     }
     
     // NARRATIVE IMPLEMENTATION: Direct processing instead of async
@@ -312,7 +311,6 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
       });
       
       // Store in narrative KV cache
-      const narrativeCache = new NarrativeKVCache(c.env);
       const cacheEntry = {
         analysisId,
         userId,
@@ -653,11 +651,14 @@ export async function performAsyncAnalysis(
       } else {
         enhancedLogger.warn(`⚠️ Narrative KV cache update failed for ${analysisId}`, { analysisId });
       }
-      
-      // Also update legacy KV for backward compatibility
-      const legacyKvSuccess = await kvStorage.putAnalysisStatus(analysisId, response);
-      if (!legacyKvSuccess) {
-        enhancedLogger.warn(`⚠️ Legacy KV cache update failed for ${analysisId}`, { analysisId });
+
+      // Conditionally update legacy KV cache for backward compatibility (config-driven)
+      const skipLegacyKV = env.SKIP_LEGACY_KV_WRITES === 'true';
+      if (!skipLegacyKV) {
+        const legacyKvSuccess = await kvStorage.putAnalysisStatus(analysisId, response);
+        if (!legacyKvSuccess) {
+          enhancedLogger.warn(`⚠️ Legacy KV cache update failed for ${analysisId}`, { analysisId });
+        }
       }
       
       // Verify the narrative analysis was saved successfully
@@ -795,12 +796,19 @@ export async function performAsyncAnalysis(
       };
       
       await narrativeCache.storeAnalysis(errorCacheEntry);
+
+      // Conditionally update legacy KV cache for backward compatibility (config-driven)
+      const skipLegacyKV = env.SKIP_LEGACY_KV_WRITES === 'true';
+      if (!skipLegacyKV) {
+        const legacyKvErr = await kvStorage.putAnalysisStatus(analysisId, errorRecord);
+        if (!legacyKvErr) {
+          enhancedLogger.warn(`⚠️ Legacy KV cache error update failed for ${analysisId}`, { analysisId });
+        }
+      }
       
       // Update legacy database for backward compatibility
       await updateDatabaseWithError(env, analysisId, userId, errorRecord);
       
-      // Update legacy KV cache
-      await kvStorage.putAnalysisStatus(analysisId, errorRecord);
       
       enhancedLogger.logAnalysisComplete(analysisId, false, {
         errorCode,
@@ -1270,11 +1278,14 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
     // Try to get from narrative KV cache first (fastest)
     const optimizer = CloudflareOptimizer.getInstance();
     const optimizedParams = getOptimizedQueryParams({ useCache: true });
+    const sourceOverride = c.req.query('source');
+    const bypassCache = sourceOverride === 'db';
+    const useCache = optimizedParams.useCache && !bypassCache;
     
     const narrativeCache = new NarrativeKVCache(c.env);
     let cachedAnalysis = null;
     
-    if (optimizedParams.useCache) {
+    if (useCache) {
       optimizer.trackKVOperation(1);
       cachedAnalysis = await narrativeCache.getAnalysis(analysisId);
     }
@@ -1295,6 +1306,8 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
         });
         
         NarrativeResponseFormatter.logResponseMetrics(response);
+        c.header('Cache-Control', 'private, max-age=60, stale-while-revalidate=60');
+        c.header('Vary', 'Authorization, Cookie');
         return c.json(response, 200);
       } else if (cachedAnalysis.status === 'failed') {
         const response = NarrativeResponseFormatter.formatFailedAnalysis({
@@ -1341,7 +1354,7 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
       };
       
       // Store in cache asynchronously (don't wait) if caching is enabled
-      if (optimizedParams.useCache) {
+      if (useCache) {
         narrativeCache.storeAnalysis(cacheEntry).catch(error => {
           enhancedLogger.warn('Failed to cache analysis after database retrieval', { error, analysisId });
         });
@@ -1363,6 +1376,8 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
       });
       
       NarrativeResponseFormatter.logResponseMetrics(response);
+      c.header('Cache-Control', 'private, max-age=60, stale-while-revalidate=60');
+      c.header('Vary', 'Authorization, Cookie');
       return c.json(response, 200);
     }
 
@@ -1393,6 +1408,8 @@ analyze.get('/resume/:analysisId', async (c: AuthenticatedContext) => {
     } else if (analysisData.status === 'failed') {
       return c.json(analysisData, 500); // Analysis failed
     } else {
+      c.header('Cache-Control', 'private, max-age=60, stale-while-revalidate=60');
+      c.header('Vary', 'Authorization, Cookie');
       return c.json(analysisData, 200); // Completed successfully
     }
 
@@ -2015,7 +2032,7 @@ analyze.get('/debug', async (c: AuthenticatedContext) => {
                 // If we get an analysis ID, poll for results
                 if (data.analysis_id) {
                     document.getElementById('results').innerHTML += '<h3>Polling for results...</h3>';
-                    setTimeout(() => pollResults(data.analysis_id), 3000);
+                    setTimeout(() => pollResults(data.analysis_id, 5000), 3000);
                 }
             } catch (error) {
                 console.error('Analysis test error:', error);
@@ -2023,11 +2040,13 @@ analyze.get('/debug', async (c: AuthenticatedContext) => {
             }
         }
         
-        async function pollResults(analysisId) {
+        let pollAttempt = 0;
+        async function pollResults(analysisId, delayMs = 5000) {
             try {
-                const response = await fetch('/api/v1/analyze/resume/' + analysisId, {
+                const response = await fetch('/api/v1/analyze/resume/' + analysisId + '?source=db', {
                     method: 'GET',
-                    credentials: 'include'
+                    credentials: 'include',
+                    cache: 'no-store'
                 });
                 const data = await response.json();
                 document.getElementById('results').innerHTML += '<h3>Poll Results (Status: ' + response.status + '):</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
@@ -2035,12 +2054,19 @@ analyze.get('/debug', async (c: AuthenticatedContext) => {
                 
                 // Continue polling if still processing
                 if (data.status === 'processing') {
-                    document.getElementById('results').innerHTML += '<p>Still processing... polling again in 5 seconds</p>';
-                    setTimeout(() => pollResults(analysisId), 5000);
+                    pollAttempt++;
+                    const nextDelay = Math.min(delayMs * 2, 30000);
+                    document.getElementById('results').innerHTML += '<p>Still processing... polling again in ' + Math.round(nextDelay / 1000) + ' seconds</p>';
+                    setTimeout(() => pollResults(analysisId, nextDelay), nextDelay);
+                } else {
+                    pollAttempt = 0; // reset on completion or failure
                 }
             } catch (error) {
                 console.error('Poll error:', error);
                 document.getElementById('results').innerHTML += '<h3>Poll Error:</h3><pre>' + error.message + '</pre>';
+                pollAttempt++;
+                const nextDelay = Math.min(delayMs * 2, 30000);
+                setTimeout(() => pollResults(analysisId, nextDelay), nextDelay);
             }
         }
     </script>

@@ -289,7 +289,7 @@ NICE TO HAVE:
                 attempts++;
                 
                 try {
-                    const response = await fetch(`/api/v1/analyze/resume/${analysisId}`, { credentials: 'include' });
+                    const response = await fetch(`/api/v1/analyze/resume/${analysisId}?source=db`, { credentials: 'include' });
                     const result = await response.json();
                     
                     console.log(\`[POLL-\${attempts}] Status: \${result.status}\`, result);
