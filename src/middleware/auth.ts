@@ -39,6 +39,21 @@ const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?:
   '    .section h3{ margin:0 0 8px; font-size:14px; color:#d1d5db }' +
   '    pre{ background:#0a1222; border:1px solid #1f2937; border-radius:8px; padding:12px; overflow:auto; color:#c7d2fe; font-size:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace }' +
   '    .footer{ margin-top:26px; color:#94a3b8; font-size:12px; text-align:center }' +
+  '    /* Inline auth modal styles */' +
+  '    .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:9999 }' +
+  '    .modal{ width:420px; max-width:92vw; background:var(--panel); border:1px solid rgba(255,255,255,.08); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.5) }' +
+  '    .modal .hd{ padding:16px 18px; border-bottom:1px solid rgba(255,255,255,.08); display:flex; align-items:center; justify-content:space-between }' +
+  '    .modal h2{ margin:0; font-size:18px; color:var(--primary) }' +
+  '    .close{ border:none; background:transparent; color:#cbd5e1; font-size:18px; cursor:pointer }' +
+  '    .tabs{ display:flex; gap:8px; background:#1f2a44; padding:6px; border-radius:10px; margin:14px 0 }' +
+  '    .tab{ flex:1; padding:10px 12px; border-radius:8px; border:1px solid transparent; color:#cbd5e1; background:transparent; cursor:pointer; font-weight:600 }' +
+  '    .tab.active{ background:var(--primary); color:#0b1020 }' +
+  '    .bd{ padding:18px }' +
+  '    .field{ margin-bottom:12px }' +
+  '    .label{ display:block; font-size:12px; color:#cbd5e1; margin:0 0 6px }' +
+  '    .input{ width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border); background:#1f2937; color:#e6ecff }' +
+  '    .btn.block{ width:100%; justify-content:center; display:inline-flex; align-items:center }' +
+  '    .error{ background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.35); color:#fecaca; padding:10px 12px; border-radius:8px; margin-bottom:10px; display:none }' +
   '  </style>' +
   '</head>' +
   '<body>' +
@@ -59,7 +74,7 @@ const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?:
   '        <div class="section">' +
   '          <h3>Quick actions</h3>' +
   '          <div class="actions">' +
-  '            <a class="btn primary" href="/?auth=login&redirect=/api/v1/docs">Log in</a>' +
+'            <button id="open-login-btn" class="btn primary">Log in</button>' +
   '          </div>' +
   '        </div>' +
   '        <div class="section" id="api-key">' +
@@ -76,6 +91,67 @@ const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?:
   '      </section>' +
   '    </div>' +
   '  </main>' +
+  "  <div id=\"authOverlay\" class=\"overlay\" role=\"dialog\" aria-modal=\"true\" aria-hidden=\"true\">" +
+  "    <div class=\"modal\">" +
+  "      <div class=\"hd\">" +
+  "        <h2>Account Access</h2>" +
+  "        <button id=\"closeAuth\" class=\"close\" aria-label=\"Close\">×</button>" +
+  "      </div>" +
+  "      <div class=\"bd\">" +
+  "        <div class=\"tabs\">" +
+  "          <button id=\"docsLoginTab\" class=\"tab active\">Login</button>" +
+  "          <button id=\"docsRegisterTab\" class=\"tab\">Sign Up</button>" +
+  "        </div>" +
+  "        <div id=\"docsAuthError\" class=\"error\"></div>" +
+  "        <form id=\"docsLoginForm\" autocomplete=\"on\">" +
+  "          <div class=\"field\">" +
+  "            <label class=\"label\">Email</label>" +
+  "            <input type=\"email\" name=\"email\" required class=\"input\" />" +
+  "          </div>" +
+  "          <div class=\"field\">" +
+  "            <label class=\"label\">Password</label>" +
+  "            <input type=\"password\" name=\"password\" required class=\"input\" />" +
+  "          </div>" +
+  "          <button type=\"submit\" class=\"btn primary block\">Log in</button>" +
+  "        </form>" +
+  "        <form id=\"docsRegisterForm\" style=\"display:none\" autocomplete=\"on\">" +
+  "          <div class=\"field\">" +
+  "            <label class=\"label\">Email</label>" +
+  "            <input type=\"email\" name=\"email\" required class=\"input\" />" +
+  "          </div>" +
+  "          <div class=\"field\">" +
+  "            <label class=\"label\">Password</label>" +
+  "            <input type=\"password\" name=\"password\" minlength=\"8\" required class=\"input\" />" +
+  "          </div>" +
+  "          <button type=\"submit\" class=\"btn primary block\">Create account</button>" +
+  "        </form>" +
+  "      </div>" +
+  "    </div>" +
+  "  </div>" +
+  "  <script>" +
+  "    (function(){" +
+  "      var overlay = document.getElementById('authOverlay');" +
+  "      var openBtn = document.getElementById('open-login-btn');" +
+  "      var closeBtn = document.getElementById('closeAuth');" +
+  "      var loginTab = document.getElementById('docsLoginTab');" +
+  "      var registerTab = document.getElementById('docsRegisterTab');" +
+  "      var loginForm = document.getElementById('docsLoginForm');" +
+  "      var registerForm = document.getElementById('docsRegisterForm');" +
+  "      var errorBox = document.getElementById('docsAuthError');" +
+  "      function showOverlay(){ overlay.style.display='flex'; document.body.style.overflow='hidden'; }" +
+  "      function hideOverlay(){ overlay.style.display='none'; document.body.style.overflow=''; }" +
+  "      function clearError(){ if(errorBox){ errorBox.style.display='none'; errorBox.textContent=''; } }" +
+  "      function showError(msg){ if(errorBox){ errorBox.textContent=msg||'Authentication failed'; errorBox.style.display='block'; } }" +
+  "      function setTab(mode){ if(mode==='login'){ loginTab.classList.add('active'); registerTab.classList.remove('active'); loginForm.style.display='block'; registerForm.style.display='none'; } else { registerTab.classList.add('active'); loginTab.classList.remove('active'); loginForm.style.display='none'; registerForm.style.display='block'; } clearError(); }" +
+  "      openBtn && openBtn.addEventListener('click', function(e){ e.preventDefault(); setTab('login'); showOverlay(); });" +
+  "      closeBtn && closeBtn.addEventListener('click', function(){ hideOverlay(); });" +
+  "      overlay && overlay.addEventListener('click', function(e){ if(e.target===overlay) hideOverlay(); });" +
+  "      loginTab && loginTab.addEventListener('click', function(){ setTab('login'); });" +
+  "      registerTab && registerTab.addEventListener('click', function(){ setTab('register'); });" +
+  "      if(loginForm){ loginForm.addEventListener('submit', async function(e){ e.preventDefault(); clearError(); var data=new FormData(loginForm); var email=data.get('email'); var password=data.get('password'); var btn=loginForm.querySelector('button[type=\\"submit\\"]'); var prev=btn.textContent; btn.textContent='Logging in...'; btn.disabled=true; try{ var res=await fetch('/api/v1/auth/login',{ method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email: email, password: password })}); var json=await res.json(); if(res.ok && json.success){ location.reload(); } else { showError(json?.error?.message || 'Invalid email or password'); } } catch(err){ showError('Network error. Please try again.'); } finally { btn.textContent=prev; btn.disabled=false; } }); }" +
+  "      if(registerForm){ registerForm.addEventListener('submit', async function(e){ e.preventDefault(); clearError(); var data=new FormData(registerForm); var email=data.get('email'); var password=data.get('password'); var btn=registerForm.querySelector('button[type=\\"submit\\"]'); var prev=btn.textContent; btn.textContent='Creating account...'; btn.disabled=true; try{ var res=await fetch('/api/v1/auth/register',{ method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email: email, password: password, name: String(email||'').split('@')[0] })}); var json=await res.json(); if((res.ok && json.success) || res.status===201){ location.reload(); } else { showError(json?.error?.message || 'Registration failed.'); } } catch(err){ showError('Network error. Please try again.'); } finally { btn.textContent=prev; btn.disabled=false; } }); }" +
+  "    })();" +
+  "  </script>" +
   '</body>' +
   '</html>';
 };
