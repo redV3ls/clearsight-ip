@@ -4,6 +4,71 @@ import { AppError } from './errorHandler';
 import { Env } from '../index';
 import { z } from 'zod';
 
+// Render a friendly HTML page when accessing API Docs without authentication
+const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?: string; help?: string }) => {
+  const title = opts.title || 'Authentication required';
+  const code = opts.code || 'AUTHENTICATION_REQUIRED';
+  const help = opts.help || 'Sign in to continue.';
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clearsight IP • API Docs – ${title}</title>
+  <style>
+    :root { --bg:#0b1020; --panel:#121a33; --accent:#4f8cff; --muted:#9fb4ff; --ok:#10b981; --err:#ef4444; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial; background: linear-gradient(180deg, #0b1020 0%, #0e1730 100%); color:#e6ecff; }
+    .wrap { max-width: 840px; margin: 6vh auto; padding: 24px; }
+    .card { background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:28px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+    h1 { margin:0 0 8px; font-size: 28px; letter-spacing:.2px; }
+    .subtitle { color:#c7d7ff; margin: 0 0 22px; font-size: 14px; opacity:.9 }
+    .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-weight:600; background:rgba(239,68,68,.15); color:#ffb4b4; border:1px solid rgba(239,68,68,.35); margin-bottom:12px }
+    .panel { display:grid; grid-template-columns: 1fr; gap:18px; }
+    .section { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; }
+    .section h3 { margin:0 0 10px; font-size:14px; color:#d7e4ff; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; }
+    pre { background: #0a0f22; border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:12px; overflow:auto; color:#cfe3ff }
+    .actions { margin-top:18px; display:flex; gap:12px; flex-wrap:wrap }
+    .btn { appearance:none; border:1px solid rgba(255,255,255,0.12); background: #1a2447; color:#e6ecff; padding:10px 14px; border-radius:10px; text-decoration:none; font-weight:600 }
+    .btn.primary { background: linear-gradient(180deg, #3b82f6, #1d4ed8); border-color:#3b82f6 }
+    .hint { color:#b9c9ff; font-size:13px; opacity:.9 }
+    .footer { margin-top:22px; font-size:12px; color:#9fb4ff; opacity:.85 }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="badge">${code}</div>
+      <h1>API documentation requires authentication</h1>
+      <p class="subtitle">${opts.message}</p>
+      <div class="panel">
+        <div class="section">
+          <h3>Quick options</h3>
+          <div class="actions">
+            <a class="btn primary" href="/">Sign in</a>
+            <a class="btn" href="#api-key">Use an API key</a>
+            <a class="btn" href="/api/v1">View API root</a>
+          </div>
+        </div>
+        <div id="api-key" class="section">
+          <h3>Using an API key</h3>
+          <p class="hint">If you have an API key, include it in requests as the X-API-Key header. Swagger UI will remember your auth if you authorize from the UI.</p>
+          <pre><code>curl -H "X-API-Key: {{YOUR_API_KEY}}" https://clearsight-ip.com/api/v1/health</code></pre>
+        </div>
+        <div class="section">
+          <h3>Using a bearer token</h3>
+          <p class="hint">If your session expired, sign in again to obtain a new token. Then open the docs and click “Authorize”.</p>
+          <pre><code>Authorization: Bearer {{YOUR_JWT_TOKEN}}</code></pre>
+        </div>
+      </div>
+      <div class="footer">Need help? See the README or contact support.</div>
+    </div>
+  </div>
+</body>
+</html>`;
+};
+
 export interface UserContext {
   id: string;
   email: string;
@@ -267,6 +332,14 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
 
     if (!apiKey && !authHeader && !authToken) {
       console.log('Authentication failed - no valid credentials found');
+      if (c.req.path.startsWith('/api/v1/docs')) {
+        const html = renderDocsAuthErrorPage({
+          message: 'You must be signed in to view the API documentation.',
+          code: 'AUTHENTICATION_REQUIRED',
+          help: 'Please sign in or provide an API key.'
+        });
+        return c.html(html, 401);
+      }
       throw new AppError('Authentication required', 401, 'AUTHENTICATION_REQUIRED');
     }
 
@@ -302,6 +375,13 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
         
         return next();
       } catch (error) {
+        if (c.req.path.startsWith('/api/v1/docs')) {
+          const html = renderDocsAuthErrorPage({
+            message: 'The API key provided is invalid or has insufficient permissions.',
+            code: error instanceof z.ZodError ? 'INVALID_API_KEY_FORMAT' : (error instanceof AppError ? error.code : 'INVALID_API_KEY')
+          });
+          return c.html(html, 401);
+        }
         if (error instanceof z.ZodError) {
           throw new AppError('Invalid API key format', 401, 'INVALID_API_KEY_FORMAT');
         }
@@ -345,6 +425,15 @@ export const authMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) 
         
         return next();
       } catch (error) {
+        // For the docs page, return a friendly HTML error instead of JSON
+        if (c.req.path.startsWith('/api/v1/docs')) {
+          const isExpired = (error instanceof AppError && error.code === 'EXPIRED_TOKEN') || error.message?.includes('expired');
+          const html = renderDocsAuthErrorPage({
+            message: isExpired ? 'Your session has expired. Please sign in again to view the API documentation.' : 'Authentication failed. Please sign in or use a valid API key.',
+            code: isExpired ? 'EXPIRED_TOKEN' : (error instanceof AppError ? error.code : 'INVALID_TOKEN')
+          });
+          return c.html(html, 401);
+        }
         if (error instanceof AppError) {
           throw error;
         }
