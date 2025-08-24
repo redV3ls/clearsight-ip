@@ -1,5 +1,4 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { swaggerUI } from '@hono/swagger-ui';
 import { Env } from '../index';
 
 export function createOpenAPIApp() {
@@ -1393,32 +1392,8 @@ Error responses:
   app.openapi(gdprCancelDeletionRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(auditLogsRoute, (c) => c.json({ message: 'Documentation only' }));
 
-  // Add Swagger UI with custom HTML to pre-authorize from cookies/headers
+  // Add Swagger UI in cookie-only mode (no token/header injection)
   app.get('/api/v1/docs', (c) => {
-    // Attempt to read tokens from incoming request to prefill Swagger UI
-    const cookieHeader = c.req.header('Cookie') || '';
-    const authHeader = c.req.header('Authorization') || '';
-    const apiKeyHeader = c.req.header('X-API-Key') || '';
-
-    // Extract auth_token from cookies (HttpOnly cookies are still sent to server and can be injected as a masked indicator)
-    let bearerFromCookie: string | null = null;
-    if (cookieHeader) {
-      const cookies = cookieHeader.split(';').map((v) => v.trim());
-      const authCookie = cookies.find((ck) => ck.startsWith('auth_token='));
-      if (authCookie) bearerFromCookie = authCookie.split('=')[1] || null;
-    }
-
-    // Bearer from Authorization header
-    let bearerFromHeader: string | null = null;
-    if (authHeader.startsWith('Bearer ')) bearerFromHeader = authHeader.substring(7);
-
-    // API key from header
-    const apiKey = apiKeyHeader || null;
-
-    // For security, do not leak token values in HTML if not present; we'll inject only when available.
-    const initialBearer = bearerFromCookie || bearerFromHeader || '';
-    const initialApiKey = apiKey || '';
-
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1438,26 +1413,8 @@ Error responses:
   <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
   <script>
     (function() {
-      // Injected from server
-      var INITIAL_BEARER = ${JSON.stringify(initialBearer)};
-      var INITIAL_API_KEY = ${JSON.stringify(initialApiKey)};
-
-      // Helper to preauthorize
-      function preauth(ui) {
-        try {
-          if (INITIAL_BEARER) {
-            // Security scheme id must match OpenAPI components.securitySchemes key: 'bearerAuth'
-            ui.preauthorizeApiKey && ui.preauthorizeApiKey('bearerAuth', 'Bearer ' + INITIAL_BEARER);
-          }
-          if (INITIAL_API_KEY) {
-            ui.preauthorizeApiKey && ui.preauthorizeApiKey('apiKey', INITIAL_API_KEY);
-          }
-        } catch (e) {
-          console.warn('Preauthorize failed:', e);
-        }
-      }
-
-      // Create Swagger UI
+      // Cookie-only mode: rely on auth_token cookie sent by the browser.
+      // We do not inject JWTs or API keys into the page.
       var ui = SwaggerUIBundle({
         url: '/openapi.json',
         dom_id: '#swagger-ui',
@@ -1467,23 +1424,9 @@ Error responses:
         requestInterceptor: function(req) {
           // Ensure cookies are sent for Try it out so auth_token cookie is included
           try { req.credentials = 'include'; } catch (_) {}
-          // If we have a bearer but the request lacks Authorization, add it
-          if (INITIAL_BEARER && !req.headers['Authorization']) {
-            req.headers['Authorization'] = 'Bearer ' + INITIAL_BEARER;
-          }
-          // If we have API key and request lacks it, add it
-          if (INITIAL_API_KEY && !req.headers['X-API-Key']) {
-            req.headers['X-API-Key'] = INITIAL_API_KEY;
-          }
           return req;
-        },
-        onComplete: function() {
-          preauth(ui);
         }
       });
-
-      // In some cases, preauth after a small delay to ensure schemes are mounted
-      setTimeout(function(){ preauth(ui); }, 300);
     })();
   </script>
 </body>
