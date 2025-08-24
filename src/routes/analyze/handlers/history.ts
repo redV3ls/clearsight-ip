@@ -4,10 +4,9 @@
  * Fetches user's past analysis history from the database
  */
 
-import { Context } from 'hono';
 import { createResponse } from '../../../middleware/common/responseBuilder';
 import { logger } from '../../../utils/logger';
-import { AuthenticatedContext } from '../../../types/auth';
+import { AuthenticatedContext } from '../../../middleware/auth';
 
 /**
  * GET /api/v1/analyze/history
@@ -56,10 +55,10 @@ export async function historyHandler(c: AuthenticatedContext): Promise<Response>
     const stmt = db.prepare(query);
     const analyses = await stmt.bind(userId).all() as any;
 
-    // Transform the results for the API response
-    const transformedAnalyses = (analyses.results || []).map(analysis => {
+    // Transform the results for the API response (snake_case keys expected by web UI)
+    const transformedAnalyses = (analyses.results || []).map((analysis: any) => {
       // Parse metadata if it's a JSON string
-      let metadata = {};
+      let metadata: any = {};
       if (analysis.metadata) {
         try {
           metadata = JSON.parse(analysis.metadata);
@@ -68,18 +67,23 @@ export async function historyHandler(c: AuthenticatedContext): Promise<Response>
         }
       }
 
+      const hasJob = !!analysis.job_description_text;
+      const analysisType = analysis.analysis_type || (hasJob ? 'job-comparison' : 'standalone');
+      const status = analysis.status || (analysis.narrative ? 'completed' : 'processing');
+
       return {
         id: analysis.id,
-        analysisType: analysis.analysis_type || 'resume',
-        status: analysis.status,
+        created_at: analysis.created_at,
+        completed_at: analysis.completed_at,
+        status,
+        analysis_type: analysisType,
+        has_job_description: hasJob,
+        narrative: analysis.narrative || null,
+        // For compatibility, also include camelCase variants used elsewhere
         createdAt: analysis.created_at,
         completedAt: analysis.completed_at,
-        hasJobDescription: !!analysis.job_description_text,
-        resumePreview: analysis.resume_text ? 
-          analysis.resume_text.substring(0, 200) + '...' : null,
-        jobDescriptionPreview: analysis.job_description_text ? 
-          analysis.job_description_text.substring(0, 200) + '...' : null,
-        narrative: analysis.narrative,
+        hasJobDescription: hasJob,
+        analysisType,
         metadata
       };
     });
@@ -90,7 +94,8 @@ export async function historyHandler(c: AuthenticatedContext): Promise<Response>
       count: transformedAnalyses.length
     });
 
-    return response.success({
+    // Return top-level "analyses" to match web UI expectations
+    return c.json({
       analyses: transformedAnalyses,
       total: transformedAnalyses.length
     });
@@ -163,7 +168,7 @@ export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Respo
     // Get D1 database from context
     const db = c.env.DB as D1Database;
     const stmt = db.prepare(query);
-    const result = await stmt.bind(analysisId, userId).first();
+    const result = await stmt.bind(analysisId, userId).first() as any;
 
     if (!result) {
       return response.error(
@@ -176,7 +181,7 @@ export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Respo
     const analysis = result;
     
     // Parse metadata if it's a JSON string
-    let metadata = {};
+    let metadata: any = {};
     if (analysis.metadata) {
       try {
         metadata = JSON.parse(analysis.metadata);
@@ -185,16 +190,24 @@ export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Respo
       }
     }
 
+    const hasJob = !!analysis.job_description_text;
+    const analysisType = analysis.analysis_type || (hasJob ? 'job-comparison' : 'standalone');
+
     const transformedAnalysis = {
       id: analysis.id,
-      analysisType: analysis.analysis_type || 'resume',
       status: analysis.status,
+      created_at: analysis.created_at,
+      completed_at: analysis.completed_at,
+      analysis_type: analysisType,
+      has_job_description: hasJob,
+      narrative: analysis.narrative,
+      // Include camelCase variants for UI compatibility
       createdAt: analysis.created_at,
       completedAt: analysis.completed_at,
-      hasJobDescription: !!analysis.job_description_text,
+      analysisType,
+      hasJobDescription: hasJob,
       resumeText: analysis.resume_text,
       jobDescriptionText: analysis.job_description_text,
-      narrative: analysis.narrative,
       metadata
     };
 
@@ -204,9 +217,8 @@ export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Respo
       analysisId
     });
 
-    return response.success({
-      analysis: transformedAnalysis
-    });
+    // Return top-level "analysis" to match web UI expectations
+    return c.json({ analysis: transformedAnalysis });
 
   } catch (error) {
     logger.error('Failed to fetch analysis', {
