@@ -461,15 +461,11 @@ app.get('/analysis.html', async (c) => {
   return c.html(ANALYSIS_WORKSPACE_CONTENT);
 });
 
-// 404 handler
+// 404 handler: redirect all unknown routes to home
 app.notFound((c) => {
-  return c.json({
-    error: {
-      code: 'NOT_FOUND',
-      message: 'The requested resource was not found.',
-      path: c.req.path,
-    },
-  }, 404);
+  // Prevent caching the redirect response
+  c.header('Cache-Control', 'no-store');
+  return c.redirect('/', 302);
 });
 
 // Export for scheduled workers
