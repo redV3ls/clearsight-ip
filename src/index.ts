@@ -13,6 +13,8 @@ import jobsRoutes from './routes/jobs';
 import monitoringRoutes from './routes/monitoring';
 import gdprRoutes from './routes/gdpr';
 import auditRoutes from './routes/audit';
+import billingRoutes from './routes/billing';
+import trendsRoutes from './routes/trends/index';
 // Cache imports - re-enabling
 import { cacheMiddleware, userCacheMiddleware } from './middleware/cache';
 import { CacheNamespaces, CacheTTL } from './services/cache';
@@ -156,6 +158,7 @@ app.use('*', cors({
 // app.use('*', compressionMiddleware);
 
 // Cache middleware for specific routes
+
 app.use('/api/v1/trends/*', cacheMiddleware({
   namespace: CacheNamespaces.TREND_DATA,
   ttl: CacheTTL.MEDIUM, // 1 hour cache for trends
@@ -177,100 +180,7 @@ app.use('*', async (c, next) => {
   return productionRateLimiter()(c, next);
 });
 
-// Simple test endpoint for debugging (public - no auth required)
-app.get('/api/v1/test-ai-config', async (c) => {
-  try {
-    const { createAIConfig, validateAIConfig } = await import('./config/ai');
-    const aiConfig = createAIConfig(c.env);
-    const validation = validateAIConfig(aiConfig);
-    
-    return c.json({
-      success: true,
-      aiConfigValid: validation.isValid,
-      errors: validation.errors,
-      hasApiKey: !!c.env.DEEPSEEK_API_KEY,
-      model: c.env.DEEPSEEK_MODEL,
-      baseUrl: c.env.DEEPSEEK_BASE_URL,
-      timeout: c.env.DEEPSEEK_TIMEOUT,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    return c.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString()
-    }, 500);
-  }
-});
 
-// Public chunking test endpoint (no auth required)
-app.get('/api/v1/test-chunking-public', async (c) => {
-  try {
-    console.log('Starting public chunking test');
-    
-    const shortResume = `
-PROFESSIONAL SUMMARY
-Experienced Software Engineer with 5+ years in full-stack development.
-
-TECHNICAL SKILLS
-Programming: JavaScript, Python, React, Node.js
-Cloud: AWS, Docker, Kubernetes
-Databases: PostgreSQL, MongoDB
-
-EXPERIENCE
-Senior Developer | TechCorp | 2020-Present
-• Built scalable web applications
-• Led team of 3 developers
-• Technologies: React, Node.js, AWS
-    `.trim();
-
-    // Initialize AI service
-    const { AIAnalysisService } = await import('./services/aiAnalysisService');
-    const aiService = new AIAnalysisService(c.env);
-    
-    console.log('AI service initialized, starting analysis...');
-    const startTime = Date.now();
-    
-    // Test the chunking analysis
-    const result = await aiService.analyzeCV(shortResume, '', {
-      includeSkillsGap: false,
-      includeCareerSuggestions: false,
-      includeIndustryTrends: false,
-    });
-    
-    const processingTime = Date.now() - startTime;
-    console.log(`Public chunking test completed in ${processingTime}ms`);
-
-    return c.json({
-      success: true,
-      message: 'Public chunking test completed successfully',
-      processingTime,
-      skillsFound: result.skillsAnalysis.skills.length,
-      categoriesFound: result.skillsAnalysis.categories.length,
-      sampleSkills: result.skillsAnalysis.skills.slice(0, 5).map(s => s.name),
-      resumeLength: shortResume.length,
-      chunkingUsed: shortResume.length > 8000,
-      metadata: {
-        fallbackUsed: result.metadata.fallbackUsed,
-        aiProvider: result.metadata.aiProvider,
-        aiModel: result.metadata.aiModel
-      },
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('Public chunking test failed:', error);
-    return c.json({
-      success: false,
-      error: {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        type: error instanceof Error ? error.constructor.name : 'UnknownError',
-        stack: error instanceof Error ? error.stack : undefined
-      },
-      timestamp: new Date().toISOString()
-    }, 500);
-  }
-});
 
 // API root endpoint (public - no auth required) - must be before auth middleware
 app.get('/api/v1', (c) => {
@@ -379,8 +289,6 @@ app.get('/health/detailed', async (c) => {
 });
 
 // API routes - Using new centralized router system
-import appRouter from './routes';
-app.route('/', appRouter);
 
 // Legacy v1 routes (to be migrated)
 import authRoutes from './routes/auth';
@@ -391,12 +299,12 @@ app.route('/api/v1/jobs', jobsRoutes);
 app.route('/api/v1/analyze', analyzeRoutes);
 
 // Test routes for debugging async analysis
-import testAnalysisRoutes from './routes/test-analysis';
-app.route('/api/v1/test-analysis', testAnalysisRoutes);
 
 app.route('/api/v1/monitoring', monitoringRoutes);
 app.route('/api/v1/gdpr', gdprRoutes);
 app.route('/api/v1/audit', auditRoutes);
+app.route('/api/billing', billingRoutes);
+app.route('/api/v1/trends', trendsRoutes);
 
 // OpenAPI documentation
 const openAPIApp = createOpenAPIApp();
@@ -437,29 +345,7 @@ app.get('/', (c) => {
   return c.html(HTML_CONTENT);
 });
 
-// Test UI endpoint - serve the narrative analysis test page
-app.get('/test-narrative-ui.html', async (c) => {
-  // Import the test UI content
-  const { TEST_NARRATIVE_UI_CONTENT } = await import('./constants/testNarrativeUI');
-  
-  // Set appropriate headers
-  c.header('Content-Type', 'text/html; charset=utf-8');
-  c.header('Cache-Control', 'no-cache');
-  
-  return c.html(TEST_NARRATIVE_UI_CONTENT);
-});
 
-// Analysis workspace endpoint - serve the new analysis workspace
-app.get('/analysis.html', async (c) => {
-  // Import the analysis workspace content
-  const { ANALYSIS_WORKSPACE_CONTENT } = await import('./constants/analysisWorkspace');
-  
-  // Set appropriate headers
-  c.header('Content-Type', 'text/html; charset=utf-8');
-  c.header('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
-  
-  return c.html(ANALYSIS_WORKSPACE_CONTENT);
-});
 
 // 404 handler: redirect all unknown routes to home
 app.notFound((c) => {

@@ -1,4 +1,3 @@
-// Test Narrative UI HTML content for Cloudflare Workers
 export const TEST_NARRATIVE_UI_CONTENT = `<!DOCTYPE html>
 <html lang="en">
 <head>

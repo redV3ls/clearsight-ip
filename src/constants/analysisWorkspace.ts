@@ -1,5 +1,3 @@
-/**
- * Analysis Workspace HTML Content
  * 
  * Complete HTML content for the new analysis workspace page
  * Features conversational analysis, tabbed interface, and enhanced UX

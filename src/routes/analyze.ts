@@ -909,181 +909,22 @@ async function updateDatabaseWithError(env: any, analysisId: string, userId: str
 /**
  * GET /analyze/test-ai - Test AI service connectivity
  */
-analyze.get('/test-ai', async (c: AuthenticatedContext) => {
-  try {
-    // Lightweight config-based status check without invoking AIAnalysisService internals
-    const hasApiKey = !!c.env.DEEPSEEK_API_KEY;
-    const status = { enabled: hasApiKey };
-
-    const info = {
-      baseUrl: c.env.DEEPSEEK_BASE_URL || 'default',
-      model: c.env.DEEPSEEK_MODEL || 'default',
-      timeout: c.env.DEEPSEEK_TIMEOUT || 'unknown'
-    };
-
-    return c.json({ status, info, message: 'AI config check completed' });
-  } catch (error) {
-    console.error('AI test error:', error);
-    return c.json({
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, 500);
-  }
-});
 
 /**
  * POST /analyze/validate-response - Validate narrative response format
  */
-analyze.post('/validate-response', async (c: AuthenticatedContext) => {
-  try {
-    const response = await c.req.json();
-    
-    const validation = NarrativeResponseFormatter.validateResponse(response);
-    const size = validation.isValid ? NarrativeResponseFormatter.calculateResponseSize(response) : null;
-
-    return c.json({
-      validation,
-      response_size: size,
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('Response validation error:', error);
-    return c.json({
-      error: {
-        code: 'VALIDATION_FAILED',
-        message: 'Failed to validate response format',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }
-    }, 500);
-  }
-});
 
 /**
  * GET /analyze/cache-health - Check narrative KV cache health
  */
-analyze.get('/cache-health', async (c: AuthenticatedContext) => {
-  try {
-    const narrativeCache = new NarrativeKVCache(c.env);
-    const health = await narrativeCache.healthCheck();
-    const stats = await narrativeCache.getStats();
-
-    return c.json({
-      cache_health: health,
-      cache_stats: stats,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Cache health check error:', error);
-    return c.json({
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, 500);
-  }
-});
 
 /**
  * POST /analyze/test-job - Test job description analysis
  */
-analyze.post('/test-job', async (c: AuthenticatedContext) => {
-  try {
-    const { jobDescription } = await c.req.json();
-    
-    if (!jobDescription) {
-      return c.json({
-        error: {
-          code: 'MISSING_JOB_DESCRIPTION',
-          message: 'Job description is required for analysis'
-        }
-      }, 400);
-    }
-
-    const { NarrativeJobAnalysisService } = await import('../services/narrativeJobAnalysis');
-    
-    // Validate job description
-    const validation = NarrativeJobAnalysisService.validateJobDescription(jobDescription);
-    
-    // Extract insights
-    const insights = NarrativeJobAnalysisService.extractJobInsights(jobDescription);
-    
-    // Generate narrative guidance
-    const narrativeGuidance = NarrativeJobAnalysisService.generateNarrativeGuidance(insights, '');
-
-    return c.json({
-      validation,
-      insights,
-      narrative_guidance: narrativeGuidance,
-      analysis_ready: validation.isValid,
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('Job analysis test error:', error);
-    return c.json({
-      error: {
-        code: 'JOB_ANALYSIS_FAILED',
-        message: 'Failed to analyze job description',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }
-    }, 500);
-  }
-});
 
 /**
  * POST /analyze/test-prompt - Test narrative prompt effectiveness
  */
-analyze.post('/test-prompt', async (c: AuthenticatedContext) => {
-  try {
-    const { cvText, jobDescription } = await c.req.json();
-    
-    if (!cvText) {
-      return c.json({
-        error: {
-          code: 'MISSING_CV_TEXT',
-          message: 'CV text is required for prompt testing'
-        }
-      }, 400);
-    }
-
-    const { AIAnalysisService } = await import('../services/aiAnalysisService');
-    const aiService = new AIAnalysisService(c.env);
-    
-    // Generate narrative analysis
-    const result = await aiService.analyzeNarrativeCV(cvText, jobDescription, {
-      includeMetadata: true
-    });
-
-    // Analyze prompt effectiveness
-    const { PromptTester } = await import('../utils/promptTesting');
-    const qualityAnalysis = PromptTester.analyzeNarrativeQuality(result.narrative);
-    const qualityScore = PromptTester.calculateQualityScore(qualityAnalysis);
-
-    return c.json({
-      analysis_result: {
-        narrative: result.narrative,
-        word_count: result.word_count,
-        analysis_type: result.analysis_type,
-        processing_time: result.metadata?.processingTime
-      },
-      prompt_quality: {
-        ...qualityAnalysis,
-        quality_score: qualityScore
-      },
-      recommendations: qualityAnalysis.issues.length > 0 ? 
-        PromptTester.generateOptimizationSuggestions([qualityAnalysis]) : 
-        ['Prompt performance is good - no major issues detected'],
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('Prompt test error:', error);
-    return c.json({
-      error: {
-        code: 'PROMPT_TEST_FAILED',
-        message: 'Failed to test prompt effectiveness',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }
-    }, 500);
-  }
-});
 
 /**
  * GET /analyze/history - Get user's analysis history
