@@ -794,9 +794,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         </div>
                     </div>
                     
-                    <div class="flex justify-end">
+                    <div class="flex justify-between sm:justify-end gap-3">
+                        <button id="analyzeResumeOnlyBtn" class="bg-primary/80 hover:bg-primary text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Analyze My Resume Only
+                        </button>
                         <button id="continueToJobBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            Continue to Job Description
+                            Add Job Description
                             <i class="fas fa-arrow-right ml-2"></i>
                         </button>
                     </div>
@@ -1364,7 +1367,8 @@ Requirements:
             // Text area
             const resumeTextArea = document.getElementById('resumeTextArea');
             const startAnalysisBtn = document.getElementById('startAnalysisBtn');
-            console.log('Found resumeTextArea:', !!resumeTextArea, 'startAnalysisBtn:', !!startAnalysisBtn);
+            const analyzeResumeOnlyBtn = document.getElementById('analyzeResumeOnlyBtn');
+            console.log('Found resumeTextArea:', !!resumeTextArea, 'startAnalysisBtn:', !!startAnalysisBtn, 'analyzeResumeOnlyBtn:', !!analyzeResumeOnlyBtn);
             
             resumeTextArea?.addEventListener('input', handleTextInput);
             
@@ -1378,6 +1382,7 @@ Requirements:
             
             // Analysis start
             startAnalysisBtn?.addEventListener('click', startAnalysis);
+            analyzeResumeOnlyBtn?.addEventListener('click', startAnalysis);
             
             // Tab navigation listeners
             const uploadTabBtn = document.getElementById('uploadTabBtn');
@@ -1977,6 +1982,7 @@ Requirements:
         function updateAnalysisButton() {
             const startButton = document.getElementById('startAnalysisBtn');
             const continueButton = document.getElementById('continueToJobBtn');
+            const resumeOnlyButton = document.getElementById('analyzeResumeOnlyBtn');
             const skipJobButton = document.getElementById('skipJobBtn');
             const hasContent = AppState.resumeFile || AppState.resumeText.trim().length > 0;
             const hasCredits = (AppState.credits || 0) > 0;
@@ -1996,6 +2002,8 @@ Requirements:
                 startButton?.classList.remove('opacity-50', 'cursor-not-allowed');
                 continueButton?.removeAttribute('disabled');
                 continueButton?.classList.remove('opacity-50', 'cursor-not-allowed');
+                resumeOnlyButton?.removeAttribute('disabled');
+                resumeOnlyButton?.classList.remove('opacity-50', 'cursor-not-allowed');
                 skipJobButton?.removeAttribute('disabled');
                 skipJobButton?.classList.remove('opacity-50', 'cursor-not-allowed');
                 if (inlineCTA) inlineCTA.innerHTML = '';
@@ -2004,6 +2012,8 @@ Requirements:
                 startButton?.classList.add('opacity-50', 'cursor-not-allowed');
                 continueButton?.setAttribute('disabled', 'true');
                 continueButton?.classList.add('opacity-50', 'cursor-not-allowed');
+                resumeOnlyButton?.setAttribute('disabled', 'true');
+                resumeOnlyButton?.classList.add('opacity-50', 'cursor-not-allowed');
                 skipJobButton?.setAttribute('disabled', 'true');
                 skipJobButton?.classList.add('opacity-50', 'cursor-not-allowed');
                 if (hasContent && !hasCredits && inlineCTA) {
