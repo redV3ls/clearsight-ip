@@ -149,7 +149,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <a href="#features" class="nav-link text-gray-300 hover:text-primary">Success Stories</a>
                     <a href="#how-it-works" class="nav-link text-gray-300 hover:text-primary">How It Works</a>
                     <a href="#pricing" class="nav-link text-gray-300 hover:text-primary">Pricing</a>
-                    <a href="/docs" class="nav-link text-gray-300 hover:text-primary">API Docs</a>
+                    <a href="/docs" target="_blank" rel="noopener noreferrer" class="nav-link text-gray-300 hover:text-primary">API Docs <i class="fas fa-up-right-from-square ml-1 text-xs opacity-75"></i></a>
                     <a href="#history" id="historyLink" class="nav-link text-gray-300 hover:text-primary hidden">My Analyses</a>
                     
                     <div id="authButtons" class="flex items-center space-x-4">
@@ -188,7 +188,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 <a href="#features" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">Success Stories</a>
                 <a href="#how-it-works" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">How It Works</a>
                 <a href="#pricing" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">Pricing</a>
-                <a href="/docs" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">API Docs</a>
+                <a href="/docs" target="_blank" rel="noopener noreferrer" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">API Docs <i class="fas fa-up-right-from-square ml-2 text-xs opacity-75"></i></a>
                 <a href="#history" id="mobileHistoryLink" class="mobile-menu-item block text-gray-300 hover:text-primary py-2 hidden">My Analyses</a>
             </div>
         </div>
@@ -222,8 +222,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                             <button id="analyzeSkillsBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
                                 Analyze My Skills Now
                             </button>
-                            <a href="/docs" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-8 py-4 rounded-lg text-lg font-semibold transition-colors text-center">
-                                View API Docs
+                            <a href="/docs" target="_blank" rel="noopener noreferrer" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-8 py-4 rounded-lg text-lg font-semibold transition-colors text-center">
+                                View API Docs <i class="fas fa-up-right-from-square ml-2 text-base opacity-75"></i>
                             </a>
                         </div>
                     </div>
@@ -657,7 +657,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         <li><a href="#features" class="text-gray-300 hover:text-primary">Features</a></li>
                         <li><a href="#pricing" class="text-gray-300 hover:text-primary">Pricing</a></li>
                         <li><a href="#demo" class="text-gray-300 hover:text-primary">Demo</a></li>
-                        <li><a href="/docs" class="text-gray-300 hover:text-primary">API Docs</a></li>
+                        <li><a href="/docs" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-primary">API Docs <i class="fas fa-up-right-from-square ml-1 text-xs opacity-75"></i></a></li>
                     </ul>
                 </div>
                 
