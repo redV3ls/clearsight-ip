@@ -21,7 +21,6 @@ A comprehensive API for professional skills analysis, career development insight
 - **Team Analysis**: Analyze team capabilities and identify development opportunities
 - **Industry Trends**: Track emerging and declining skills in various industries
 - **User Profiles**: Manage user skills and track progression
-- **GDPR Compliance**: Data export, retention, and deletion features
 - **Async Processing**: Handle large-scale analyses with job queuing
 - **Caching**: High-performance caching for optimal response times
 
@@ -121,18 +120,6 @@ Error responses:
         name: 'Jobs',
         description: 'Asynchronous job processing'
       },
-      {
-        name: 'GDPR',
-        description: 'Data privacy and compliance endpoints'
-      },
-      {
-        name: 'Audit',
-        description: 'Audit logging and compliance tracking'
-      },
-      {
-        name: 'Monitoring',
-        description: 'System monitoring and health checks'
-      }
     ],
     components: {
       securitySchemes: {
@@ -1147,227 +1134,11 @@ Error responses:
     }
   });
 
-  // Monitoring endpoints
-  const cacheStatsRoute = createRoute({
-    method: 'get',
-    path: '/api/v1/monitoring/cache/stats',
-    tags: ['Monitoring'],
-    summary: 'Get cache statistics',
-    description: 'Retrieve cache performance statistics',
-    security: [{ bearerAuth: [] }],
-    responses: {
-      200: {
-        description: 'Cache statistics',
-        content: {
-          'application/json': {
-            schema: z.object({
-              success: z.boolean().openapi({ example: true }),
-              data: z.object({
-                hitRate: z.number().openapi({ example: 0.85 }),
-                missRate: z.number().openapi({ example: 0.15 }),
-                totalRequests: z.number().openapi({ example: 12500 }),
-                cacheSize: z.number().openapi({ example: 2048 }),
-                lastCleared: z.string().datetime().optional().openapi({ example: '2024-01-20T08:00:00Z' })
-              })
-            })
-          }
-        }
-      }
-    }
-  });
 
-  const rateLimitStatsRoute = createRoute({
-    method: 'get',
-    path: '/api/v1/monitoring/rate-limits/stats',
-    tags: ['Monitoring'],
-    summary: 'Get rate limiting statistics',
-    description: 'Retrieve current rate limiting statistics and tier information',
-    security: [{ bearerAuth: [] }],
-    responses: {
-      200: {
-        description: 'Rate limiting statistics',
-        content: {
-          'application/json': {
-            schema: z.object({
-              rateLimits: z.object({
-                totalActiveKeys: z.number().openapi({ example: 1247 }),
-                tierBreakdown: z.record(z.number()).openapi({ 
-                  example: { 
-                    anonymous: 856, 
-                    authenticated: 234, 
-                    api_key_basic: 157 
-                  } 
-                }),
-                tiers: z.record(z.object({
-                  limit: z.number(),
-                  window: z.string()
-                })).openapi({
-                  example: {
-                    anonymous: { limit: 100, window: '15 minutes' },
-                    authenticated: { limit: 500, window: '15 minutes' }
-                  }
-                })
-              }),
-              timestamp: z.string().datetime().openapi({ example: '2024-01-20T15:30:00Z' })
-            })
-          }
-        }
-      }
-    }
-  });
 
-  // GDPR endpoints
-  const gdprExportRoute = createRoute({
-    method: 'post',
-    path: '/api/v1/gdpr/export',
-    tags: ['GDPR'],
-    summary: 'Request data export',
-    description: 'Request export of user data for GDPR compliance',
-    security: [{ bearerAuth: [] }],
-    requestBody: {
-      required: true,
-      content: {
-        'application/json': {
-          schema: z.object({
-            format: z.enum(['json', 'csv']).default('json').openapi({ example: 'json' }),
-            categories: z.array(z.string()).optional().openapi({ example: ['skills', 'profile', 'analysis_history'] })
-          })
-        }
-      }
-    },
-    responses: {
-      202: {
-        description: 'Export request accepted',
-        content: {
-          'application/json': {
-            schema: z.object({
-              success: z.boolean().openapi({ example: true }),
-              data: z.object({
-                exportId: z.string().openapi({ example: 'export_20240120_143052_001' }),
-                status: z.string().openapi({ example: 'processing' }),
-                estimatedCompletion: z.string().datetime().openapi({ example: '2024-01-20T14:35:00Z' })
-              })
-            })
-          }
-        }
-      }
-    }
-  });
 
-  const gdprDeleteRoute = createRoute({
-    method: 'post',
-    path: '/api/v1/gdpr/delete',
-    tags: ['GDPR'],
-    summary: 'Request data deletion',
-    description: 'Request permanent deletion of all user data (GDPR Right to be Forgotten)',
-    security: [{ bearerAuth: [] }],
-    requestBody: {
-      required: true,
-      content: {
-        'application/json': {
-          schema: z.object({
-            confirmationToken: z.string().openapi({ example: 'delete_usr123_1642684800000' })
-          })
-        }
-      }
-    },
-    responses: {
-      200: {
-        description: 'Deletion request accepted',
-        content: {
-          'application/json': {
-            schema: z.object({
-              success: z.boolean().openapi({ example: true }),
-              message: z.string().openapi({ example: 'Data deletion has been scheduled. You will receive a confirmation email.' }),
-              deletionId: z.string().openapi({ example: 'del_20240120_143052_001' }),
-              gracePeriod: z.string().openapi({ example: '72 hours' })
-            })
-          }
-        }
-      }
-    }
-  });
 
-  const gdprCancelDeletionRoute = createRoute({
-    method: 'post',
-    path: '/api/v1/gdpr/cancel-deletion',
-    tags: ['GDPR'],
-    summary: 'Cancel data deletion',
-    description: 'Cancel a pending data deletion request during the grace period',
-    security: [{ bearerAuth: [] }],
-    requestBody: {
-      required: true,
-      content: {
-        'application/json': {
-          schema: z.object({
-            deletionId: z.string().openapi({ example: 'del_20240120_143052_001' })
-          })
-        }
-      }
-    },
-    responses: {
-      200: {
-        description: 'Deletion cancelled successfully',
-        content: {
-          'application/json': {
-            schema: z.object({
-              success: z.boolean().openapi({ example: true }),
-              message: z.string().openapi({ example: 'Data deletion request has been cancelled successfully.' })
-            })
-          }
-        }
-      }
-    }
-  });
 
-  // Audit endpoints
-  const auditLogsRoute = createRoute({
-    method: 'get',
-    path: '/api/v1/audit/my-logs',
-    tags: ['Audit'],
-    summary: 'Get user audit logs',
-    description: 'Retrieve audit logs for the current user',
-    security: [{ bearerAuth: [] }],
-    parameters: [
-      {
-        name: 'limit',
-        in: 'query',
-        required: false,
-        schema: { type: 'number', default: 50 }
-      },
-      {
-        name: 'startDate',
-        in: 'query',
-        required: false,
-        schema: { type: 'string', format: 'date-time', example: '2024-01-01T00:00:00Z' }
-      },
-      {
-        name: 'endDate',
-        in: 'query',
-        required: false,
-        schema: { type: 'string', format: 'date-time', example: '2024-01-31T23:59:59Z' }
-      }
-    ],
-    responses: {
-      200: {
-        description: 'User audit logs',
-        content: {
-          'application/json': {
-            schema: z.object({
-              success: z.boolean().openapi({ example: true }),
-              data: z.array(z.object({
-                id: z.string().openapi({ example: 'audit_20240120_143052_001' }),
-                action: z.string().openapi({ example: 'profile.skills.updated' }),
-                resourceType: z.string().openapi({ example: 'user_profile' }),
-                timestamp: z.string().datetime().openapi({ example: '2024-01-20T14:30:52Z' }),
-                ipAddress: z.string().optional().openapi({ example: '192.168.1.100' })
-              }))
-            })
-          }
-        }
-      }
-    }
-  });
 
   // Register the routes (these are just for documentation, not actual handlers)
   app.openapi(healthRoute, (c) => c.json({ message: 'Documentation only' }));
@@ -1385,12 +1156,6 @@ Error responses:
   app.openapi(getUserProfileRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(updateUserProfileRoute, (c) => c.json({ message: 'Documentation only' }));
   app.openapi(jobSearchRoute, (c) => c.json({ message: 'Documentation only' }));
-  app.openapi(cacheStatsRoute, (c) => c.json({ message: 'Documentation only' }));
-  app.openapi(rateLimitStatsRoute, (c) => c.json({ message: 'Documentation only' }));
-  app.openapi(gdprExportRoute, (c) => c.json({ message: 'Documentation only' }));
-  app.openapi(gdprDeleteRoute, (c) => c.json({ message: 'Documentation only' }));
-  app.openapi(gdprCancelDeletionRoute, (c) => c.json({ message: 'Documentation only' }));
-  app.openapi(auditLogsRoute, (c) => c.json({ message: 'Documentation only' }));
 
   // Add Swagger UI in cookie-only mode (no token/header injection)
   app.get('/api/v1/docs', (c) => {

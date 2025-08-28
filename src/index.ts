@@ -10,9 +10,10 @@ import { environmentValidationMiddleware, getEnvironmentHealthStatus } from './m
 // Import routes
 import usersRoutes from './routes/users';
 import jobsRoutes from './routes/jobs';
-import monitoringRoutes from './routes/monitoring';
-import gdprRoutes from './routes/gdpr';
-import auditRoutes from './routes/audit';
+// Removed unused routes as part of API pruning
+// import monitoringRoutes from './routes/monitoring';
+// import gdprRoutes from './routes/gdpr';
+// import auditRoutes from './routes/audit';
 import billingRoutes from './routes/billing';
 import trendsRoutes from './routes/trends/index';
 // Cache imports - re-enabling
@@ -202,9 +203,6 @@ app.get('/api/v1', (c) => {
       jobs: '/api/v1/jobs',
       analyze: '/api/v1/analyze',
       trends: '/api/v1/trends',
-      monitoring: '/api/v1/monitoring',
-      gdpr: '/api/v1/gdpr',
-      audit: '/api/v1/audit',
       docs: '/docs'
     },
     features: {
@@ -214,7 +212,7 @@ app.get('/api/v1', (c) => {
       job_matching: 'active',
       user_profiles: 'active',
       caching: 'active',
-      monitoring: 'active'
+      // monitoring endpoints removed; internal health checks remain
     },
     authentication: {
       required: true,
@@ -305,9 +303,7 @@ app.route('/api/v1/analyze', analyzeRoutes);
 
 // Test routes for debugging async analysis
 
-app.route('/api/v1/monitoring', monitoringRoutes);
-app.route('/api/v1/gdpr', gdprRoutes);
-app.route('/api/v1/audit', auditRoutes);
+// Pruned routes: monitoring, gdpr, audit are no longer exposed via API
 app.route('/api/billing', billingRoutes);
 app.route('/api/v1/trends', trendsRoutes);
 
