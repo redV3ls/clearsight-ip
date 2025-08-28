@@ -1,6 +1,8 @@
 import { Env } from './index';
 import { JobScheduler } from './services/jobScheduler';
 import { DataRetentionService } from './services/dataRetentionService';
+import { NarrativeKVCache } from './services/narrativeKVCache';
+import { kvStorage } from './utils/kvStorage';
 import { logger } from './utils/logger';
 
 export interface ScheduledEvent {
@@ -24,6 +26,9 @@ export default async function scheduled(
   try {
     // Run monitoring and health checks first
     await runMonitoringTasks(env);
+
+    // Run once-a-day cleanup for stale analyses
+    await maybeRunDailyStaleAnalysisCleanup(env);
     
     // Run data retention purging
     await runDataRetentionPurge(env);
@@ -95,6 +100,129 @@ export default async function scheduled(
     //   duration: Date.now() - startTime,
     //   error: error instanceof Error ? error.message : 'Unknown error',
     // });
+  }
+}
+
+/**
+ * Run stale analysis cleanup at most once per day
+ */
+async function maybeRunDailyStaleAnalysisCleanup(env: Env): Promise<void> {
+  try {
+    const key = 'cleanup:stale_analyses:last_run';
+    const lastRun = await env.CACHE.get(key);
+    const now = Date.now();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+
+    if (lastRun) {
+      const last = Date.parse(lastRun);
+      if (!isNaN(last) && (now - last) < oneDayMs) {
+        // Skip: already ran within 24h
+        return;
+      }
+    }
+
+    await cleanupStaleAnalyses(env);
+
+    // Record run time
+    await env.CACHE.put(key, new Date(now).toISOString(), { expirationTtl: 31 * 24 * 60 * 60 });
+  } catch (error) {
+    logger.error('Failed daily stale analysis cleanup gating', error);
+  }
+}
+
+/**
+ * Delete analyses stuck in processing/undefined for >10 minutes
+ */
+async function cleanupStaleAnalyses(env: Env): Promise<void> {
+  const start = Date.now();
+  const cutoffMs = 10 * 60 * 1000; // 10 minutes
+  const cutoffIso = new Date(Date.now() - cutoffMs).toISOString();
+
+  logger.info('Starting stale analyses cleanup', { cutoffIso });
+
+  try {
+    const pageSize = 500;
+    let offset = 0;
+    let totalChecked = 0;
+    let totalDeleted = 0;
+
+    // Loop in pages to avoid large queries
+    while (true) {
+      const rows = await env.DB
+        .prepare(`
+          SELECT id, user_id, created_at, analysis_data
+          FROM resume_analyses
+          WHERE created_at < ?
+          ORDER BY created_at ASC
+          LIMIT ? OFFSET ?
+        `)
+        .bind(cutoffIso, pageSize, offset)
+        .all() as any;
+
+      const results = rows.results || [];
+      if (results.length === 0) break;
+
+      for (const row of results) {
+        totalChecked++;
+        let data: any = null;
+        try { data = row.analysis_data ? JSON.parse(row.analysis_data) : null; } catch { data = null; }
+
+        const rawStatus = (data?.status ?? '').toString();
+        const statusLc = rawStatus ? rawStatus.toLowerCase() : '';
+        const hasNarrative = Boolean(data?.narrative);
+
+        // Consider stale if status is processing/undefined/unknown/empty and no narrative present
+        const isStaleStatus = (
+          statusLc === 'processing' ||
+          statusLc === 'undefined' ||
+          statusLc === 'unknown' ||
+          statusLc === '' ||
+          statusLc === 'null'
+        );
+
+        if (isStaleStatus && !hasNarrative) {
+          // Delete from legacy and narrative tables, and clear caches
+          try {
+            const delLegacy = await env.DB
+              .prepare('DELETE FROM resume_analyses WHERE id = ?')
+              .bind(row.id)
+              .run();
+
+            // Best-effort delete from narrative table if any partial record exists
+            await env.DB
+              .prepare('DELETE FROM narrative_analysis WHERE id = ?')
+              .bind(row.id)
+              .run();
+
+            // Clear KV caches
+            const kv = new NarrativeKVCache(env);
+            await kv.deleteAnalysis(row.id).catch(() => {});
+            kvStorage.setEnv(env);
+            await kvStorage.delete(`resume:${row.id}`).catch(() => {});
+
+            const changes = (delLegacy?.changes || delLegacy?.meta?.changes || 0);
+            if (changes > 0) totalDeleted++;
+          } catch (delErr) {
+            logger.warn('Failed to delete stale analysis', { id: row.id, error: delErr instanceof Error ? delErr.message : String(delErr) });
+          }
+        }
+      }
+
+      // Next page
+      offset += results.length;
+      if (results.length < pageSize) break;
+    }
+
+    const duration = Date.now() - start;
+    logger.info('Stale analyses cleanup complete', { duration, totalChecked, totalDeleted });
+    await env.CACHE.put('cleanup:stale_analyses:last_result', JSON.stringify({
+      ranAt: new Date().toISOString(),
+      duration,
+      totalChecked,
+      totalDeleted
+    }), { expirationTtl: 30 * 24 * 60 * 60 });
+  } catch (error) {
+    logger.error('Stale analyses cleanup failed', error);
   }
 }
 

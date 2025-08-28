@@ -795,7 +795,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     </div>
                     
                     <div class="flex justify-between sm:justify-end gap-3">
-                        <button id="analyzeResumeOnlyBtn" class="bg-primary/80 hover:bg-primary text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+<button id="analyzeResumeOnlyBtn" class="bg-primary/80 hover:bg-primary text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-brain mr-2"></i>
                             Analyze My Resume Only
                         </button>
                         <button id="continueToJobBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
@@ -934,7 +935,8 @@ Requirements:
             analysisStartTs: 0,
             estimatedTotalMs: 60000,
             loadingActive: false,
-            credits: 0
+            credits: 0,
+            cleaningStale: false
         };
 
         // Catchy loading messages
@@ -1556,8 +1558,15 @@ Requirements:
                 // Store original data for filtering
                 AppState.allAnalyses = analyses;
                 
-                // Apply current filter and sort
-                applyFilterAndSort();
+                // Clean up stale processing analyses (older than 10 minutes), then render
+                cleanupStaleProcessingAnalyses(analyses).then((didCleanup) => {
+                    if (didCleanup) {
+                        // Reload will trigger fresh render
+                        return;
+                    }
+                    // Apply current filter and sort
+                    applyFilterAndSort();
+                });
             }
         }
         
@@ -1615,7 +1624,7 @@ Requirements:
         // Create analysis card element
         function createAnalysisCard(analysis) {
             const card = document.createElement('div');
-            card.className = 'bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-primary transition-all';
+            card.className = 'w-full bg-slate-800 rounded-lg p-6 border border-slate-700 hover:border-primary transition-all';
             
             // Determine status color and icon
             let statusColor = 'text-gray-400';
@@ -1699,6 +1708,10 @@ Requirements:
         // View analysis details
         window.viewAnalysis = async function(analysisId) {
             try {
+                // Open directly to the Analysis tab and show a loading state while we fetch
+                showAnalysisInterface('analysis');
+                showLoadingScreen();
+                
                 const response = await fetch(API_ENDPOINTS.getAnalysis(analysisId), {
                     method: 'GET',
                     credentials: 'include',
@@ -1709,8 +1722,6 @@ Requirements:
                 
                 if (response.ok) {
                     const data = await response.json();
-                    // First open the analysis interface, then render results to avoid resetting to upload tab
-                    showAnalysisInterface();
                     displayAnalysisResults(data.analysis || data);
                 } else {
                     throw new Error('Failed to load analysis');
@@ -1777,7 +1788,39 @@ Requirements:
                 showNotification('Failed to delete analysis.', 'error');
             }
         };
-
+        
+        // Auto-delete stale processing analyses
+        async function cleanupStaleProcessingAnalyses(analyses) {
+            if (AppState.cleaningStale) return false;
+            try {
+                const cutoffMs = 10 * 60 * 1000; // 10 minutes
+                const now = Date.now();
+                const stale = (analyses || []).filter(a => {
+                    if (!a || a.status !== 'processing' || !a.created_at) return false;
+                    const ts = new Date(a.created_at).getTime();
+                    if (isNaN(ts)) return false;
+                    return (now - ts) > cutoffMs;
+                });
+                if (stale.length === 0) return false;
+                AppState.cleaningStale = true;
+                const ids = stale.map(a => a.id).filter(Boolean);
+                await Promise.allSettled(ids.map(id => fetch(API_ENDPOINTS.deleteAnalysis(id), {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                })));
+                showNotification(`Removed ${ids.length} stale processing ${ids.length === 1 ? 'analysis' : 'analyses'} (older than 10 minutes).`, 'info');
+                // Reload history to reflect deletions
+                loadAnalysisHistory();
+                return true;
+            } catch (e) {
+                console.error('Cleanup stale processing error:', e);
+                return false;
+            } finally {
+                AppState.cleaningStale = false;
+            }
+        }
+        
         // UI utility functions
         function setupUIListeners() {
             // Close modals on escape key
@@ -1840,7 +1883,7 @@ Requirements:
         }
 
         // Analysis modal functions
-        function showAnalysisInterface() {
+        function showAnalysisInterface(defaultTab = 'upload') {
             const modal = document.getElementById('analysisInterface');
             const analysisModal = document.getElementById('analysisModal');
             const singleColumnLayout = document.getElementById('singleColumnLayout');
@@ -1858,8 +1901,8 @@ Requirements:
                 twoColumnLayout.classList.add('hidden');
             }
             
-            // Reset to upload tab
-            switchAnalysisTab('upload');
+            // Open to requested tab (upload by default, analysis when viewing history)
+            switchAnalysisTab(defaultTab);
             
             modal?.classList.remove('hidden');
             AppState.currentModal = 'analysis';
@@ -2856,6 +2899,12 @@ Requirements:
             
             // IMPORTANT: Switch to Analysis tab to show results
             switchAnalysisTab('analysis');
+
+            // Ensure the Analysis tab is enabled for navigation
+            const analysisTabBtn = document.getElementById('analysisTabBtn');
+            if (analysisTabBtn) {
+                analysisTabBtn.removeAttribute('disabled');
+            }
             
             // Expand modal to show results
             const analysisModal = document.getElementById('analysisModal');
@@ -3086,7 +3135,7 @@ Requirements:
             
             if (resultsContent && analysisData) {
                 // Determine analysis type
-                const hasJobDescription = analysisData.hasJobDescription || analysisData.analysisType === 'job-comparison';
+                const hasJobDescription = analysisData.hasJobDescription || analysisData.has_job_description || analysisData.analysisType === 'job-comparison';
                 const headerTitle = hasJobDescription ? 'Job Match Analysis' : 'CV Analysis and Recommendations';
                 
                 let html = '<div class="space-y-6">';
