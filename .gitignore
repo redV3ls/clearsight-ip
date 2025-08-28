@@ -102,3 +102,6 @@ prisma/migrations/
 
 # API Keys (should be in .dev.vars or environment secrets)
 *.key
+
+# Cloudflare Wrangler local state (do not commit local dev state)
+.wrangler/

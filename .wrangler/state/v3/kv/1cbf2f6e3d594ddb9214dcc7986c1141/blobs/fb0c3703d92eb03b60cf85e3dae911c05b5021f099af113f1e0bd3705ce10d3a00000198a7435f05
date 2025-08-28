@@ -1,1 +1,0 @@
-{"timestamp":"2025-08-14T06:27:47.075Z","level":"info","message":"✅ CHECKPOINT [SAVING_TO_DB]: de485290-b4cb-48f8-980e-f722f842c215 (12ms elapsed)","analysisId":"de485290-b4cb-48f8-980e-f722f842c215","checkpoint":"SAVING_TO_DB","elapsed":12,"stage":"CHECKPOINT","status":"processing","hasJobDescription":false}

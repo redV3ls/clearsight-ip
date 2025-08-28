@@ -1,1 +1,0 @@
-{"timestamp":"2025-08-13T19:24:45.521Z","level":"info","message":"✅ CHECKPOINT [SAVING_TO_DB]: 4a147864-4467-495c-b274-4d56dc4bbda7 (23ms elapsed)","analysisId":"4a147864-4467-495c-b274-4d56dc4bbda7","checkpoint":"SAVING_TO_DB","elapsed":23,"stage":"CHECKPOINT","status":"processing","hasJobDescription":false}

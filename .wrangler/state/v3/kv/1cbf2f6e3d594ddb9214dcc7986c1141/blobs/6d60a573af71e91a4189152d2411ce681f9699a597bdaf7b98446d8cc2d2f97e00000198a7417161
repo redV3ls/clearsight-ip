@@ -1,1 +1,0 @@
-{"timestamp":"2025-08-14T06:25:40.700Z","level":"info","message":"✅ CHECKPOINT [NARRATIVE_DB_SAVE_START]: 801a2436-7a26-4e28-bc25-6b7f942b9c7f (39883ms elapsed)","analysisId":"801a2436-7a26-4e28-bc25-6b7f942b9c7f","checkpoint":"NARRATIVE_DB_SAVE_START","elapsed":39883,"stage":"CHECKPOINT"}

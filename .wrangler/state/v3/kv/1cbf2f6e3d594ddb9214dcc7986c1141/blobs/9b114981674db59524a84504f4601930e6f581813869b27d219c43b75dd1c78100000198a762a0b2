@@ -1,1 +1,0 @@
-{"timestamp":"2025-08-14T07:01:55.500Z","level":"info","message":"✅ CHECKPOINT [SAVING_TO_DB]: b938ad73-431c-49c4-9bfc-e4819079d586 (15ms elapsed)","analysisId":"b938ad73-431c-49c4-9bfc-e4819079d586","checkpoint":"SAVING_TO_DB","elapsed":15,"stage":"CHECKPOINT","status":"processing","hasJobDescription":false}

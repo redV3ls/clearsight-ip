@@ -1,1 +1,0 @@
-{"timestamp":"2025-08-13T19:24:45.591Z","level":"info","message":"✅ CHECKPOINT [AI_ANALYSIS_START]: 4a147864-4467-495c-b274-4d56dc4bbda7 (93ms elapsed)","analysisId":"4a147864-4467-495c-b274-4d56dc4bbda7","checkpoint":"AI_ANALYSIS_START","elapsed":93,"stage":"CHECKPOINT","timeout":120000,"contentLength":241,"cpuTime":8}
