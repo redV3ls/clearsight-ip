@@ -462,8 +462,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 </div>
                 
                 <!-- History Grid -->
-                <div id="historyGrid" class="hidden grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <!-- Analysis cards will be dynamically inserted here -->
+                <div id="historyGrid" class="hidden grid grid-cols-1 gap-6">
+                    <!-- Analysis items will be dynamically inserted here, one per row -->
                 </div>
             </div>
         </div>
@@ -1704,9 +1704,9 @@ Requirements:
                 
                 if (response.ok) {
                     const data = await response.json();
-                    // Display the analysis in the analysis interface
-                    displayAnalysisResults(data.analysis || data);
+                    // First open the analysis interface, then render results to avoid resetting to upload tab
                     showAnalysisInterface();
+                    displayAnalysisResults(data.analysis || data);
                 } else {
                     throw new Error('Failed to load analysis');
                 }
