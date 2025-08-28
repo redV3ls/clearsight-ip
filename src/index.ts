@@ -70,46 +70,20 @@ app.use('*', logger());
 app.use('*', prettyJSON());
 // Security headers middleware
 app.use('*', async (c, next) => {
-  // Generate a per-request nonce for inline scripts we explicitly allow (via nonce)
-  const nonce = (globalThis.crypto && 'randomUUID' in globalThis.crypto)
-    ? (globalThis.crypto as any).randomUUID()
-    : Math.random().toString(36).slice(2);
-  c.set('cspNonce', nonce);
-
-  const path = c.req.path || '';
-  const isDocs = path.startsWith('/api/v1/docs');
-
-  // Build CSP with stricter script-src by default; allow inline only on docs for Swagger UI
-  const scriptSrc = isDocs
-    ? [
-        "script-src",
-        "'self'",
-        // Allow Swagger UI bundle loader inline init on docs page only
-        "'unsafe-inline'",
-        // Allow external Swagger UI and Tailwind CDN scripts
-        'https://unpkg.com',
-        'https://cdn.tailwindcss.com'
-      ].join(' ')
-    : [
-        "script-src",
-        "'self'",
-        // Allow Tailwind CDN (no inline or eval needed with nonced config script)
-        'https://cdn.tailwindcss.com',
-        // Nonce for our permitted inline scripts on main pages
-        `'nonce-${nonce}'`
-      ].join(' ');
-
+  // Content Security Policy - relaxed for third-party resources
   const csp = [
     "default-src 'self' https:",
-    scriptSrc,
-    // Styles still allow inline due to inline <style> and third-party CSS needs
+    // Scripts: Allow inline, eval, and all HTTPS sources (needed for CDNs)
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+    // Styles: Allow inline and all HTTPS sources
     "style-src 'self' 'unsafe-inline' https:",
-    // Fonts and images
+    // Fonts: Allow all HTTPS sources and data URIs
     "font-src 'self' https: data:",
+    // Images: Allow all HTTPS sources and data URIs
     "img-src 'self' https: data:",
-    // XHR/fetch
+    // Connections: Allow all HTTPS sources
     "connect-src 'self' https:",
-    // Lock down other sources
+    // Objects and frames
     "object-src 'none'",
     "frame-src 'none'",
     "frame-ancestors 'none'",
@@ -121,21 +95,24 @@ app.use('*', async (c, next) => {
   ].join('; ');
 
   c.header('Content-Security-Policy', csp);
-
-  // Add CORP header to allow resources to be loaded cross-origin when needed
+  
+  // Remove COEP header entirely to avoid cross-origin resource blocking
+  // Don't set Cross-Origin-Embedder-Policy at all
+  
+  // Add CORP header to allow resources to be loaded cross-origin
   c.header('Cross-Origin-Resource-Policy', 'cross-origin');
-
+  
   // Add other security headers
   c.header('X-Content-Type-Options', 'nosniff');
   c.header('X-Frame-Options', 'DENY');
   c.header('X-XSS-Protection', '1; mode=block');
   c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-
+  
   // Ensure proper content type for HTML responses
-  if (path === '/' || path.endsWith('.html')) {
+  if (c.req.path === '/' || c.req.path.endsWith('.html')) {
     c.header('Content-Type', 'text/html; charset=utf-8');
   }
-
+  
   await next();
 });
 
@@ -363,40 +340,14 @@ app.get('/favicon.ico', (c) => {
   return c.body(faviconSvg);
 });
 
-// SVG favicon route
-app.get('/favicon.svg', (c) => {
-  const faviconSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-    <defs>
-      <linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'>
-        <stop offset='0%' style='stop-color:#14b8a6;stop-opacity:1' />
-        <stop offset='100%' style='stop-color:#2563eb;stop-opacity:1' />
-      </linearGradient>
-    </defs>
-    <circle cx='50' cy='50' r='45' fill='url(#grad)'/>
-    <path d='M30 35h40v6H30z' fill='white' opacity='0.9'/>
-    <path d='M30 45h32v4H30z' fill='white' opacity='0.7'/>
-    <path d='M30 53h28v4H30z' fill='white' opacity='0.5'/>
-    <path d='M30 61h24v4H30z' fill='white' opacity='0.3'/>
-    <path d='M65 42l8 8-8 8-3-3 5-5-5-5z' fill='white'/>
-  </svg>`;
-
-  c.header('Content-Type', 'image/svg+xml');
-  c.header('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
-  return c.body(faviconSvg);
-});
-
 // Root endpoint - serve the HTML home page
 // Static file serving for client assets
 app.get('/', (c) => {
   // Set cache header
   c.header('Cache-Control', 'public, max-age=3600');
-
-  // Inject CSP nonce into the HTML for permitted inline scripts
-  const nonce = c.get('cspNonce') as string | undefined;
-  const html = nonce ? HTML_CONTENT.replaceAll('__CSP_NONCE__', nonce) : HTML_CONTENT;
   
   // Return HTML content using Hono's html method
-  return c.html(html);
+  return c.html(HTML_CONTENT);
 });
 
 
