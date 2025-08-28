@@ -12,7 +12,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script nonce="__CSP_NONCE__">
-        // Define Tailwind config before the CDN script loads so custom colors (e.g. `primary`) are available immediately
+        // Define Tailwind config before the CDN script loads so custom colors (e.g. primary) are available immediately
         window.tailwind = window.tailwind || {};
         window.tailwind.config = {
             theme: {
