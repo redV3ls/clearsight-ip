@@ -185,14 +185,11 @@ curl -X POST https://api.skillgap.example.com/api/v1/analyze/gap \
 - `GET /api/v1/jobs/{id}/result` - Get job result
 
 ### GDPR & Privacy
-- `POST /api/v1/gdpr/export` - Request data export
-- `GET /api/v1/gdpr/export/{id}` - Export status
-- `DELETE /api/v1/gdpr/data` - Delete user data
+- Managed via the web app UI (Account Settings → Privacy). No public API endpoints are exposed for GDPR export or deletion.
 
 ### Monitoring
 - `GET /health` - Basic health check
 - `GET /health/detailed` - Detailed health status
-- `GET /api/v1/monitoring/metrics` - System metrics
 
 ## Development
 

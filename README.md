@@ -160,9 +160,6 @@ All API endpoints require authentication via:
 - `GET /api/v1/trends/skills/emerging` - Emerging skills analysis ✅
 - `GET /api/v1/jobs/search` - Job search and matching ✅
 - `GET /api/v1/users/profile` - User profile management ✅
-- `GET /api/v1/monitoring/cache/stats` - System monitoring ✅
-- `POST /api/v1/gdpr/export` - GDPR data export ✅
-- `GET /api/v1/audit/my-logs` - Audit trail access ✅
 
 ## Development
 
@@ -283,7 +280,7 @@ curl -X POST https://clearsight-ip.vchernev93.workers.dev/api/v1/auth/login \
 - ✅ **CORS**: Enabled for cross-origin requests
 - ✅ **Security Headers**: Applied via Hono middleware
 - ✅ **Caching**: Intelligent caching enabled for performance
-- ✅ **All API Routes**: Skill analysis, trends, monitoring, GDPR, audit - all active
+- ✅ **All API Routes**: Skill analysis, trends, jobs, users - active
 
 ### **Next Steps for GitHub Integration:**
 

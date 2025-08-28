@@ -113,27 +113,9 @@ await logger.logRequest(context, duration, statusCode);
 }
 ```
 
-## Monitoring Endpoints
+## Monitoring
 
-### Error Monitoring
-
-- `GET /api/v1/monitoring/errors/stats` - Error statistics
-- `GET /api/v1/monitoring/errors/:errorId` - Specific error details
-- `GET /api/v1/monitoring/errors?code=CODE&level=LEVEL` - Query errors
-
-### Log Monitoring
-
-- `GET /api/v1/monitoring/logs/stats?hours=24` - Log statistics
-- `GET /api/v1/monitoring/logs?level=error&path=/api/v1/auth` - Query logs
-
-### Cleanup
-
-- `POST /api/v1/monitoring/cleanup` - Clean up old logs and errors
-  ```json
-  {
-    "daysToKeep": 7
-  }
-  ```
+There are no public monitoring endpoints. Use Cloudflare Dashboard and internal logs. Public health checks: `GET /health` and `GET /health/detailed`.
 
 ## Configuration
 
@@ -233,7 +215,7 @@ The system automatically captures:
 
 Access analytics via:
 1. Cloudflare Dashboard
-2. Monitoring API endpoints
+2. Public health endpoints
 3. Custom dashboards using the data
 
 ## Alerting
@@ -276,7 +258,7 @@ const logger = new LoggingService(env, { level: 'debug' });
 
 Verify system health:
 ```bash
-curl https://api.example.com/api/v1/monitoring/health/dependencies
+curl https://api.example.com/health/detailed
 ```
 
 ## Examples

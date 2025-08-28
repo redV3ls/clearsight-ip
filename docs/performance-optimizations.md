@@ -69,10 +69,8 @@ This document summarizes all the performance optimizations implemented as part o
 - Endpoint usage statistics
 
 ### Monitoring Endpoints
-- `GET /api/v1/monitoring/cache/stats` - Cache statistics
-- `GET /api/v1/monitoring/database/metrics` - Database query metrics
-- `GET /api/v1/monitoring/performance` - Overall performance metrics
-- `GET /api/v1/monitoring/health/dependencies` - Dependency health checks
+- Publicly exposed: `GET /health`, `GET /health/detailed`
+- Internal metrics routes are not exposed via the public API.
 
 ## 5. Caching Strategy
 
@@ -177,14 +175,11 @@ curl -I http://localhost:8787/health
 
 ### Monitoring Commands
 ```bash
-# View cache statistics
-curl -H "Authorization: Bearer <token>" http://localhost:8787/api/v1/monitoring/cache/stats
+# Check health
+curl http://localhost:8787/health
 
-# View database metrics
-curl -H "Authorization: Bearer <token>" http://localhost:8787/api/v1/monitoring/database/metrics
-
-# View performance metrics
-curl -H "Authorization: Bearer <token>" http://localhost:8787/api/v1/monitoring/performance
+# Check detailed health
+curl http://localhost:8787/health/detailed
 ```
 
 ## Future Improvements

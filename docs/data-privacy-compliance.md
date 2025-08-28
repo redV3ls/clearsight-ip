@@ -66,16 +66,7 @@ RETENTION_DRY_RUN=false       // Set to true for testing without deletion
 Users can request a complete export of their personal data in machine-readable formats (JSON or CSV).
 
 ### Requesting an Export
-
-```bash
-POST /api/v1/gdpr/export
-Authorization: Bearer {token}
-
-{
-  "format": "json",  // or "csv"
-  "categories": ["all"]  // or specific categories
-}
-```
+Use the web app UI: Account Settings → Privacy → Request Data Export. No public API endpoint is exposed.
 
 ### Export Categories
 
@@ -99,18 +90,10 @@ Authorization: Bearer {token}
 6. Export available for download for 72 hours
 
 ### Checking Export Status
-
-```bash
-GET /api/v1/gdpr/export/{exportId}
-Authorization: Bearer {token}
-```
+Status is visible in the web app UI within Account Settings → Privacy.
 
 ### Downloading Export
-
-```bash
-GET /api/v1/gdpr/export/{exportId}/download
-Authorization: Bearer {token}
-```
+Exports are downloaded from the web app UI. No public download endpoint is exposed.
 
 ## Audit Logging
 
@@ -154,38 +137,12 @@ Critical actions that are always logged:
 
 ### Querying Audit Logs
 
-Users can query their own audit logs:
+Users cannot query audit logs via public API. Relevant security events may be visible in the web app UI; for compliance exports, contact support.
 
-```bash
-GET /api/v1/audit/my-logs?action=gdpr.export.requested&limit=50
-Authorization: Bearer {token}
-```
-
-Administrators can query all audit logs:
-
-```bash
-GET /api/v1/audit/admin/logs?userId=user_123&startDate=2024-01-01
-Authorization: Bearer {admin_token}
-```
+Administrators do not have public API access to audit logs. Audit log access is handled internally.
 
 ### Audit Statistics
-
-```bash
-GET /api/v1/audit/my-stats
-Authorization: Bearer {token}
-
-Response:
-{
-  "totalActions": 245,
-  "actionsByType": {
-    "user.login": 45,
-    "gap.analyze": 23,
-    "skill.update": 67
-  },
-  "recentActions": [...],
-  "criticalActions": 5
-}
-```
+Audit statistics are internal and not exposed via public API.
 
 ## Data Deletion
 
@@ -262,25 +219,10 @@ Some data may be retained for legal compliance:
 ## API Reference
 
 ### GDPR Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v1/gdpr/export` | POST | Request data export |
-| `/api/v1/gdpr/export/{id}` | GET | Check export status |
-| `/api/v1/gdpr/export/{id}/download` | GET | Download export |
-| `/api/v1/gdpr/exports` | GET | List export history |
-| `/api/v1/gdpr/categories` | GET | List data categories |
-| `/api/v1/gdpr/data` | DELETE | Request data deletion |
+No public endpoints are exposed. Use the web app (Account Settings → Privacy) for data export and deletion.
 
 ### Audit Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v1/audit/my-logs` | GET | Get user's audit logs |
-| `/api/v1/audit/my-stats` | GET | Get user's audit statistics |
-| `/api/v1/audit/admin/logs` | GET | Admin: Query all logs |
-| `/api/v1/audit/admin/stats` | GET | Admin: Global statistics |
-| `/api/v1/audit/actions` | GET | List available actions |
+No public endpoints are exposed. Audit logging is handled internally.
 
 ## Implementation Examples
 
@@ -374,17 +316,7 @@ Configure alerts for:
    - Verify retention policies
 
 ### Debug Commands
-
-```bash
-# Check retention status
-GET /api/v1/monitoring/retention/status
-
-# View recent purge results
-GET /api/v1/monitoring/retention/history
-
-# Check export queue
-GET /api/v1/jobs?type=gdpr_export&status=pending
-```
+Internal-only. No public monitoring endpoints are exposed.
 
 ## Security Considerations
 
