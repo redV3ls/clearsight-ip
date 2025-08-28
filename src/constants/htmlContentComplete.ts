@@ -925,7 +925,7 @@ Requirements:
         </div>
     </div>
 
-    <script>
+    <script nonce="__CSP_NONCE__">
         // Application State
         const AppState = {
             currentModal: null,
@@ -2266,7 +2266,7 @@ Requirements:
         // Notification system
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
-            notification.className = \`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full\`;
+            notification.className = 'fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full';
             
             const colors = {
                 success: 'bg-green-600 text-white',
@@ -2274,26 +2274,36 @@ Requirements:
                 info: 'bg-blue-600 text-white'
             };
             
-            notification.className += \` \${colors[type] || colors.info}\`;
-            notification.innerHTML = \`
-                <div class="flex items-center">
-                    <i class="fas fa-\${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
-                    <span>\${message}</span>
-                </div>
-            \`;
+            const colorClass = colors[type] || colors.info;
+            notification.className += ' ' + colorClass;
+            
+            let iconName = 'info-circle';
+            if (type === 'success') {
+                iconName = 'check-circle';
+            } else if (type === 'error') {
+                iconName = 'exclamation-circle';
+            }
+            
+            notification.innerHTML =
+                '<div class="flex items-center">' +
+                    '<i class="fas fa-' + iconName + ' mr-2"></i>' +
+                    '<span>' + message + '</span>' +
+                '</div>';
             
             document.body.appendChild(notification);
             
             // Animate in
-            setTimeout(() => {
+            setTimeout(function() {
                 notification.classList.remove('translate-x-full');
             }, 100);
             
             // Remove after 5 seconds
-            setTimeout(() => {
+            setTimeout(function() {
                 notification.classList.add('translate-x-full');
-                setTimeout(() => {
-                    document.body.removeChild(notification);
+                setTimeout(function() {
+                    if (notification && notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
                 }, 300);
             }, 5000);
         }
