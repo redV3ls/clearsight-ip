@@ -120,6 +120,20 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         .tab-content {
             min-height: 420px; /* Or a suitable fixed height */
         }
+
+        /* Fallback for Tailwind 'primary' color classes in case CDN config is not applied */
+        .text-primary { color: #14b8a6; }
+        .bg-primary { background-color: #14b8a6; }
+        .border-primary { border-color: #14b8a6; }
+        /* Opacity variants */
+        .bg-primary\/80 { background-color: rgba(20, 184, 166, 0.8); }
+        .bg-primary\/10 { background-color: rgba(20, 184, 166, 0.1); }
+        .text-primary\/80 { color: rgba(20, 184, 166, 0.8); }
+        .border-primary\/40 { border-color: rgba(20, 184, 166, 0.4); }
+        /* Hover variants */
+        .hover\:text-primary:hover { color: #14b8a6; }
+        .hover\:bg-primary\/80:hover { background-color: rgba(20, 184, 166, 0.8); }
+        .hover\:border-primary:hover { border-color: #14b8a6; }
     </style>
 </head>
 <body class="bg-slate-900 text-gray-200">
