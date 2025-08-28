@@ -1,16 +1,21 @@
 /**
- * Analysis History Handler
+ * Analysis History Handlers
  * 
- * Fetches user's past analysis history from the database
+ * Unified handlers for listing, retrieving, and deleting user's past analyses
+ * using the actual storage tables (narrative_analysis and resume_analyses).
  */
 
 import { createResponse } from '../../../middleware/common/responseBuilder';
 import { logger } from '../../../utils/logger';
 import { AuthenticatedContext } from '../../../middleware/auth';
+import { createDatabase } from '../../../config/database';
+import { NarrativeAnalysisService } from '../../../services/narrativeAnalysisService';
 
 /**
  * GET /api/v1/analyze/history
- * Fetches authenticated user's analysis history
+ * Returns a unified list of the user's past analyses (recent first).
+ * Pulls from the optimized narrative_analysis table and falls back to
+ * the legacy resume_analyses table for backward compatibility.
  */
 export async function historyHandler(c: AuthenticatedContext): Promise<Response> {
   const response = createResponse(c);
@@ -27,77 +32,104 @@ export async function historyHandler(c: AuthenticatedContext): Promise<Response>
       );
     }
 
+    // Basic pagination support (defaults chosen to match prior behavior)
+    const page = parseInt(c.req.query('page') || '1', 10);
+    const limit = Math.min(parseInt(c.req.query('limit') || '50', 10), 100);
+    const offset = (page - 1) * limit;
+
     logger.info('Fetching analysis history', {
       requestId: c.get('requestId'),
-      userId
+      userId,
+      page,
+      limit
     });
 
-    // Query analyses from database
-    const query = `
-      SELECT 
-        id,
-        analysis_type,
-        status,
-        created_at,
-        completed_at,
-        resume_text,
-        job_description_text,
-        narrative,
-        metadata
-      FROM analyses
-      WHERE user_id = ?
-      ORDER BY created_at DESC
-      LIMIT 50
-    `;
+    // New optimized store: narrative_analysis via service (Drizzle)
+    const database = createDatabase(c.env.DB);
+    const narrativeService = new NarrativeAnalysisService(database);
+    const narrativeAnalyses = await narrativeService.getUserHistory(userId, { limit, offset });
 
-    // Get D1 database from context
-    const db = c.env.DB as D1Database;
-    const stmt = db.prepare(query);
-    const analyses = await stmt.bind(userId).all() as any;
+    // Legacy store: resume_analyses table
+    const legacyRows = await c.env.DB
+      .prepare(`
+        SELECT id, created_at, analysis_data
+        FROM resume_analyses
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+        LIMIT ? OFFSET ?
+      `)
+      .bind(userId, limit, offset)
+      .all() as any;
 
-    // Transform the results for the API response (snake_case keys expected by web UI)
-    const transformedAnalyses = (analyses.results || []).map((analysis: any) => {
-      // Parse metadata if it's a JSON string
-      let metadata: any = {};
-      if (analysis.metadata) {
-        try {
-          metadata = JSON.parse(analysis.metadata);
-        } catch (e) {
-          metadata = {};
-        }
+    // Normalize narrative analyses
+    const normalizedNarrative = (narrativeAnalyses || []).map(a => ({
+      id: a.id,
+      created_at: a.createdAt,
+      completed_at: a.createdAt,
+      status: 'completed' as const,
+      analysis_type: a.analysisType,
+      has_job_description: a.hasJobDescription,
+      narrative: a.narrative || null,
+      createdAt: a.createdAt,
+      completedAt: a.createdAt,
+      hasJobDescription: a.hasJobDescription,
+      analysisType: a.analysisType,
+      metadata: {
+        wordCount: a.wordCount,
+        aiProvider: a.aiProvider,
+        aiModel: a.aiModel,
+        format: 'narrative'
+      }
+    }));
+
+    // Normalize legacy resume analyses
+    const normalizedLegacy = (legacyRows.results || []).map((row: any) => {
+      let data: any = {};
+      try {
+        data = row.analysis_data ? JSON.parse(row.analysis_data) : {};
+      } catch {
+        data = {};
       }
 
-      const hasJob = !!analysis.job_description_text;
-      const analysisType = analysis.analysis_type || (hasJob ? 'job-comparison' : 'standalone');
-      const status = analysis.status || (analysis.narrative ? 'completed' : 'processing');
+      const hasJob = Boolean(data?.hasJobDescription || data?.metadata?.hasJobDescription);
+      const analysisType = data?.analysisType || data?.analysis_type || (hasJob ? 'job-comparison' : 'standalone');
+
+      const status = (data?.status as string) || (data?.narrative ? 'completed' : 'processing') || 'unknown';
+      const ts = data?.timestamp || row.created_at;
 
       return {
-        id: analysis.id,
-        created_at: analysis.created_at,
-        completed_at: analysis.completed_at,
+        id: row.id,
+        created_at: ts,
+        completed_at: ts,
         status,
         analysis_type: analysisType,
         has_job_description: hasJob,
-        narrative: analysis.narrative || null,
-        // For compatibility, also include camelCase variants used elsewhere
-        createdAt: analysis.created_at,
-        completedAt: analysis.completed_at,
+        narrative: data?.narrative || null,
+        createdAt: ts,
+        completedAt: ts,
         hasJobDescription: hasJob,
         analysisType,
-        metadata
+        metadata: {
+          format: 'legacy'
+        }
       };
     });
+
+    // Merge, sort by createdAt desc, and cap to limit
+    const combined = [...normalizedNarrative, ...normalizedLegacy]
+      .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+      .slice(0, limit);
 
     logger.info('Analysis history fetched', {
       requestId: c.get('requestId'),
       userId,
-      count: transformedAnalyses.length
+      count: combined.length
     });
 
-    // Return top-level "analyses" to match web UI expectations
+    // Keep existing top-level shape: { analyses, total }
     return c.json({
-      analyses: transformedAnalyses,
-      total: transformedAnalyses.length
+      analyses: combined,
+      total: combined.length
     });
 
   } catch (error) {
@@ -117,7 +149,8 @@ export async function historyHandler(c: AuthenticatedContext): Promise<Response>
 
 /**
  * GET /api/v1/analyze/history/:id
- * Fetches a specific analysis by ID for the authenticated user
+ * Fetch a specific analysis by ID for the authenticated user
+ * Tries the narrative_analysis table first, then falls back to resume_analyses.
  */
 export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Response> {
   const response = createResponse(c);
@@ -149,28 +182,47 @@ export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Respo
       analysisId
     });
 
-    // Query specific analysis from database
-    const query = `
-      SELECT 
-        id,
-        analysis_type,
-        status,
-        created_at,
-        completed_at,
-        resume_text,
-        job_description_text,
-        narrative,
-        metadata
-      FROM analyses
-      WHERE id = ? AND user_id = ?
-    `;
+    // Try narrative_analysis first
+    const database = createDatabase(c.env.DB);
+    const narrativeService = new NarrativeAnalysisService(database);
+    const narrative = await narrativeService.getById(analysisId, userId);
 
-    // Get D1 database from context
-    const db = c.env.DB as D1Database;
-    const stmt = db.prepare(query);
-    const result = await stmt.bind(analysisId, userId).first() as any;
+    if (narrative) {
+      const transformed = {
+        id: narrative.id,
+        status: 'completed' as const,
+        created_at: narrative.createdAt,
+        completed_at: narrative.createdAt,
+        analysis_type: narrative.analysisType,
+        has_job_description: narrative.hasJobDescription,
+        narrative: narrative.narrative,
+        createdAt: narrative.createdAt,
+        completedAt: narrative.createdAt,
+        analysisType: narrative.analysisType,
+        hasJobDescription: narrative.hasJobDescription,
+        metadata: {
+          wordCount: narrative.wordCount,
+          aiProvider: narrative.aiProvider,
+          aiModel: narrative.aiModel
+        }
+      };
 
-    if (!result) {
+      logger.info('Analysis (narrative) fetched', {
+        requestId: c.get('requestId'),
+        userId,
+        analysisId
+      });
+
+      return c.json({ analysis: transformed });
+    }
+
+    // Fallback to legacy resume_analyses
+    const legacy = await c.env.DB
+      .prepare('SELECT * FROM resume_analyses WHERE id = ? AND user_id = ?')
+      .bind(analysisId, userId)
+      .first() as any;
+
+    if (!legacy) {
       return response.error(
         'NOT_FOUND',
         'Analysis not found',
@@ -178,47 +230,40 @@ export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Respo
       );
     }
 
-    const analysis = result;
-    
-    // Parse metadata if it's a JSON string
-    let metadata: any = {};
-    if (analysis.metadata) {
-      try {
-        metadata = JSON.parse(analysis.metadata);
-      } catch (e) {
-        metadata = {};
-      }
+    let data: any = {};
+    try {
+      data = legacy.analysis_data ? JSON.parse(legacy.analysis_data) : {};
+    } catch {
+      data = {};
     }
 
-    const hasJob = !!analysis.job_description_text;
-    const analysisType = analysis.analysis_type || (hasJob ? 'job-comparison' : 'standalone');
+    const hasJob = Boolean(data?.hasJobDescription || data?.metadata?.hasJobDescription);
+    const analysisType = data?.analysisType || data?.analysis_type || (hasJob ? 'job-comparison' : 'standalone');
+    const status: 'completed' | 'failed' | 'processing' = (data?.status as any) || (data?.narrative ? 'completed' : 'processing');
+    const ts = data?.timestamp || legacy.created_at;
 
-    const transformedAnalysis = {
-      id: analysis.id,
-      status: analysis.status,
-      created_at: analysis.created_at,
-      completed_at: analysis.completed_at,
+    const transformedLegacy = {
+      id: legacy.id,
+      status,
+      created_at: ts,
+      completed_at: ts,
       analysis_type: analysisType,
       has_job_description: hasJob,
-      narrative: analysis.narrative,
-      // Include camelCase variants for UI compatibility
-      createdAt: analysis.created_at,
-      completedAt: analysis.completed_at,
+      narrative: data?.narrative || null,
+      createdAt: ts,
+      completedAt: ts,
       analysisType,
       hasJobDescription: hasJob,
-      resumeText: analysis.resume_text,
-      jobDescriptionText: analysis.job_description_text,
-      metadata
+      metadata: data?.metadata || { format: 'legacy' }
     };
 
-    logger.info('Analysis fetched', {
+    logger.info('Analysis (legacy) fetched', {
       requestId: c.get('requestId'),
       userId,
       analysisId
     });
 
-    // Return top-level "analysis" to match web UI expectations
-    return c.json({ analysis: transformedAnalysis });
+    return c.json({ analysis: transformedLegacy });
 
   } catch (error) {
     logger.error('Failed to fetch analysis', {
@@ -238,7 +283,7 @@ export async function getAnalysisHandler(c: AuthenticatedContext): Promise<Respo
 
 /**
  * DELETE /api/v1/analyze/history/:id
- * Deletes a specific analysis for the authenticated user
+ * Deletes a specific analysis from both narrative_analysis and resume_analyses.
  */
 export async function deleteAnalysisHandler(c: AuthenticatedContext): Promise<Response> {
   const response = createResponse(c);
@@ -270,18 +315,20 @@ export async function deleteAnalysisHandler(c: AuthenticatedContext): Promise<Re
       analysisId
     });
 
-    // Delete analysis from database
-    const query = `
-      DELETE FROM analyses
-      WHERE id = ? AND user_id = ?
-    `;
+    // Delete from both tables; consider either deletion a success
+    const delNarrative = await c.env.DB
+      .prepare('DELETE FROM narrative_analysis WHERE id = ? AND user_id = ?')
+      .bind(analysisId, userId)
+      .run();
 
-    // Get D1 database from context
-    const db = c.env.DB as D1Database;
-    const stmt = db.prepare(query);
-    const result = await stmt.bind(analysisId, userId).run();
+    const delLegacy = await c.env.DB
+      .prepare('DELETE FROM resume_analyses WHERE id = ? AND user_id = ?')
+      .bind(analysisId, userId)
+      .run();
 
-    if (!result.success || result.meta.changes === 0) {
+    const changes = (delNarrative?.changes || delNarrative?.meta?.changes || 0) + (delLegacy?.changes || delLegacy?.meta?.changes || 0);
+
+    if (!changes) {
       return response.error(
         'NOT_FOUND',
         'Analysis not found',
