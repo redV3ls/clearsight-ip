@@ -1167,18 +1167,39 @@ Requirements:
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
                     const targetId = this.getAttribute('href');
-                    const target = document.querySelector(targetId);
+
+                    // Helper: show a section by id and hide others, then scroll to it
+                    const showSection = (id) => {
+                        try {
+                            // Hide any open modals to restore normal page interaction
+                            try { hideAuthModal(); } catch {}
+                            try { hideAnalysisInterface(); } catch {}
+
+                            // Toggle sections visibility
+                            document.querySelectorAll('section').forEach(section => {
+                                const shouldShow = ('#' + section.id) === id;
+                                section.classList.toggle('hidden', !shouldShow);
+                            });
+
+                            const target = document.querySelector(id);
+                            if (target) {
+                                target.classList.remove('hidden');
+                                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                            closeMobileMenu();
+                        } catch (err) {
+                            console.warn('Navigation error:', err);
+                        }
+                    };
                     
-                    // Handle history section specially
+                    // Handle history section specially (loads data and manages visibility)
                     if (targetId === '#history') {
                         handleHistoryNavigation();
-                    } else if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                        closeMobileMenu();
+                        return;
                     }
+
+                    // For other in-page anchors, ensure section is made visible even if previously hidden
+                    showSection(targetId);
                 });
             });
 
@@ -1831,7 +1852,8 @@ Requirements:
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' }
                 })));
-                showNotification('Removed ' + ids.length + ' stale processing ' + (ids.length === 1 ? 'analysis' : 'analyses') + ' (older than 10 minutes).', 'info');
+                // Suppress user-facing notification: silently clean up stale entries
+                console.log('Removed ' + ids.length + ' stale processing ' + (ids.length === 1 ? 'analysis' : 'analyses') + ' (older than 10 minutes).');
                 // Reload history to reflect deletions
                 loadAnalysisHistory();
                 return true;
