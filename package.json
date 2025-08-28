@@ -4,8 +4,6 @@
   "description": "Comprehensive professional skills intelligence API service",
   "main": "dist/index.js",
   "scripts": {
-    "css:build": "node ./scripts/build-css.mjs",
-    "prebuild": "npm run css:build",
     "dev": "wrangler dev",
     "build": "wrangler build",
     "deploy": "wrangler deploy",
@@ -53,7 +51,6 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240512.0",
     "@types/bcryptjs": "^2.4.6",
-    "tailwindcss": "^3.4.10",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.10.5",
     "@types/uuid": "^9.0.7",

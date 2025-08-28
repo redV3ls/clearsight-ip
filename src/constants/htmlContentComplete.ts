@@ -17,8 +17,25 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/app.css">
+    <script nonce="__CSP_NONCE__">
+        // Ensure global tailwind object exists before CDN loads
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#14b8a6',
+                        accent: '#14b8a6',
+                        background: '#0f172a',
+                        text: '#e2e8f0'
+                    }
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700\u0026display=swap');
         
         body {
             font-family: 'Inter', sans-serif;

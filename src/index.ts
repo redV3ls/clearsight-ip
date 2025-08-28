@@ -86,12 +86,15 @@ app.use('*', async (c, next) => {
         "'self'",
         // Allow Swagger UI bundle loader inline init on docs page only
         "'unsafe-inline'",
-        // Allow external Swagger UI scripts
-        'https://unpkg.com'
+        // Allow external Swagger UI and Tailwind CDN scripts
+        'https://unpkg.com',
+        'https://cdn.tailwindcss.com'
       ].join(' ')
     : [
         "script-src",
         "'self'",
+        // Allow Tailwind CDN (no inline or eval needed with nonced config script)
+        'https://cdn.tailwindcss.com',
         // Nonce for our permitted inline scripts on main pages
         `'nonce-${nonce}'`
       ].join(' ');
@@ -358,14 +361,6 @@ app.get('/favicon.ico', (c) => {
   c.header('Content-Type', 'image/svg+xml');
   c.header('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
   return c.body(faviconSvg);
-});
-
-// Serve prebuilt CSS
-import { APP_CSS } from './constants/appCss';
-app.get('/assets/app.css', (c) => {
-  c.header('Content-Type', 'text/css; charset=utf-8');
-  c.header('Cache-Control', 'public, max-age=86400');
-  return c.body(APP_CSS);
 });
 
 // SVG favicon route
