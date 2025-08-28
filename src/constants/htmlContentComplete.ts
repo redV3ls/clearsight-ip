@@ -12,7 +12,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script nonce="__CSP_NONCE__">
-        // Define Tailwind config before the CDN script loads so custom colors (e.g. primary) are available immediately
+        // Tailwind CDN configuration: must be defined before the CDN script loads.
+        // Ensure the global object exists, then assign the config.
         window.tailwind = window.tailwind || {};
         window.tailwind.config = {
             theme: {
@@ -26,8 +27,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 }
             }
         };
-        // Also expose as plain global tailwind.config for the CDN bootstrapper
-        try { tailwind = window.tailwind; tailwind.config = window.tailwind.config; } catch (e) { /* no-op */ }
+        // Expose a global variable that some environments expect.
+        var tailwind = window.tailwind;
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
