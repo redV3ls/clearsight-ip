@@ -26,7 +26,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 }
             }
         };
-        // Also expose as plain global `tailwind.config` for the CDN bootstrapper
+        // Also expose as plain global tailwind.config for the CDN bootstrapper
         try { tailwind = window.tailwind; tailwind.config = window.tailwind.config; } catch (e) { /* no-op */ }
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
