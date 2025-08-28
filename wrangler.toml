@@ -73,9 +73,9 @@ preview_id = "1cbf2f6e3d594ddb9214dcc7986c1141"
 # tag = "v1"
 # new_classes = ["RateLimiter"]
 
-# Scheduled triggers for async job processing (temporarily disabled for debugging)
-# [triggers]
-# crons = ["*/5 * * * *"] # Run every 5 minutes
+# Scheduled triggers for async job processing and maintenance
+[triggers]
+crons = ["0 3 * * *"] # Run once per day at 03:00 UTC (stale analysis cleanup is gated to daily)
 
 # For Durable Objects (requires paid plan)
 # [[durable_objects.bindings]]
