@@ -115,8 +115,34 @@ export async function historyHandler(c: AuthenticatedContext): Promise<Response>
       };
     });
 
-    // Merge, sort by createdAt desc, and cap to limit
-    const combined = [...normalizedNarrative, ...normalizedLegacy]
+    // Merge and de-duplicate by ID, preferring narrative over legacy and completed over processing
+    const byId = new Map<string, any>();
+    const consider = [...normalizedLegacy, ...normalizedNarrative]; // legacy first, then narrative overrides
+    for (const item of consider) {
+      const existing = byId.get(item.id);
+      if (!existing) {
+        byId.set(item.id, item);
+        continue;
+      }
+      // Prefer narrative format over legacy, or completed over non-completed
+      const existingIsNarrative = existing?.metadata?.format === 'narrative' || existing?.analysisType === 'standalone' || existing?.analysisType === 'job-comparison';
+      const currentIsNarrative = item?.metadata?.format === 'narrative' || item?.analysisType === 'standalone' || item?.analysisType === 'job-comparison';
+      const existingCompleted = existing.status === 'completed';
+      const currentCompleted = item.status === 'completed';
+
+      if (currentIsNarrative && !existingIsNarrative) {
+        byId.set(item.id, item);
+      } else if (currentCompleted && !existingCompleted) {
+        byId.set(item.id, item);
+      } else if (currentIsNarrative && existingIsNarrative) {
+        // If both narrative, keep the newer one
+        if ((item.createdAt || '').localeCompare(existing.createdAt || '') > 0) {
+          byId.set(item.id, item);
+        }
+      }
+    }
+
+    const combined = Array.from(byId.values())
       .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
       .slice(0, limit);
 

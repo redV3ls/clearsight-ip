@@ -345,6 +345,37 @@ analyze.post('/resume', async (c: AuthenticatedContext) => {
         processingTime: Date.now() - startTime
       });
       
+      // Update legacy resume_analyses record to reflect completion (for backward compatibility)
+      try {
+        const updateStatement = c.env.DB
+          .prepare(`
+            UPDATE resume_analyses 
+            SET analysis_data = ?, created_at = ?
+            WHERE id = ? AND user_id = ?
+          `);
+        const responseJson = JSON.stringify({
+          ...completedResponse,
+          status: 'completed'
+        });
+        const updateResult = await updateStatement
+          .bind(
+            responseJson,
+            new Date().toISOString(),
+            analysisId,
+            userId
+          )
+          .run();
+        enhancedLogger.info('✅ Legacy resume_analyses updated after direct analysis', {
+          analysisId,
+          changes: updateResult.changes ?? updateResult.meta?.changes ?? 0
+        });
+      } catch (legacyUpdateError) {
+        enhancedLogger.warn('⚠️ Failed to update legacy resume_analyses after direct analysis', {
+          analysisId,
+          error: legacyUpdateError instanceof Error ? legacyUpdateError.message : String(legacyUpdateError)
+        });
+      }
+      
       return c.json(completedResponse, 200); // 200 OK with direct response
       
     } catch (error) {
