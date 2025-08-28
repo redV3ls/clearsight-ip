@@ -5,11 +5,20 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clearsight IP - Bridge Your Skills Gap with AI-Powered Insights</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico">
+    <meta name="description" content="AI-powered skills analysis and career insights to identify gaps, improve your resume, and accelerate your path to the right role.">
+    <meta property="og:title" content="Clearsight IP - Bridge Your Skills Gap with AI-Powered Insights">
+    <meta property="og:description" content="AI-powered skills analysis and career insights to identify gaps and accelerate your path to the right role.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="/">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/favicon.ico">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.tailwindcss.com"></script>
+    <script nonce="__CSP_NONCE__">
         tailwind.config = {
             theme: {
                 extend: {
@@ -112,9 +121,70 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         .tab-content {
             min-height: 420px; /* Or a suitable fixed height */
         }
+
+        /* Emoji icon fallback for Font Awesome classes (CDN removed) */
+        .fa, .fas { font-style: normal; }
+        .fa::before, .fas::before { display: inline-block; }
+        .fa-sign-in-alt::before { content: "🔑"; }
+        .fa-user-plus::before { content: "➕"; }
+        .fa-user::before { content: "👤"; }
+        .fa-sign-out-alt::before { content: "🚪"; }
+        .fa-bars::before { content: "☰"; }
+        .fa-exclamation-triangle::before { content: "⚠️"; }
+        .fa-upload::before { content: "⬆️"; }
+        .fa-briefcase::before { content: "💼"; }
+        .fa-brain::before { content: "🧠"; }
+        .fa-arrow-right::before { content: "→"; }
+        .fa-user-tie::before { content: "👔"; }
+        .fa-chart-line::before { content: "📈"; }
+        .fa-graduation-cap::before { content: "🎓"; }
+        .fa-arrow-up::before { content: "⬆️"; }
+        .fa-rocket::before { content: "🚀"; }
+        .fa-clock::before { content: "⏰"; }
+        .fa-keyboard::before { content: "⌨️"; }
+        .fa-file-upload::before { content: "📤"; }
+        .fa-file-check::before { content: "✅"; }
+        .fa-info-circle::before { content: "ℹ️"; }
+        .fa-sync-alt::before { content: "🔄"; }
+        .fa-magic::before { content: "✨"; }
+        .fa-check::before { content: "✔️"; }
+        .fa-check-circle::before { content: "✅"; }
+        .fa-exclamation-circle::before { content: "❗"; }
+        .fa-history::before { content: "🕘"; }
+        .fa-redo::before { content: "🔁"; }
+        .fa-eye::before { content: "👁️"; }
+        .fa-trash::before { content: "🗑️"; }
+        .fa-cogs::before { content: "⚙️"; }
+        .fa-lightbulb::before { content: "💡"; }
+        .fa-twitter::before { content: "🐦"; }
+        .fa-linkedin::before { content: "in"; }
+        .fa-github::before { content: "🐙"; }
+
+        /* Brands base */
+        .fab { font-style: normal; }
+        .fab::before { display: inline-block; }
+
+        /* Spinner and animation fallback */
+        .fa-spinner::before { content: "⏳"; }
+        .fa-spin { animation: fa-spin 1s linear infinite; display: inline-block; }
+        @keyframes fa-spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        /* Additional icon fallbacks used across the UI */
+        .fa-chart-bar::before { content: "📊"; }
+        .fa-file-alt::before { content: "📄"; }
+        .fa-plus::before { content: "➕"; }
+        .fa-arrow-left::before { content: "←"; }
+        .fa-folder-open::before { content: "📂"; }
+        .fa-times::before { content: "✖️"; }
+        .fa-circle::before { content: "●"; }
+        .fa-bullseye::before { content: "🎯"; }
     </style>
 </head>
 <body class="bg-slate-900 text-gray-200">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 bg-slate-800 text-white px-3 py-2 rounded">Skip to main content</a>
     <!-- Navigation -->
     <nav class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -154,14 +224,14 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 </div>
 
                 <div class="md:hidden">
-                    <button id="mobileMenuBtn" class="text-gray-300 hover:text-primary">
-                        <i class="fas fa-bars text-xl"></i>
+                    <button id="mobileMenuBtn" type="button" class="text-gray-300 hover:text-primary" aria-label="Open menu" aria-controls="mobileMenu" aria-expanded="false">
+                        <i class="fas fa-bars text-xl" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <div id="mobileMenu" class="hidden md:hidden bg-slate-800 border-t border-slate-700">
+        <div id="mobileMenu" class="hidden md:hidden bg-slate-800 border-t border-slate-700" role="menu" aria-label="Mobile menu" tabindex="-1">
             <div class="px-4 py-4 space-y-4">
                 <a href="#features" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">Success Stories</a>
                 <a href="#how-it-works" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">How It Works</a>
@@ -173,7 +243,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     </nav>
     
     <!-- Main Content -->
-    <main>
+    <main id="main-content">
         <!-- Hero Section -->
         <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -669,12 +739,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     </footer>
 
     <!-- Auth Modal -->
-    <div id="authModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div id="authModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="authModalTitle" tabindex="-1">
         <div class="bg-slate-800 rounded-lg max-w-md w-full">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-primary">Account Access</h2>
-                    <button id="closeAuthModal" class="text-gray-400 hover:text-white">
+                    <h2 id="authModalTitle" class="text-2xl font-bold text-primary">Account Access</h2>
+                    <button id="closeAuthModal" class="text-gray-400 hover:text-white" aria-label="Close dialog">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -688,7 +758,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     </button>
                 </div>
 
-                <div id="authError" class="hidden bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-4">
+                <div id="authError" class="hidden bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-4" role="alert" aria-live="assertive">
                     <div class="flex items-center text-red-400">
                         <i class="fas fa-exclamation-triangle mr-2"></i>
                         <span class="font-semibold">Error</span>
@@ -699,11 +769,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 <form id="loginForm" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                        <input type="email" name="loginEmail" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <input type="email" name="loginEmail" autocomplete="email" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                        <input type="password" name="loginPassword" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <input type="password" name="loginPassword" autocomplete="current-password" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
                     </div>
                     <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
                         Login
@@ -713,15 +783,15 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 <form id="registerForm" class="hidden space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                        <input type="email" name="registerEmail" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <input type="email" name="registerEmail" autocomplete="email" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                        <input type="password" name="registerPassword" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <input type="password" name="registerPassword" autocomplete="new-password" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
-                        <input type="password" name="confirmPassword" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <input type="password" name="confirmPassword" autocomplete="new-password" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
                     </div>
                     <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
                         Sign Up
@@ -733,12 +803,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
     <!-- Analysis Interface Modal -->
     <div id="analysisInterface" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div id="analysisModal" class="bg-slate-800 rounded-lg w-full max-w-4xl my-8 flex flex-col transition-all duration-300 max-h-[calc(100vh-4rem)] overflow-hidden">
+        <div id="analysisModal" class="bg-slate-800 rounded-lg w-full max-w-4xl my-8 flex flex-col transition-all duration-300 max-h-[calc(100vh-4rem)] overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="analysisModalTitle" tabindex="-1">
             <!-- Header -->
             <div class="p-6 border-b border-slate-700 flex-shrink-0">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-primary">AI-Powered Skills Analysis</h2>
-                    <button id="closeAnalysisInterface" class="text-gray-400 hover:text-white">
+                    <h2 id="analysisModalTitle" class="text-2xl font-bold text-primary">AI-Powered Skills Analysis</h2>
+                    <button id="closeAnalysisInterface" class="text-gray-400 hover:text-white" aria-label="Close dialog">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -746,17 +816,17 @@ export const HTML_CONTENT = `<!DOCTYPE html>
 
             <!-- Tab Navigation -->
             <div class="border-b border-slate-700">
-                <div class="flex px-6">
-                    <button id="uploadTabBtn" class="tab-button px-6 py-3 text-white border-b-2 border-primary transition-colors">
+                <div class="flex px-6" role="tablist" aria-label="Analysis steps">
+                    <button id="uploadTabBtn" class="tab-button px-6 py-3 text-white border-b-2 border-primary transition-colors" role="tab" aria-selected="true" aria-controls="uploadTabContent" tabindex="0">
                         <i class="fas fa-upload mr-2"></i>
                         <span>Resume (CV)</span>
                     </button>
-                    <button id="jobTabBtn" class="tab-button px-6 py-3 text-gray-400 border-b-2 border-transparent hover:text-white transition-colors">
+                    <button id="jobTabBtn" class="tab-button px-6 py-3 text-gray-400 border-b-2 border-transparent hover:text-white transition-colors" role="tab" aria-selected="false" aria-controls="jobTabContent" tabindex="-1">
                         <i class="fas fa-briefcase mr-2"></i>
                         <span>Job Description</span>
                         <span class="ml-2 text-xs opacity-60">(Optional)</span>
                     </button>
-                    <button id="analysisTabBtn" class="tab-button px-6 py-3 text-gray-400 border-b-2 border-transparent hover:text-white transition-colors" disabled>
+                    <button id="analysisTabBtn" class="tab-button px-6 py-3 text-gray-400 border-b-2 border-transparent hover:text-white transition-colors" role="tab" aria-selected="false" aria-controls="analysisTabContent" tabindex="-1" disabled>
                         <i class="fas fa-brain mr-2"></i>
                         <span>Analysis</span>
                     </button>
@@ -768,7 +838,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <!-- Tab Content Container -->
                     <div id="tabContentContainer">
                         <!-- Upload Tab Content -->
-                        <div id="uploadTabContent" class="tab-content p-6">
+                        <div id="uploadTabContent" class="tab-content p-6" role="tabpanel" aria-labelledby="uploadTabBtn" tabindex="0">
                     <div class="mb-6 text-center">
                         <i class="fas fa-upload text-4xl text-primary mb-3"></i>
                         <h3 class="text-xl font-bold text-white mb-2">Upload Your Resume</h3>
@@ -807,7 +877,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 </div>
                 
                 <!-- Job Tab Content -->
-                <div id="jobTabContent" class="tab-content hidden p-6">
+                <div id="jobTabContent" class="tab-content hidden p-6" role="tabpanel" aria-labelledby="jobTabBtn" tabindex="0">
                     <div class="mb-6 text-center">
                         <i class="fas fa-briefcase text-4xl text-primary mb-3"></i>
                         <h3 class="text-xl font-bold text-white mb-2">Job Description (Optional)</h3>
@@ -858,10 +928,10 @@ Requirements:
                 </div>
                 
                 <!-- Analysis Tab Content -->
-                <div id="analysisTabContent" class="tab-content hidden">
+                <div id="analysisTabContent" class="tab-content hidden" role="tabpanel" aria-labelledby="analysisTabBtn" tabindex="0">
                 
                 <!-- Loading Section -->
-                <div id="loadingSection" class="hidden">
+                <div id="loadingSection" class="hidden" role="status" aria-live="polite" aria-busy="true">
                     <div class="text-center py-12">
                         <div class="relative mb-8">
                             <!-- Animated AI Brain -->
@@ -886,7 +956,7 @@ Requirements:
                             <p class="text-gray-300 mb-6">Our AI is working its magic on your resume!</p>
                             
                             <!-- Dynamic Loading Message -->
-                            <p id="progressText" class="text-lg text-primary animate-pulse font-medium mb-4">🧠 Initializing AI brain...</p>
+                            <p id="progressText" class="text-lg text-primary animate-pulse font-medium mb-4" aria-live="polite">🧠 Initializing AI brain...</p>
                             
                             <!-- Mini Game Section -->
                             <div class="bg-slate-700/50 rounded-lg p-4 max-w-md mx-auto border border-slate-600">
@@ -918,7 +988,7 @@ Requirements:
         </div>
     </div>
 
-    <script>
+    <script nonce="__CSP_NONCE__">
         // Application State
         const AppState = {
             currentModal: null,
@@ -938,6 +1008,55 @@ Requirements:
             credits: 0,
             cleaningStale: false
         };
+
+        // Simple focus trap utility for accessibility
+        const FocusTrap = {
+            active: null,
+            previous: null,
+            onKeydown: null
+        };
+
+        function trapFocus(container) {
+            try { releaseFocus(); } catch {}
+            if (!container) return;
+            FocusTrap.active = container;
+            FocusTrap.previous = document.activeElement;
+            const selectors = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+            const nodes = Array.from(container.querySelectorAll(selectors));
+            if (nodes.length) {
+                nodes[0].focus();
+            }
+            FocusTrap.onKeydown = function(e) {
+                if (e.key !== 'Tab' || !FocusTrap.active) return;
+                const focusables = Array.from(FocusTrap.active.querySelectorAll(selectors));
+                if (!focusables.length) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                const current = document.activeElement;
+                if (e.shiftKey) {
+                    if (current === first || !FocusTrap.active.contains(current)) {
+                        e.preventDefault();
+                        last.focus();
+                    }
+                } else {
+                    if (current === last) {
+                        e.preventDefault();
+                        first.focus();
+                    }
+                }
+            };
+            document.addEventListener('keydown', FocusTrap.onKeydown);
+        }
+
+        function releaseFocus() {
+            if (FocusTrap.onKeydown) document.removeEventListener('keydown', FocusTrap.onKeydown);
+            if (FocusTrap.previous && FocusTrap.previous.focus) {
+                try { FocusTrap.previous.focus(); } catch {}
+            }
+            FocusTrap.active = null;
+            FocusTrap.previous = null;
+            FocusTrap.onKeydown = null;
+        }
 
         // Catchy loading messages
         const LOADING_MESSAGES = [
@@ -1834,14 +1953,32 @@ Requirements:
 
         // Mobile menu functions
         function toggleMobileMenu() {
-            const mobileMenu = document.getElementById('mobileMenu');
-            mobileMenu?.classList.toggle('hidden');
+            const btn = document.getElementById('mobileMenuBtn');
+            const menu = document.getElementById('mobileMenu');
+            if (!btn || !menu) return;
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                btn.setAttribute('aria-expanded', 'true');
+                trapFocus(menu);
+                const first = menu.querySelector('a, button');
+                if (first) first.focus();
+            } else {
+                menu.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                releaseFocus();
+                btn.focus();
+            }
         }
 
         function closeMobileMenu() {
+            const btn = document.getElementById('mobileMenuBtn');
             const mobileMenu = document.getElementById('mobileMenu');
             if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
                 mobileMenu.classList.add('hidden');
+                btn?.setAttribute('aria-expanded', 'false');
+                releaseFocus();
+                btn?.focus();
             }
         }
 
@@ -1851,12 +1988,19 @@ Requirements:
             modal?.classList.remove('hidden');
             AppState.currentModal = 'auth';
             switchAuthTab(mode);
+            const panel = document.querySelector('#authModal .bg-slate-800');
+            if (panel) {
+                panel.setAttribute('tabindex', '-1');
+                trapFocus(panel);
+                panel.focus();
+            }
         }
 
         function hideAuthModal() {
             const modal = document.getElementById('authModal');
             modal?.classList.add('hidden');
             AppState.currentModal = null;
+            releaseFocus();
         }
 
         function switchAuthTab(mode) {
@@ -1906,6 +2050,11 @@ Requirements:
             
             modal?.classList.remove('hidden');
             AppState.currentModal = 'analysis';
+            if (analysisModal) {
+                analysisModal.setAttribute('tabindex', '-1');
+                trapFocus(analysisModal);
+                analysisModal.focus();
+            }
         }
         
         // Tab switching functionality for analysis interface
@@ -1925,11 +2074,16 @@ Requirements:
                 if (tab) {
                     tab.classList.remove('text-white', 'border-primary');
                     tab.classList.add('text-gray-400', 'border-transparent');
+                    tab.setAttribute('aria-selected', 'false');
+                    tab.setAttribute('tabindex', '-1');
                 }
             });
             
             contents.forEach(content => {
-                if (content) content.classList.add('hidden');
+                if (content) {
+                    content.classList.add('hidden');
+                    content.setAttribute('aria-hidden', 'true');
+                }
             });
             
             // Activate selected tab
@@ -1938,24 +2092,30 @@ Requirements:
                     if (uploadTabBtn) {
                         uploadTabBtn.classList.add('text-white', 'border-primary');
                         uploadTabBtn.classList.remove('text-gray-400', 'border-transparent');
+                        uploadTabBtn.setAttribute('aria-selected', 'true');
+                        uploadTabBtn.setAttribute('tabindex', '0');
                     }
-                    if (uploadTabContent) uploadTabContent.classList.remove('hidden');
+                    if (uploadTabContent) { uploadTabContent.classList.remove('hidden'); uploadTabContent.setAttribute('aria-hidden', 'false'); }
                     break;
                     
                 case 'job':
                     if (jobTabBtn) {
                         jobTabBtn.classList.add('text-white', 'border-primary');
                         jobTabBtn.classList.remove('text-gray-400', 'border-transparent');
+                        jobTabBtn.setAttribute('aria-selected', 'true');
+                        jobTabBtn.setAttribute('tabindex', '0');
                     }
-                    if (jobTabContent) jobTabContent.classList.remove('hidden');
+                    if (jobTabContent) { jobTabContent.classList.remove('hidden'); jobTabContent.setAttribute('aria-hidden', 'false'); }
                     break;
                     
                 case 'analysis':
                     if (analysisTabBtn) {
                         analysisTabBtn.classList.add('text-white', 'border-primary');
                         analysisTabBtn.classList.remove('text-gray-400', 'border-transparent');
+                        analysisTabBtn.setAttribute('aria-selected', 'true');
+                        analysisTabBtn.setAttribute('tabindex', '0');
                     }
-                    if (analysisTabContent) analysisTabContent.classList.remove('hidden');
+                    if (analysisTabContent) { analysisTabContent.classList.remove('hidden'); analysisTabContent.setAttribute('aria-hidden', 'false'); }
                     break;
             }
         }
@@ -1980,6 +2140,7 @@ Requirements:
             
             modal?.classList.add('hidden');
             AppState.currentModal = null;
+            releaseFocus();
         }
 
         // File handling
