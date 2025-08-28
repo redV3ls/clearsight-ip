@@ -21,14 +21,32 @@ export class AppError extends Error {
 }
 
 export const errorHandler = async (err: Error, c: Context) => {
-  // Initialize error tracking if available
-  let errorTracker: ErrorTrackingService | null = null;
+  // Determine status code early (for sampling decisions)
+  let statusCode = 500;
+  if (err instanceof HTTPException) {
+    statusCode = err.status;
+  } else if (err instanceof AppError) {
+    statusCode = err.statusCode;
+  } else if (err.name === 'ZodError') {
+    statusCode = 400;
+  }
+
+  // Initialize error tracking if enabled
   let trackingErrorId: string | null = null;
-  
+  const trackingEnabled = c.env?.ERROR_TRACKING_ENABLED === 'true';
   try {
-    if (c.env?.CACHE) {
-      errorTracker = new ErrorTrackingService(c.env as any);
-      trackingErrorId = await errorTracker.trackError(err, c);
+    if (trackingEnabled && c.env?.CACHE) {
+      // Sampling: capture all >=500, optionally sample 4xx
+      let shouldTrack = statusCode >= 500;
+      if (!shouldTrack && statusCode >= 400 && statusCode < 500) {
+        const rate = Number(c.env.ERROR_TRACKING_SAMPLE_RATE || '0.02');
+        shouldTrack = Math.random() < rate;
+      }
+
+      if (shouldTrack) {
+        const errorTracker = new ErrorTrackingService(c.env as any);
+        trackingErrorId = await errorTracker.trackError(err, c);
+      }
     }
   } catch (trackingError) {
     // Don't let tracking errors break the error handler
@@ -44,17 +62,6 @@ export const errorHandler = async (err: Error, c: Context) => {
   // Use tracking error ID if available, otherwise use sanitized error ID
   if (trackingErrorId) {
     sanitizedError.id = trackingErrorId;
-  }
-
-  // Determine status code
-  let statusCode = 500;
-  
-  if (err instanceof HTTPException) {
-    statusCode = err.status;
-  } else if (err instanceof AppError) {
-    statusCode = err.statusCode;
-  } else if (err.name === 'ZodError') {
-    statusCode = 400;
   }
 
   // Return sanitized error response

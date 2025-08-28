@@ -312,7 +312,19 @@ export const productionRateLimiter = () => {
       return next();
     }
 
-    // Skip if rate limiting is disabled in environment
+    // Respect environment flags
+    if (c.env?.ENABLE_RATE_LIMITING !== 'true') {
+      return next();
+    }
+
+    // Optionally only rate-limit mutation methods
+    const onlyMutations = c.env?.RATE_LIMIT_ONLY_MUTATIONS === 'true';
+    const method = c.req.method.toUpperCase();
+    if (onlyMutations && (method === 'GET' || method === 'HEAD' || method === 'OPTIONS')) {
+      return next();
+    }
+
+    // Skip if rate limiting is disabled in development
     if (c.env.NODE_ENV === 'development' && !c.env.ENABLE_RATE_LIMITING) {
       return next();
     }

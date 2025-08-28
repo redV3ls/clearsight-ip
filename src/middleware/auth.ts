@@ -197,15 +197,25 @@ export const generateRSAKeyPair = async (): Promise<{ privateKey: string; public
   return { privateKey, publicKey };
 };
 
+// Module-scoped in-memory cache for RSA keys to avoid repeated KV reads
+let IN_MEMORY_RSA_KEYS: { privateKey: string; publicKey: string } | null = null;
+
 // Helper function to get RSA keys from environment or KV (persistent), otherwise generate and persist
 export const getRSAKeys = async (env: Env): Promise<{ privateKey: string; publicKey: string }> => {
+  // 0) Module memory cache (warm isolate)
+  if (IN_MEMORY_RSA_KEYS?.privateKey && IN_MEMORY_RSA_KEYS?.publicKey) {
+    return IN_MEMORY_RSA_KEYS;
+  }
+
   // 1) Prefer explicit keys from environment (most reliable)
   if (env.JWT_PRIVATE_KEY && env.JWT_PUBLIC_KEY) {
     console.log('Using RSA keys from environment variables');
-    return {
+    const keys = {
       privateKey: env.JWT_PRIVATE_KEY,
       publicKey: env.JWT_PUBLIC_KEY,
     };
+    IN_MEMORY_RSA_KEYS = keys;
+    return keys;
   }
 
   console.warn('JWT_PRIVATE_KEY and JWT_PUBLIC_KEY not found in environment, falling back to KV storage');
@@ -217,6 +227,7 @@ export const getRSAKeys = async (env: Env): Promise<{ privateKey: string; public
       const parsed = JSON.parse(cached) as { privateKey: string; publicKey: string };
       if (parsed?.privateKey && parsed?.publicKey) {
         console.log('Using RSA keys from KV cache');
+        IN_MEMORY_RSA_KEYS = parsed;
         return parsed;
       }
     }
@@ -234,6 +245,7 @@ export const getRSAKeys = async (env: Env): Promise<{ privateKey: string; public
     console.error('Failed to cache RSA keys to KV:', error);
     console.warn('RSA keys will be ephemeral - tokens may become invalid across worker instances');
   }
+  IN_MEMORY_RSA_KEYS = keys;
   return keys;
 };
 

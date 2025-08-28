@@ -26,8 +26,14 @@ export const performanceTrackingMiddleware = async (c: Context<{ Bindings: Env }
     const duration = Date.now() - startTime;
     const status = c.res.status;
 
-    // Enhanced logging with performance context
-    if (c.env?.CACHE) {
+    // Decide whether to log to KV
+    const disableKvLogging = c.env?.DISABLE_KV_LOGGING === 'true';
+    const method = c.req.method.toUpperCase();
+    const isPreflight = method === 'OPTIONS' || method === 'HEAD';
+    const isHealth = c.req.path.startsWith('/health') || c.req.path === '/favicon.ico';
+
+    // Enhanced logging with performance context (KV) — gated
+    if (!disableKvLogging && !isPreflight && !isHealth && c.env?.CACHE) {
       try {
         const loggingService = new LoggingService(c.env);
         await loggingService.logRequest(c, duration, status);
@@ -35,18 +41,6 @@ export const performanceTrackingMiddleware = async (c: Context<{ Bindings: Env }
         console.error('Failed to log request:', loggingError);
       }
     }
-
-    // Create metrics object
-    const metrics: RequestMetrics = {
-      timestamp: startTime,
-      method: c.req.method,
-      path: c.req.path,
-      status,
-      duration,
-      userAgent: c.req.header('User-Agent'),
-      country: c.req.header('CF-IPCountry'),
-      colo: c.req.header('CF-Ray')?.split('-')[1],
-    };
 
     // Log request completion
     console.log(`[${requestId}] ${c.req.method} ${c.req.path} - ${status} - ${duration}ms`);

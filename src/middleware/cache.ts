@@ -25,6 +25,11 @@ export const cacheMiddleware = (options: CacheOptions = {}): MiddlewareHandler<{
       return await next();
     }
 
+    // If KV caching is disabled via env, skip
+    if (c.env?.USE_KV_CACHE !== 'true') {
+      return await next();
+    }
+
     const cacheService = new CacheService(c.env.CACHE);
     const namespace = options.namespace || CacheNamespaces.API_RESPONSES;
     const ttl = options.ttl || CacheTTL.SHORT;

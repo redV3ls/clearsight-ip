@@ -35,6 +35,11 @@ export interface Env {
   RATE_LIMIT_WINDOW_MS?: string;
   RATE_LIMIT_MAX_REQUESTS?: string;
   ENABLE_RATE_LIMITING?: string;
+  RATE_LIMIT_ONLY_MUTATIONS?: string;
+  DISABLE_KV_LOGGING?: string;
+  ERROR_TRACKING_ENABLED?: string;
+  ERROR_TRACKING_SAMPLE_RATE?: string;
+  USE_KV_CACHE?: string;
   LOG_LEVEL?: string;
   
   // DeepSeek AI Configuration
