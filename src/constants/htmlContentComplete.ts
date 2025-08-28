@@ -1928,7 +1928,7 @@ Requirements:
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' }
                 })));
-                showNotification(`Removed ${ids.length} stale processing ${ids.length === 1 ? 'analysis' : 'analyses'} (older than 10 minutes).`, 'info');
+                showNotification('Removed ' + ids.length + ' stale processing ' + (ids.length === 1 ? 'analysis' : 'analyses') + ' (older than 10 minutes).', 'info');
                 // Reload history to reflect deletions
                 loadAnalysisHistory();
                 return true;
