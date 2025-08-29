@@ -1066,6 +1066,15 @@ Requirements:
             cleaningStale: false
         };
 
+        // Suppress console log/info/debug in the UI
+        try {
+            ['log','info','debug'].forEach(function(k) {
+                if (typeof console !== 'undefined' && typeof console[k] === 'function') {
+                    console[k] = function() {};
+                }
+            });
+        } catch (e) {}
+
         // Catchy loading messages
         const LOADING_MESSAGES = [
             "🧠 Spinning up the AI engines...",
@@ -1561,11 +1570,14 @@ const API_ENDPOINTS = {
             e.preventDefault();
             const form = e.target;
             const email = (new FormData(form)).get('resetEmail');
+            const emailText = (typeof email === 'string') ? email : (email ? String(email) : '');
+            const confirmed = confirm(emailText ? ('Send a password reset link to ' + emailText + '?') : 'Send a password reset link?');
+            if (!confirmed) return;
             const submitButton = form.querySelector('button[type="submit"]');
             const originalText = submitButton?.innerHTML;
             try {
                 if (submitButton) {
-                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+                    submitButton.innerHTML = '<i class=\"fas fa-spinner fa-spin mr-2\"></i>Sending...';
                     submitButton.setAttribute('disabled', 'true');
                 }
                 const res = await fetch(API_ENDPOINTS.requestReset, {
@@ -2260,6 +2272,8 @@ const API_ENDPOINTS = {
                     showNotification('Please log in to manage your password.', 'info');
                     return;
                 }
+                const confirmed = confirm('Send a password reset link to ' + email + '?');
+                if (!confirmed) return;
                 await fetch(API_ENDPOINTS.requestReset, {
                     method: 'POST',
                     credentials: 'include',
