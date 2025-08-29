@@ -162,19 +162,28 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     </div>
 
                     <div id="userMenu" class="hidden flex items-center space-x-4">
-                        <div class="flex items-center space-x-2">
-                            <div class="user-avatar w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                                <i class="fas fa-user text-white text-sm"></i>
+                        <div class="relative">
+                            <button id="userMenuToggle" class="flex items-center space-x-2 text-gray-300 hover:text-white px-3 py-2 rounded-lg border border-gray-600 hover:border-primary transition-colors">
+                                <div class="user-avatar w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-white text-sm"></i>
+                                </div>
+                                <span id="userEmail" class="text-gray-300 text-sm"></span>
+                                <i class="fas fa-chevron-down text-gray-400 text-xs ml-1"></i>
+                            </button>
+                            <div id="userDropdown" class="hidden absolute right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-lg shadow-lg py-2 z-50">
+                                <button id="dropdownChangePassword" class="w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-slate-700 transition-colors">
+                                    <i class="fas fa-key mr-2 text-primary"></i>Change Password
+                                </button>
+                                <button id="dropdownRequestReset" class="w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-slate-700 transition-colors">
+                                    <i class="fas fa-envelope mr-2 text-primary"></i>Email me a reset link
+                                </button>
+                                <div class="my-1 border-t border-slate-700"></div>
+                                <button id="dropdownLogout" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-slate-700 hover:text-red-300 transition-colors">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                </button>
                             </div>
-                            <span id="userEmail" class="text-gray-300 text-sm"></span>
-                            <span id="userCreditsBadge" class="hidden text-xs text-primary bg-primary/10 px-2 py-1 rounded border border-primary/40">0 credits</span>
                         </div>
-                        <button id="changePasswordBtn" class="auth-button text-gray-300 hover:text-primary px-3 py-2 rounded-lg border border-gray-600 hover:border-primary transition-colors">
-                            <i class="fas fa-key mr-2"></i>Change Password
-                        </button>
-                        <button id="logoutBtn" class="auth-button text-gray-300 hover:text-red-400 px-3 py-2 rounded-lg border border-gray-600 hover:border-red-400 transition-colors">
-                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                        </button>
+                        <span id="userCreditsBadge" class="hidden text-xs text-primary bg-primary/10 px-2 py-1 rounded border border-primary/40">0 credits</span>
                     </div>
                 </div>
 
@@ -1160,6 +1169,7 @@ const API_ENDPOINTS = {
             setupAnalysisListeners();
             setupHistoryListeners();
             setupUIListeners();
+            setupUserMenuListeners();
             
             // Check authentication status
             checkAuthStatus();
@@ -1289,6 +1299,7 @@ const API_ENDPOINTS = {
                                 target.classList.remove('hidden');
                                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             }
+                            hideUserDropdown();
                             closeMobileMenu();
                         } catch (err) {
                             console.warn('Navigation error:', err);
@@ -2188,8 +2199,77 @@ const API_ENDPOINTS = {
                 if (e.key === 'Escape') {
                     hideAuthModal();
                     hideAnalysisInterface();
+                    hideUserDropdown();
                 }
             });
+        }
+
+        function hideUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+
+        function setupUserMenuListeners() {
+            const toggle = document.getElementById('userMenuToggle');
+            const dropdown = document.getElementById('userDropdown');
+            const changeBtn = document.getElementById('dropdownChangePassword');
+            const resetBtn = document.getElementById('dropdownRequestReset');
+            const logoutBtn = document.getElementById('dropdownLogout');
+
+            if (toggle && dropdown) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropdown.classList.toggle('hidden');
+                });
+            }
+
+            changeBtn?.addEventListener('click', function(e) {
+                e.preventDefault();
+                hideUserDropdown();
+                showChangePasswordModal();
+            });
+
+            resetBtn?.addEventListener('click', async function(e) {
+                e.preventDefault();
+                hideUserDropdown();
+                await requestResetForCurrentUser();
+            });
+
+            logoutBtn?.addEventListener('click', function(e) {
+                e.preventDefault();
+                hideUserDropdown();
+                handleLogout();
+            });
+
+            // Close dropdown on outside click
+            document.addEventListener('click', function(e) {
+                const menuContainer = document.getElementById('userMenu');
+                if (!menuContainer || !dropdown) return;
+                if (!menuContainer.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        async function requestResetForCurrentUser() {
+            try {
+                const email = AppState.user && AppState.user.email ? AppState.user.email : null;
+                if (!email) {
+                    showAuthModal('login');
+                    showNotification('Please log in to manage your password.', 'info');
+                    return;
+                }
+                await fetch(API_ENDPOINTS.requestReset, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                showNotification('If this email exists, a reset link has been sent.', 'info');
+            } catch (err) {
+                showNotification('Request failed. Please try again later.', 'error');
+            }
         }
 
         // Mobile menu functions
