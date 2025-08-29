@@ -1,6 +1,3 @@
-// Complete HTML content with inline JavaScript and CSS for Cloudflare Workers
-export const HTML_CONTENT = `<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +5,10 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     <link rel="icon" type="image/svg+xml" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script nonce="__CSP_NONCE__">
+    <script nonce="">
         // Tailwind CDN configuration: must be defined before the CDN script loads.
         // Ensure the global object exists, then assign the config.
         window.tailwind = window.tailwind || {};
@@ -32,7 +29,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700\u0026display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
@@ -120,22 +117,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         .tab-content {
             min-height: 420px; /* Or a suitable fixed height */
         }
-
-        /* Fallback for Tailwind 'primary' color classes in case CDN config is not applied */
-        .text-primary { color: #14b8a6; }
-        .bg-primary { background-color: #14b8a6; }
-        .border-primary { border-color: #14b8a6; }
-        /* Opacity variants */
-        .bg-primary\/80 { background-color: rgba(20, 184, 166, 0.8); }
-        .bg-primary\/10 { background-color: rgba(20, 184, 166, 0.1); }
-        .text-primary\/80 { color: rgba(20, 184, 166, 0.8); }
-        .border-primary\/40 { border-color: rgba(20, 184, 166, 0.4); }
-        /* Hover variants */
-        .hover\:text-primary:hover { color: #14b8a6; }
-        .hover\:bg-primary\/80:hover { background-color: rgba(20, 184, 166, 0.8); }
-        .hover\:border-primary:hover { border-color: #14b8a6; }
     </style>
-</head>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.inset-2{inset:0.5rem}.-top-4{top:-1rem}.bottom-0{bottom:0px}.left-0{left:0px}.left-1\/2{left:50%}.right-0{right:0px}.top-0{top:0px}.top-1\/2{top:50%}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.my-8{margin-top:2rem;margin-bottom:2rem}.mb-1{margin-bottom:0.25rem}.mb-12{margin-bottom:3rem}.mb-16{margin-bottom:4rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.ml-2{margin-left:0.5rem}.ml-4{margin-left:1rem}.mr-1{margin-right:0.25rem}.mr-2{margin-right:0.5rem}.mr-3{margin-right:0.75rem}.mt-1{margin-top:0.25rem}.mt-12{margin-top:3rem}.mt-2{margin-top:0.5rem}.mt-6{margin-top:1.5rem}.mt-8{margin-top:2rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-12{height:3rem}.h-16{height:4rem}.h-2{height:0.5rem}.h-20{height:5rem}.h-24{height:6rem}.h-48{height:12rem}.h-8{height:2rem}.max-h-\[calc\(100vh-4rem\)\]{max-height:calc(100vh - 4rem)}.min-h-4{min-height:1rem}.w-12{width:3rem}.w-16{width:4rem}.w-2{width:0.5rem}.w-20{width:5rem}.w-24{width:6rem}.w-8{width:2rem}.w-full{width:100%}.max-w-3xl{max-width:48rem}.max-w-4xl{max-width:56rem}.max-w-7xl{max-width:80rem}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.-translate-x-1{--tw-translate-x:-0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-y-1{--tw-translate-y:-0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-y-1\/2{--tw-translate-y:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-x-1{--tw-translate-x:0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-y-1{--tw-translate-y:0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes bounce{0%, 100%{transform:translateY(-25%);animation-timing-function:cubic-bezier(0.8,0,1,1)}50%{transform:none;animation-timing-function:cubic-bezier(0,0,0.2,1)}}.animate-bounce{animation:bounce 1s infinite}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}@keyframes spin{to{transform:rotate(360deg)}}.animate-spin{animation:spin 1s linear infinite}.cursor-pointer{cursor:pointer}.cursor-not-allowed{cursor:not-allowed}.resize-none{resize:none}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-12{gap:3rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.space-x-2 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.5rem * var(--tw-space-x-reverse));margin-left:calc(0.5rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-4 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(1rem * var(--tw-space-x-reverse));margin-left:calc(1rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-8 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(2rem * var(--tw-space-x-reverse));margin-left:calc(2rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.25rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-blue-500\/30{border-color:rgb(59 130 246 / 0.3)}.border-gray-600{--tw-border-opacity:1;border-color:rgb(75 85 99 / var(--tw-border-opacity, 1))}.border-green-500\/30{border-color:rgb(34 197 94 / 0.3)}.border-red-500\/30{border-color:rgb(239 68 68 / 0.3)}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105 / var(--tw-border-opacity, 1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-transparent{border-color:transparent}.bg-black\/50{background-color:rgb(0 0 0 / 0.5)}.bg-blue-400{--tw-bg-opacity:1;background-color:rgb(96 165 250 / var(--tw-bg-opacity, 1))}.bg-blue-900\/20{background-color:rgb(30 58 138 / 0.2)}.bg-green-400{--tw-bg-opacity:1;background-color:rgb(74 222 128 / var(--tw-bg-opacity, 1))}.bg-green-900\/20{background-color:rgb(20 83 45 / 0.2)}.bg-purple-400{--tw-bg-opacity:1;background-color:rgb(192 132 252 / var(--tw-bg-opacity, 1))}.bg-red-500{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.bg-red-900\/20{background-color:rgb(127 29 29 / 0.2)}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.bg-slate-700\/50{background-color:rgb(51 65 85 / 0.5)}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-slate-900\/50{background-color:rgb(15 23 42 / 0.5)}.bg-yellow-600{--tw-bg-opacity:1;background-color:rgb(202 138 4 / var(--tw-bg-opacity, 1))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-slate-800{--tw-gradient-from:#1e293b var(--tw-gradient-from-position);--tw-gradient-to:rgb(30 41 59 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-slate-900{--tw-gradient-from:#0f172a var(--tw-gradient-from-position);--tw-gradient-to:rgb(15 23 42 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-slate-800{--tw-gradient-to:rgb(30 41 59 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #1e293b var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-blue-400{--tw-gradient-to:#60a5fa var(--tw-gradient-to-position)}.to-slate-700{--tw-gradient-to:#334155 var(--tw-gradient-to-position)}.to-slate-900{--tw-gradient-to:#0f172a var(--tw-gradient-to-position)}.p-1{padding:0.25rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-8{padding-left:2rem;padding-right:2rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-20{padding-top:5rem;padding-bottom:5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pt-8{padding-top:2rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.text-blue-300{--tw-text-opacity:1;color:rgb(147 197 253 / var(--tw-text-opacity, 1))}.text-blue-400{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}.text-gray-200{--tw-text-opacity:1;color:rgb(229 231 235 / var(--tw-text-opacity, 1))}.text-gray-300{--tw-text-opacity:1;color:rgb(209 213 219 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-green-300{--tw-text-opacity:1;color:rgb(134 239 172 / var(--tw-text-opacity, 1))}.text-green-400{--tw-text-opacity:1;color:rgb(74 222 128 / var(--tw-text-opacity, 1))}.text-red-300{--tw-text-opacity:1;color:rgb(252 165 165 / var(--tw-text-opacity, 1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.opacity-60{opacity:0.6}.opacity-50{opacity:0.5}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-200{transition-duration:200ms}.duration-300{transition-duration:300ms}.hover\:border-red-400:hover{--tw-border-opacity:1;border-color:rgb(248 113 113 / var(--tw-border-opacity, 1))}.hover\:bg-red-600:hover{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.hover\:bg-yellow-700:hover{--tw-bg-opacity:1;background-color:rgb(161 98 7 / var(--tw-bg-opacity, 1))}.hover\:text-red-400:hover{--tw-text-opacity:1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.disabled\:cursor-not-allowed:disabled{cursor:not-allowed}.disabled\:opacity-50:disabled{opacity:0.5}@media (min-width: 640px){.sm\:flex-row{flex-direction:row}.sm\:justify-end{justify-content:flex-end}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}}@media (min-width: 768px){.md\:flex{display:flex}.md\:hidden{display:none}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.lg\:px-8{padding-left:2rem;padding-right:2rem}.lg\:text-6xl{font-size:3.75rem;line-height:1}}</style></head>
 <body class="bg-slate-900 text-gray-200">
     <!-- Navigation -->
     <nav class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
@@ -149,10 +132,10 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <a href="#features" class="nav-link text-gray-300 hover:text-primary">Success Stories</a>
                     <a href="#how-it-works" class="nav-link text-gray-300 hover:text-primary">How It Works</a>
                     <a href="#pricing" class="nav-link text-gray-300 hover:text-primary">Pricing</a>
-                    <a href="/docs" target="_blank" rel="noopener noreferrer" class="nav-link text-gray-300 hover:text-primary">API Docs <i class="fas fa-up-right-from-square ml-1 text-xs opacity-75"></i></a>
-                    <a href="#history" id="historyLink" class="nav-link text-gray-300 hover:text-primary hidden">My Analyses</a>
+                    <a href="/docs" class="nav-link text-gray-300 hover:text-primary">API Docs</a>
+                    <a href="#history" id="historyLink" class="nav-link text-gray-300 hover:text-primary">My Analyses</a>
                     
-                    <div id="authButtons" class="flex items-center space-x-4">
+                    <div id="authButtons" class="flex items-center space-x-4 hidden">
                         <button id="headerLoginBtn" class="auth-button text-gray-300 hover:text-primary px-4 py-2 rounded-lg border border-gray-600 hover:border-primary transition-colors">
                             <i class="fas fa-sign-in-alt mr-2"></i>Login
                         </button>
@@ -161,17 +144,14 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         </button>
                     </div>
 
-                    <div id="userMenu" class="hidden flex items-center space-x-4">
+                    <div id="userMenu" class="flex items-center space-x-4">
                         <div class="flex items-center space-x-2">
                             <div class="user-avatar w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                                 <i class="fas fa-user text-white text-sm"></i>
                             </div>
-                            <span id="userEmail" class="text-gray-300 text-sm"></span>
-                            <span id="userCreditsBadge" class="hidden text-xs text-primary bg-primary/10 px-2 py-1 rounded border border-primary/40">0 credits</span>
+                            <span id="userEmail" class="text-gray-300 text-sm">nemlupufyo@necub.com</span>
+                            <span id="userCreditsBadge" class="text-xs text-primary bg-primary/10 px-2 py-1 rounded border border-primary/40">27 credits</span>
                         </div>
-                        <button id="changePasswordBtn" class="auth-button text-gray-300 hover:text-primary px-3 py-2 rounded-lg border border-gray-600 hover:border-primary transition-colors">
-                            <i class="fas fa-key mr-2"></i>Change Password
-                        </button>
                         <button id="logoutBtn" class="auth-button text-gray-300 hover:text-red-400 px-3 py-2 rounded-lg border border-gray-600 hover:border-red-400 transition-colors">
                             <i class="fas fa-sign-out-alt mr-2"></i>Logout
                         </button>
@@ -191,8 +171,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 <a href="#features" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">Success Stories</a>
                 <a href="#how-it-works" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">How It Works</a>
                 <a href="#pricing" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">Pricing</a>
-                <a href="/docs" target="_blank" rel="noopener noreferrer" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">API Docs <i class="fas fa-up-right-from-square ml-2 text-xs opacity-75"></i></a>
-                <a href="#history" id="mobileHistoryLink" class="mobile-menu-item block text-gray-300 hover:text-primary py-2 hidden">My Analyses</a>
+                <a href="/docs" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">API Docs</a>
+                <a href="#history" id="mobileHistoryLink" class="mobile-menu-item block text-gray-300 hover:text-primary py-2">My Analyses</a>
             </div>
         </div>
     </nav>
@@ -225,8 +205,8 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                             <button id="analyzeSkillsBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
                                 Analyze My Skills Now
                             </button>
-                            <a href="/docs" target="_blank" rel="noopener noreferrer" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-8 py-4 rounded-lg text-lg font-semibold transition-colors text-center">
-                                View API Docs <i class="fas fa-up-right-from-square ml-2 text-base opacity-75"></i>
+                            <a href="/docs" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-8 py-4 rounded-lg text-lg font-semibold transition-colors text-center">
+                                View API Docs
                             </a>
                         </div>
                     </div>
@@ -516,12 +496,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                             <p class="mb-3">Full-Stack Developer | 5 years experience</p>
                             
                             <p class="text-xs text-gray-400 mb-1">SKILLS:</p>
-                            <p class="mb-3">• JavaScript, React, Node.js<br/>• Python, Django<br/>• SQL, MongoDB<br/>• Git, Docker</p>
+                            <p class="mb-3">• JavaScript, React, Node.js<br>• Python, Django<br>• SQL, MongoDB<br>• Git, Docker</p>
                             
                             <p class="text-xs text-gray-400 mb-1">EXPERIENCE:</p>
-                            <p class="mb-2">Senior Developer at TechCorp<br/>
-                            • Led team of 4 developers<br/>
-                            • Built RESTful APIs<br/>
+                            <p class="mb-2">Senior Developer at TechCorp<br>
+                            • Led team of 4 developers<br>
+                            • Built RESTful APIs<br>
                             • Improved app performance by 40%</p>
                             
                             <p class="text-xs text-gray-400 mb-1">EDUCATION:</p>
@@ -540,16 +520,16 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                             <p class="mb-3">Leading Tech Company | Remote</p>
                             
                             <p class="text-xs text-gray-400 mb-1">REQUIREMENTS:</p>
-                            <p class="mb-3">• 5+ years full-stack development<br/>
-                            • Expert in React & TypeScript<br/>
-                            • Experience with AWS services<br/>
-                            • Knowledge of microservices<br/>
-                            • GraphQL experience preferred<br/>
+                            <p class="mb-3">• 5+ years full-stack development<br>
+                            • Expert in React &amp; TypeScript<br>
+                            • Experience with AWS services<br>
+                            • Knowledge of microservices<br>
+                            • GraphQL experience preferred<br>
                             • CI/CD pipeline expertise</p>
                             
                             <p class="text-xs text-gray-400 mb-1">NICE TO HAVE:</p>
-                            <p>• Kubernetes experience<br/>
-                            • Machine learning basics<br/>
+                            <p>• Kubernetes experience<br>
+                            • Machine learning basics<br>
                             • Agile/Scrum certification</p>
                         </div>
                     </div>
@@ -660,7 +640,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         <li><a href="#features" class="text-gray-300 hover:text-primary">Features</a></li>
                         <li><a href="#pricing" class="text-gray-300 hover:text-primary">Pricing</a></li>
                         <li><a href="#demo" class="text-gray-300 hover:text-primary">Demo</a></li>
-                        <li><a href="/docs" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-primary">API Docs <i class="fas fa-up-right-from-square ml-1 text-xs opacity-75"></i></a></li>
+                        <li><a href="/docs" class="text-gray-300 hover:text-primary">API Docs</a></li>
                     </ul>
                 </div>
                 
@@ -724,125 +704,32 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 <form id="loginForm" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                        <input type="email" name="loginEmail" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <input type="email" name="loginEmail" required="" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                        <input type="password" name="loginPassword" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <input type="password" name="loginPassword" required="" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
                     </div>
                     <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
                         Login
                     </button>
-                    <div class="text-right mt-2">
-                        <button type="button" id="forgotPasswordLink" class="text-sm text-gray-300 hover:text-primary underline">Forgot your password?</button>
-                    </div>
                 </form>
 
                 <form id="registerForm" class="hidden space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                        <input type="email" name="registerEmail" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <input type="email" name="registerEmail" required="" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                        <input type="password" name="registerPassword" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <input type="password" name="registerPassword" required="" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
-                        <input type="password" name="confirmPassword" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <input type="password" name="confirmPassword" required="" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
                     </div>
                     <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
                         Sign Up
-                    </button>
-                </form>
-
-                <form id="requestResetForm" class="hidden space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                        <input type="email" name="resetEmail" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
-                    </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
-                        Send reset link
-                    </button>
-                    <div class="text-right mt-2">
-                        <button type="button" id="backToLoginLink" class="text-sm text-gray-300 hover:text-primary underline">Back to login</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Change Password Modal -->
-    <div id="changePasswordModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-lg max-w-md w-full">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-primary">Change Password</h2>
-                    <button id="closeChangePasswordModal" class="text-gray-400 hover:text-white">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-
-                <div id="changePasswordError" class="hidden bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-4">
-                    <div class="flex items-center text-red-400">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <span class="font-semibold">Error</span>
-                    </div>
-                    <p class="text-red-300 mt-1"></p>
-                </div>
-
-                <form id="changePasswordForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Current Password</label>
-                        <input type="password" name="currentPassword" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">New Password</label>
-                        <input type="password" name="newPassword" required minlength="8" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
-                        <input type="password" name="confirmNewPassword" required minlength="8" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
-                    </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
-                        Update Password
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reset Password Modal -->
-    <div id="resetPasswordModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-lg max-w-md w-full">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-primary">Reset Password</h2>
-                    <button id="closeResetPasswordModal" class="text-gray-400 hover:text-white">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-
-                <div id="resetPasswordError" class="hidden bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-4">
-                    <div class="flex items-center text-red-400">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <span class="font-semibold">Error</span>
-                    </div>
-                    <p class="text-red-300 mt-1"></p>
-                </div>
-
-                <form id="resetPasswordForm" class="space-y-4">
-                    <input type="hidden" name="resetToken" id="resetTokenInput" />
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">New Password</label>
-                        <input type="password" name="resetNewPassword" required minlength="8" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
-                        <input type="password" name="resetConfirmPassword" required minlength="8" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
-                    </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
-                        Reset Password
                     </button>
                 </form>
             </div>
@@ -874,7 +761,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         <span>Job Description</span>
                         <span class="ml-2 text-xs opacity-60">(Optional)</span>
                     </button>
-                    <button id="analysisTabBtn" class="tab-button px-6 py-3 text-gray-400 border-b-2 border-transparent hover:text-white transition-colors" disabled>
+                    <button id="analysisTabBtn" class="tab-button px-6 py-3 text-gray-400 border-b-2 border-transparent hover:text-white transition-colors" disabled="">
                         <i class="fas fa-brain mr-2"></i>
                         <span>Analysis</span>
                     </button>
@@ -913,11 +800,11 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     </div>
                     
                     <div class="flex justify-between sm:justify-end gap-3">
-<button id="analyzeResumeOnlyBtn" class="bg-primary/80 hover:bg-primary text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+<button id="analyzeResumeOnlyBtn" class="bg-primary/80 hover:bg-primary text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed opacity-50 cursor-not-allowed" disabled="true">
                             <i class="fas fa-brain mr-2"></i>
                             Analyze My Resume Only
                         </button>
-                        <button id="continueToJobBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <button id="continueToJobBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed opacity-50 cursor-not-allowed" disabled="true">
                             Add Job Description
                             <i class="fas fa-arrow-right ml-2"></i>
                         </button>
@@ -967,12 +854,12 @@ Requirements:
                             <button id="skipAnalysisBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors mr-3">
                                 Skip to Analysis
                             </button>
-                            <button id="startAnalysisBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+                            <button id="startAnalysisBtn" class="bg-primary hover:bg-primary/80 text-white px-8 py-3 rounded-lg font-semibold transition-colors opacity-50 cursor-not-allowed" disabled="true">
                                 <i class="fas fa-brain mr-2"></i>
                                 Start AI Analysis
                             </button>
                         </div>
-                    </div>
+                    <div id="buyCreditsInline" class="mt-2 text-sm text-gray-400"></div></div>
                 </div>
                 
                 <!-- Analysis Tab Content -->
@@ -1036,7 +923,7 @@ Requirements:
         </div>
     </div>
 
-    <script nonce="__CSP_NONCE__">
+    <script nonce="">
         // Application State
         const AppState = {
             currentModal: null,
@@ -1129,14 +1016,11 @@ Requirements:
         const API_BASE_URL = '/api';
         const API_V1_BASE_URL = '/api/v1';
         const API_BILLING_BASE_URL = '/api/billing';
-const API_ENDPOINTS = {
+        const API_ENDPOINTS = {
             login: API_V1_BASE_URL + '/auth/login',
             register: API_V1_BASE_URL + '/auth/register',
             logout: API_V1_BASE_URL + '/auth/logout',
             me: API_V1_BASE_URL + '/auth/me',
-            changePassword: API_V1_BASE_URL + '/auth/change-password',
-            requestReset: API_V1_BASE_URL + '/auth/request-reset',
-            resetPassword: API_V1_BASE_URL + '/auth/reset-password',
             analyzeResume: API_V1_BASE_URL + '/analyze/resume',
             analysisHistory: API_V1_BASE_URL + '/analyze/history',
             getAnalysis: (id) => API_V1_BASE_URL + '/analyze/history/' + id,
@@ -1156,7 +1040,6 @@ const API_ENDPOINTS = {
             // Setup all event listeners
             setupNavigationListeners();
             setupAuthListeners();
-            setupPasswordFlowListeners();
             setupAnalysisListeners();
             setupHistoryListeners();
             setupUIListeners();
@@ -1166,9 +1049,6 @@ const API_ENDPOINTS = {
 
             // If URL requests auth modal (from external redirect), open it
             handleAuthModalQuery();
-
-            // Handle presence of reset token in URL
-            handleResetTokenInURL();
 
             // Attach purchase handlers
             attachBuyPlanHandlers();
@@ -1270,39 +1150,18 @@ const API_ENDPOINTS = {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
                     const targetId = this.getAttribute('href');
-
-                    // Helper: show a section by id and hide others, then scroll to it
-                    const showSection = (id) => {
-                        try {
-                            // Hide any open modals to restore normal page interaction
-                            try { hideAuthModal(); } catch {}
-                            try { hideAnalysisInterface(); } catch {}
-
-                            // Toggle sections visibility
-                            document.querySelectorAll('section').forEach(section => {
-                                const shouldShow = ('#' + section.id) === id;
-                                section.classList.toggle('hidden', !shouldShow);
-                            });
-
-                            const target = document.querySelector(id);
-                            if (target) {
-                                target.classList.remove('hidden');
-                                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                            closeMobileMenu();
-                        } catch (err) {
-                            console.warn('Navigation error:', err);
-                        }
-                    };
+                    const target = document.querySelector(targetId);
                     
-                    // Handle history section specially (loads data and manages visibility)
+                    // Handle history section specially
                     if (targetId === '#history') {
                         handleHistoryNavigation();
-                        return;
+                    } else if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        closeMobileMenu();
                     }
-
-                    // For other in-page anchors, ensure section is made visible even if previously hidden
-                    showSection(targetId);
                 });
             });
 
@@ -1477,219 +1336,6 @@ const API_ENDPOINTS = {
             // Form submissions
             document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
             document.getElementById('registerForm')?.addEventListener('submit', handleRegister);
-        }
-
-        // Password flows (change, request reset, reset)
-        function setupPasswordFlowListeners() {
-            // Forgot password flow in auth modal
-            document.getElementById('forgotPasswordLink')?.addEventListener('click', () => {
-                document.getElementById('loginForm')?.classList.add('hidden');
-                document.getElementById('registerForm')?.classList.add('hidden');
-                document.getElementById('requestResetForm')?.classList.remove('hidden');
-            });
-            document.getElementById('backToLoginLink')?.addEventListener('click', () => {
-                document.getElementById('requestResetForm')?.classList.add('hidden');
-                document.getElementById('registerForm')?.classList.add('hidden');
-                document.getElementById('loginForm')?.classList.remove('hidden');
-            });
-            document.getElementById('requestResetForm')?.addEventListener('submit', handleRequestReset);
-
-            // Change password (requires auth)
-            document.getElementById('changePasswordBtn')?.addEventListener('click', () => showChangePasswordModal());
-            document.getElementById('closeChangePasswordModal')?.addEventListener('click', hideChangePasswordModal);
-            document.getElementById('changePasswordForm')?.addEventListener('submit', handleChangePassword);
-
-            // Reset password modal (token-based)
-            document.getElementById('closeResetPasswordModal')?.addEventListener('click', hideResetPasswordModal);
-            document.getElementById('resetPasswordForm')?.addEventListener('submit', handleResetPasswordSubmit);
-        }
-
-        function handleResetTokenInURL() {
-            try {
-                const url = new URL(window.location.href);
-                const token = url.searchParams.get('token');
-                if (token) {
-                    showResetPasswordModal(token);
-                    url.searchParams.delete('token');
-                    window.history.replaceState({}, document.title, url.pathname + url.search);
-                }
-            } catch {}
-        }
-
-        function showChangePasswordModal() {
-            if (!AppState.user) {
-                showAuthModal('login');
-                showNotification('Please log in to change your password.', 'info');
-                return;
-            }
-            document.getElementById('changePasswordError')?.classList.add('hidden');
-            document.getElementById('changePasswordModal')?.classList.remove('hidden');
-            AppState.currentModal = 'change-password';
-        }
-
-        function hideChangePasswordModal() {
-            document.getElementById('changePasswordModal')?.classList.add('hidden');
-            AppState.currentModal = null;
-        }
-
-        function showResetPasswordModal(token) {
-            // Prefill token
-            const tokenInput = document.getElementById('resetTokenInput');
-            if (tokenInput) tokenInput.value = token;
-            document.getElementById('resetPasswordError')?.classList.add('hidden');
-            document.getElementById('resetPasswordModal')?.classList.remove('hidden');
-            AppState.currentModal = 'reset-password';
-        }
-
-        function hideResetPasswordModal() {
-            document.getElementById('resetPasswordModal')?.classList.add('hidden');
-            AppState.currentModal = null;
-        }
-
-        async function handleRequestReset(e) {
-            e.preventDefault();
-            const form = e.target;
-            const email = (new FormData(form)).get('resetEmail');
-            const submitButton = form.querySelector('button[type="submit"]');
-            const originalText = submitButton?.innerHTML;
-            try {
-                if (submitButton) {
-                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
-                    submitButton.setAttribute('disabled', 'true');
-                }
-                const res = await fetch(API_ENDPOINTS.requestReset, {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-                // Always success message to avoid enumeration
-                showNotification('If this email exists, a reset link has been sent.', 'info');
-                // Return to login form
-                document.getElementById('requestResetForm')?.classList.add('hidden');
-                document.getElementById('loginForm')?.classList.remove('hidden');
-            } catch (err) {
-                showNotification('Request failed. Please try again later.', 'error');
-            } finally {
-                if (submitButton && originalText) {
-                    submitButton.innerHTML = originalText;
-                    submitButton.removeAttribute('disabled');
-                }
-            }
-        }
-
-        async function handleChangePassword(e) {
-            e.preventDefault();
-            const form = e.target;
-            const fd = new FormData(form);
-            const currentPassword = fd.get('currentPassword');
-            const newPassword = fd.get('newPassword');
-            const confirmNewPassword = fd.get('confirmNewPassword');
-            if (newPassword !== confirmNewPassword) {
-                const err = document.getElementById('changePasswordError');
-                const p = err?.querySelector('p');
-                if (err && p) {
-                    p.textContent = 'New passwords do not match.';
-                    err.classList.remove('hidden');
-                }
-                return;
-            }
-            const submitButton = form.querySelector('button[type="submit"]');
-            const originalText = submitButton?.innerHTML;
-            try {
-                if (submitButton) {
-                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
-                    submitButton.setAttribute('disabled', 'true');
-                }
-                const res = await fetch(API_ENDPOINTS.changePassword, {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ currentPassword, newPassword })
-                });
-                const data = await res.json().catch(() => ({}));
-                if (res.ok) {
-                    hideChangePasswordModal();
-                    showNotification('Password changed successfully.', 'success');
-                } else if (res.status === 401) {
-                    handleTokenExpiration();
-                } else {
-                    const err = document.getElementById('changePasswordError');
-                    const p = err?.querySelector('p');
-                    if (err && p) {
-                        p.textContent = data?.error?.message || 'Password change failed.';
-                        err.classList.remove('hidden');
-                    }
-                }
-            } catch (err) {
-                const eDiv = document.getElementById('changePasswordError');
-                const p = eDiv?.querySelector('p');
-                if (eDiv && p) {
-                    p.textContent = 'Network error. Please try again.';
-                    eDiv.classList.remove('hidden');
-                }
-            } finally {
-                if (submitButton && originalText) {
-                    submitButton.innerHTML = originalText;
-                    submitButton.removeAttribute('disabled');
-                }
-            }
-        }
-
-        async function handleResetPasswordSubmit(e) {
-            e.preventDefault();
-            const form = e.target;
-            const fd = new FormData(form);
-            const token = fd.get('resetToken');
-            const newPassword = fd.get('resetNewPassword');
-            const confirmPassword = fd.get('resetConfirmPassword');
-            if (newPassword !== confirmPassword) {
-                const err = document.getElementById('resetPasswordError');
-                const p = err?.querySelector('p');
-                if (err && p) {
-                    p.textContent = 'Passwords do not match.';
-                    err.classList.remove('hidden');
-                }
-                return;
-            }
-            const submitButton = form.querySelector('button[type="submit"]');
-            const originalText = submitButton?.innerHTML;
-            try {
-                if (submitButton) {
-                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Resetting...';
-                    submitButton.setAttribute('disabled', 'true');
-                }
-                const res = await fetch(API_ENDPOINTS.resetPassword, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token, newPassword })
-                });
-                const data = await res.json().catch(() => ({}));
-                if (res.ok) {
-                    hideResetPasswordModal();
-                    showAuthModal('login');
-                    showNotification('Password reset successfully. Please log in with your new password.', 'success');
-                } else {
-                    const err = document.getElementById('resetPasswordError');
-                    const p = err?.querySelector('p');
-                    if (err && p) {
-                        p.textContent = data?.error?.message || 'Password reset failed.';
-                        err.classList.remove('hidden');
-                    }
-                }
-            } catch (err) {
-                const eDiv = document.getElementById('resetPasswordError');
-                const p = eDiv?.querySelector('p');
-                if (eDiv && p) {
-                    p.textContent = 'Network error. Please try again.';
-                    eDiv.classList.remove('hidden');
-                }
-            } finally {
-                if (submitButton && originalText) {
-                    submitButton.innerHTML = originalText;
-                    submitButton.removeAttribute('disabled');
-                }
-            }
         }
 
         // Analysis functionality
@@ -2168,8 +1814,7 @@ const API_ENDPOINTS = {
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' }
                 })));
-                // Suppress user-facing notification: silently clean up stale entries
-                console.log('Removed ' + ids.length + ' stale processing ' + (ids.length === 1 ? 'analysis' : 'analyses') + ' (older than 10 minutes).');
+                showNotification('Removed ' + ids.length + ' stale processing ' + (ids.length === 1 ? 'analysis' : 'analyses') + ' (older than 10 minutes).', 'info');
                 // Reload history to reflect deletions
                 loadAnalysisHistory();
                 return true;
@@ -3306,7 +2951,7 @@ const API_ENDPOINTS = {
                 if (!text) return '';
                 
                 // Process line by line to handle headers and lists
-                var lines = text.split('\\n');
+                var lines = text.split('\n');
                 var processedLines = [];
                 var inList = false;
                 
@@ -3351,8 +2996,8 @@ const API_ENDPOINTS = {
                         }
                     }
                     // Process numbered lists (1. 2. etc. and double digit)
-                    else if (line.match(/^\d+\.\s/)) {
-                        var match = line.match(/^\d+\.\s/);
+                    else if (line.match(/^d+.s/)) {
+                        var match = line.match(/^d+.s/);
                         var listText = line.substring(match[0].length);
                         processedLine = '<li class="ml-4 mb-1 text-gray-300"><span class="font-medium">' + match[0].trim() + '</span> ' + listText + '</li>';
                     }
@@ -3445,7 +3090,7 @@ const API_ENDPOINTS = {
                 // Process plain URLs (http://, https://, www.)
                 // First, replace common course/resource patterns with clickable links (supports normal/curly/single quotes)
                 // Matches: "Course Name" (optional: module/course/learning path/lesson/tutorial/video/playlist) on Provider
-                text = text.replace(/["'“”]([^"'“”]+)["'“”]\\s+(?:module|course|learning\\s*path|lesson|tutorial|video|playlist)?\\s*on\\s+([A-Za-z][A-Za-z\\s&+\.\-]+?)(?=[\\)\\]\\.,;!]|\\s|$)/gi, function(match, courseName, platform) {
+                text = text.replace(/["'“”]([^"'“”]+)["'“”]\s+(?:module|course|learning\s*path|lesson|tutorial|video|playlist)?\s*on\s+([A-Za-z][A-Za-z\s&+.-]+?)(?=[\)\]\.,;!]|\s|$)/gi, function(match, courseName, platform) {
                     function providerSearchUrl(p, name) {
                         var pl = (p || '').trim().toLowerCase();
                         if (pl === 'udemy') return 'https://www.udemy.com/courses/search/?q=' + encodeURIComponent(name);
@@ -3467,7 +3112,7 @@ const API_ENDPOINTS = {
                 
                 // Process standalone URLs - fixed regex
                 // Use non-capturing group; escape backslashes for template literal, but keep pattern simple
-                var urlRegex = /(?:https?:\\/\\/|www\\.)[^\\s<>"']+/g;
+                var urlRegex = /(?:https?:\/\/|www\.)[^\s<>"']+/g;
                 text = text.replace(urlRegex, function(url) {
                     // Skip if already part of an anchor tag
                     if (text.indexOf('href="' + url) > -1 || text.indexOf('>' + url + '</a>') > -1) {
@@ -3528,7 +3173,7 @@ const API_ENDPOINTS = {
                     } catch (error) {
                         console.log('🔍 Debug - Markdown conversion failed, using fallback');
                         // Safe fallback - just convert line breaks to <br>
-                        safeNarrative = '<p class="text-gray-300">' + analysisData.narrative.split('\\n').join('<br>') + '</p>';
+                        safeNarrative = '<p class="text-gray-300">' + analysisData.narrative.split('\n').join('<br>') + '</p>';
                     }
                     
                     html += '<div class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 border border-primary/30 rounded-lg p-6 mb-6">' +
@@ -3714,5 +3359,6 @@ const API_ENDPOINTS = {
             }
         }
     </script>
-</body>
-</html>`;
+<script defer="" src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;9af463261b2e4372b9d2a0c99c936141&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+
+</div></body>
