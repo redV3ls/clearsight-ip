@@ -149,7 +149,6 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <a href="#features" class="nav-link text-gray-300 hover:text-primary">Success Stories</a>
                     <a href="#how-it-works" class="nav-link text-gray-300 hover:text-primary">How It Works</a>
                     <a href="#pricing" class="nav-link text-gray-300 hover:text-primary">Pricing</a>
-                    <a href="/docs" target="_blank" rel="noopener noreferrer" class="nav-link text-gray-300 hover:text-primary">API Docs <i class="fas fa-up-right-from-square ml-1 text-xs opacity-75"></i></a>
                     <a href="#history" id="historyLink" class="nav-link text-gray-300 hover:text-primary hidden">My Analyses</a>
                     
                     <div id="authButtons" class="flex items-center space-x-4">
@@ -185,6 +184,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         </div>
                         <span id="userCreditsBadge" class="hidden text-xs text-primary bg-primary/10 px-2 py-1 rounded border border-primary/40">0 credits</span>
                     </div>
+                    <a href="/docs" target="_blank" rel="noopener noreferrer" class="nav-link text-gray-300 hover:text-primary">API Docs <i class="fas fa-up-right-from-square ml-1 text-xs opacity-75"></i></a>
                 </div>
 
                 <div class="md:hidden">
