@@ -8,6 +8,17 @@ import { QueryOptimizationService } from '../services/queryOptimization';
 import { CacheInvalidationService } from '../services/cacheInvalidation';
 import { Env } from '../index';
 
+// Safe JSON parsing for certifications
+const safeParseCerts = (input: string | null | undefined): string[] => {
+  try {
+    if (!input) return [];
+    const parsed = JSON.parse(input);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
 // Zod schemas for validation
 export const skillLevelEnum = z.enum(['beginner', 'intermediate', 'advanced', 'expert']);
 export const learningStyleEnum = z.enum(['visual', 'auditory', 'kinesthetic']);
@@ -144,7 +155,7 @@ export class UserProfileService {
         ...profile[0],
         skills: userSkillsData.map(skill => ({
           ...skill,
-          certifications: skill.certifications ? JSON.parse(skill.certifications) : [],
+          certifications: safeParseCerts(skill.certifications as any),
         })),
       };
 
@@ -420,7 +431,7 @@ export class UserProfileService {
 
       return userSkillsData.map(skill => ({
         ...skill,
-        certifications: skill.certifications ? JSON.parse(skill.certifications) : [],
+        certifications: safeParseCerts(skill.certifications as any),
       }));
     } catch (error) {
       logger.error('Error fetching user skills:', error);

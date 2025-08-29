@@ -5,6 +5,16 @@ import { Env } from '../index';
 import { eq, and, or, desc, asc, sql, inArray, like, gte, lte, count } from 'drizzle-orm';
 import * as schema from '../db/schema';
 
+const safeParseCerts = (input: string | null | undefined): string[] => {
+  try {
+    if (!input) return [];
+    const parsed = JSON.parse(input);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
 export interface QueryPerformanceMetrics {
   queryId: string;
   executionTime: number;
@@ -109,7 +119,7 @@ export class QueryOptimizationService {
         ...profile[0],
         skills: userSkills.map(skill => ({
           ...skill,
-          certifications: skill.certifications ? JSON.parse(skill.certifications) : [],
+          certifications: safeParseCerts(skill.certifications as any),
         })),
       };
 
