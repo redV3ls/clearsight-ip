@@ -118,9 +118,14 @@ export class UserProfileService {
 
   async getUserProfile(userId: string) {
     try {
-      // Use optimized query if available
+      // Use optimized query if available, but fall back on error
       if (this.queryOptimizer) {
-        return await this.queryOptimizer.getUserProfileOptimized(userId);
+        try {
+          const optimized = await this.queryOptimizer.getUserProfileOptimized(userId);
+          if (optimized) return optimized;
+        } catch (optErr) {
+          logger.warn('Query optimizer failed, falling back to base query', { error: String(optErr) });
+        }
       }
 
       // Fallback to original implementation
