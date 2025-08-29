@@ -346,6 +346,13 @@ app.get('/', (c) => {
   return c.html(HTML_CONTENT);
 });
 
+// Password reset route: serve same app to allow token-based reset UI
+app.get('/reset-password', (c) => {
+  // Avoid caching token-bearing URLs
+  c.header('Cache-Control', 'no-store');
+  return c.html(HTML_CONTENT);
+});
+
 
 
 // 404 handler: redirect all unknown routes to home

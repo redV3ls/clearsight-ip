@@ -169,6 +169,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                             <span id="userEmail" class="text-gray-300 text-sm"></span>
                             <span id="userCreditsBadge" class="hidden text-xs text-primary bg-primary/10 px-2 py-1 rounded border border-primary/40">0 credits</span>
                         </div>
+                        <button id="changePasswordBtn" class="auth-button text-gray-300 hover:text-primary px-3 py-2 rounded-lg border border-gray-600 hover:border-primary transition-colors">
+                            <i class="fas fa-key mr-2"></i>Change Password
+                        </button>
                         <button id="logoutBtn" class="auth-button text-gray-300 hover:text-red-400 px-3 py-2 rounded-lg border border-gray-600 hover:border-red-400 transition-colors">
                             <i class="fas fa-sign-out-alt mr-2"></i>Logout
                         </button>
@@ -730,6 +733,9 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
                         Login
                     </button>
+                    <div class="text-right mt-2">
+                        <button type="button" id="forgotPasswordLink" class="text-sm text-gray-300 hover:text-primary underline">Forgot your password?</button>
+                    </div>
                 </form>
 
                 <form id="registerForm" class="hidden space-y-4">
@@ -747,6 +753,96 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     </div>
                     <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
                         Sign Up
+                    </button>
+                </form>
+
+                <form id="requestResetForm" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" name="resetEmail" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
+                        Send reset link
+                    </button>
+                    <div class="text-right mt-2">
+                        <button type="button" id="backToLoginLink" class="text-sm text-gray-300 hover:text-primary underline">Back to login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-lg max-w-md w-full">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-primary">Change Password</h2>
+                    <button id="closeChangePasswordModal" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div id="changePasswordError" class="hidden bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-4">
+                    <div class="flex items-center text-red-400">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span class="font-semibold">Error</span>
+                    </div>
+                    <p class="text-red-300 mt-1"></p>
+                </div>
+
+                <form id="changePasswordForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Current Password</label>
+                        <input type="password" name="currentPassword" required class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+                        <input type="password" name="newPassword" required minlength="8" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
+                        <input type="password" name="confirmNewPassword" required minlength="8" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
+                        Update Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="resetPasswordModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-lg max-w-md w-full">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-primary">Reset Password</h2>
+                    <button id="closeResetPasswordModal" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div id="resetPasswordError" class="hidden bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-4">
+                    <div class="flex items-center text-red-400">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span class="font-semibold">Error</span>
+                    </div>
+                    <p class="text-red-300 mt-1"></p>
+                </div>
+
+                <form id="resetPasswordForm" class="space-y-4">
+                    <input type="hidden" name="resetToken" id="resetTokenInput" />
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">New Password</label>
+                        <input type="password" name="resetNewPassword" required minlength="8" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
+                        <input type="password" name="resetConfirmPassword" required minlength="8" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-primary">
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-primary/80 text-white py-2 px-4 rounded-lg transition-colors">
+                        Reset Password
                     </button>
                 </form>
             </div>
@@ -1033,11 +1129,14 @@ Requirements:
         const API_BASE_URL = '/api';
         const API_V1_BASE_URL = '/api/v1';
         const API_BILLING_BASE_URL = '/api/billing';
-        const API_ENDPOINTS = {
+const API_ENDPOINTS = {
             login: API_V1_BASE_URL + '/auth/login',
             register: API_V1_BASE_URL + '/auth/register',
             logout: API_V1_BASE_URL + '/auth/logout',
             me: API_V1_BASE_URL + '/auth/me',
+            changePassword: API_V1_BASE_URL + '/auth/change-password',
+            requestReset: API_V1_BASE_URL + '/auth/request-reset',
+            resetPassword: API_V1_BASE_URL + '/auth/reset-password',
             analyzeResume: API_V1_BASE_URL + '/analyze/resume',
             analysisHistory: API_V1_BASE_URL + '/analyze/history',
             getAnalysis: (id) => API_V1_BASE_URL + '/analyze/history/' + id,
@@ -1057,6 +1156,7 @@ Requirements:
             // Setup all event listeners
             setupNavigationListeners();
             setupAuthListeners();
+            setupPasswordFlowListeners();
             setupAnalysisListeners();
             setupHistoryListeners();
             setupUIListeners();
@@ -1066,6 +1166,9 @@ Requirements:
 
             // If URL requests auth modal (from external redirect), open it
             handleAuthModalQuery();
+
+            // Handle presence of reset token in URL
+            handleResetTokenInURL();
 
             // Attach purchase handlers
             attachBuyPlanHandlers();
@@ -1374,6 +1477,219 @@ Requirements:
             // Form submissions
             document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
             document.getElementById('registerForm')?.addEventListener('submit', handleRegister);
+        }
+
+        // Password flows (change, request reset, reset)
+        function setupPasswordFlowListeners() {
+            // Forgot password flow in auth modal
+            document.getElementById('forgotPasswordLink')?.addEventListener('click', () => {
+                document.getElementById('loginForm')?.classList.add('hidden');
+                document.getElementById('registerForm')?.classList.add('hidden');
+                document.getElementById('requestResetForm')?.classList.remove('hidden');
+            });
+            document.getElementById('backToLoginLink')?.addEventListener('click', () => {
+                document.getElementById('requestResetForm')?.classList.add('hidden');
+                document.getElementById('registerForm')?.classList.add('hidden');
+                document.getElementById('loginForm')?.classList.remove('hidden');
+            });
+            document.getElementById('requestResetForm')?.addEventListener('submit', handleRequestReset);
+
+            // Change password (requires auth)
+            document.getElementById('changePasswordBtn')?.addEventListener('click', () => showChangePasswordModal());
+            document.getElementById('closeChangePasswordModal')?.addEventListener('click', hideChangePasswordModal);
+            document.getElementById('changePasswordForm')?.addEventListener('submit', handleChangePassword);
+
+            // Reset password modal (token-based)
+            document.getElementById('closeResetPasswordModal')?.addEventListener('click', hideResetPasswordModal);
+            document.getElementById('resetPasswordForm')?.addEventListener('submit', handleResetPasswordSubmit);
+        }
+
+        function handleResetTokenInURL() {
+            try {
+                const url = new URL(window.location.href);
+                const token = url.searchParams.get('token');
+                if (token) {
+                    showResetPasswordModal(token);
+                    url.searchParams.delete('token');
+                    window.history.replaceState({}, document.title, url.pathname + url.search);
+                }
+            } catch {}
+        }
+
+        function showChangePasswordModal() {
+            if (!AppState.user) {
+                showAuthModal('login');
+                showNotification('Please log in to change your password.', 'info');
+                return;
+            }
+            document.getElementById('changePasswordError')?.classList.add('hidden');
+            document.getElementById('changePasswordModal')?.classList.remove('hidden');
+            AppState.currentModal = 'change-password';
+        }
+
+        function hideChangePasswordModal() {
+            document.getElementById('changePasswordModal')?.classList.add('hidden');
+            AppState.currentModal = null;
+        }
+
+        function showResetPasswordModal(token) {
+            // Prefill token
+            const tokenInput = document.getElementById('resetTokenInput') as HTMLInputElement | null;
+            if (tokenInput) tokenInput.value = token;
+            document.getElementById('resetPasswordError')?.classList.add('hidden');
+            document.getElementById('resetPasswordModal')?.classList.remove('hidden');
+            AppState.currentModal = 'reset-password';
+        }
+
+        function hideResetPasswordModal() {
+            document.getElementById('resetPasswordModal')?.classList.add('hidden');
+            AppState.currentModal = null;
+        }
+
+        async function handleRequestReset(e) {
+            e.preventDefault();
+            const form = e.target as HTMLFormElement;
+            const email = (new FormData(form)).get('resetEmail');
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton?.innerHTML;
+            try {
+                if (submitButton) {
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+                    submitButton.setAttribute('disabled', 'true');
+                }
+                const res = await fetch(API_ENDPOINTS.requestReset, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                // Always success message to avoid enumeration
+                showNotification('If this email exists, a reset link has been sent.', 'info');
+                // Return to login form
+                document.getElementById('requestResetForm')?.classList.add('hidden');
+                document.getElementById('loginForm')?.classList.remove('hidden');
+            } catch (err) {
+                showNotification('Request failed. Please try again later.', 'error');
+            } finally {
+                if (submitButton && originalText) {
+                    submitButton.innerHTML = originalText;
+                    submitButton.removeAttribute('disabled');
+                }
+            }
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const form = e.target as HTMLFormElement;
+            const fd = new FormData(form);
+            const currentPassword = fd.get('currentPassword');
+            const newPassword = fd.get('newPassword');
+            const confirmNewPassword = fd.get('confirmNewPassword');
+            if (newPassword !== confirmNewPassword) {
+                const err = document.getElementById('changePasswordError');
+                const p = err?.querySelector('p');
+                if (err && p) {
+                    p.textContent = 'New passwords do not match.';
+                    err.classList.remove('hidden');
+                }
+                return;
+            }
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton?.innerHTML;
+            try {
+                if (submitButton) {
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
+                    submitButton.setAttribute('disabled', 'true');
+                }
+                const res = await fetch(API_ENDPOINTS.changePassword, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok) {
+                    hideChangePasswordModal();
+                    showNotification('Password changed successfully.', 'success');
+                } else if (res.status === 401) {
+                    handleTokenExpiration();
+                } else {
+                    const err = document.getElementById('changePasswordError');
+                    const p = err?.querySelector('p');
+                    if (err && p) {
+                        p.textContent = data?.error?.message || 'Password change failed.';
+                        err.classList.remove('hidden');
+                    }
+                }
+            } catch (err) {
+                const eDiv = document.getElementById('changePasswordError');
+                const p = eDiv?.querySelector('p');
+                if (eDiv && p) {
+                    p.textContent = 'Network error. Please try again.';
+                    eDiv.classList.remove('hidden');
+                }
+            } finally {
+                if (submitButton && originalText) {
+                    submitButton.innerHTML = originalText;
+                    submitButton.removeAttribute('disabled');
+                }
+            }
+        }
+
+        async function handleResetPasswordSubmit(e) {
+            e.preventDefault();
+            const form = e.target as HTMLFormElement;
+            const fd = new FormData(form);
+            const token = fd.get('resetToken');
+            const newPassword = fd.get('resetNewPassword');
+            const confirmPassword = fd.get('resetConfirmPassword');
+            if (newPassword !== confirmPassword) {
+                const err = document.getElementById('resetPasswordError');
+                const p = err?.querySelector('p');
+                if (err && p) {
+                    p.textContent = 'Passwords do not match.';
+                    err.classList.remove('hidden');
+                }
+                return;
+            }
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton?.innerHTML;
+            try {
+                if (submitButton) {
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Resetting...';
+                    submitButton.setAttribute('disabled', 'true');
+                }
+                const res = await fetch(API_ENDPOINTS.resetPassword, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, newPassword })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok) {
+                    hideResetPasswordModal();
+                    showAuthModal('login');
+                    showNotification('Password reset successfully. Please log in with your new password.', 'success');
+                } else {
+                    const err = document.getElementById('resetPasswordError');
+                    const p = err?.querySelector('p');
+                    if (err && p) {
+                        p.textContent = data?.error?.message || 'Password reset failed.';
+                        err.classList.remove('hidden');
+                    }
+                }
+            } catch (err) {
+                const eDiv = document.getElementById('resetPasswordError');
+                const p = eDiv?.querySelector('p');
+                if (eDiv && p) {
+                    p.textContent = 'Network error. Please try again.';
+                    eDiv.classList.remove('hidden');
+                }
+            } finally {
+                if (submitButton && originalText) {
+                    submitButton.innerHTML = originalText;
+                    submitButton.removeAttribute('disabled');
+                }
+            }
         }
 
         // Analysis functionality
