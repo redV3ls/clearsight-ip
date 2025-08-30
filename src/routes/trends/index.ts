@@ -508,21 +508,6 @@ class TrendsHandlers {
  * Create and configure trends routes
  */
 const trendsRoutes = createRouteBuilder('/trends')
-  .get('/industry/:industry', TrendsHandlers.getIndustryTrends, {
-    validation: { 
-      params: TrendsSchemas.industryParam,
-      query: TrendsSchemas.industryTrends 
-    },
-    auth: { required: true },
-    description: 'Get industry-specific trends analysis',
-    tags: ['Trends', 'Industry Analysis']
-  })
-  .get('/emerging', TrendsHandlers.getEmergingSkills, {
-    validation: { query: TrendsSchemas.emergingSkills },
-    auth: { required: true },
-    description: 'Get emerging skills trends',
-    tags: ['Trends', 'Skills Analysis']
-  })
   .get('/regional', TrendsHandlers.getRegionalTrends, {
     validation: { query: TrendsSchemas.regionalTrends },
     auth: { required: true },

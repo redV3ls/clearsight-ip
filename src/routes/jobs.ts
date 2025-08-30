@@ -92,38 +92,6 @@ jobs.post('/',
   }
 );
 
-/**
- * GET /jobs/search
- * Search jobs with filters
- */
-jobs.get('/search',
-  validateQuery(jobSearchSchema),
-  async (c) => {
-    try {
-      const searchParams = c.get('validatedQuery');
-      
-      const db = DatabaseManager.initialize(c.env.DB);
-      const jobService = new JobRequirementsService(db);
-
-      const jobs = await jobService.searchJobs(searchParams);
-
-      return c.json({
-        success: true,
-        data: jobs,
-        pagination: {
-          limit: searchParams.limit,
-          offset: searchParams.offset,
-          total: jobs.length
-        }
-      });
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError('Failed to search jobs', 500, 'JOB_SEARCH_ERROR');
-    }
-  }
-);
 
 /**
  * GET /jobs/:jobId
