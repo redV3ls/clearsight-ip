@@ -1317,39 +1317,36 @@ const API_ENDPOINTS = {
                     e.preventDefault();
                     const targetId = this.getAttribute('href');
 
-                    // Helper: show a section by id and hide others, then scroll to it
-                    const showSection = (id) => {
-                        try {
-                            // Hide any open modals to restore normal page interaction
-                            try { hideAuthModal(); } catch {}
-                            try { hideAnalysisInterface(); } catch {}
-
-                            // Toggle sections visibility
-                            document.querySelectorAll('section').forEach(section => {
-                                const shouldShow = ('#' + section.id) === id;
-                                section.classList.toggle('hidden', !shouldShow);
-                            });
-
-                            const target = document.querySelector(id);
-                            if (target) {
-                                target.classList.remove('hidden');
-                                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                            hideUserDropdown();
-                            closeMobileMenu();
-                        } catch (err) {
-                            console.warn('Navigation error:', err);
-                        }
-                    };
-                    
                     // Handle history section specially (loads data and manages visibility)
                     if (targetId === '#history') {
                         handleHistoryNavigation();
                         return;
                     }
 
-                    // For other in-page anchors, ensure section is made visible even if previously hidden
-                    showSection(targetId);
+                    try {
+                        // Hide modals/menus
+                        try { hideAuthModal(); } catch {}
+                        try { hideAnalysisInterface(); } catch {}
+                        hideUserDropdown();
+                        closeMobileMenu();
+
+                        // Show all landing sections; keep history hidden
+                        document.querySelectorAll('section').forEach(section => {
+                            if (section.id === 'history') {
+                                section.classList.add('hidden');
+                            } else {
+                                section.classList.remove('hidden');
+                            }
+                        });
+
+                        // Scroll to requested section
+                        const target = document.querySelector(targetId);
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    } catch (err) {
+                        console.warn('Navigation error:', err);
+                    }
                 });
             });
 
