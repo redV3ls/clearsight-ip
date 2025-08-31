@@ -1169,6 +1169,70 @@ Error responses:
   <style>
     html, body { margin: 0; padding: 0; height: 100%; }
     #swagger-ui { height: 100%; }
+
+    /* Brand variables to match the main app */
+    :root {
+      --primary: #14b8a6;
+      --primary-600: #0d9488;
+      --text: #e2e8f0;
+      --border: #334155;
+      --danger: #ef4444;
+    }
+
+    /* Make Swagger UI buttons look like the app's buttons */
+    .swagger-ui .btn,
+    .swagger-ui .opblock-control__btn,
+    .swagger-ui .modal-ux .modal-btn {
+      appearance: none;
+      border: 1px solid var(--border) !important;
+      background: #1f2937 !important; /* slate-800 */
+      color: var(--text) !important;
+      padding: 10px 14px !important; /* ~px-4 py-2 */
+      border-radius: 10px !important; /* rounded-lg */
+      font-weight: 700 !important; /* font-semibold */
+      box-shadow: none !important;
+      transition: all .2s ease !important;
+    }
+
+    .swagger-ui .btn:hover,
+    .swagger-ui .opblock-control__btn:hover,
+    .swagger-ui .modal-ux .modal-btn:hover {
+      border-color: var(--primary) !important;
+      color: var(--text) !important;
+    }
+
+    /* Primary actions (Authorize, Try it out, Execute) */
+    .swagger-ui .btn.authorize,
+    .swagger-ui .btn.execute,
+    .swagger-ui .opblock-control__btn.try-out {
+      background: linear-gradient(180deg, var(--primary), var(--primary-600)) !important;
+      border-color: transparent !important;
+      color: #0b1020 !important; /* dark text for contrast on teal */
+    }
+    .swagger-ui .btn.authorize svg { fill: #0b1020 !important; }
+
+    /* Danger/Cancel style */
+    .swagger-ui .btn.cancel,
+    .swagger-ui .btn.clear-opblock,
+    .swagger-ui .btn.undo {
+      background: transparent !important;
+      border-color: #7f1d1d !important;
+      color: #fca5a5 !important;
+    }
+    .swagger-ui .btn.cancel:hover,
+    .swagger-ui .btn.clear-opblock:hover,
+    .swagger-ui .btn.undo:hover {
+      border-color: var(--danger) !important;
+      color: #fecaca !important;
+    }
+
+    /* Small utility buttons */
+    .swagger-ui .copy-to-clipboard,
+    .swagger-ui .btn-copy {
+      background: #111827 !important; /* slate-900 */
+      border-color: var(--border) !important;
+      color: #cbd5e1 !important;
+    }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
 </head>
