@@ -33,8 +33,8 @@ const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?:
   '    h1{ font-size:32px; margin:0 0 10px } .lead{ color:#cbd5e1; margin:0 0 18px }' +
   '    .badge{ display:inline-block; padding:4px 10px; border-radius:999px; font-weight:700; font-size:12px; background:rgba(239,68,68,.15); color:#fecaca; border:1px solid rgba(239,68,68,.35); margin-bottom:12px }' +
   '    .actions{ display:flex; gap:12px; flex-wrap:wrap; margin-top:16px }' +
-  '    .btn{ appearance:none; border:1px solid var(--border); background:#1f2937; color:#e2e8f0; padding:12px 16px; border-radius:10px; text-decoration:none; font-weight:700 } .btn:hover{ border-color:var(--primary); color:var(--primary) }' +
-  '    .btn.primary{ background:linear-gradient(180deg, #14b8a6, #0d9488); border-color:transparent; color:#0b1020 } .btn.primary:hover{ filter:brightness(1.05) }' +
+  '    .btn{ appearance:none; border:1px solid var(--border); background:#1f2937; color:#e2e8f0; padding:14px 20px; border-radius:12px; text-decoration:none; font-weight:700; transition:all .2s ease } .btn:hover{ border-color:var(--primary); color:var(--primary) }' +
+  '    .btn.primary{ background:#14b8a6; border-color:transparent; color:#ffffff } .btn.primary:hover{ background:#0d9488 }' +
   '    .section{ background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; margin-top:14px }' +
   '    .section h3{ margin:0 0 8px; font-size:14px; color:#d1d5db }' +
   '    pre{ background:#0a1222; border:1px solid #1f2937; border-radius:8px; padding:12px; overflow:auto; color:#c7d2fe; font-size:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace }' +
@@ -47,7 +47,7 @@ const renderDocsAuthErrorPage = (opts: { title?: string; message: string; code?:
   '    .close{ border:none; background:transparent; color:#cbd5e1; font-size:18px; cursor:pointer }' +
   '    .tabs{ display:flex; gap:8px; background:#1f2a44; padding:6px; border-radius:10px; margin:14px 0 }' +
   '    .tab{ flex:1; padding:10px 12px; border-radius:8px; border:1px solid transparent; color:#cbd5e1; background:transparent; cursor:pointer; font-weight:600 }' +
-  '    .tab.active{ background:var(--primary); color:#0b1020 }' +
+  '    .tab.active{ background:var(--primary); color:#ffffff }' +
   '    .bd{ padding:18px }' +
   '    .field{ margin-bottom:12px }' +
   '    .label{ display:block; font-size:12px; color:#cbd5e1; margin:0 0 6px }' +
