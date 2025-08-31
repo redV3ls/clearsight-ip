@@ -644,23 +644,12 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     <!-- Footer -->
     <footer class="bg-slate-800 border-t border-slate-700 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-8">
+            <div class="grid md:grid-cols-3 gap-8">
                 <div>
                     <h3 class="text-xl font-bold text-primary mb-4">Clearsight IP</h3>
                     <p class="text-gray-300 mb-4">
                         AI-powered career insights and skills analysis platform for professional growth.
                     </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-primary">
-                            <i class="fab fa-twitter text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary">
-                            <i class="fab fa-linkedin text-xl"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary">
-                            <i class="fab fa-github text-xl"></i>
-                        </a>
-                    </div>
                 </div>
                 
                 <div>
@@ -670,16 +659,6 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         <li><a href="#pricing" class="text-gray-300 hover:text-primary">Pricing</a></li>
                         <li><a href="#demo" class="text-gray-300 hover:text-primary">Demo</a></li>
                         <li><a href="/docs" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-primary">API Docs <i class="fas fa-up-right-from-square ml-1 text-xs opacity-75"></i></a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 class="font-semibold text-white mb-4">Company</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-primary">About</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-primary">Blog</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-primary">Careers</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-primary">Contact</a></li>
                     </ul>
                 </div>
                 
