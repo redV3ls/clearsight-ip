@@ -172,6 +172,8 @@ export const DATA_RETENTION_HTML = basePage('Data Retention Policy', `
     <ul class="list-disc ml-6 space-y-1 text-gray-300">
       <li>Skill assessments: 12 months</li>
       <li>Gap analysis results: 6 months</li>
+      <li>Resume analyses and generated narratives: 90 days</li>
+      <li>Job analyses and comparisons: 90 days</li>
       <li>User profiles: up to 24 months after last activity</li>
       <li>Error tracking logs: 3 months</li>
       <li>General application logs: 1 month</li>

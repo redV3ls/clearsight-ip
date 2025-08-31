@@ -100,3 +100,20 @@ export function getRetentionConfig(env: any): RetentionConfig {
     dryRun: env.RETENTION_DRY_RUN === 'true'
   };
 }
+
+// D1 (database) retention configuration for age-based purging
+export interface D1RetentionConfig {
+  narrativeDays: number;        // narrative_analysis retention
+  resumeDays: number;           // resume_analyses retention
+  jobAnalysesDays: number;      // job_analyses retention
+  jobComparisonsDays: number;   // job_comparisons retention
+}
+
+export function getD1RetentionConfig(env: any): D1RetentionConfig {
+  return {
+    narrativeDays: parseInt(env.RETENTION_D1_NARRATIVE_DAYS || '90', 10),
+    resumeDays: parseInt(env.RETENTION_D1_RESUME_DAYS || '90', 10),
+    jobAnalysesDays: parseInt(env.RETENTION_D1_JOB_ANALYSES_DAYS || '90', 10),
+    jobComparisonsDays: parseInt(env.RETENTION_D1_JOB_COMPARISONS_DAYS || '90', 10),
+  };
+}

@@ -331,20 +331,26 @@ async function runDataRetentionPurge(env: Env): Promise<void> {
   logger.info('Starting data retention purge');
   
   try {
+    // Purge KV-based data per policies
     const retentionService = new DataRetentionService(env);
-    const results = await retentionService.purgeExpiredData();
+    const kvResults = await retentionService.purgeExpiredData();
+
+    // Purge D1 data by age (analyses and comparisons)
+    const d1Results = await purgeOldD1Records(env);
     
     const duration = Date.now() - startTime;
     logger.info('Data retention purge completed', {
       duration,
-      results,
+      kvResults,
+      d1Results,
     });
     
     // Store retention metrics
     await env.CACHE.put('retention:last_run', JSON.stringify({
       timestamp: new Date().toISOString(),
       duration,
-      results,
+      kvResults,
+      d1Results,
     }), {
       expirationTtl: 86400 * 30, // Keep for 30 days
     });
@@ -352,6 +358,66 @@ async function runDataRetentionPurge(env: Env): Promise<void> {
     logger.error('Data retention purge failed:', error);
     throw error;
   }
+}
+
+/**
+ * Purge D1 tables by age thresholds
+ */
+async function purgeOldD1Records(env: Env): Promise<any> {
+  const { getD1RetentionConfig } = await import('./config/dataRetention');
+  const config = getD1RetentionConfig(env);
+
+  const now = Date.now();
+  const cutoffs = {
+    narrative: new Date(now - config.narrativeDays * 24 * 60 * 60 * 1000).toISOString(),
+    resume: new Date(now - config.resumeDays * 24 * 60 * 60 * 1000).toISOString(),
+    jobAnalyses: new Date(now - config.jobAnalysesDays * 24 * 60 * 60 * 1000).toISOString(),
+    jobComparisons: new Date(now - config.jobComparisonsDays * 24 * 60 * 60 * 1000).toISOString(),
+  };
+
+  const stats = { narrativeDeleted: 0, resumeDeleted: 0, jobAnalysesDeleted: 0, jobComparisonsDeleted: 0 } as any;
+
+  try {
+    // narrative_analysis
+    const delNarr = await env.DB.prepare('DELETE FROM narrative_analysis WHERE created_at < ?')
+      .bind(cutoffs.narrative)
+      .run();
+    stats.narrativeDeleted = (delNarr as any)?.changes || (delNarr as any)?.meta?.changes || 0;
+  } catch (e) {
+    logger.warn('D1 purge: narrative_analysis failed', { error: e instanceof Error ? e.message : String(e) });
+  }
+
+  try {
+    // resume_analyses
+    const delRes = await env.DB.prepare('DELETE FROM resume_analyses WHERE created_at < ?')
+      .bind(cutoffs.resume)
+      .run();
+    stats.resumeDeleted = (delRes as any)?.changes || (delRes as any)?.meta?.changes || 0;
+  } catch (e) {
+    logger.warn('D1 purge: resume_analyses failed', { error: e instanceof Error ? e.message : String(e) });
+  }
+
+  try {
+    // job_analyses
+    const delJA = await env.DB.prepare('DELETE FROM job_analyses WHERE created_at < ?')
+      .bind(cutoffs.jobAnalyses)
+      .run();
+    stats.jobAnalysesDeleted = (delJA as any)?.changes || (delJA as any)?.meta?.changes || 0;
+  } catch (e) {
+    logger.warn('D1 purge: job_analyses failed', { error: e instanceof Error ? e.message : String(e) });
+  }
+
+  try {
+    // job_comparisons
+    const delJC = await env.DB.prepare('DELETE FROM job_comparisons WHERE created_at < ?')
+      .bind(cutoffs.jobComparisons)
+      .run();
+    stats.jobComparisonsDeleted = (delJC as any)?.changes || (delJC as any)?.meta?.changes || 0;
+  } catch (e) {
+    logger.warn('D1 purge: job_comparisons failed', { error: e instanceof Error ? e.message : String(e) });
+  }
+
+  return { config, cutoffs, stats };
 }
 
 /**

@@ -473,6 +473,19 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 </div>
             </div>
             
+            <div class="bg-slate-800 border border-slate-700 rounded-lg p-4 mb-6">
+                <div class="flex items-start gap-3">
+                    <div class="mt-0.5 text-primary" title="We automatically purge analyses after 90 days to protect your privacy and manage storage.">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="text-sm text-gray-300">
+                        Analyses older than <span class="font-semibold text-white">90 days</span> are automatically deleted in accordance with our
+                        <a href="/data-retention" class="underline text-primary">Data Retention Policy</a>.
+                        <span class="text-xs text-gray-400 block mt-1">Tip: Download or copy important results to keep them beyond this window.</span>
+                    </div>
+                </div>
+            </div>
+            
             <!-- History Content -->
             <div id="historyContent">
                 <!-- Loading State -->
