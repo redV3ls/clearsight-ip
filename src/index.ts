@@ -20,6 +20,7 @@ import trendsRoutes from './routes/trends/index';
 import { cacheMiddleware, userCacheMiddleware } from './middleware/cache';
 import { CacheNamespaces, CacheTTL } from './services/cache';
 import { createOpenAPIApp } from './lib/openapi';
+import { PRIVACY_POLICY_HTML, TERMS_HTML, DPA_HTML, DATA_RETENTION_HTML, DSR_HTML, STATUS_HTML } from './constants/legalPages';
 
 export interface Env {
   // Cloudflare bindings (required)
@@ -235,7 +236,8 @@ app.use('/api/v1/*', async (c, next) => {
   const publicPaths = [
     '/api/v1/auth/login', 
     '/api/v1/auth/register',
-    '/api/v1/auth/me'  // Make /auth/me public to check auth status
+    '/api/v1/auth/me',  // Make /auth/me public to check auth status
+    '/api/v1/privacy/dsr-public' // Allow public DSR submissions
   ];
   if (publicPaths.some(path => c.req.path === path)) {
     return next();
@@ -296,10 +298,12 @@ app.get('/health/detailed', async (c) => {
 // Legacy v1 routes (to be migrated)
 import authRoutes from './routes/auth';
 import analyzeRoutes from './routes/analyze';
+import privacyRoutes from './routes/privacy';
 app.route('/api/v1/auth', authRoutes);
 app.route('/api/v1/users', usersRoutes);
 app.route('/api/v1/jobs', jobsRoutes);
 app.route('/api/v1/analyze', analyzeRoutes);
+app.route('/api/v1/privacy', privacyRoutes);
 
 // Test routes for debugging async analysis
 
@@ -313,6 +317,14 @@ app.route('/', openAPIApp);
 
 // Redirect /docs to the actual documentation location
 app.get('/docs', (c) => c.redirect('/api/v1/docs'));
+
+// Legal and status pages
+app.get('/privacy', (c) => c.html(PRIVACY_POLICY_HTML));
+app.get('/terms', (c) => c.html(TERMS_HTML));
+app.get('/dpa', (c) => c.html(DPA_HTML));
+app.get('/data-retention', (c) => c.html(DATA_RETENTION_HTML));
+app.get('/dsr', (c) => c.html(DSR_HTML));
+app.get('/status', (c) => c.html(STATUS_HTML));
 
 // Favicon route
 app.get('/favicon.ico', (c) => {

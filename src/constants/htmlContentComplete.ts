@@ -686,10 +686,13 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                 <div>
                     <h4 class="font-semibold text-white mb-4">Support</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-primary">Help Center</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-primary">Privacy Policy</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-primary">Terms of Service</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-primary">Status</a></li>
+                        <li><a href="/privacy" class="text-gray-300 hover:text-primary">Privacy Policy</a></li>
+                        <li><a href="/terms" class="text-gray-300 hover:text-primary">Terms of Service</a></li>
+                        <li><a href="/dpa" class="text-gray-300 hover:text-primary">Data Processing Addendum</a></li>
+                        <li><a href="/data-retention" class="text-gray-300 hover:text-primary">Data Retention</a></li>
+                        <li><a href="/dsr" class="text-gray-300 hover:text-primary">Privacy Requests (DSR)</a></li>
+                        <li><a href="/status" class="text-gray-300 hover:text-primary">Status</a></li>
+                        <li><button id="openCookieSettings" type="button" class="text-gray-300 hover:text-primary underline">Cookie Settings</button></li>
                     </ul>
                 </div>
             </div>
@@ -701,6 +704,48 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             </div>
         </div>
     </footer>
+
+    <!-- Cookie Consent Banner -->
+    <div id="cookieConsent" class="fixed inset-x-0 bottom-0 z-50 hidden">
+      <div class="max-w-7xl mx-auto px-4 pb-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-lg p-4 md:p-6">
+          <div class="md:flex md:items-start md:justify-between gap-6">
+            <div class="md:w-2/3">
+              <h3 class="text-white font-semibold mb-2">We use cookies</h3>
+              <p class="text-gray-300 text-sm mb-3">
+                We use strictly necessary cookies to run the site. With your consent, we may also use analytics, functional, and marketing cookies. You can change your preferences at any time. Lawful bases: necessary = contract/legitimate interests; others = consent.
+              </p>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <label class="flex items-center gap-2">
+                  <input id="cc-necessary" type="checkbox" checked disabled class="rounded border-slate-600 bg-slate-700" />
+                  <span class="text-gray-300">Strictly necessary</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input id="cc-analytics" type="checkbox" class="rounded border-slate-600 bg-slate-700" />
+                  <span class="text-gray-300">Analytics</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input id="cc-functional" type="checkbox" class="rounded border-slate-600 bg-slate-700" />
+                  <span class="text-gray-300">Functional</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input id="cc-marketing" type="checkbox" class="rounded border-slate-600 bg-slate-700" />
+                  <span class="text-gray-300">Marketing</span>
+                </label>
+              </div>
+              <div class="mt-3 text-xs text-gray-400">
+                <a class="underline hover:text-primary" href="/privacy">Privacy Policy</a>
+              </div>
+            </div>
+            <div class="md:w-1/3 mt-3 md:mt-0 flex md:flex-col gap-2 justify-end">
+              <button id="cc-accept-all" class="bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded">Accept all</button>
+              <button id="cc-reject" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded">Reject non-essential</button>
+              <button id="cc-save" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded">Save preferences</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Auth Modal -->
     <div id="authModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1179,6 +1224,9 @@ const API_ENDPOINTS = {
             setupHistoryListeners();
             setupUIListeners();
             setupUserMenuListeners();
+            
+            // Cookie consent banner
+            setupCookieConsent();
             
             // Check authentication status
             checkAuthStatus();
@@ -2213,6 +2261,98 @@ const API_ENDPOINTS = {
                     hideAnalysisInterface();
                     hideUserDropdown();
                 }
+            });
+        }
+
+        // Cookie consent banner logic
+        function setupCookieConsent() {
+            const banner = document.getElementById('cookieConsent');
+            const btnAcceptAll = document.getElementById('cc-accept-all');
+            const btnReject = document.getElementById('cc-reject');
+            const btnSave = document.getElementById('cc-save');
+            const openSettingsBtn = document.getElementById('openCookieSettings');
+            const chkAnalytics = document.getElementById('cc-analytics');
+            const chkFunctional = document.getElementById('cc-functional');
+            const chkMarketing = document.getElementById('cc-marketing');
+
+            const STORAGE_KEY = 'cookieConsent.v1';
+
+            function savePrefs(prefs) {
+                try {
+                    const toStore = { ...prefs, ts: Date.now() };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+                    // expose globally for other scripts
+                    window.cookieConsent = prefs;
+                    try { window.dispatchEvent(new CustomEvent('cookieconsentchange', { detail: prefs })); } catch (e) {}
+                } catch (e) {}
+            }
+
+            function loadPrefs() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return null;
+                    const parsed = JSON.parse(raw);
+                    const prefs = {
+                        necessary: true,
+                        analytics: !!parsed.analytics,
+                        functional: !!parsed.functional,
+                        marketing: !!parsed.marketing
+                    };
+                    return prefs;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function applyPrefsToUI(prefs) {
+                if (chkAnalytics) chkAnalytics.checked = !!prefs.analytics;
+                if (chkFunctional) chkFunctional.checked = !!prefs.functional;
+                if (chkMarketing) chkMarketing.checked = !!prefs.marketing;
+            }
+
+            function showBanner() { banner?.classList.remove('hidden'); }
+            function hideBanner() { banner?.classList.add('hidden'); }
+
+            // Initialize state
+            const existing = loadPrefs();
+            if (existing) {
+                window.cookieConsent = existing;
+                applyPrefsToUI(existing);
+                hideBanner();
+            } else {
+                window.cookieConsent = { necessary: true, analytics: false, functional: false, marketing: false };
+                showBanner();
+            }
+
+            // Button handlers
+            btnAcceptAll?.addEventListener('click', () => {
+                const prefs = { necessary: true, analytics: true, functional: true, marketing: true };
+                savePrefs(prefs);
+                hideBanner();
+            });
+
+            btnReject?.addEventListener('click', () => {
+                const prefs = { necessary: true, analytics: false, functional: false, marketing: false };
+                savePrefs(prefs);
+                hideBanner();
+            });
+
+            btnSave?.addEventListener('click', () => {
+                const prefs = {
+                    necessary: true,
+                    analytics: !!(chkAnalytics && chkAnalytics.checked),
+                    functional: !!(chkFunctional && chkFunctional.checked),
+                    marketing: !!(chkMarketing && chkMarketing.checked)
+                };
+                savePrefs(prefs);
+                hideBanner();
+            });
+
+            openSettingsBtn?.addEventListener('click', (e) => {
+                try { e.preventDefault(); } catch {}
+                const current = loadPrefs();
+                if (current) applyPrefsToUI(current);
+                showBanner();
             });
         }
 
