@@ -670,7 +670,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <ul class="space-y-2">
                         <li><a href="#features" class="text-gray-300 hover:text-primary">Features</a></li>
                         <li><a href="#pricing" class="text-gray-300 hover:text-primary">Pricing</a></li>
-                        <li><a href="#demo" class="text-gray-300 hover:text-primary">Demo</a></li>
+                        <li><a href="#demo" class="text-gray-300 hover:text-primary">See What to Expect</a></li>
                         <li><a href="/docs" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-primary">API Docs <i class="fas fa-up-right-from-square ml-1 text-xs opacity-75"></i></a></li>
                     </ul>
                 </div>
