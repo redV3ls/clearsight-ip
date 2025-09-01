@@ -2,7 +2,7 @@
 // NOTE: These pages are informational templates. Review with counsel before production.
 
 function basePage(title: string, body: string): string {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,14 +26,13 @@ function basePage(title: string, body: string): string {
         <a href="/dpa" class="hover:text-primary">DPA</a>
         <a href="/data-retention" class="hover:text-primary">Data Retention</a>
         <a href="/dsr" class="hover:text-primary">Privacy Requests</a>
-        <a href="/status" class="hover:text-primary">Status</a>
       </div>
     </div>
   </nav>
 
   <main class="max-w-5xl mx-auto px-4 py-10">
     <h1 class="text-3xl font-bold text-white mb-2">${title}</h1>
-    <p class="text-gray-400 text-sm mb-8">Last updated: ${today}</p>
+    <p id="lastUpdatedStamp" class="text-gray-400 text-sm mb-8">Last updated: ${today}</p>
     ${body}
     <div class="mt-10 text-sm text-gray-400">
       <button id="cookieSettingsLink" class="underline hover:text-primary" type="button">Cookie Settings</button>
@@ -43,6 +42,16 @@ function basePage(title: string, body: string): string {
   </main>
 
   <script>
+  // Update last updated date client-side to ensure correct formatting and freshness
+  try {
+    var el = document.getElementById('lastUpdatedStamp');
+    if (el) {
+      var now = new Date();
+      var formatted = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      el.textContent = 'Last updated: ' + formatted;
+    }
+  } catch (e) {}
+
   // Simple opener to show the cookie settings on the home page
   document.getElementById('cookieSettingsLink')?.addEventListener('click', function(){
     window.location.href='/?cookies=open';
@@ -258,30 +267,4 @@ export const DSR_HTML = basePage('Privacy Requests (DSR)', `
   </script>
 `);
 
-export const STATUS_HTML = basePage('System Status', `
-  <div id="statusWrap" class="space-y-6">
-    <div class="bg-slate-800 border border-slate-700 rounded p-6">
-      <h2 class="text-xl font-semibold text-white mb-2">Overall</h2>
-      <div id="overall" class="text-gray-300">Loading...</div>
-    </div>
-    <div class="bg-slate-800 border border-slate-700 rounded p-6">
-      <h2 class="text-xl font-semibold text-white mb-2">Details</h2>
-      <pre id="details" class="text-xs text-gray-300 whitespace-pre-wrap"></pre>
-    </div>
-  </div>
-  <script>
-    (async function(){
-      try {
-        const health = await fetch('/health').then(r=>r.json());
-        const detailed = await fetch('/health/detailed').then(r=>r.json());
-        const overall = document.getElementById('overall');
-        const details = document.getElementById('details');
-        overall.textContent = 'Status: ' + (health?.status || 'unknown') + ' • env=' + (health?.environment || 'n/a');
-        details.textContent = JSON.stringify(detailed, null, 2);
-      } catch (e) {
-        document.getElementById('overall').textContent = 'Unable to fetch status';
-      }
-    })();
-  </script>
-`);
 

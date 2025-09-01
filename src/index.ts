@@ -20,7 +20,7 @@ import trendsRoutes from './routes/trends/index';
 import { cacheMiddleware, userCacheMiddleware } from './middleware/cache';
 import { CacheNamespaces, CacheTTL } from './services/cache';
 import { createOpenAPIApp } from './lib/openapi';
-import { PRIVACY_POLICY_HTML, TERMS_HTML, DPA_HTML, DATA_RETENTION_HTML, DSR_HTML, STATUS_HTML } from './constants/legalPages';
+import { PRIVACY_POLICY_HTML, TERMS_HTML, DPA_HTML, DATA_RETENTION_HTML, DSR_HTML } from './constants/legalPages';
 
 export interface Env {
   // Cloudflare bindings (required)
@@ -324,7 +324,6 @@ app.get('/terms', (c) => c.html(TERMS_HTML));
 app.get('/dpa', (c) => c.html(DPA_HTML));
 app.get('/data-retention', (c) => c.html(DATA_RETENTION_HTML));
 app.get('/dsr', (c) => c.html(DSR_HTML));
-app.get('/status', (c) => c.html(STATUS_HTML));
 
 // Favicon route
 app.get('/favicon.ico', (c) => {
@@ -351,8 +350,8 @@ app.get('/favicon.ico', (c) => {
 // Root endpoint - serve the HTML home page
 // Static file serving for client assets
 app.get('/', (c) => {
-  // Set cache header
-  c.header('Cache-Control', 'public, max-age=3600');
+  // Avoid caching the main HTML so changes propagate immediately
+  c.header('Cache-Control', 'no-store');
   
   // Return HTML content using Hono's html method
   return c.html(HTML_CONTENT);

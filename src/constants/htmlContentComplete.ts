@@ -683,7 +683,6 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                         <li><a href="/dpa" class="text-gray-300 hover:text-primary">Data Processing Addendum</a></li>
                         <li><a href="/data-retention" class="text-gray-300 hover:text-primary">Data Retention</a></li>
                         <li><a href="/dsr" class="text-gray-300 hover:text-primary">Privacy Requests (DSR)</a></li>
-                        <li><a href="/status" class="text-gray-300 hover:text-primary">Status</a></li>
                         <li><button id="openCookieSettings" type="button" class="text-gray-300 hover:text-primary underline">Cookie Settings</button></li>
                     </ul>
                 </div>
