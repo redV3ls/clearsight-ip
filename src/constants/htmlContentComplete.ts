@@ -690,7 +690,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             
             <div class="border-t border-slate-700 mt-8 pt-8 text-center">
                 <p class="text-gray-400">
-                    © 2024 Clearsight IP. All rights reserved. Built with ❤️ for career growth.
+                    © 2025 Clearsight IP. All rights reserved. Built with ❤️ for career growth.
                 </p>
             </div>
         </div>
