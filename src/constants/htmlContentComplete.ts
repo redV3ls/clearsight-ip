@@ -638,10 +638,6 @@ export const HTML_CONTENT = `<!DOCTYPE html>
                     <div class="flex flex-wrap justify-center gap-4 text-sm">
                         <div class="flex items-center text-gray-300">
                             <i class="fas fa-check-circle text-green-400 mr-2"></i>
-                            <span>No credit card required</span>
-                        </div>
-                        <div class="flex items-center text-gray-300">
-                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
                             <span>Results in seconds</span>
                         </div>
                         <div class="flex items-center text-gray-300">
