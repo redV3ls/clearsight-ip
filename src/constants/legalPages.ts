@@ -35,8 +35,6 @@ function basePage(title: string, body: string): string {
     <p id="lastUpdatedStamp" class="text-gray-400 text-sm mb-8">Last updated: ${today}</p>
     ${body}
     <div class="mt-10 text-sm text-gray-400">
-      <button id="cookieSettingsLink" class="underline hover:text-primary" type="button">Cookie Settings</button>
-      <span class="mx-2">•</span>
       <a href="/" class="underline hover:text-primary">Back to Home</a>
     </div>
   </main>
@@ -52,10 +50,6 @@ function basePage(title: string, body: string): string {
     }
   } catch (e) {}
 
-  // Simple opener to show the cookie settings on the home page
-  document.getElementById('cookieSettingsLink')?.addEventListener('click', function(){
-    window.location.href='/?cookies=open';
-  });
   </script>
 </body>
 </html>`;
@@ -199,72 +193,23 @@ export const DATA_RETENTION_HTML = basePage('Data Retention Policy', `
 export const DSR_HTML = basePage('Privacy Requests (DSR)', `
   <div class="space-y-6">
     <p>
-      Use this form to request: access/export of your data, deletion, or correction. If you have an account, using the email tied to your account will help us verify your identity.
+      Use this page to request access, export, deletion, correction, or opt out of marketing.
     </p>
 
-    <form id="dsrForm" class="bg-slate-800 border border-slate-700 rounded p-6 space-y-4 max-w-xl">
-      <div>
-        <label class="block text-sm text-gray-300 mb-1">Request Type</label>
-        <select id="requestType" class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white">
-          <option value="access">Access / Copy</option>
-          <option value="export">Export (portable copy)</option>
-          <option value="delete">Delete Account & Data</option>
-          <option value="rectify">Correct Data</option>
-          <option value="opt_out">Opt-out (marketing)</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm text-gray-300 mb-1">Email</label>
-        <input id="email" type="email" required class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white" placeholder="you@example.com" />
-      </div>
-      <div>
-        <label class="block text-sm text-gray-300 mb-1">Details (optional)</label>
-        <textarea id="details" class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white" rows="4" placeholder="Add any specifics that help us process your request..."></textarea>
-      </div>
-      <button type="submit" class="bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded">Submit Request</button>
-      <p id="dsrMsg" class="text-sm text-gray-400 mt-2"></p>
-    </form>
+    <div class="bg-slate-800 border border-slate-700 rounded p-6 space-y-3">
+      <h2 class="text-xl font-semibold text-white">Submit by email</h2>
+      <p class="text-gray-300">
+        Email <a class="underline text-primary" href="mailto:privacy@clearsight-ip.com">privacy@clearsight-ip.com</a> with:
+      </p>
+      <ul class="list-disc ml-6 space-y-1 text-gray-300">
+        <li>Request type (access, export, delete, rectify, opt out)</li>
+        <li>The email address associated with your account</li>
+        <li>Any details that help us process the request</li>
+      </ul>
+    </div>
 
-    <p class="text-sm text-gray-400">If you are signed in, you may also use in-app privacy tools in your account.</p>
+    <p class="text-sm text-gray-400">We will respond as required by applicable law.</p>
   </div>
-
-  <script>
-  (function(){
-    const form = document.getElementById('dsrForm');
-    const msg = document.getElementById('dsrMsg');
-    form?.addEventListener('submit', async function(e){
-      e.preventDefault();
-      msg.textContent = '';
-      var typeEl = document.getElementById('requestType');
-      var type = (typeEl && (typeEl).value) ? (typeEl).value : 'access';
-      var emailEl = document.getElementById('email');
-      var email = (emailEl && (emailEl).value) ? (emailEl).value : '';
-      var detailsEl = document.getElementById('details');
-      var details = (detailsEl && (detailsEl).value) ? (detailsEl).value : '';
-      try {
-        const res = await fetch('/api/v1/privacy/dsr-public', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type, email, details })
-        });
-        const data = await res.json().catch(()=>({}));
-        if (res.ok) {
-          msg.textContent = 'Request submitted. We will follow up via email.';
-          msg.className = 'text-sm text-green-400';
-          form.reset();
-        } else {
-          msg.textContent = data?.error?.message || 'Submission failed. Please try again later.';
-          msg.className = 'text-sm text-red-400';
-        }
-      } catch (err) {
-        msg.textContent = 'Network error. Please try again later.';
-        msg.className = 'text-sm text-red-400';
-      }
-    });
-    document.getElementById('cookieSettingsLink')?.addEventListener('click', function(){
-      window.location.href='/?cookies=open';
-    });
-  })();
-  </script>
 `);
 
 

@@ -1,324 +1,49 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-import { prettyJSON } from 'hono/pretty-json';
 import { HTML_CONTENT } from './constants/htmlContentComplete';
-import { errorHandler } from './middleware/errorHandler';
-import { authMiddleware } from './middleware/auth';
-import { performanceTrackingMiddleware } from './middleware/performanceTracking';
-import { environmentValidationMiddleware, getEnvironmentHealthStatus } from './middleware/environmentValidation';
-// Import routes
-import usersRoutes from './routes/users';
-import jobsRoutes from './routes/jobs';
-// Removed unused routes as part of API pruning
-// import monitoringRoutes from './routes/monitoring';
-// import gdprRoutes from './routes/gdpr';
-// import auditRoutes from './routes/audit';
-import billingRoutes from './routes/billing';
-import trendsRoutes from './routes/trends/index';
-// Cache imports - re-enabling
-import { cacheMiddleware, userCacheMiddleware } from './middleware/cache';
-import { CacheNamespaces, CacheTTL } from './services/cache';
-import { createOpenAPIApp } from './lib/openapi';
 import { PRIVACY_POLICY_HTML, TERMS_HTML, DPA_HTML, DATA_RETENTION_HTML, DSR_HTML } from './constants/legalPages';
 
-export interface Env {
-  // Cloudflare bindings (required)
-  DB: D1Database;
-  CACHE: KVNamespace;
-  // RATE_LIMITER: DurableObjectNamespace; // Requires paid plan
-  
-  // Environment variables
-  NODE_ENV?: string;
-  JWT_SECRET?: string; // Legacy - kept for backward compatibility
-  JWT_PRIVATE_KEY?: string; // RSA private key for JWT signing (RS256)
-  JWT_PUBLIC_KEY?: string; // RSA public key for JWT verification (RS256)
-  CORS_ORIGIN?: string;
-  RATE_LIMIT_WINDOW_MS?: string;
-  RATE_LIMIT_MAX_REQUESTS?: string;
-  ENABLE_RATE_LIMITING?: string;
-  RATE_LIMIT_ONLY_MUTATIONS?: string;
-  DISABLE_KV_LOGGING?: string;
-  ERROR_TRACKING_ENABLED?: string;
-  ERROR_TRACKING_SAMPLE_RATE?: string;
-  USE_KV_CACHE?: string;
-  LOG_LEVEL?: string;
-  
-  // DeepSeek AI Configuration
-  DEEPSEEK_API_KEY?: string;
-  DEEPSEEK_BASE_URL?: string;
-  DEEPSEEK_MODEL?: string;
-  DEEPSEEK_MAX_TOKENS?: string;
-  DEEPSEEK_TEMPERATURE?: string;
-  DEEPSEEK_TIMEOUT?: string;
+const app = new Hono();
 
-  // Stripe configuration
-  STRIPE_SECRET_KEY?: string;
-  STRIPE_PRICE_ID_PACK_4?: string;
-  STRIPE_PRICE_ID_PACK_10?: string;
-  STRIPE_PRICE_ID_PACK_30?: string;
-  STRIPE_WEBHOOK_SECRET?: string; // optional, for future webhook support
-}
-
-const app = new Hono<{ Bindings: Env }>();
-
-// Global error handler
-app.onError(errorHandler);
-
-// Global middleware
-app.use('*', environmentValidationMiddleware);
-app.use('*', performanceTrackingMiddleware);
 app.use('*', logger());
-app.use('*', prettyJSON());
-// Security headers middleware
+
+// Basic security headers and HTML content type handling.
 app.use('*', async (c, next) => {
-  // Content Security Policy - relaxed for third-party resources
   const csp = [
     "default-src 'self' https:",
-    // Scripts: Allow inline, eval, and all HTTPS sources (needed for CDNs)
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
-    // Styles: Allow inline and all HTTPS sources
     "style-src 'self' 'unsafe-inline' https:",
-    // Fonts: Allow all HTTPS sources and data URIs
     "font-src 'self' https: data:",
-    // Images: Allow all HTTPS sources and data URIs
     "img-src 'self' https: data:",
-    // Connections: Allow all HTTPS sources
     "connect-src 'self' https:",
-    // Objects and frames
     "object-src 'none'",
     "frame-src 'none'",
     "frame-ancestors 'none'",
-    // Forms and base
     "form-action 'self'",
     "base-uri 'self'",
-    // Upgrade insecure requests
     'upgrade-insecure-requests'
   ].join('; ');
 
   c.header('Content-Security-Policy', csp);
-  
-  // Remove COEP header entirely to avoid cross-origin resource blocking
-  // Don't set Cross-Origin-Embedder-Policy at all
-  
-  // Add CORP header to allow resources to be loaded cross-origin
   c.header('Cross-Origin-Resource-Policy', 'cross-origin');
-  
-  // Add other security headers
   c.header('X-Content-Type-Options', 'nosniff');
   c.header('X-Frame-Options', 'DENY');
   c.header('X-XSS-Protection', '1; mode=block');
   c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
-  // Ensure proper content type for HTML responses
+
   if (c.req.path === '/' || c.req.path.endsWith('.html')) {
     c.header('Content-Type', 'text/html; charset=utf-8');
   }
-  
+
   await next();
 });
 
-// CORS configuration for production
-app.use('*', cors({
-  origin: (origin, c) => {
-    // Allow when no Origin header (same-origin requests)
-    if (!origin) return null;
-
-    // Allow production domain
-    const allowedOrigins = [
-      'https://clearsight-ip.com',
-      'https://www.clearsight-ip.com',
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'https://localhost:3000',
-      'https://localhost:3001',
-    ];
-
-    if (allowedOrigins.includes(origin)) return origin;
-
-    // Allow configured origin from environment
-    if (c.env?.CORS_ORIGIN && origin === c.env.CORS_ORIGIN) return origin;
-
-    // Allow Cloudflare Workers subdomains
-    try {
-      const url = new URL(origin);
-      // Allow any *.workers.dev subdomain
-      if (url.hostname.endsWith('.workers.dev')) return origin;
-      // Allow clearsight-ip.com subdomains
-      if (url.hostname.endsWith('clearsight-ip.com')) return origin;
-    } catch {
-      // Invalid URL, deny
-    }
-
-    // Deny otherwise
-    return null;
-  },
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With', 'Accept'],
-  exposeHeaders: ['Content-Length', 'X-Request-Id'],
-  credentials: true,
-  maxAge: 86400, // 24 hours
-}));
-
-// Temporarily disable compression middleware to fix display issues
-// TODO: Re-enable with proper configuration later
-// app.use('*', compressionMiddleware);
-
-// Cache middleware for specific routes
-
-app.use('/api/v1/trends/*', cacheMiddleware({
-  namespace: CacheNamespaces.TREND_DATA,
-  ttl: CacheTTL.MEDIUM, // 1 hour cache for trends
-}));
-
-app.use('/api/v1/jobs/search', cacheMiddleware({
-  namespace: CacheNamespaces.API_RESPONSES,
-  ttl: CacheTTL.SHORT, // 15 minutes for job searches
-}));
-
-app.use('/api/v1/users/profile', userCacheMiddleware({
-  namespace: CacheNamespaces.USER_PROFILE,
-  ttl: CacheTTL.SHORT, // 15 minutes for user profiles
-}));
-
-// Production rate limiting
-app.use('*', async (c, next) => {
-  const { productionRateLimiter } = await import('./services/productionRateLimiter');
-  return productionRateLimiter()(c, next);
+// Public web pages
+app.get('/', (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.html(HTML_CONTENT);
 });
 
-
-
-// API root endpoint (public - no auth required) - must be before auth middleware
-app.get('/api/v1', (c) => {
-  return c.json({
-    message: 'Clearsight IP API v1',
-    version: '1.0.0',
-    status: 'All endpoints active',
-    endpoints: {
-      health: '/health',
-      root: '/',
-      api: '/api/v1',
-      auth: '/api/v1/auth',
-      users: '/api/v1/users',
-      jobs: '/api/v1/jobs',
-      analyze: '/api/v1/analyze',
-      trends: '/api/v1/trends',
-      docs: '/docs'
-    },
-    features: {
-      skill_gap_analysis: 'active',
-      team_analysis: 'active',
-      industry_trends: 'active',
-      job_matching: 'active',
-      user_profiles: 'active',
-      caching: 'active',
-      // monitoring endpoints removed; internal health checks remain
-    },
-    authentication: {
-      required: true,
-      methods: ['JWT', 'API_KEY'],
-      endpoints: {
-        login: '/api/v1/auth/login',
-        register: '/api/v1/auth/register'
-      }
-    },
-    timestamp: new Date().toISOString(),
-    cloudflare: {
-      colo: c.req.header('CF-RAY')?.split('-')[1] || 'unknown',
-      country: c.req.header('CF-IPCountry') || 'unknown',
-    },
-  });
-});
-
-// Authentication middleware for protected routes
-app.use('/api/v1/*', async (c, next) => {
-  const publicPaths = [
-    '/api/v1/auth/login', 
-    '/api/v1/auth/register',
-    '/api/v1/auth/me',  // Make /auth/me public to check auth status
-    '/api/v1/privacy/dsr-public' // Allow public DSR submissions
-  ];
-  if (publicPaths.some(path => c.req.path === path)) {
-    return next();
-  }
-  return authMiddleware(c, next);
-});
-
-// Basic health check
-app.get('/health', (c) => {
-  const envHealth = getEnvironmentHealthStatus();
-  
-  return c.json({
-    status: envHealth.status === 'valid' ? 'healthy' : 'degraded',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    environment: c.env?.NODE_ENV || 'development',
-    validation: envHealth
-  });
-});
-
-// Detailed health check
-app.get('/health/detailed', async (c) => {
-  const healthStatus = {
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    environment: c.env?.NODE_ENV || 'development',
-    dependencies: {
-      database: 'unknown',
-      cache: 'unknown',
-    },
-    cloudflare: {
-      colo: c.req.header('CF-RAY')?.split('-')[1] || 'unknown',
-      country: c.req.header('CF-IPCountry') || 'unknown',
-      ray: c.req.header('CF-RAY') || 'unknown',
-    },
-  };
-
-  // Check D1 database connection
-  try {
-    await c.env.DB.prepare('SELECT 1').first();
-    healthStatus.dependencies.database = 'healthy';
-  } catch (error) {
-    healthStatus.dependencies.database = 'unhealthy';
-    healthStatus.status = 'degraded';
-  }
-
-  // Skip KV cache writes/reads here to avoid burning KV quotas
-  // If needed, a lightweight read-only ping can be added behind a flag.
-  healthStatus.dependencies.cache = 'skipped';
-
-  const statusCode = healthStatus.status === 'healthy' ? 200 : 503;
-  return c.json(healthStatus, statusCode);
-});
-
-// API routes - Using new centralized router system
-
-// Legacy v1 routes (to be migrated)
-import authRoutes from './routes/auth';
-import analyzeRoutes from './routes/analyze';
-import privacyRoutes from './routes/privacy';
-app.route('/api/v1/auth', authRoutes);
-app.route('/api/v1/users', usersRoutes);
-app.route('/api/v1/jobs', jobsRoutes);
-app.route('/api/v1/analyze', analyzeRoutes);
-app.route('/api/v1/privacy', privacyRoutes);
-
-// Test routes for debugging async analysis
-
-// Pruned routes: monitoring, gdpr, audit are no longer exposed via API
-app.route('/api/billing', billingRoutes);
-app.route('/api/v1/trends', trendsRoutes);
-
-// OpenAPI documentation
-const openAPIApp = createOpenAPIApp();
-app.route('/', openAPIApp);
-
-// Redirect /docs to the actual documentation location
-app.get('/docs', (c) => c.redirect('/api/v1/docs'));
-
-// Legal and status pages
 app.get('/privacy', (c) => c.html(PRIVACY_POLICY_HTML));
 app.get('/terms', (c) => c.html(TERMS_HTML));
 app.get('/dpa', (c) => c.html(DPA_HTML));
@@ -343,40 +68,14 @@ app.get('/favicon.ico', (c) => {
   </svg>`;
 
   c.header('Content-Type', 'image/svg+xml');
-  c.header('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+  c.header('Cache-Control', 'public, max-age=31536000');
   return c.body(faviconSvg);
 });
 
-// Root endpoint - serve the HTML home page
-// Static file serving for client assets
-app.get('/', (c) => {
-  // Avoid caching the main HTML so changes propagate immediately
-  c.header('Cache-Control', 'no-store');
-  
-  // Return HTML content using Hono's html method
-  return c.html(HTML_CONTENT);
-});
-
-// Password reset route: serve same app to allow token-based reset UI
-app.get('/reset-password', (c) => {
-  // Avoid caching token-bearing URLs
-  c.header('Cache-Control', 'no-store');
-  return c.html(HTML_CONTENT);
-});
-
-
-
-// 404 handler: redirect all unknown routes to home
+// Redirect all unknown routes to home
 app.notFound((c) => {
-  // Prevent caching the redirect response
   c.header('Cache-Control', 'no-store');
   return c.redirect('/', 302);
 });
 
-// Export for scheduled workers
-export { default as scheduled } from './scheduled';
-
 export default app;
-
-// Note: Durable Objects require a paid Cloudflare plan
-// For free tier, we'll implement rate limiting using KV storage instead
