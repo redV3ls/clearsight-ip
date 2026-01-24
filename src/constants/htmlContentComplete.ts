@@ -90,7 +90,6 @@ export const HTML_CONTENT = `<!DOCTYPE html>
           <a href="#how-it-works" class="nav-link text-gray-300 hover:text-primary">How It Works</a>
           <a href="#pricing" class="nav-link text-gray-300 hover:text-primary">Pricing</a>
           <a href="#faq" class="nav-link text-gray-300 hover:text-primary">FAQ</a>
-          <a href="#contact" class="bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg transition-colors">Contact</a>
         </div>
         <div class="md:hidden">
           <button id="mobileMenuBtn" class="text-gray-300 hover:text-primary" aria-label="Open menu">
@@ -105,7 +104,6 @@ export const HTML_CONTENT = `<!DOCTYPE html>
         <a href="#how-it-works" class="block text-gray-300 hover:text-primary py-2">How It Works</a>
         <a href="#pricing" class="block text-gray-300 hover:text-primary py-2">Pricing</a>
         <a href="#faq" class="block text-gray-300 hover:text-primary py-2">FAQ</a>
-        <a href="#contact" class="block text-primary py-2">Contact</a>
       </div>
     </div>
   </nav>
@@ -122,9 +120,6 @@ export const HTML_CONTENT = `<!DOCTYPE html>
               Clearsight IP turns career uncertainty into a focused, practical path. Get clarity on what to build next and why it matters.
             </p>
             <div class="flex flex-col sm:flex-row gap-4">
-              <a href="#contact" class="bg-primary hover:bg-primary/80 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors text-center">
-                Talk to Us
-              </a>
               <a href="#features" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-8 py-4 rounded-lg text-lg font-semibold transition-colors text-center">
                 See the Results
               </a>
@@ -279,7 +274,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
               <li>Personal skill roadmap</li>
               <li>Priority recommendations</li>
             </ul>
-            <a href="#contact" class="block text-center bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded">Contact Us</a>
+            <span class="block text-center bg-slate-600 text-white px-4 py-2 rounded">Included</span>
           </div>
 
           <div class="bg-slate-700 rounded-lg p-8 border border-primary/60">
@@ -291,7 +286,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
               <li>Roadmap updates</li>
               <li>Role fit guidance</li>
             </ul>
-            <a href="#contact" class="block text-center bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded">Contact Us</a>
+            <span class="block text-center bg-slate-600 text-white px-4 py-2 rounded">Included</span>
           </div>
 
           <div class="bg-slate-700 rounded-lg p-8 border border-slate-600">
@@ -303,7 +298,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
               <li>Learning priorities</li>
               <li>Progress snapshots</li>
             </ul>
-            <a href="#contact" class="block text-center bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded">Contact Us</a>
+            <span class="block text-center bg-slate-600 text-white px-4 py-2 rounded">Included</span>
           </div>
         </div>
       </div>
@@ -336,18 +331,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
       </div>
     </section>
 
-    <section id="contact" class="py-20 bg-slate-800">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-4xl font-bold text-white mb-4">Contact</h2>
-        <p class="text-xl text-gray-300 mb-8">
-          Reach out for availability, team plans, or general questions.
-        </p>
-        <div class="inline-flex items-center gap-3 bg-slate-700 border border-slate-600 rounded-lg px-6 py-4">
-          <span class="text-gray-300">Email:</span>
-          <a href="mailto:support@clearsight-ip.com" class="text-primary font-semibold hover:text-primary/80">support@clearsight-ip.com</a>
-        </div>
-      </div>
-    </section>
+    
   </main>
 
   <footer class="bg-slate-900 border-t border-slate-800 py-8">
