@@ -76,10 +76,21 @@ export const HTML_CONTENT = `<!DOCTYPE html>
     .hover\:text-primary:hover { color: #14b8a6; }
     .hover\:bg-primary\/80:hover { background-color: rgba(20, 184, 166, 0.8); }
     .hover\:border-primary:hover { border-color: #14b8a6; }
+    
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up {
+      animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .delay-100 { animation-delay: 100ms; }
+    .delay-200 { animation-delay: 200ms; }
+    .delay-300 { animation-delay: 300ms; }
   </style>
 </head>
 <body class="bg-slate-900 text-gray-200">
-  <nav class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
+  <nav class="bg-slate-900/80 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center">
@@ -113,22 +124,29 @@ export const HTML_CONTENT = `<!DOCTYPE html>
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 class="text-4xl lg:text-6xl font-bold mb-6">
+            <h1 class="text-4xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-teal-400 via-blue-500 to-purple-600 bg-clip-text text-transparent animate-fade-up">
               Clear insight into the skills that move your career forward.
             </h1>
-            <p class="text-xl text-gray-300 mb-8">
+            <p class="text-xl text-gray-400 mb-8 animate-fade-up delay-100">
               Clearsight IP turns career uncertainty into a focused, practical path. Get clarity on what to build next and why it matters.
             </p>
-            <div class="flex flex-col sm:flex-row gap-4">
-              <a href="#features" class="border border-gray-600 hover:border-primary text-gray-300 hover:text-primary px-8 py-4 rounded-lg text-lg font-semibold transition-colors text-center">
+            <div class="flex flex-col sm:flex-row gap-4 animate-fade-up delay-200">
+              <a href="#features" class="inline-flex justify-center items-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-slate-900 bg-primary hover:bg-teal-400 transition-all duration-300 shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:shadow-[0_0_30px_rgba(20,184,166,0.6)] hover:-translate-y-1">
+                Get Started
+                <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </a>
+              <a href="#features" class="inline-flex justify-center items-center px-8 py-4 border border-white/10 text-lg font-medium rounded-lg text-white hover:bg-white/5 transition-all duration-300 hover:-translate-y-1">
                 See the Results
               </a>
             </div>
           </div>
-          <div class="relative">
-            <div class="bg-slate-800 rounded-lg p-6 border border-slate-700">
-              <h3 class="text-primary font-semibold mb-4">Career Progress, Simplified</h3>
-              <div class="space-y-4">
+          <div class="relative animate-fade-up delay-300">
+            <div class="absolute -inset-1 bg-gradient-to-r from-teal-500 to-blue-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            <div class="relative bg-slate-800/40 backdrop-blur-md rounded-lg p-8 border border-white/10 shadow-2xl">
+              <h3 class="text-primary font-semibold mb-4 text-lg">Career Progress, Simplified</h3>
+              <div class="space-y-6">
                 <div class="flex justify-between items-center">
                   <span class="text-gray-300">Clarity on priorities</span>
                   <span class="text-green-400 font-bold">High</span>
@@ -165,7 +183,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
           </p>
         </div>
         <div class="grid md:grid-cols-3 gap-8">
-          <div class="bg-slate-700 rounded-lg p-6 border border-slate-600">
+          <div class="bg-slate-800/40 backdrop-blur-md rounded-lg p-6 border border-white/10 hover:border-white/20 transition-all duration-300 hover:transform hover:scale-105 hover:shadow-xl">
             <div class="flex items-center mb-4">
               <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
                 <span class="text-white font-semibold">SM</span>
@@ -181,7 +199,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             <div class="text-primary font-semibold">Clear priorities</div>
           </div>
 
-          <div class="bg-slate-700 rounded-lg p-6 border border-slate-600">
+          <div class="bg-slate-800/40 backdrop-blur-md rounded-lg p-6 border border-white/10 hover:border-white/20 transition-all duration-300 hover:transform hover:scale-105 hover:shadow-xl">
             <div class="flex items-center mb-4">
               <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
                 <span class="text-white font-semibold">MR</span>
@@ -265,7 +283,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
           </p>
         </div>
         <div class="grid md:grid-cols-3 gap-8">
-          <div class="bg-slate-700 rounded-lg p-8 border border-slate-600">
+          <div class="bg-slate-800/40 backdrop-blur-md rounded-lg p-8 border border-white/10 hover:border-white/20 transition-all duration-300 hover:transform hover:scale-105 hover:shadow-xl">
             <h3 class="text-2xl font-bold text-white mb-2">Starter</h3>
             <p class="text-gray-400 mb-6">For individuals building momentum.</p>
             <div class="text-4xl font-bold text-white mb-6">$29</div>
@@ -277,7 +295,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             <span class="block text-center bg-slate-600 text-white px-4 py-2 rounded">Included</span>
           </div>
 
-          <div class="bg-slate-700 rounded-lg p-8 border border-primary/60">
+          <div class="bg-slate-800/40 backdrop-blur-md rounded-lg p-8 border border-primary/60 hover:border-primary shadow-[0_0_30px_rgba(20,184,166,0.15)] transition-all duration-300 hover:transform hover:scale-105">
             <h3 class="text-2xl font-bold text-white mb-2">Pro</h3>
             <p class="text-gray-400 mb-6">For accelerated career movement.</p>
             <div class="text-4xl font-bold text-white mb-6">$59</div>
@@ -289,7 +307,7 @@ export const HTML_CONTENT = `<!DOCTYPE html>
             <span class="block text-center bg-slate-600 text-white px-4 py-2 rounded">Included</span>
           </div>
 
-          <div class="bg-slate-700 rounded-lg p-8 border border-slate-600">
+          <div class="bg-slate-800/40 backdrop-blur-md rounded-lg p-8 border border-white/10 hover:border-white/20 transition-all duration-300 hover:transform hover:scale-105 hover:shadow-xl">
             <h3 class="text-2xl font-bold text-white mb-2">Teams</h3>
             <p class="text-gray-400 mb-6">For managers and growing teams.</p>
             <div class="text-4xl font-bold text-white mb-6">Custom</div>
@@ -311,19 +329,19 @@ export const HTML_CONTENT = `<!DOCTYPE html>
           <p class="text-xl text-gray-300">A few quick answers.</p>
         </div>
         <div class="space-y-6">
-          <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <div class="bg-slate-800/40 backdrop-blur-md border border-white/10 rounded-lg p-6 hover:border-white/20 transition-colors">
             <h3 class="text-lg font-semibold text-white mb-2">Is everything available on the website?</h3>
             <p class="text-gray-300">Yes. The experience is fully web-based.</p>
           </div>
-          <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <div class="bg-slate-800/40 backdrop-blur-md border border-white/10 rounded-lg p-6 hover:border-white/20 transition-colors">
             <h3 class="text-lg font-semibold text-white mb-2">How do I get started?</h3>
             <p class="text-gray-300">Use the contact section below to reach out and we will guide you.</p>
           </div>
-          <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <div class="bg-slate-800/40 backdrop-blur-md border border-white/10 rounded-lg p-6 hover:border-white/20 transition-colors">
             <h3 class="text-lg font-semibold text-white mb-2">Do you support teams?</h3>
             <p class="text-gray-300">Yes, we provide team-level insights and planning support.</p>
           </div>
-          <div class="bg-slate-800 border border-slate-700 rounded-lg p-6">
+          <div class="bg-slate-800/40 backdrop-blur-md border border-white/10 rounded-lg p-6 hover:border-white/20 transition-colors">
             <h3 class="text-lg font-semibold text-white mb-2">Where can I find legal terms?</h3>
             <p class="text-gray-300">Use the links in the footer for privacy and terms.</p>
           </div>
